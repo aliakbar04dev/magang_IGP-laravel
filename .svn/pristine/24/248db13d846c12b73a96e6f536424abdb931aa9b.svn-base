@@ -1,0 +1,365 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use App\EhstWp1;
+use App\EhstWp2Mp;
+use App\EhstWp2K3;
+use App\EhstWp2Env;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use App\Http\Requests\StoreEhstWp1Request;
+use Illuminate\Support\Facades\Session;
+use App\Http\Requests\UpdateehsspaccidentsRequest;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use DB;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\File;
+use App\User;
+use Intervention\Image\ImageManagerStatic as Image;
+use Illuminate\Support\Facades\Mail;
+use PDF;
+use JasperPHP\JasperPHP;
+use DNS1D;
+use Illuminate\Support\Facades\Input;
+use App\Mobile;
+use DateTime;
+use App\EhsEnvReps;
+
+class EhsEnvRepsController extends Controller
+{
+    protected $ehsenvreps;
+
+    public function __construct()
+    {
+        $this->ehsenvreps = new EhsEnvReps();
+    }
+
+     public function proses_equipment()
+    {
+        return view('ehs.ep.equipment.proses_equipfacility');
+    }
+
+    public function proseslaporan($tahun, $bulan)
+    {
+       if(strlen(Auth::user()->username) == 5) {    
+            $tahun = base64_decode($tahun);
+            $bulan = base64_decode($bulan);
+            $level = "success";
+            $msg = "Proses Laporan Equipment Facility Tahun: ".$tahun.", Bulan: ".$bulan." Berhasil!";
+
+            DB::connection("pgsql")->beginTransaction();
+            try {
+                DB::table("equipment_facility_reps")
+                ->where("tahun", $tahun)
+                ->where("bulan", $bulan)
+                ->delete();
+
+                $mmtcmesins = DB::table("mas_traplb3")
+                ->select(DB::raw("kd_ot"));
+
+                $dtcrea = Carbon::now();
+                foreach ($mmtcmesins->get() as $mmtcmesin) {
+                    $kd_ot = $mmtcmesin->kd_ot;
+
+                    $data_detail = [];
+                    $data_detail["bulan"] = $bulan;
+                    $data_detail["tahun"] = $tahun;
+                    $data_detail["kd_ot"] = $kd_ot;
+                  
+                        for($tgl = 1; $tgl <= 31; $tgl++) {
+                            $param_tgl = $tgl;
+                            if($tgl < 10) {
+                                $param_tgl = "0".$tgl;
+                            }
+
+                            $yyyymmdd = $tahun."".$bulan."".$param_tgl;
+
+                            $equipment_facility = DB::table("equipment_facility")
+                            ->select(DB::raw("status"))
+                            ->where(DB::raw("to_char(tgl_mon, 'yyyymmdd')"), $yyyymmdd)
+                            ->where("kd_ot", $kd_ot)
+                            ->first();
+
+                             if($equipment_facility != null) {
+                                if($equipment_facility->status == '0') {
+                                    $data_detail["t".$param_tgl] = "NG";
+                                } else {
+                                    $data_detail["t".$param_tgl] = "OK";
+                                }
+                            } else {
+                                $data_detail["t".$param_tgl] = NULL;
+                            }
+                        }
+                  
+
+                    DB::table("equipment_facility_reps")->insert($data_detail);
+                
+                }
+                
+
+                DB::commit();
+
+            } catch (Exception $ex) {
+                DB::rollback();
+                $level = "danger";
+                $msg = "Proses Equipment Facility Tahun: ".$tahun.", Bulan: ".$bulan." Gagal! ".$ex;
+            }
+            Session::flash("flash_notification", [
+                "level"=>$level,
+                "message"=>$msg
+            ]);
+            return redirect()->route('ehsenvreps.proses_equipment');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+
+    public function detail_equipfacility($kd_ot, $tgl)
+    {
+        $kd_ot = base64_decode($kd_ot);
+        $tgl = base64_decode($tgl);
+        $mefdetail = DB::table("equipment_facility")
+                ->select(DB::raw("*"))
+                ->where('kd_ot', '=', $kd_ot)
+                ->where(DB::raw("to_char(tgl_mon,'yyyymmdd')"), $tgl)
+                ->get();
+             //  return $mefdetail;
+
+        $mefdetail1 = DB::table("equipment_facility")
+                ->where('kd_ot', '=', $kd_ot)
+                ->where(DB::raw("to_char(tgl_mon,'yyyymmdd')"), $tgl)
+                ->first();
+
+        $cmvalve = DB::table("v_mas_karyawan")
+                ->select(DB::raw("nama, desc_dep, desc_div"))
+                ->where('npk', '=', $mefdetail1->cm_valve)->get()
+                ->first();
+
+        $cmpompa = DB::table("v_mas_karyawan")
+                ->select(DB::raw("nama, desc_dep, desc_div"))
+                ->where('npk', '=', $mefdetail1->cm_pompa)->get()
+                ->first();
+
+        $cmradar = DB::table("v_mas_karyawan")
+                ->select(DB::raw("nama, desc_dep, desc_div"))
+                ->where('npk', '=', $mefdetail1->cm_radar)->get()
+                ->first();
+
+        $cmbak = DB::table("v_mas_karyawan")
+                ->select(DB::raw("nama, desc_dep, desc_div"))
+                ->where('npk', '=', $mefdetail1->cm_bak)->get()
+                ->first();
+
+        $cmspit = DB::table("v_mas_karyawan")
+                ->select(DB::raw("nama, desc_dep, desc_div"))
+                ->where('npk', '=', $mefdetail1->cm_spit)->get()
+                ->first();
+
+
+        $img_valve = "";
+            if (!empty($mefdetail1->pic_valve)) {
+                if(config('app.env', 'local') === 'production') {
+                    $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."environment".DIRECTORY_SEPARATOR.$mefdetail1->pic_valve;
+                } else {
+                    $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\environment\\".$mefdetail1->pic_valve;
+                }
+                if (file_exists($file_temp)) {
+                    $loc_image = file_get_contents('file:///'.str_replace("\\\\","\\",$file_temp));
+                    $img_valve = "data:".mime_content_type($file_temp).";charset=utf-8;base64,".base64_encode($loc_image);
+                }
+            }
+
+        $img_pompa = "";
+            if (!empty($mefdetail1->pic_pompa)) {
+                if(config('app.env', 'local') === 'production') {
+                    $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."environment".DIRECTORY_SEPARATOR.$mefdetail1->pic_pompa;
+                } else {
+                    $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\environment\\".$mefdetail1->pic_pompa;
+                }
+                if (file_exists($file_temp)) {
+                    $loc_image = file_get_contents('file:///'.str_replace("\\\\","\\",$file_temp));
+                    $img_pompa = "data:".mime_content_type($file_temp).";charset=utf-8;base64,".base64_encode($loc_image);
+                }
+            }
+
+        $img_radar = "";
+            if (!empty($mefdetail1->pic_radar)) {
+                if(config('app.env', 'local') === 'production') {
+                    $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."environment".DIRECTORY_SEPARATOR.$mefdetail1->pic_radar;
+                } else {
+                    $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\environment\\".$mefdetail1->pic_radar;
+                }
+                if (file_exists($file_temp)) {
+                    $loc_image = file_get_contents('file:///'.str_replace("\\\\","\\",$file_temp));
+                    $img_radar = "data:".mime_content_type($file_temp).";charset=utf-8;base64,".base64_encode($loc_image);
+                }
+            }
+
+        $img_bak = "";
+            if (!empty($mefdetail1->pic_bak)) {
+                if(config('app.env', 'local') === 'production') {
+                    $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."environment".DIRECTORY_SEPARATOR.$mefdetail1->pic_bak;
+                } else {
+                    $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\environment\\".$mefdetail1->pic_bak;
+                }
+                if (file_exists($file_temp)) {
+                    $loc_image = file_get_contents('file:///'.str_replace("\\\\","\\",$file_temp));
+                    $img_bak = "data:".mime_content_type($file_temp).";charset=utf-8;base64,".base64_encode($loc_image);
+                }
+            }
+        $img_spit = "";
+            if (!empty($mefdetail1->pic_spit)) {
+                if(config('app.env', 'local') === 'production') {
+                    $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."environment".DIRECTORY_SEPARATOR.$mefdetail1->pic_spit;
+                } else {
+                    $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\environment\\".$mefdetail1->pic_spit;
+                }
+                if (file_exists($file_temp)) {
+                    $loc_image = file_get_contents('file:///'.str_replace("\\\\","\\",$file_temp));
+                    $img_spit = "data:".mime_content_type($file_temp).";charset=utf-8;base64,".base64_encode($loc_image);
+                }
+            }
+
+        return view('ehs.ep.equipment.show_equipfacility')->with(compact('mefdetail', 'cmvalve', 'cmpompa', 'cmradar', 'cmspit', 'cmbak', 'img_valve', 'img_spit', 'img_pompa', 'img_bak', 'img_radar'));
+    }
+
+
+    public function monitoring_ef(Request $request, $tahun=null, $bulan=null)
+    {
+      
+        $date = Carbon::now();
+        if($tahun == null) {
+            $tahun = $date->format("Y");
+        }
+        if($bulan == null) {
+            $bulan = $date->format("m");
+        }
+        $tgl = $date->format("Ymd");
+        $jam = $date->format("Hi");
+
+        $equipment_facility_reps = $this->ehsenvreps->monitoring_ef($tahun, $bulan);
+
+        return view('ehs.ep.equipment.mon_equipfacility', compact('tahun', 'bulan', 'tgl', 'jam', 'equipment_facility_reps'));
+    }
+
+    public function monitoring_air(Request $request, $tahun = null, $bulan = null)
+    {
+        $date = Carbon::now();
+        if($tahun == null) {
+            $tahun = $date->format("Y");
+        }
+        if($bulan == null) {
+            $bulan = $date->format("m");
+        }
+        $tgl = $date->format("Ymd");
+        $jam = $date->format("Hi");
+
+        $equipment_facility_reps = $this->ehsenvreps->monitoring_ef($tahun, $bulan);
+
+        return view('ehs.ep.equipment.mon_equipfacility', compact('tahun', 'bulan', 'tgl', 'jam', 'equipment_facility_reps'));
+    }
+
+    public function prosesmon_pkimia()
+    {
+        return view('ehs.ep.wwtstp.prosesmon_pkimia');
+    }
+    public function monitoring_pkimia(Request $request, $tahun = null, $bulan = null)
+    {
+        $date = Carbon::now();
+        if($tahun == null) {
+            $tahun = $date->format("Y");
+        }
+        if($bulan == null) {
+            $bulan = $date->format("m");
+        }
+        $tgl = $date->format("Ymd");
+        $jam = $date->format("Hi");
+
+       $pem_bhnkimia_reps = $this->ehsenvreps->monitoring_pkimia($tahun, $bulan);
+
+
+        return view('ehs.ep.wwtstp.mon_pkimia', compact('tahun', 'bulan', 'tgl', 'jam', 'pem_bhnkimia_reps'));
+    }
+
+    public function prosesmon_alimbah()
+    {
+        return view('ehs.ep.wwtstp.prosesmon_alimbah');
+    }
+    public function monitoring_alimbah(Request $request, $tahun = null, $bulan = null)
+    {
+        $date = Carbon::now();
+        if($tahun == null) {
+            $tahun = $date->format("Y");
+        }
+        if($bulan == null) {
+            $bulan = $date->format("m");
+        }
+        $tgl = $date->format("Ymd");
+        $jam = $date->format("Hi");
+
+       $level_airlimbah_reps = $this->ehsenvreps->monitoring_alimbah($tahun, $bulan);
+
+
+        return view('ehs.ep.wwtstp.mon_alimbah', compact('tahun', 'bulan', 'tgl', 'jam', 'level_airlimbah_reps'));
+    }
+
+    public function mon_airlimbah(Request $request, $plant = "1", $tahun = null, $bulan = null)
+    {
+
+               /* if($tgl == null) {
+            $tgl = Carbon::now()->format("Ymd");
+            $tgl = base64_encode($tgl);
+        }
+
+        $ehstwp1sIGP = DB::connection('pgsql')
+        ->table("ehst_wp1s")
+        ->select(DB::raw("'IGP' kd_pt, no_wp, kd_supp, coalesce((select nama from b_suppliers where kd_supp = ehst_wp1s.kd_supp),'-') nm_supp, kd_site, nm_proyek, lok_proyek, pic_pp, coalesce((select nama from v_mas_karyawan where npk = ehst_wp1s.pic_pp),'-') nm_pic, status, jns_pekerjaan, scan_sec_in_tgl, scan_sec_out_tgl, tgl_laksana1, tgl_laksana2, to_char(scan_sec_in_tgl + '12 hour'::interval, 'yyyymmddhh24miss') batas, to_char(coalesce(scan_sec_out_tgl,now()), 'yyyymmddhh24miss') skrg"))
+        ->whereRaw("(scan_sec_in_tgl is not null or scan_sec_out_tgl is not null)")
+        ->where(DB::raw("to_char(scan_sec_in_tgl,'yyyymmdd')"), "=", base64_decode($tgl));
+
+        $ehstwp1sGKD = DB::connection('pgsql-gkd')
+        ->table("ehst_wp1s")
+        ->select(DB::raw("'GKD' kd_pt, no_wp, kd_supp, coalesce((select nama from b_suppliers where kd_supp = ehst_wp1s.kd_supp),'-') nm_supp, kd_site, nm_proyek, lok_proyek, pic_pp, coalesce((select nama from v_mas_karyawan where npk = ehst_wp1s.pic_pp),'-') nm_pic, status, jns_pekerjaan, scan_sec_in_tgl, scan_sec_out_tgl, tgl_laksana1, tgl_laksana2, to_char(scan_sec_in_tgl + '12 hour'::interval, 'yyyymmddhh24miss') batas, to_char(coalesce(scan_sec_out_tgl,now()), 'yyyymmddhh24miss') skrg"))
+        ->whereRaw("(scan_sec_in_tgl is not null or scan_sec_out_tgl is not null)")
+        ->where(DB::raw("to_char(scan_sec_in_tgl,'yyyymmdd')"), "=", base64_decode($tgl));
+        
+        $ehstwp1sAGI = DB::connection('pgsql-agi')
+        ->table("ehst_wp1s")
+        ->select(DB::raw("'AGI' kd_pt, no_wp, kd_supp, coalesce((select nama from b_suppliers where kd_supp = ehst_wp1s.kd_supp),'-') nm_supp, kd_site, nm_proyek, lok_proyek, pic_pp, coalesce((select nama from v_mas_karyawan where npk = ehst_wp1s.pic_pp),'-') nm_pic, status, jns_pekerjaan, scan_sec_in_tgl, scan_sec_out_tgl, tgl_laksana1, tgl_laksana2, to_char(scan_sec_in_tgl + '12 hour'::interval, 'yyyymmddhh24miss') batas, to_char(coalesce(scan_sec_out_tgl,now()), 'yyyymmddhh24miss') skrg"))
+        ->whereRaw("(scan_sec_in_tgl is not null or scan_sec_out_tgl is not null)")
+        ->where(DB::raw("to_char(scan_sec_in_tgl,'yyyymmdd')"), "=", base64_decode($tgl));
+
+        $total = $ehstwp1sIGP->get()->count() + $ehstwp1sGKD->get()->count() + $ehstwp1sAGI->get()->count();
+
+        if($displayStart == null) {
+            $displayStart = 0;
+        } else {
+            if($total <= $displayStart) {
+                $url = "monitoringwpall/".$tgl;
+                return redirect($url);
+            }
+        }*/
+
+        $periode = Carbon::now();
+        if($tahun == null) {
+            $tahun = $periode->format("Y");
+        }
+        if($bulan == null) {
+            $bulan = $periode->format("m");
+        }
+        $period = $tahun.$bulan;
+        $tgl = $periode->format("Ymd");        
+
+        $xmlines = $this->smartmtc->monitoringlp($plant, $period);
+  
+  return view('monitoring.ehs.dashboard.monlp', compact('plant', 'tahun', 'bulan', 'xmlines', 'period', 'tgl'));
+     /*  return view('ehs.safety_performance.mon_airlimbah',  compact('tgl', 'displayStart', 'ehstwp1sIGP', 'ehstwp1sGKD', 'ehstwp1sAGI'));*/
+    }
+}

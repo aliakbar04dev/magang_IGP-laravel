@@ -1,0 +1,599 @@
+@extends('monitoring.mtc.layouts.app3')
+<style type="text/css">
+  @media only screen and (min-width: 600px ) {
+      #footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 2.5rem;            /* Footer height */
+  }
+  
+  body{
+    height:500px;
+  }
+  
+  
+  #tblMaster{
+      min-height:293px; 
+      margin-left:0px;
+      margin-right:0px;
+      margin-bottom:0px;
+      margin-top:-20px;
+     }
+  
+     #tblChart{
+      height:350px !important;
+     }
+  
+    .chartGambar{
+      height:320px !important;
+     
+    }
+    .atasdashboard{
+      width: 100%; 
+      height:100px; 
+      padding:0px; 
+      margin-left:-50px;
+    }
+    /* .tampilbawah{
+      margin-bottom:20%;
+    } */
+  
+    .garisinfo{
+      margin-left:10px;
+    }
+  
+    .menu{
+      font-size: 30px;
+      color:white;
+    }
+  
+    
+  
+    .imagelogo{
+      margin-top:-10px;
+      margin-left:30px;
+      height:100px; 
+      width:100px;
+    }
+  
+  
+  
+    .huruf{
+      font-size: 25px;
+      margin-left: 20px;
+      text-transform: uppercase;
+    }
+  }
+  
+  @media only screen and (max-width: 599px) {
+  
+    #footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 2.5rem;            /* Footer height */
+  }
+  
+  body{
+      height: 250px !important;
+     }
+  
+     #tblChart{
+      height:350px;
+     }
+  
+     .chartGambar{
+      height:350px !important;
+     
+    }
+  
+  .menu{
+    font-size: 14px;
+    color:white;
+  }
+  
+  .imagelogo{
+      margin-top:15px;
+      margin-left:30px;
+      height:50px; 
+      width:50px;
+    }
+  
+  
+    .huruf{
+      font-size: 14px;
+      margin-top:10px;
+      margin-left: 20px;
+      text-transform: uppercase;
+    }
+  
+  }
+  @media only screen and (min-width: 1081px) {
+     body{
+      height: 710px !important;
+     }
+  
+     #tblMaster{
+      min-height:293px; 
+      margin-left:0px;
+      margin-right:0px;
+      margin-bottom:0px;
+      margin-top:30px;
+     }
+  
+     #tblChart{
+      height:350px !important;
+     }
+  
+    .chartGambar{
+      height:320px !important;
+     
+    }
+  
+    }
+  
+    .atasdashboard{
+      width: 100%; 
+      height:100px; 
+      padding:0px; 
+      margin-left:-10px;
+    }
+  
+    .box{
+      position: relative;
+    text-align: center;
+    background:none;
+          /* Make the width of box same as image */
+  }
+  
+    body {
+      background-image: url("{{ asset('images/warehouse_bg.jpg') }}");
+      /* background-color: #00001e !important; */
+      position:relative;
+    }
+    
+  .centered {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .backbutton{
+    float:right;
+    margin-top:5px !important;
+  }
+  
+  
+  
+    
+  
+    
+  </style>
+@section('content')
+  <div class="container4" >
+          <!-- /.box-header -->
+
+          <div class="box-body tampilbawah" >
+                <div class="row">
+                    <div class="col-xl-12" >
+                        <img src="{{ asset('images/logosmart.png') }}" class="imagelogo" align="left">
+                        <br>
+                            <div class="alert alert-danger alert-dismissible" style="height:40px; width:100% ;  padding:0px 10px; background-color:#ff7701 !important;">
+                                    <p class="huruf" >PREVENTIVE ACHIEVEMENT <button type="button" onclick="onBack()" class="btn bg-navy margin backbutton" style="width:70px;"><i class="fa fa-chevron-circle-left"></i></button></p>
+                                    
+                            </div>
+                    </div>
+                </div>
+              <center>
+                      <table id="tblMaster" width="85%"  > 
+                          {{-- <tr>
+                              <td></td>
+                              <td colspan="2" style="color:white; padding-bottom:10px; font-size:20px; font-weight:bold;"><center>IGP 1</center></td>
+                              <td></td>
+                              <td colspan="2" style="color:white; padding-bottom:10px; font-size:20px; font-weight:bold;"><center>IGP 2</center></td>
+                              <td></td>
+                              <td colspan="2" style="color:white; padding-bottom:10px; font-size:20px; font-weight:bold;"><center>IGP 3</center></td>
+                              <td></td>
+                          </tr> --}}
+                        <tr >
+                          <td style="width: 10%;text-align: center;">
+                            <img id="btn-pms-igp1-zona1" src="{{ asset('images/igp1zona1.png') }}" style="filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.8)); margin-bottom:20px; width: 100%;" >
+                            <img  id="btn-pms-igp1-zona2" src="{{ asset('images/igp1zona2.png') }}" style="filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.8)); margin-bottom:20px; width: 100%;" >
+                          </td>
+                          <td  style="width: 2%;"></td>
+                          <td style="width: 10%;text-align: center; margin-left:50px;">
+                              <img id="btn-pms-igp2-zona1" src="{{ asset('images/igp2zona1.png') }}" style=" filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.8)); margin-bottom:20px; width: 100%; " >
+                              <img id="btn-pms-igp2-zona2" src="{{ asset('images/igp2zona2.png') }}" style=" filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.8)); margin-bottom:20px; width: 100%;" >
+                          </td>
+                          <td style="width: 10%;text-align: center">
+                            <img id="btn-pms-igp2-zona3" src="{{ asset('images/igp2zona3.png') }}" style="filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.8)); width: 100%; margin-bottom:20px; width: 100%; " >
+                          </td>
+                            <td style="width: 10%;text-align: center">
+                            <img id="btn-pms-igp3-zona1" src="{{ asset('images/igp3zona1.png') }}" style="filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.8)); margin-bottom:20px; width: 100%; " >
+                            <img id="btn-pms-igp3-zona2" src="{{ asset('images/igp3zona2.png') }}" style="filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.8)); margin-bottom:20px; width: 100%;" >
+                          </td>
+                          <td style="width: 10%;text-align: center">
+                              <img id="btn-pms-igp3-zona3" src="{{ asset('images/igp3zona3.png') }}" style="filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.8)); width: 100%; margin-bottom:20px; width: 100%; ">
+                          </td>
+                        </tr>
+                      </table>
+              </center>
+            
+            {{-- <div class="table-responsive" style="background-color: white; min-height:305px; margin-top:-20px; !important;">
+                <table id="tblMaster2"  width="100%" > 
+                    <tr >
+                      <td style="width: 10%;text-align: center">
+                          <div class="col-md-2" style=" width:150px !important;">
+                                <div class="chart">
+                                  <canvas id="barChart11" style="height: 300px; width: 20%;" ></canvas>
+                                </div>
+                            </div>
+                      </td>
+                      <td style="width: 10%;text-align: center;">
+                          <div class="col-md-2" style=" width:150px !important;">
+                                <div class="chart">
+                                  <canvas id="barChart12" style="height: 300px; width: 20%;" ></canvas>
+                                </div>
+                            </div>
+                      </td>
+                        <td style="width: 10%;text-align: center">
+                            <div class="col-md-4" style=" width:150px !important;">
+                                  <div class="chart">
+                                    <canvas id="barChart21" style="height: 300px; width: 20%;" ></canvas>
+                                  </div>
+                              </div>
+                          </td>
+                          <td style="width: 10%;text-align: center">
+                            <div class="col-md-4" style=" width:150px !important;">
+                                  <div class="chart">
+                                    <canvas id="barChart22" style="height: 300px; width: 20%;" ></canvas>
+                                  </div>
+                              </div>
+                          </td>
+                          <td style="width: 10%;text-align: center">
+                            <div class="col-md-4" style=" width:150px !important;">
+                                  <div class="chart">
+                                    <canvas id="barChart23" style="height: 300px; width: 20%;" ></canvas>
+                                  </div>
+                              </div>
+                          </td>
+                          <td style="width: 10%;text-align: center">
+                            <div class="col-md-4" style=" width:150px !important;">
+                                  <div class="chart">
+                                    <canvas id="barChart31" style="height: 300px; width: 20%;" ></canvas>
+                                  </div>
+                              </div>
+                          </td>
+                          <td style="width: 10%;text-align: center">
+                            <div class="col-md-4" style=" width:150px !important;">
+                                  <div class="chart">
+                                    <canvas id="barChart32" style="height: 300px; width: 20%;" ></canvas>
+                                  </div>
+                              </div>
+                          </td>
+                          <td style="width: 10%;text-align: center">
+                            <div class="col-md-4" style=" width:150px !important;">
+                                  <div class="chart">
+                                    <canvas id="barChart33" style="height: 300px; width: 20%;" ></canvas>
+                                  </div>
+                              </div>
+                          </td>
+                          
+                    </tr>
+                  </table>
+
+            </div> --}}
+          </div>
+          <!-- ./box-body -->
+          
+        <!-- /.box -->
+      <!-- /.col -->
+    <!-- /.row -->
+  </div>
+
+  <footer id="footer">
+      <div class="row">
+          <div class="col-xl-12" style="height:40px; ">
+                  <div class="alert alert-danger alert-dismissible" style="height:40px; padding:0px 10px; background-color:red !important;">
+                          <p class="huruf" >{{date('F')}} PREVENTIVE ACHIEVEMENT</p>
+                  </div>
+          </div>
+  </div>
+  <div style="background-color: white; margin-bottom:0;">
+    <div class="row" style="height:350px;">
+      <div class="col-md-12 col-sm-12" >
+                <div class="chart">
+                    <center>
+                        <button type="button" style="width:5px; height:5px; background-color:#FF3D67;" class="form-control  btn"
+                        data-toggle="tooltip" data-placement="top" title="Close"></button>
+                       Plan &nbsp;&nbsp;
+                       <button type="button" style="width:5px; height:5px; background-color:#36A2EB;" class="form-control btn"
+                         data-toggle="tooltip" data-placement="top" title="Close"></button> Actual &nbsp;&nbsp;
+                         &nbsp;&nbsp;
+                    </center>
+                <canvas id="barChart1s" style="height:auto; min-height:320px;" ></canvas>
+                
+                </div>
+      </div>
+    </div>
+  </div>
+  </footer>
+@endsection
+
+@section('scripts')
+<script src="{{ asset('chartjs/Chart.bundle.js') }}"></script>
+  <script src="{{ asset('chartjs/utils.js') }}"></script>
+<script type="text/javascript">
+
+  document.title = "PREVENTIVE ACHIEVEMENT";
+
+  $(document).ready(function(){
+    var chartData1s = {
+      labels: ['IGP 1 ZONA 1','IGP 1 ZONA 2','IGP 2 ZONA 1','IGP 2 ZONA 2','IGP 2 ZONA 3','IGP 3 ZONA 1','IGP 3 ZONA 2','IGP 3 ZONA 3'], 
+      datasets: 
+      [
+        {
+          type: 'bar',
+          label: 'Plan',
+          backgroundColor: window.chartColors.red,
+          data: {!!$plansfix!!},
+          borderColor: 'white',
+          borderWidth: 2
+        }, 
+        {
+          type: 'bar',
+          label: 'Actual',
+          backgroundColor: window.chartColors.blue,
+          data: {!!$actsfix!!},
+          borderColor: 'white',
+          borderWidth: 2
+        }
+      ]
+    };
+
+    var ctx = document.getElementById('barChart1s').getContext('2d');
+      window.myMixedChart = new Chart(ctx, {
+        type: 'bar',
+        data: chartData1s,
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero:true,
+                // max: 100, 
+                stepSize: 60,
+                callback: function(value, index, values) {
+                  // Remove the formatting to get integer data for summation
+                  var intVal = function (i) {
+                    return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                    i : 0;
+                  };
+                  value = intVal(value);
+
+                  var format = function formatNumber(num) {
+                    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                  };
+
+                  return format(value);
+                }
+              },
+              gridLines: {
+                display:true
+              }
+            }],
+            xAxes: [{
+              ticks: {
+                fontSize: 18
+              },
+              gridLines: {
+                display:true
+              }   
+            }]
+          },
+          "hover": {
+            "animationDuration": 0
+          },
+          "animation": {
+            // "duration": 1,
+            "onComplete": function() {
+              var chartInstance = this.chart,
+              ctx = chartInstance.ctx;
+
+              ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+              ctx.fillStyle = 'black';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'bottom';
+
+              this.data.datasets.forEach(function(dataset, i) {
+                var meta = chartInstance.controller.getDatasetMeta(i);
+                meta.data.forEach(function(bar, index) {
+                  var data = dataset.data[index];
+                  // Remove the formatting to get integer data for summation
+                  var intVal = function (i) {
+                    return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                    i : 0;
+                  };
+                  data = intVal(data);
+
+                  var format = function formatNumber(num) {
+                    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                  };
+
+                  data = format(data);
+                  ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                });
+              });
+            }
+          },
+          title: {
+            display: true,
+            position: 'top', 
+            text: '',
+            fontSize: 14,
+          },
+          legend: {
+            
+            position: 'bottom', 
+            "display": false,
+            labels: {
+              // This more specific font property overrides the global property
+              fontColor: 'black',
+              boxWidth: 10,
+              text:'halo'
+              //fontSize: 12,
+            }
+          },
+          
+          tooltips: {
+            mode: 'index',
+            intersect: true, 
+            callbacks: {
+              title: function(tooltipItem, data) {
+                return data['labels'][tooltipItem[0].index];
+              },
+              label: function(tooltipItem, data) {
+                var label = tooltipItem.yLabel;
+                // Remove the formatting to get integer data for summation
+                var intVal = function (i) {
+                  return typeof i === 'string' ?
+                  i.replace(/[\$,]/g, '')*1 :
+                  typeof i === 'number' ?
+                  i : 0;
+                };
+                label = intVal(label);
+
+                var format = function formatNumber(num) {
+                  return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                };
+
+                label = format(label);
+                return data.datasets[tooltipItem.datasetIndex].label + ": " + label;
+              },
+            },
+          }
+        }
+      });
+    
+
+
+
+  $("#btn-pms-igp1-zona1").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "1";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}?type=smartmtc";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-pms-igp1-zona2").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "1";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}?type=smartmtc";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-pms-igp2-zona1").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "2";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}?type=smartmtc";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-pms-igp2-zona2").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "2";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}?type=smartmtc";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-pms-igp2-zona3").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "2";
+    var lok_zona = "3";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}?type=smartmtc";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-pms-igp3-zona1").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "3";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}?type=smartmtc";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-pms-igp3-zona2").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "3";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}?type=smartmtc";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-pms-igp3-zona3").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "3";
+    var lok_zona = "3";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}?type=smartmtc";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    window.location.href = urlRedirect;
+  });
+
+  
+  });
+  function onBack() {
+
+    window.location.href = "{{ route('smartmtcs.dashboardmtc2') }}";
+}
+</script>
+@endsection

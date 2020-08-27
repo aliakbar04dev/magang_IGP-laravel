@@ -1,0 +1,79 @@
+@if (strlen(Auth::user()->username) == 5)
+@permission(['prod-*','prod-lhp-*','prod-plant-*'])
+  <li class="header">PRODUCTION NAVIGATION</li>
+  @permission(['prod-*','prod-lhp-*','prod-plant-*'])
+    <li class="treeview">
+      <a href="#">
+        <i class="fa fa-files-o"></i> <span>MASTER</span>
+        <span class="pull-right-container">
+          <i class="fa fa-angle-left pull-right"></i>
+        </span>
+      </a>
+      <ul class="treeview-menu">
+          @permission(['prod-plant-*'])
+            <li class="{{ route('prodnpks.index') == request()->url() ? 'active' : '' }}">
+              <a href="{{ route('prodnpks.index') }}"><i class="fa fa-circle-o"></i>Setting NPK/Plant</a>
+            </li>
+          @endpermission
+        <li class="{{ route('prodsaldo.index') == request()->url() ? 'active' : '' }}">
+          <a href="{{ route('prodsaldo.index') }}"><i class="fa fa-circle-o"></i> Saldo Awal Per Work Center</a>   
+      </ul>
+    </li>
+    <li class="treeview">
+      <a href="#">
+        <i class="fa fa-files-o"></i> <span>TRANSACTION</span>
+        <span class="pull-right-container">
+          <i class="fa fa-angle-left pull-right"></i>
+        </span>
+      </a>
+      <ul class="treeview-menu">
+        @permission(['prod-pos'])
+        <li class="{{ route('prodpos.index') == request()->url() ? 'active' : '' }}">
+          <a href="{{ route('prodpos.index') }}"><i class="fa fa-circle-o"></i>Daftar POS</a>
+        </li>        
+        @endpermission
+        @permission(['prod-lhp-*'])
+        <li class="{{ route('prodlhp.index') == request()->url() ? 'active' : '' }}">
+          <a href="{{ route('prodlhp.index') }}"><i class="fa fa-circle-o"></i>Laporan Harian Produksi (LHP) </a>
+        </li>
+        @endpermission
+      </ul>
+    </li>
+  @endpermission
+  <li class="treeview">
+    <a href="#">
+      <i class="fa fa-files-o"></i> <span>LAPORAN</span>
+      <span class="pull-right-container">
+        <i class="fa fa-angle-left pull-right"></i>
+      </span>
+    </a>
+    <ul class="treeview-menu">
+      @permission(['prod-pos'])
+        <li class="{{ route('prodpos.index') == request()->url() ? 'active' : '' }}">
+          <a href="{{ route('prodpos.index') }}"><i class="fa fa-circle-o"></i>Daftar POS</a>
+        </li>        
+      @endpermission
+      @permission(['prod-lhp-*'])
+        <li class="{{ route('prodlhp.index') == request()->url() ? 'active' : '' }}">
+          <a href="{{ route('prodlhp.index') }}"><i class="fa fa-circle-o"></i>Laporan Harian Produksi (LHP) </a>
+        </li>
+      @endpermission 
+    </ul>
+  </li>
+  @permission(['prod-param-hardening'])
+    <li class="treeview">
+      <a href="#">
+        <i class="fa fa-files-o"></i> <span>PARAMETER HARDENING</span>
+        <span class="pull-right-container">
+          <i class="fa fa-angle-left pull-right"></i>
+        </span>
+      </a>
+      <ul class="treeview-menu">
+        <li class="{{ route('prodparamharden.index') == request()->url() ? 'active' : '' }}">
+          <a href="{{ route('prodparamharden.index') }}"><i class="fa fa-circle-o"></i>PARAMETER HARDENING</a>
+        </li>
+      </ul>
+    </li>
+  @endpermission
+@endpermission
+@endif

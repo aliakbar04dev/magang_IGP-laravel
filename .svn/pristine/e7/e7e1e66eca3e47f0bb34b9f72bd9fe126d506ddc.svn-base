@@ -1,0 +1,387 @@
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
+use DB;
+use App\User;
+
+
+class HrdRegistrasiKaryawan extends Model
+{
+    protected $connection = 'pgsql-mobile';
+
+    public function masKaryawan($noreg)
+    {
+        $mas_karyawan = DB::connection('pgsql-mobile')
+        ->table("mas_reg_karyawan")
+        ->select(DB::raw("no_reg, npk, nama, no_ktp, gol_darah, kd_warga, agama, npk_lc, kelamin, kd_pt, desc_dep, desc_div, no_npwp, email, kode_dep, kode_div, npk_atasan, kode_gol, desc_jab, tmp_lahir, tgl_lahir, coalesce(substr(foto,18),'-.jpg') foto, npk_sec_head, npk_div_head, marital, kode_site, bpjskes, bpjsket, rek_mandiri"))
+        ->where("no_reg", "=", $noreg)
+        ->first();
+        return $mas_karyawan;
+    }
+
+    public function GetSequenceNumber (){
+        $last_noreg = DB::connection('pgsql-mobile')
+        ->table("mas_reg_karyawan")
+        ->select("no_reg")
+        ->latest('tgl_sync')
+        ->first();
+        
+        return $last_noreg;
+    }
+
+    public function almtKaryawan($noreg, $kd_alam)
+    {
+        $almt_karyawan = DB::connection('pgsql-mobile')
+        ->table("mas_reg_karyawan_alamat")
+        ->select("*")
+        ->where("no_reg", "=", $noreg )
+        ->where("kd_alam", "=", $kd_alam)
+        ->first();
+        return $almt_karyawan;
+    }
+
+    public function alamatexist($username, $kd_alam)
+    {
+        $alamatexist = DB::connection('pgsql-mobile')
+            ->table('mas_reg_karyawan_alamat')
+            ->select('kd_alam')
+            ->where("npk", $username)
+            ->where("kd_alam", $kd_alam)
+            ->exists(); 
+
+        return $alamatexist;
+    }
+
+    public function pendKaryawan($noreg)
+    {
+
+        $dat_pendidikan = DB::connection('pgsql-mobile')->select('select no_reg, npk, kd_jenjang, jenjang, nama_sekolah, jurusan, tempat, tahun_masuk, tahun_lulus, keterangan from mas_reg_karyawan_pendidikan where no_reg = :no_reg', ['no_reg' => $noreg]);
+        
+       //dd($dat_pendidikan);
+        return $dat_pendidikan;
+    }
+
+    public function OrtuKaryawan($noreg, $stts)
+    {
+
+        $dat_ortu =  DB::connection('pgsql-mobile')->select('select nama, npk, tanggungan, tmp_lahir, tgl_lahir, status_klg, kelamin from mas_reg_karyawan_keluarga where no_reg = :no_reg AND status_klg = :status_klg', ['no_reg' => $noreg, 'status_klg'=>$stts]);
+        return $dat_ortu;
+    }
+
+    public function MertuaKaryawan($noreg, $stts)
+    {
+
+        $dat_mertua = DB::connection('pgsql-mobile')->select('select nama, npk, tanggungan, tmp_lahir, tgl_lahir, status_klg, kelamin from mas_reg_karyawan_keluarga where no_reg = :no_reg AND status_klg = :status_klg', ['no_reg' => $noreg, 'status_klg'=>$stts]);
+        
+        return $dat_mertua;
+    }
+
+    public function MaritalKaryawan($noreg)
+    {
+
+        $dat_marital = DB::connection('pgsql-mobile')->select('select no_reg, npk, status_klg, status_klg_desc, tanggungan, nama, tmp_lahir, tgl_lahir, kelamin, kd_pend,pekerjaan, ditanggung, marriage, pendidikan from mas_reg_karyawan_keluarga where no_reg = :no_reg', ['no_reg' => $noreg]);
+        
+      
+        
+        return $dat_marital;
+    }
+
+    public function MarriageKaryawan($noreg)
+    {
+        $dat_mar = DB::connection('pgsql-mobile')->select('select marriage from mas_reg_karyawan_keluarga where ((status_klg = :status_klg) OR (status_klg = :status_klg2 )) AND no_reg = :no_reg ', 
+            ['no_reg' => $noreg,'status_klg' => "I",'status_klg2' => "S"]);
+
+        return $dat_mar;
+    }
+
+    public function StoreMaritalkaryawan($request){
+  
+        $record_count = DB::connection('pgsql-mobile')->select('select COUNT(*) from mas_reg_karyawan_keluarga where no_reg = :no_reg AND ditanggung = :ditanggung', ['no_reg' => $request['no_reg'], 'ditanggung'=>'T']);
+        $ditanggung = 'T';
+        if ((int)$record_count > 4) {
+            $ditanggung = 'F';
+        }
+        
+
+        $tanggungan_anak = DB::connection('pgsql-mobile')
+        ->table("mas_reg_karyawan_keluarga")
+        ->select("tanggungan")
+        ->latest('tgl_sync')
+        ->where('no_reg', $request['no_reg'])
+        ->first();
+
+       
+        if (($request['status_klg'] == 'I')||($request['status_klg'] == 'S')){
+            $tanggungan = '1';
+        }elseif ($request['status_klg'] == 'A') {
+             $tanggungan_anak= $tanggungan_anak->tanggungan;
+
+            (int)$tanggungan = (int)$tanggungan_anak +1;
+        }
+            DB::beginTransaction();
+            DB::connection('pgsql-mobile')   
+            ->table("mas_reg_karyawan_keluarga")
+            ->insert(['no_reg' => $request['no_reg'], 'status_klg'=>$request['status_klg'], 'status_klg_desc'=>$request['status_klg_desc'], 'tanggungan'=>$tanggungan, 'nama'=>$request['nama'],'tmp_lahir' => $request['tempat'], 'tgl_lahir' => $request['tgl_lahir'], 'kelamin' => $request['kelamin'], 'kd_pend' => $request['pendidikan'],'pendidikan' => $request['kd_pend'], 'pekerjaan' => $request['pekerjaan'], 'ditanggung'=>$ditanggung]);
+            $status = "saving done";
+            DB::commit();
+
+        return $status;        
+    }
+
+
+    public function StorePendKaryawan($request)
+    {   
+        $data_exist = 
+             DB::connection('pgsql-mobile')
+             ->table('mas_reg_karyawan_pendidikan')
+             ->select('no_reg')
+             ->where('no_reg', $request['no_reg'])
+             ->where("kd_jenjang", $request['kd_jenjang'])
+             ->first();      
+
+        $status = "fail";
+
+        DB::beginTransaction();   
+        if ($data_exist != null){
+            DB::connection('pgsql-mobile')
+            ->table('mas_reg_karyawan_pendidikan')
+            ->where("no_reg" ,"=", $request['no_reg'])
+            ->where("kd_jenjang", $request['kd_jenjang'])
+            ->update($request);
+            $status = "update done";
+        }else{
+            DB::connection('pgsql-mobile')   
+            ->table("mas_reg_karyawan_pendidikan")
+            ->insert(['no_reg' => $request['no_reg'], 'kd_jenjang'=>$request['kd_jenjang'], 'jenjang'=>$request['jenjang'],'nama_sekolah' => $request['nama_sekolah'], 'tempat' => $request['tempat'], 'jurusan' => $request['jurusan'], 'tahun_masuk' => $request['tahun_masuk'], 'tahun_lulus' => $request['tahun_lulus']]);
+            $status = "saving done";
+            DB::commit();
+        }  
+        //dd($status);
+        return $status;
+    }
+
+
+    public function StoreNoReg($noreg){
+        DB::connection('pgsql-mobile')   
+            ->table("mas_reg_karyawan")
+            ->insert(['no_reg' => $noreg]);
+            $status = "saving done";
+            DB::commit();
+    }
+
+    public function StoreDataPendukung($data){
+        $data_exist = DB::connection('pgsql-mobile') 
+            ->table('mas_reg_karyawan')
+            ->select('no_reg')->where("no_reg", $data['no_reg'])
+            ->exists();       
+        $status = "fail";
+
+        DB::beginTransaction();   
+        if ($data_exist){
+            DB::connection('pgsql-mobile')
+            ->table('mas_reg_karyawan')
+            ->where("no_reg", $data['no_reg'])
+            ->update($data);
+            $status = "update done";
+        }else{
+            DB::connection('pgsql-mobile')   
+            ->table("mas_reg_karyawan")
+            ->insert(['no_reg' => $data['no_reg'], 'bpjsket'=>$data['bpjsket'], 'bpjskes'=>$data['bpjskes'],'rek_mandiri' => $data['rek_mandiri'], 'bpjsket_file' => $data['bpjsket_file'], 'bpjskes_file' => $data['bpjskes_file'], 'rek_mandiri_file' => $data['rek_mandiri_file']]);
+            $status = "saving done";
+            DB::commit();
+        }  
+        return $status;
+    }
+
+    public function StoreDataOrgTua($request){
+        DB::beginTransaction();
+        $data_ayah['nama'] = $request['nama_ayah'];
+        $data_ayah['tmp_lahir_ayah'] = $request['tmp_lahir_ayah'];
+        $data_ayah['tgl_lahir_ayah'] = $request['tgl_lahir_ayah'];
+        $data_ayah['pekerjaan_ayah'] = $request['pekerjaan_ayah'];
+
+        $data_ibu['nama'] = $request['nama_ibu'];
+        $data_ibu['tmp_lahir_ibu'] = $request['tmp_lahir_ibu'];
+        $data_ibu['tgl_lahir_ibu'] = $request['tgl_lahir_ibu'];
+        $data_ibu['pekerjaan_ibu'] = $request['pekerjaan_ibu'];
+
+        $data_ortu['alamat'] = $request['alamat_orgtua'];
+        $data_ortu['rt'] = $request['rt_orgtua'];
+        $data_ortu['rw'] = $request['rw_orgtua'];
+        $data_ortu['kelurahan'] = $request['kelurahan_orgtua'];
+        $data_ortu['kecamatan'] = $request['kecamatan_orgtua'];
+        $data_ortu['kota'] = $request['kota_orgtua'];
+        $data_ortu['kode_pos'] = $request['kode_pos_orgtua'];
+        $data_ortu['no_telp_hp'] = $request['no_telp_hp_orgtua'];
+
+
+
+        $data_ayah_mertua['nama'] = $request['nama_ayah_mertua'];
+        $data_ayah_mertua['tmp_lahir'] = $request['tmp_lahir_ayah_mertua'];
+        $data_ayah_mertua['tgl_lahir'] = $request['tgl_lahir_ayah_mertua'];
+        $data_ayah_mertua['pekerjaan'] = $request['pekerjaan_ayah_mertua'];
+
+        $data_ibu_mertua['nama'] = $request['nama_ibu_mertua'];
+        $data_ibu_mertua['tmp_lahir'] = $request['tmp_lahir_ibu_mertua'];
+        $data_ibu_mertua['tgl_lahir'] = $request['tgl_lahir_ibu_mertua'];
+        $data_ibu_mertua['pekerjaan'] = $request['pekerjaan_ibu_mertua'];
+
+        $data_mertua['alamat'] = $request['alamat_mertua'];
+        $data_mertua['rt'] = $request['rt_mertua'];
+        $data_mertua['rw'] = $request['rw_mertua'];
+        $data_mertua['kelurahan'] = $request['kelurahan_mertua'];
+        $data_mertua['kecamatan'] = $request['kecamatan_mertua'];
+        $data_mertua['kota'] = $request['kota_mertua'];
+        $data_mertua['kode_pos'] = $request['kode_pos_mertua'];
+        $data_mertua['no_telp_hp'] = $request['no_telp_hp_mertua'];
+
+        $now = date("Y-m-d H:i:s");
+        //insert ayah orgtua
+        DB::connection('pgsql-mobile')
+            ->table("mas_reg_karyawan_keluarga")
+            ->insert(['no_reg'=>$request['no_reg'] , 'tanggungan'=>'5', 'status_klg'=>'O' , 'status_klg_desc'=>"ORANG TUA" ,'nama'=>$data_ayah['nama'],'tmp_lahir' => $data_ayah['tmp_lahir_ayah'], 'tgl_lahir' => $data_ayah['tgl_lahir_ayah'], 'pekerjaan' => $data_ayah['pekerjaan_ayah']]);
+        DB::commit();
+        $status = "saving done";
+        
+         //insert ibu orgtua
+        DB::connection('pgsql-mobile')
+            ->table("mas_reg_karyawan_keluarga")
+            ->insert(['no_reg'=>$request['no_reg'] , 'tanggungan'=>'6','status_klg'=>'O' , 'status_klg_desc'=>"ORANG TUA" ,'nama'=>$data_ibu['nama'],'tmp_lahir' => $data_ibu['tmp_lahir_ibu'], 'tgl_lahir' => $data_ibu['tgl_lahir_ibu'], 'pekerjaan' => $data_ibu['pekerjaan_ibu']]);
+        DB::commit();
+        $status = "saving done";
+       
+
+        //insert ayah mertua
+        DB::connection('pgsql-mobile')
+            ->table("mas_reg_karyawan_keluarga")
+            ->insert(['no_reg'=>$request['no_reg'] , 'tanggungan'=>'7','status_klg'=>'M' , 'status_klg_desc'=>"MERTUA" ,'nama'=>$data_ayah_mertua['nama'],'tmp_lahir' => $data_ayah_mertua['tmp_lahir'], 'tgl_lahir' => $data_ayah_mertua['tgl_lahir'], 'pekerjaan' => $data_ayah_mertua['pekerjaan']]);
+        DB::commit();
+        $status = "saving done";
+        
+
+         //insert ibu mertua
+        DB::connection('pgsql-mobile')
+            ->table("mas_reg_karyawan_keluarga")
+            ->insert(['no_reg'=>$request['no_reg'] , 'tanggungan'=>'8','status_klg'=>'M' , 'status_klg_desc'=>"MERTUA" ,'nama'=>$data_ibu_mertua['nama'],'tmp_lahir' => $data_ibu_mertua['tmp_lahir'], 'tgl_lahir' => $data_ibu_mertua['tgl_lahir'], 'pekerjaan' => $data_ibu_mertua['pekerjaan']]);
+        DB::commit();
+        $status = "saving done";
+       
+
+        //save data alamat ortu
+        DB::connection('pgsql-mobile')
+                ->table("mas_reg_karyawan_alamat")
+                ->insert(['no_reg'=>$request['no_reg'] , 'kd_alam'=>'3','desc_alam' => $data_ortu['alamat'], 'rt' => $data_ortu['rt'], 'rw' => $data_ortu['rw'], 'kelurahan' => $data_ortu['kelurahan'], 'kecamatan' => $data_ortu['kecamatan'], 'kota' => $data_ortu['kota'], 'kd_pos' => $data_ortu['kode_pos'], 'no_tel' => $data_ortu['no_telp_hp'], 'tgl_proses' => $now]);
+            DB::commit();
+        $status = "saving done";
+    
+
+        //save data alamat mertua
+        DB::connection('pgsql-mobile')
+                ->table("mas_reg_karyawan_alamat")
+                ->insert(['no_reg'=>$request['no_reg'] , 'kd_alam'=>'4','desc_alam' => $data_mertua['alamat'], 'rt' => $data_mertua['rt'], 'rw' => $data_mertua['rw'], 'kelurahan' => $data_mertua['kelurahan'], 'kecamatan' => $data_mertua['kecamatan'], 'kota' => $data_mertua['kota'], 'kd_pos' => $data_mertua['kode_pos'],'no_tel' => $data_mertua['no_telp_hp'],  'tgl_proses' => $now]);
+            DB::commit();
+        $status = "saving done";
+        return $status;
+
+    }
+
+    public function StoreDataPribadi($request){                           
+        DB::beginTransaction();
+        $data_pribadi['nama'] = $request['nama'];
+        $data_pribadi['npk_lc'] = $request['npk_lc'];
+        $data_pribadi['no_ktp'] = $request['no_ktp'];
+        $data_pribadi['tmp_lahir'] = $request['tmp_lahir'];
+        $data_pribadi['tgl_lahir'] = $request['tgl_lahir'];
+        $data_pribadi['kd_warga'] = $request['kd_warga'];
+        $data_pribadi['agama'] = $request['agama'];
+        $data_pribadi['kelamin'] = $request['kelamin'];
+        $data_pribadi['gol_darah'] = $request['gol_darah'];
+
+        $kd_warga = $request['kd_warga'];
+        switch($kd_warga){
+            case "1":
+                $data_pribadi['nm_warga']= 'WNI';
+            break;
+
+             case "2":
+                $data_pribadi['nm_warga']= 'WNA';
+            break;               
+        }
+
+        $agama = $request['agama'];
+        switch($agama){
+            case "1":
+                $data_pribadi['agama_desc']= 'Islam';
+            break;
+
+            case "2":
+                $data_pribadi['agama_desc']= 'Katolik';
+            break; 
+
+            case "3":
+                $data_pribadi['agama_desc']= 'Protestan';
+            break; 
+
+            case "4":
+                $data_pribadi['agama_desc']= 'Hindu';
+            break; 
+
+            case "5":
+                $data_pribadi['agama_desc']= 'Budha';
+            break;              
+        }
+
+        $now = date("Y-m-d H:i:s");
+        $data_pribadi['tgl_masuk']= $now;
+                DB::connection('pgsql-mobile')
+                ->table('mas_reg_karyawan')
+                ->where("no_reg", $request['no_reg'])
+                ->update($data_pribadi);
+            // } 
+
+        /* Update data alamat Domisili */            
+        $dat_alam_dom['kd_alam'] = '1';
+        $dat_alam_dom['desc_alam'] = $request['alamat_dom'];
+        $dat_alam_dom['rt'] = trim($request['rt_dom']) !== '' ? trim($request['rt_dom']) : null;
+        $dat_alam_dom['rw'] = trim($request['rw_dom']) !== '' ? trim($request['rw_dom']) : null;
+        $dat_alam_dom['kelurahan'] = trim($request['kelurahan_dom']) !== '' ? trim($request['kelurahan_dom']) : null;
+        $dat_alam_dom['kecamatan'] = trim($request['kecamatan_dom']) !== '' ? trim($request['kecamatan_dom']) : null;
+        $dat_alam_dom['kota'] = trim($request['kota_dom']) !== '' ? trim($request['kota_dom']) : null;
+        $dat_alam_dom['kd_pos'] = trim($request['kode_pos_dom']) !== '' ? trim($request['kode_pos_dom']) : null;                
+            DB::connection('pgsql-mobile')
+                ->table("mas_reg_karyawan_alamat")
+                ->insert(['no_reg' => $request['no_reg'] ,'kd_alam' => $dat_alam_dom['kd_alam'], 'desc_alam' => $dat_alam_dom['desc_alam'], 'rt' => $dat_alam_dom['rt'], 'rw' => $dat_alam_dom['rw'], 'kelurahan' => $dat_alam_dom['kelurahan'], 'kecamatan' => $dat_alam_dom['kecamatan'], 'kota' => $dat_alam_dom['kota'], 'kd_pos' => $dat_alam_dom['kd_pos'],'tgl_proses' => $now]);
+                DB::commit();
+            // }
+
+         /* Update data alamat KTP */  
+        $dat_alam_ktp['kd_alam'] = '2';
+        $dat_alam_ktp['desc_alam'] = trim($request['alamat_ktp']) !== '' ? trim($request['alamat_ktp']) : null;
+        $dat_alam_ktp['rt'] = trim($request['rt_ktp']) !== '' ? trim($request['rt_ktp']) : null;
+        $dat_alam_ktp['rw'] = trim($request['rw_ktp']) !== '' ? trim($request['rw_ktp']) : null;
+        $dat_alam_ktp['kelurahan'] = trim($request['kelurahan_ktp']) !== '' ? trim($request['kelurahan_ktp']) : null;
+        $dat_alam_ktp['kecamatan'] = trim($request['kecamatan_ktp']) !== '' ? trim($request['kecamatan_ktp']) : null;
+        $dat_alam_ktp['kota'] = trim($request['kota_ktp']) !== '' ? trim($request['kota_ktp']) : null;
+        $dat_alam_ktp['kd_pos'] = trim($request['kode_pos_ktp']) !== '' ? trim($request['kode_pos_ktp']) : null;  
+            DB::connection('pgsql-mobile')
+                ->table("mas_reg_karyawan_alamat")
+                ->insert(['no_reg'=>$request['no_reg'] , 'kd_alam'=>$dat_alam_ktp['kd_alam'],'desc_alam' => $dat_alam_ktp['desc_alam'], 'rt' => $dat_alam_ktp['rt'], 'rw' => $dat_alam_ktp['rw'], 'kelurahan' => $dat_alam_ktp['kelurahan'], 'kecamatan' => $dat_alam_ktp['kecamatan'], 'kota' => $dat_alam_ktp['kota'], 'kd_pos' => $dat_alam_ktp['kd_pos'], 'tgl_proses' => $now]);
+            DB::commit();
+        $status = "saving done";
+        return $status;
+    }
+
+    public function masterkarexist($no_reg)
+    {
+        $masterkarexist = 
+             DB::connection('pgsql-mobile')
+            ->table('mas_reg_karyawan')
+            ->select('no_reg')->where("no_reg", $no_reg)
+            ->exists(); 
+
+        return $masterkarexist;
+    }
+}

@@ -1,0 +1,242 @@
+@extends('monitoring.mtc.layouts.app3')
+
+@section('content')
+  <div class="container2">
+    <div class="row" id="field_header">
+      <div class="col-md-6">
+        <div class="box">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="box box-primary">
+                <div class="box-header with-border">
+                  <h3 class="box-title" id="box-grafik">Grafik V Avg</h3>
+                  <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-success btn-sm" data-widget="collapse">
+                      <i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-danger btn-sm" data-widget="remove">
+                      <i class="fa fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                  <canvas id="canvas-1" width="1100" height="200"></canvas>
+                </div>
+                <!-- ./box-body -->
+              </div>
+              <!-- /.box -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          <div class="row">
+            <div class="col-md-12">
+              <div class="box box-primary">
+                <div class="box-header with-border">
+                  <h3 class="box-title" id="box-grafik">Grafik V Avg</h3>
+                  <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-success btn-sm" data-widget="collapse">
+                      <i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-danger btn-sm" data-widget="remove">
+                      <i class="fa fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                  <canvas id="canvas-2" width="1100" height="200"></canvas>
+                </div>
+                <!-- ./box-body -->
+              </div>
+              <!-- /.box -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          <div class="row">
+            <div class="col-md-12">
+              <div class="box box-primary">
+                <div class="box-header with-border">
+                  <h3 class="box-title" id="box-grafik">Grafik V Avg</h3>
+                  <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-success btn-sm" data-widget="collapse">
+                      <i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-danger btn-sm" data-widget="remove">
+                      <i class="fa fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                  <canvas id="canvas-3" width="1100" height="200"></canvas>
+                </div>
+                <!-- ./box-body -->
+              </div>
+              <!-- /.box -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          <div class="row">
+            <div class="col-md-12">
+              <div class="box box-primary">
+                <div class="box-header with-border">
+                  <h3 class="box-title" id="box-grafik">Grafik V Avg</h3>
+                  <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-success btn-sm" data-widget="collapse">
+                      <i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-danger btn-sm" data-widget="remove">
+                      <i class="fa fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                  <canvas id="canvas-4" width="1100" height="200"></canvas>
+                </div>
+                <!-- ./box-body -->
+              </div>
+              <!-- /.box -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+        </div>
+        <!-- /.box -->
+      </div>
+      <!-- /.col -->
+    </div>
+    <!-- /.row -->
+  </div>
+@endsection
+
+@section('scripts')
+  <script src="{{ asset('chartjs/Chart.bundle.js') }}"></script>
+  <script src="{{ asset('chartjs/utils.js') }}"></script>
+  <script src="{{ asset('js/Gauge.js') }}"></script>
+  <script type="text/javascript">
+    // document.body.style.backgroundColor = "black";
+
+    window.onload = function() {
+      // Chart.Legend.prototype.afterFit = function() {
+      //   this.height = this.height + 15;
+      // };
+
+      var ctx1 = document.getElementById("canvas-1").getContext("2d");
+      var valueColor1 = "green";
+      var value1 = 382;
+
+      if(value1 >= 342 && value1 <= 418) {
+        valueColor1 = "green";
+      } else if(value1 < 342 || value1 > 418) {
+        valueColor1 = "red";
+      }
+      new Chart(ctx1, {
+        type: "tsgauge",
+        data: {
+          datasets: [{
+            backgroundColor: ["yellow", "green", "red"],
+            borderWidth: 0,
+            gaugeData: {
+              value: value1,
+              valueColor: valueColor1
+            },
+            gaugeLimits: [266, 342, 418, 494]
+          }]
+        },
+        options: {
+          events: [],
+          showMarkers: true
+        }
+      });
+
+      var ctx2 = document.getElementById("canvas-2").getContext("2d");
+      var valueColor2 = "green";
+      var value2 = 382;
+
+      if(value2 >= 342 && value2 <= 418) {
+        valueColor2 = "green";
+      } else if(value2 < 342 || value2 > 418) {
+        valueColor2 = "red";
+      }
+      new Chart(ctx2, {
+        type: "tsgauge",
+        data: {
+          datasets: [{
+            backgroundColor: ["yellow", "green", "red"],
+            borderWidth: 0,
+            gaugeData: {
+              value: value2,
+              valueColor: valueColor2
+            },
+            gaugeLimits: [266, 342, 418, 494]
+          }]
+        },
+        options: {
+          events: [],
+          showMarkers: true
+        }
+      });
+
+      var ctx3 = document.getElementById("canvas-3").getContext("2d");
+      var valueColor3 = "green";
+      var value3 = 382;
+
+      if(value3 >= 342 && value3 <= 418) {
+        valueColor3 = "green";
+      } else if(value3 < 342 || value3 > 418) {
+        valueColor3 = "red";
+      }
+      new Chart(ctx3, {
+        type: "tsgauge",
+        data: {
+          datasets: [{
+            backgroundColor: ["yellow", "green", "red"],
+            borderWidth: 0,
+            gaugeData: {
+              value: value3,
+              valueColor: valueColor3
+            },
+            gaugeLimits: [266, 342, 418, 494]
+          }]
+        },
+        options: {
+          events: [],
+          showMarkers: true
+        }
+      });
+
+      var ctx4 = document.getElementById("canvas-4").getContext("2d");
+      var valueColor4 = "green";
+      var value4 = 382;
+
+      if(value4 >= 342 && value4 <= 418) {
+        valueColor4 = "green";
+      } else if(value4 < 342 || value4 > 418) {
+        valueColor4 = "red";
+      }
+      new Chart(ctx4, {
+        type: "tsgauge",
+        data: {
+          datasets: [{
+            backgroundColor: ["yellow", "green", "red"],
+            borderWidth: 0,
+            gaugeData: {
+              value: value4,
+              valueColor: valueColor4
+            },
+            gaugeLimits: [266, 342, 418, 494]
+          }]
+        },
+        options: {
+          events: [],
+          showMarkers: true
+        }
+      });
+    };
+  </script>
+@endsection

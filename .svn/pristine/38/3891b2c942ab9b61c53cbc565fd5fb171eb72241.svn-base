@@ -1,0 +1,272 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use App\BgttCrRegis;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use App\Http\Requests\StoreBgttCrRegisRequest;
+use Illuminate\Support\Facades\Session;
+use App\Http\Requests\UpdateBgttCrRegisRequest;
+use Illuminate\Support\Facades\Auth;
+use DB;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\File;
+use PDF;
+use JasperPHP\JasperPHP;
+
+class BgttCrRegissController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        if(Auth::user()->can(['budget-cr-activities-*'])) {
+            return view('budget.activity.index');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function dashboard(Request $request)
+    {
+        if ($request->ajax()) {
+            if(Auth::user()->can(['budget-cr-activities-*'])) {
+
+                $bgttcrregiss = BgttCrRegis::from(DB::raw("bgtt_cr_regiss b"))
+                ->whereRaw("b.no_rev = (select max(s.no_rev) from bgtt_cr_regiss s where s.kd_dep = b.kd_dep and s.thn = b.thn and s.nm_klasifikasi = b.nm_klasifikasi and s.nm_kategori = b.nm_kategori  and s.nm_aktivitas = b.nm_aktivitas)")
+                ->where(DB::raw("b.kd_dep"), "=", Auth::user()->masKaryawan()->kode_dep);
+
+                if(!empty($request->get('status'))) {
+                    if($request->get('status') !== 'ALL') {
+                        $bgttcrregiss->status($request->get('status'));
+                    }
+                }
+
+                return Datatables::of($bgttcrregiss)
+                ->editColumn('nm_aktivitas', function($data) {
+                    $info = "Show Detail Activity: ".$data->nm_aktivitas.", Tahun: ".$data->thn.", Classification: ".$data->nm_klasifikasi.", CR Categories: ".$data->nm_kategori;
+                    return '<a href="'.route('bgttcrregiss.show', base64_encode($data->id)).'" data-toggle="tooltip" data-placement="top" title="'.$info.'">'.$data->nm_aktivitas.'</a>';
+                })
+                ->editColumn('kd_dep', function($data){
+                    return $data->kd_dep.' - '.$data->namaDepartemen($data->kd_dep);
+                })
+                ->addColumn('kd_div', function($data){
+                    return $data->kd_div.' - '.$data->namaDivisi($data->kd_div);
+                })
+                ->editColumn('creaby', function($data){
+                    if(!empty($data->creaby)) {
+                        $name = $data->namaByNpk($data->creaby);
+                        if(!empty($data->dtcrea)) {
+                            $tgl = Carbon::parse($data->dtcrea)->format('d/m/Y H:i');
+                            return $data->creaby.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->creaby.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('creaby', function ($query, $keyword) {
+                    $query->whereRaw("(b.creaby||' - '||(select v.nama from v_mas_karyawan v where b.creaby = v.npk limit 1)||' - '||to_char(b.dtcrea,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('creaby', 'creaby $1')
+                ->editColumn('modiby', function($data){
+                    if(!empty($data->modiby)) {
+                        $name = $data->namaByNpk($data->modiby);
+                        if(!empty($data->dtmodi)) {
+                            $tgl = Carbon::parse($data->dtmodi)->format('d/m/Y H:i');
+                            return $data->modiby.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->modiby.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('modiby', function ($query, $keyword) {
+                    $query->whereRaw("(b.modiby||' - '||(select v.nama from v_mas_karyawan v where b.modiby = v.npk limit 1)||' - '||to_char(b.dtmodi,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('modiby', 'modiby $1')
+                ->addColumn('status', function($data){
+                    return $data->status;
+                })
+                ->addColumn('action', function($data){
+                    if($data->checkEdit() === "T") {
+                        if(Auth::user()->can(['budget-cr-activities-create', 'budget-cr-activities-delete'])) {
+                            $info = "Anda yakin menghapus Activity: ".$data->nm_aktivitas.", Tahun: ".$data->thn.", Classification: ".$data->nm_klasifikasi.", CR Categories: ".$data->nm_kategori.'?';
+                            return view('datatable._action', [
+                                'model' => $data,
+                                'form_url' => route('bgttcrregiss.destroy', base64_encode($data->id)),
+                                'edit_url' => route('bgttcrregiss.edit', base64_encode($data->id)),
+                                'class' => 'form-inline js-ajax-delete',
+                                'form_id' => 'form-'.$data->id,
+                                'id_table' => 'tblMaster',
+                                'confirm_message' => $info
+                                ]);
+                        } else {
+                            return "";
+                        }
+                    } else {
+                        return "";
+                    }
+                })->make(true);
+            } else {
+                return view('errors.403');
+            }
+        } else {
+            return redirect('home');
+        }
+    }
+
+    public function detail(Request $request, $id)
+    {
+        if(Auth::user()->can(['budget-cr-activities-*'])) {
+            if ($request->ajax()) {
+                $id = base64_decode($id);
+                $vw_bgtt_cr_regiss_details = DB::table(DB::raw("(
+                    select v.id, v.kd_dep, v.bulan, v.jml_mp, v.amount, b.jml jml_mp_act, b.amt amount_act 
+                    from vw_bgtt_cr_regiss_detail v left join bgtt_cr_submits b 
+                    on v.id = b.id_regis and v.thn = b.thn and v.bulan = b.bln 
+                ) s"))
+                ->selectRaw("bulan, jml_mp, amount, jml_mp_act, amount_act")
+                ->where("kd_dep", "=", Auth::user()->masKaryawan()->kode_dep)
+                ->where("id", "=", $id)
+                ->orderBy("bulan");
+
+                return Datatables::of($vw_bgtt_cr_regiss_details)
+                ->editColumn('bulan', function($data){
+                    $bulan = $data->bulan;
+                    return strtoupper(namaBulan((int) $bulan));
+                })
+                ->editColumn('jml_mp', function($data){
+                  return numberFormatter(0, 0)->format($data->jml_mp);
+                })
+                ->filterColumn('jml_mp', function ($query, $keyword) {
+                  $query->whereRaw("trim(to_char(jml_mp,'999999999999999999')) like ?", ["%$keyword%"]);
+                })
+                ->editColumn('amount', function($data){
+                  return numberFormatter(0, 5)->format($data->amount);
+                })
+                ->filterColumn('amount', function ($query, $keyword) {
+                  $query->whereRaw("trim(to_char(amount,'999999999999999999.999999')) like ?", ["%$keyword%"]);
+                })
+                ->editColumn('jml_mp_act', function($data){
+                  return numberFormatter(0, 0)->format($data->jml_mp_act);
+                })
+                ->filterColumn('jml_mp_act', function ($query, $keyword) {
+                  $query->whereRaw("trim(to_char(jml_mp_act,'999999999999999999')) like ?", ["%$keyword%"]);
+                })
+                ->editColumn('amount_act', function($data){
+                  return numberFormatter(0, 5)->format($data->amount_act);
+                })
+                ->filterColumn('amount_act', function ($query, $keyword) {
+                  $query->whereRaw("trim(to_char(amount_act,'999999999999999999.999999')) like ?", ["%$keyword%"]);
+                })
+                ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        if(Auth::user()->can('budget-cr-activities-create')) {
+            $years = DB::table("mcbgt001ts")
+            ->select(DB::raw("thn_period, st_budget_plan, st_budget_act"))
+            ->whereRaw("coalesce(st_budget_plan, 'F') = 'T'")
+            ->orderByRaw("thn_period");
+            return view('budget.activity.create', compact('years'));
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        if(Auth::user()->can(['budget-cr-activities-*'])) {
+            $bgttcrregis = BgttCrRegis::from(DB::raw("bgtt_cr_regiss b"))
+            ->whereRaw("b.no_rev = (select max(s.no_rev) from bgtt_cr_regiss s where s.kd_dep = b.kd_dep and s.thn = b.thn and s.nm_klasifikasi = b.nm_klasifikasi and s.nm_kategori = b.nm_kategori  and s.nm_aktivitas = b.nm_aktivitas)")
+            ->where(DB::raw("b.id"), "=", base64_decode($id))
+            ->first();
+            if($bgttcrregis != null) {
+                if ($bgttcrregis->checkKdDept() === "T") {
+                    return view('budget.activity.show', compact('bgttcrregis'));
+                } else {
+                    return view('errors.403');
+                }
+            } else {
+                return view('errors.404');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        //
+    }
+}

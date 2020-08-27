@@ -1,0 +1,712 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
+use App\HrdRegistrasiKaryawan;
+use App\User;
+use DB;
+use Redirect,Response;
+use Illuminate\Support\Facades\Validator;
+
+class HrdRegistratsiKarController extends Controller
+{
+    public function indexreg(Request $request){           
+    	$kar = new HrdRegistrasiKaryawan();
+    	$datpendidikan = $kar->pendKaryawan(Auth::user()->username);
+
+    	$data = $kar->GetSequenceNumber();
+    	if ($data){
+    		$last_ =(int)substr($data->no_reg,-3);
+    	}else{
+    		$noreg = "REG201909100";
+    		$last_ = (int)substr($noreg,-3);
+    	}
+
+        $last_new = $last_ + 1; 
+    	$seq_number = "REG". date("Ym"). $last_new ;            	
+        $store_noreg = $kar->StoreNoReg($seq_number);
+        $datkar = $kar->masKaryawan($seq_number);            
+
+    	return view('hr.mobile.regkaryawan.ajax')->with(compact(['datkar']))->with('seq_number', $seq_number)->with('page', "data_pribadi" );
+        
+        
+    }
+
+    public function index_(Request $request, $param, $noreg){           
+        $kar = new HrdRegistrasiKaryawan();
+        $datkar = $kar->masKaryawan($noreg);            
+        $alamatdom = $kar->almtKaryawan($noreg,'1');            
+        $alamatktp = $kar->almtKaryawan($noreg,'2');
+        $datpendidikan = $kar->pendKaryawan($noreg);  
+        $datmarital = $kar->MaritalKaryawan($noreg);   
+        $datogrtua = $kar->OrtuKaryawan($noreg, 'O'); 
+        $datmertua = $kar->MertuaKaryawan($noreg, 'M');  
+        $datmarriage =  $kar->MarriageKaryawan($noreg);        
+        
+        $request->session()->put('sort', $request->has('sort') ? $request->get('sort') : ($request->session()->has('sort') ? $request->session()->get('sort') : 'desc'));
+    
+        if ($request->ajax())
+        	return view('hr.mobile.regkaryawan.'.$param)->with(compact(['datkar', 'alamatdom','alamatktp', 'datpendidikan','datmarital']))->with('page',$param)->with('seq_number', $noreg)->with('datmarriage', $datmarriage);
+        
+        else
+           return view('hr.mobile.regkaryawan.ajax')->with(compact(['datkar', 'alamatdom','alamatktp', 'datpendidikan','datmarital']))->with('page',$param)->with('seq_number', $noreg)->with('datmarriage', $datmarriage);
+        
+    }
+
+    public function updatedatapribadi(Request $request){   		
+		$this->validate($request, [
+           'nama' => 'required',
+           'no_ktp' => 'required',
+           'tmp_lahir' => 'required',
+            //alamat
+           'alamat_dom'=>'required|max:350',
+           'rt_dom'=>'required',
+           'rw_dom'=>'required',
+           'kelurahan_dom'=>'required',
+           'kecamatan_dom'=>'required',
+           'kota_dom'=>'required',
+           'kode_pos_dom'=>'required',
+           //'no_telp_hp_dom'=>'required',
+            
+            //alamat
+           'alamat_ktp'=>'required|max:350',
+           'rt_ktp'=>'required',
+           'rw_ktp'=>'required',
+           'kelurahan_ktp'=>'required',
+           'kecamatan_ktp'=>'required',
+           'kota_ktp'=>'required',
+           'kode_pos_ktp'=>'required',
+            //'no_telp_hp_ktp'=>'required',
+        ]);
+
+		$msg = 'Penyimpanan data berhasil.';			
+        $data = $request->all();                     
+        DB::beginTransaction();
+        try {  
+        	/* Update data Diri */   ;
+            $data_pribadi['nama'] = $data['nama'];
+            $data_pribadi['no_ktp'] = $data['no_ktp'];
+            $data_pribadi['tmp_lahir'] = $data['tmp_lahir'];
+            //$data_pribadi['tgl_lahir'] = $data['tgl_lahir'];
+            $data_pribadi['kd_warga'] = $data['kd_warga'];
+            $data_pribadi['agama'] = $data['agama'];
+			$data_pribadi['kelamin'] = $data['kelamin'];
+			$data_pribadi['gol_darah'] = $data['gol_darah'];
+
+				$kar = new HrdRegistrasiKaryawan();
+            	$status_db = $kar->masterkarexist(Auth::user()->username);
+            	
+				if ($status_db){
+					DB::connection('pgsql-mobile')
+		        	->table('v_mas_karyawan')
+		        	->where("npk", Auth::user()->username)
+		        	->update($data_pribadi);
+				} else {
+					DB::table("v_mas_karyawan")
+						->insert(['npk' => Auth::user()->username,'npk'=>$data_pribadi['npk'], 'nama' => $data_pribadi['nama'], 'no_ktp' => $data_pribadi['no_ktp'], 'tmp_lahir' => $data_pribadi['tmp_lahir'],  'kd_warga' => $data_pribadi['kd_warga'], 'agama' => $data_pribadi['agama'], 'kelamin' => $data_pribadi['kelamin'], 'gol_darah' => $data_pribadi['gol_darah'], 'created_at' => $created_at, 'updated_at' => $updated_at]);
+                	DB::commit();
+				}
+
+            /* Update data alamat Domisili */            
+            $dat_alam_dom['kd_alam'] = '1';
+            $dat_alam_dom['desc_alam'] = $data['alamat_dom'];
+            $dat_alam_dom['rt'] = trim($data['rt_dom']) !== '' ? trim($data['rt_dom']) : null;
+            $dat_alam_dom['rw'] = trim($data['rw_dom']) !== '' ? trim($data['rw_dom']) : null;
+            $dat_alam_dom['kelurahan'] = trim($data['kelurahan_dom']) !== '' ? trim($data['kelurahan_dom']) : null;
+			$dat_alam_dom['kecamatan'] = trim($data['kecamatan_dom']) !== '' ? trim($data['kecamatan_dom']) : null;
+			$dat_alam_dom['kota'] = trim($data['kota_dom']) !== '' ? trim($data['kota_dom']) : null;
+			$dat_alam_dom['kd_pos'] = trim($data['kode_pos_dom']) !== '' ? trim($data['kode_pos_dom']) : null;					
+				$kar = new HrdRegistrasiKaryawan();
+            	$kodealam_db = $kar->alamatexist(Auth::user()->username, $dat_alam_dom['kd_alam']);
+				if ($kodealam_db){
+					DB::connection('pgsql-mobile')
+		        	->table('v_mas_karyawan_alamat')
+		        	->where("npk", Auth::user()->username)
+		        	->where("kd_alam", $dat_alam_dom['kd_alam'])
+		        	->update($dat_alam_dom);
+				} else {
+					DB::table("v_mas_karyawan_alamat")
+						->insert(['npk' => Auth::user()->username,'kd_alam'=>$dat_alam_dom['kd_alam'], 'desc_alam' => $dat_alam_dom['desc_alam'], 'rt' => $dat_alam_dom['rt'], 'rw' => $dat_alam_dom['rw'], 'kelurahan' => $dat_alam_dom['kelurahan'], 'kecamatan' => $dat_alam_dom['kecamatan'], 'kota' => $dat_alam_dom['kota'], 'kd_pos' => $dat_alam_dom['kd_pos'], 'created_at' => $created_at, 'updated_at' => $updated_at]);
+                	DB::commit();
+				}
+
+	         /* Update data alamat KTP */  
+	        $dat_alam_ktp['kd_alam'] = '2';
+            $dat_alam_ktp['desc_alam'] = trim($data['alamat_ktp']) !== '' ? trim($data['alamat_ktp']) : null;
+            $dat_alam_ktp['rt'] = trim($data['rt_ktp']) !== '' ? trim($data['rt_ktp']) : null;
+            $dat_alam_ktp['rw'] = trim($data['rw_ktp']) !== '' ? trim($data['rw_ktp']) : null;
+            $dat_alam_ktp['kelurahan'] = trim($data['kelurahan_ktp']) !== '' ? trim($data['kelurahan_ktp']) : null;
+			$dat_alam_ktp['kecamatan'] = trim($data['kecamatan_ktp']) !== '' ? trim($data['kecamatan_ktp']) : null;
+			$dat_alam_ktp['kota'] = trim($data['kota_ktp']) !== '' ? trim($data['kota_ktp']) : null;
+			$dat_alam_ktp['kd_pos'] = trim($data['kode_pos_ktp']) !== '' ? trim($data['kode_pos_ktp']) : null;	
+				$kar = new HrdRegistrasiKaryawan();
+            	$kodealam_db = $kar->alamatexist(Auth::user()->username, $dat_alam_ktp['kd_alam']);
+				if ($kodealam_db){
+					DB::connection('pgsql-mobile')
+		        	->table('v_mas_karyawan_alamat')
+		        	->where("npk", Auth::user()->username)
+		        	->where("kd_alam", $dat_alam_ktp['kd_alam'])
+		        	->update($dat_alam_ktp);
+				} else {
+					//dd($kodealam_db);
+					DB::table("v_mas_karyawan_alamat")
+						->insert(['npk' => Auth::user()->username, 'kd_alam'=>$dat_alam_ktp['kd_alam'],'desc_alam' => $dat_alam_ktp['desc_alam'], 'rt' => $dat_alam_ktp['rt'], 'rw' => $dat_alam_ktp['rw'], 'kelurahan' => $dat_alam_ktp['kelurahan'], 'kecamatan' => $dat_alam_ktp['kecamatan'], 'kota' => $dat_alam_ktp['kota'], 'kd_pos' => $dat_alam_ktp['kd_pos'], 'created_at' => $created_at, 'updated_at' => $updated_at]);
+                	DB::commit();
+				}
+
+			$kar = new HrdRegistrasiKaryawan();
+            $last_noreg = $kar->GetSequenceNumber();
+            $last_ =(int)substr($last_noreg->no_reg,-3);
+            $last_new = $last_ + 1;          
+            $seq_number = "REG". date("Ym"). $last_new ;
+            
+            $store_noreg = $kar->StoreNoReg($seq_number);
+
+			    Session::flash("flash_notification", [
+	                "level"=>'success',
+	                "message"=>$msg
+	            ]);
+			    return redirect()->route('mobiles.indexreg');
+
+	    } catch (Exception $ex) {
+            DB::rollback();
+            $status = 'fail';
+            $level = "danger";
+            $msg = 'Gagal menyimpan!';
+            return view('errors.403');
+        }		      
+    }
+
+    public function create_datpend(Request $request, $noreg)
+    {
+        if ($request->isMethod('get'))        	
+            return view('hr.mobile.regkaryawan.form');        
+        else {
+            $rules = [
+                'jenjang' => 'required',
+                'nama_sekolah' => 'required',
+                'tempat' => 'required',
+                'tahun_masuk' => 'required|numeric',
+                'tahun_lulus' => 'required|numeric',
+            ];
+            $validator = Validator::make($request->all(), $rules);
+            if ($validator->fails())
+                return response()->json([
+                    'fail' => true,
+                    'errors' => $validator->errors()
+                ]);
+            $datapend = new HrdRegistrasiKaryawan();
+
+            $jenjang = $request['jenjang'];
+	        switch($jenjang){
+	            case "SD":
+	                $request['kd_jenjang']= '1';
+	            break;
+
+	            case "SMP":
+	                $request['kd_jenjang']= '2';
+	            break;
+
+	            case "SMA":
+	                $request['kd_jenjang']= '3';
+	            break;
+
+	            case "SMK":
+	                $request['kd_jenjang']= '4';
+	            break;
+
+	            case "D1":
+	                $request['kd_jenjang']= '5';
+	            break;
+	            case "D2":
+	                $request['kd_jenjang']= '6';
+	            break;
+
+	            case "D3":
+	                $request['kd_jenjang']= '7';
+	            break;
+
+	            case "S1":
+	                $request['kd_jenjang']= '8';
+	            break;
+
+	            case "S2":
+	                $request['kd_jenjang']= '9';
+	            break;
+
+	            case "S3":
+	                $request['kd_jenjang']= '10';
+	            break;
+	        }
+	        $no_reg = $request->segment(5);
+	        $request['no_reg']= $noreg;
+
+            $storedata = $datapend->StorePendKaryawan($request->all());
+	        if ($storedata){      	
+	            return response()->json([
+	                'fail' => false,
+	                "level"=>"success",
+	                'redirect_url' => url('laravel-crud-search-sort-ajax-modal-form/data_pendidikan/'.$request['no_reg'])
+	            ]);
+        	}
+        }
+    }
+
+ 	public function create_datmarit(Request $request, $noreg)
+    {
+        if ($request->isMethod('get'))        	
+            return view('hr.mobile.regkaryawan.form_marital');        
+        else {
+            $rules = [
+                'status_klg' => 'required',
+                'nama' => 'required',
+                'tempat' => 'required',
+                'tgl_lahir' => 'required',
+                'kelamin' => 'required',
+                'pendidikan' => 'required',
+                'pekerjaan' => 'required',
+            ];
+            $validator = Validator::make($request->all(), $rules);
+            if ($validator->fails())
+                return response()->json([
+                    'fail' => true,
+                    'errors' => $validator->errors()
+                ]);
+            $datmarit = new HrdRegistrasiKaryawan();
+
+            $pendidikan = $request['pendidikan'];
+	        switch($pendidikan){
+	        	case "K01":
+	                $request['kd_pend']= 'PLAYGROUP';
+	            break;
+	        	case "L01":
+	                $request['kd_pend']= 'TK';
+	            break;
+	            case "A01":
+	                $request['kd_pend']= 'SD';
+	            break;
+	            case "B01":
+	                $request['kd_pend']= 'SMP';
+	            break;
+	            case "B01":
+	                $request['kd_pend']= 'SLTA';
+	            break;
+	            case "C04":
+	                $request['kd_pend']= 'SMA';
+	            break;
+	            case "C09":
+	                $request['kd_pend']= 'SMEA';
+	            break;
+	            case "C17":
+	                $request['kd_pend']= 'SMK';
+	            break;
+	            case "D04":
+	                $request['kd_pend']= 'D1';
+	            break;
+	            case "E04":
+	                $request['kd_pend']= 'D2';
+	            break;
+
+	            case "F08":
+	                $request['kd_pend']= 'D3';
+	            break;
+
+	            case "G06":
+	                $request['kd_pend']= 'S1';
+	            break;
+
+	            case "H01":
+	                $request['kd_pend']= 'S2';
+	            break;
+
+	        }
+	        $no_reg = $request->segment(5);
+	        $request['no_reg']= $noreg;
+
+
+	        $status_klg = $request['status_klg'];
+	        switch($status_klg){
+	            case "I":
+	                $request['status_klg_desc']= 'ISTRI';
+	            break;
+
+	            case "A":
+	                $request['status_klg_desc']= 'Anak';
+	            break;
+
+	            case "S":
+	                $request['status_klg_desc']= 'SUAMI';
+	            break;
+	        }
+
+            $storedata = $datmarit->StoreMaritalkaryawan($request->all());
+            return response()->json([
+                'fail' => false,
+                'redirect_url' => url('laravel-crud-search-sort-ajax-modal-form/data_marital/'.$request['no_reg'])
+            ]);
+        }
+    }
+
+    public function storedatamarital(Request $request)
+    {
+    	$data2['marital']=$request['marital'];
+        $storedata2 = DB::connection('pgsql-mobile')
+        ->table('mas_reg_karyawan')
+        ->where("no_reg" ,"=", $request['no_reg'])
+        ->update($data2);
+
+        if ($data2['marital'] !== 'TK'){
+            $data['no_reg']=$request['no_reg']; 
+        	$data['marriage']=$request['marriage'];
+        	$storedata = DB::connection('pgsql-mobile')
+            ->table('mas_reg_karyawan_keluarga')
+            ->where("no_reg" ,"=", $data['no_reg'])
+            ->where("tanggungan", '1')
+            ->update($data);
+        	
+
+            if (($storedata)&&($storedata2)){
+            	Session::flash("flash_notification", [
+               		"level"=>"success",
+                	"message"=>"Berhasil menyimpan"
+            	]);	
+            	return response()->json([
+                'fail' => false,
+                'redirect_url' => url('laravel-crud-search-sort-ajax-modal-form/data_marital/'.$request['no_reg'])
+           		 ]);
+            }else { 
+                Session::flash("flash_notification", [
+           		"level"=>"danger",
+            	"message"=>"Gagal menyimpan"
+            	]);	
+            	return response()->json([
+                'fail' => true,
+                'redirect_url' => url('laravel-crud-search-sort-ajax-modal-form/data_marital/'.$request['no_reg'])
+           		 ]);
+            }	    
+        }else{
+            if ($storedata2){
+                Session::flash("flash_notification", [
+                    "level"=>"success",
+                    "message"=>"Berhasil menyimpan"
+                ]); 
+                return response()->json([
+                'fail' => false,
+                'redirect_url' => url('laravel-crud-search-sort-ajax-modal-form/data_marital/'.$request['no_reg'])
+                 ]);
+            }else { 
+                Session::flash("flash_notification", [
+                "level"=>"danger",
+                "message"=>"Gagal menyimpan"
+                ]); 
+                return response()->json([
+                'fail' => true,
+                'redirect_url' => url('laravel-crud-search-sort-ajax-modal-form/data_marital/'.$request['no_reg'])
+                 ]);
+            }
+
+        }     
+			
+            
+    }
+    public function delete_datpend($id)
+    {
+        Customer::destroy($id);
+        return redirect('/laravel-crud-search-sort-ajax-modal-form');
+    }
+
+    public function update_datpend(Request $request, $kd_jenjang)
+    {
+        if ($request->isMethod('get')){
+        	 $datpendidikan = DB::connection('pgsql-mobile')
+        	 	 ->table("v_mas_karyawan_pendidikan")
+                 ->select(DB::raw("jenjang, nama_sekolah, tempat, tahun_masuk, tahun_lulus, jurusan"))
+                 ->where("npk", "=", Auth::user()->username)
+                 ->where("kd_jenjang", $kd_jenjang)
+                 ->first();
+            return view('hr.mobile.regkaryawan.form')->with(compact('datpendidikan'));
+        }else if (!$request->isMethod('get')){
+            $rules = [
+                'jenjang' => 'required',
+                'nama_sekolah' => 'required',
+                'tempat' => 'required',
+                'tahun_masuk' => 'required',
+                'tahun_lulus' => 'required',
+            ];
+            $validator = Validator::make($request->all(), $rules);
+            if ($validator->fails())
+                return response()->json([
+                    'fail' => true,
+                    'errors' => $validator->errors()
+                ]);
+
+            $jenjang = $request['jenjang'];
+	        switch($jenjang){
+	            case "SD":
+	                $request['kd_jenjang']= '1';
+	            break;
+
+	            case "SMP":
+	                $request['kd_jenjang']= '2';
+	            break;
+
+	            case "SMA":
+	                $request['kd_jenjang']= '3';
+	            break;
+
+	            case "D1":
+	                $request['kd_jenjang']= '4';
+	            break;
+	            case "D2":
+	                $request['kd_jenjang']= '5';
+	            break;
+
+	            case "D3":
+	                $request['kd_jenjang']= '6';
+	            break;
+
+	            case "S1":
+	                $request['kd_jenjang']= '7';
+	            break;
+
+	            case "S2":
+	                $request['kd_jenjang']= '8';
+	            break;
+
+	            case "S3":
+	                $request['kd_jenjang']= '9';
+	            break;
+	        }
+            /* Update data pendidikan */   
+            $data_pendidikan['kd_jenjang'] = $request['kd_jenjang'];
+            $data_pendidikan['jenjang'] = $request['jenjang'];
+            $data_pendidikan['nama_sekolah'] = $request['nama_sekolah'];
+            $data_pendidikan['jurusan'] = $request['jurusan'];
+            $data_pendidikan['tempat'] = $request['tempat'];
+            $data_pendidikan['tahun_masuk'] = $request['tahun_masuk'];
+            $data_pendidikan['tahun_lulus'] = $request['tahun_lulus'];			
+				DB::connection('pgsql-mobile')
+        		->table('v_mas_karyawan_pendidikan')
+        		->where("npk", Auth::user()->username)
+        		->where("kd_jenjang","=", $data_pendidikan['kd_jenjang'])
+        		->update($data_pendidikan);
+        	
+
+            return response()->json([
+                'fail' => false,
+                'redirect_url' => url('laravel-crud-search-sort-ajax-modal-form')
+            ]);
+        }
+    }
+    
+
+    public function storedatapribadi(Request $request)
+    {
+    	$rules = [
+    		   'nama' => 'required',
+	           'no_ktp' => 'required',
+	           'tmp_lahir' => 'required',
+               'npk_lc' => 'required',
+	           //'tgl_lahir' => 'required',
+	            
+	            //alamat
+	           'alamat_dom'=>'required|max:350',
+	           'rt_dom'=>'required',
+	           'rw_dom'=>'required',
+	           'kelurahan_dom'=>'required',
+	           'kecamatan_dom'=>'required',
+	           'kota_dom'=>'required',
+	           'kode_pos_dom'=>'required',
+	           'no_telp_hp_dom'=>'required',
+	            
+	            //alamat
+	           'alamat_ktp'=>'required|max:350',
+	           'rt_ktp'=>'required',
+	           'rw_ktp'=>'required',
+	           'kelurahan_ktp'=>'required',
+	           'kecamatan_ktp'=>'required',
+	           'kota_ktp'=>'required',
+	           'kode_pos_ktp'=>'required',
+	           'no_telp_hp_ktp'=>'required',
+    	];
+    	$validator = Validator::make($request->all(), $rules);
+	        if ($validator->fails()){        		
+	           return response()->json(['error'=>$validator->errors()->all()]);
+	        }  
+   
+	        $data = $request->all();
+       		$kar = new HrdRegistrasiKaryawan();
+		    $check = $kar->StoreDataPribadi($data);
+
+	        $arr = array('error' => 'Gagal menyimpan data', 'status' => false);
+	        if($check){ 
+	        	$arr = array('msg' => 'Data Pribadi anda berhasil disimpan', 'status' => true);
+	        }
+	        return response()->json($arr);
+
+		    Session::flash("flash_notification", [
+                "level"=>'success',
+                "message"=>$msg
+            ]);
+			        
+    }
+
+
+    public function storedataorgtua(Request $request)
+    {
+    	$rules = [
+    			//validasi orgtua
+    		   'nama_ayah' => 'required',
+	           'tmp_lahir_ayah' => 'required',
+	           'tgl_lahir_ayah' => 'required',
+	           'pekerjaan_ayah' => 'required',
+	           'nama_ibu' => 'required',
+	           'tgl_lahir_ibu' => 'required',
+	           'pekerjaan_ibu' => 'required',
+	           'alamat_orgtua' => 'required',
+	           'rt_orgtua' => 'required',
+	           'rw_orgtua' => 'required',
+	           'kelurahan_orgtua' => 'required',
+	           'kecamatan_orgtua' => 'required',
+	           'kota_orgtua' => 'required',
+	           'kode_pos_orgtua' => 'required',
+	           'no_telp_hp_orgtua' => 'required',
+
+
+				//validasi mertua
+	           'nama_ayah_mertua' => 'required',
+	           'tmp_lahir_ayah_mertua' => 'required',
+	           'tgl_lahir_ayah_mertua' => 'required',
+	           'pekerjaan_ayah_mertua' => 'required',
+	           'nama_ibu_mertua' => 'required',
+	           'tmp_lahir_ibu_mertua' => 'required',
+	           'tgl_lahir_ibu_mertua' => 'required',
+	           'pekerjaan_ibu_mertua' => 'required',
+	           'alamat_mertua' => 'required',
+	           'rt_mertua' => 'required',
+	           'rw_mertua' => 'required',
+	           'kelurahan_mertua' => 'required',
+	           'kecamatan_mertua' => 'required',
+	           'kota_mertua' => 'required',
+	           'kode_pos_mertua' => 'required',
+	           'no_telp_hp_mertua' => 'required',
+    	];
+    	$validator = Validator::make($request->all(), $rules);
+	        if ($validator->fails()){        		
+	           return response()->json(['error'=>$validator->errors()->all()]);
+	        }  
+   
+	        $data = $request->all();
+       		$kar = new HrdRegistrasiKaryawan();
+		    $save = $kar->StoreDataOrgTua($data);
+
+	        $arr = array('error' => 'Gagal menyimpan data', 'status' => false);
+	        if($save){ 
+		        	return response()->json([
+	        		'msg' => 'Data Pribadi anda berhasil disimpan',
+	        		'status' => true,
+	                'fail' => false,
+	                'redirect_url' => url('mobile/indexreg')
+	          		  ]);
+	        }            		        
+    }
+
+
+    public function storedatapendukung(Request $request)
+    {   	
+	    $rules = [
+            'rek_mandiri' => 'required',
+            'bpjskes_file' => 'image|max:2048',
+            'bpjsket_file' => 'image|max:2048',
+            'rek_mandiri_file' => 'image|max:2048',
+
+        ];       
+
+	    $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()){
+           return response()->json(['error'=>$validator->errors()->all()]);
+         }   
+        $data['bpjskes'] = $request['bpjskes'];
+        $data['bpjsket'] = $request['bpjsket'];
+        $data['rek_mandiri'] = $request['rek_mandiri'];
+        $data['bpjskes_file'] = $request['bpjskes_file'];
+        $data['bpjsket_file'] = $request['bpjsket_file'];
+        $data['no_npwp'] = $request['no_npwp'];
+	    $data['no_reg']= $request['no_reg'];
+	    
+
+        //PROSES UPLOAD FILE
+        if ($request->hasFile('bpjskes_file')) {
+	        $uploaded_picture = $request->file('bpjskes_file');
+	        $extension = $uploaded_picture->getClientOriginalExtension();
+	        $filename = $noreg . '_cm.' . $extension;
+	        $filename = base64_encode($filename);
+	        if(config('app.env', 'local') === 'production') {
+	            $destinationPath = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."mgt";
+	        } else {
+	            $destinationPath = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\mgt";
+	        }
+	        $img = Image::make($uploaded_picture->getRealPath());
+	        if($img->filesize()/1024 > 2048) {
+	            $img->save($destinationPath.DIRECTORY_SEPARATOR.$filename, 75);
+	        } else {
+	            $uploaded_picture->move($destinationPath, $filename);
+	        }
+	        $data['bpjskes_file'] = $filename;
+	    }
+         //PROSES UPLOAD FILE
+	    if ($request->hasFile('bpjsket_file')) {
+	        $uploaded_picture = $request->file('bpjsket_file');
+	        $extension = $uploaded_picture->getClientOriginalExtension();
+	        $filename = $noreg . '_cm.' . $extension;
+	        $filename = base64_encode($filename);
+	        if(config('app.env', 'local') === 'production') {
+	            $destinationPath = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."mgt";
+	        } else {
+	            $destinationPath = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\mgt";
+	        }
+	        $img = Image::make($uploaded_picture->getRealPath());
+	        if($img->filesize()/1024 > 2048) {
+	            $img->save($destinationPath.DIRECTORY_SEPARATOR.$filename, 75);
+	        } else {
+	            $uploaded_picture->move($destinationPath, $filename);
+	        }
+	        $data['bpjsket_file'] = $filename;
+	    }
+       
+		 //PROSES UPLOAD FILE
+         if ($request->hasFile('rek_mandiri_file')) {
+	        $uploaded_picture = $request->file('rek_mandiri_file');
+	        $extension = $uploaded_picture->getClientOriginalExtension();
+	        $filename = $noreg . '_cm.' . $extension;
+	        $filename = base64_encode($filename);
+	        if(config('app.env', 'local') === 'production') {
+	            $destinationPath = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."mgt";
+	        } else {
+	            $destinationPath = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\mgt";
+	        }
+	        $img = Image::make($uploaded_picture->getRealPath());
+	        if($img->filesize()/1024 > 2048) {
+	            $img->save($destinationPath.DIRECTORY_SEPARATOR.$filename, 75);
+	        } else {
+	            $uploaded_picture->move($destinationPath, $filename);
+	        }
+	        $data['rek_mandiri_file'] = $filename;
+	    }
+
+
+        $kar = new HrdRegistrasiKaryawan();
+	    $check = $kar->StoreDataPendukung($data);
+
+        $arr = array('error' => 'Gagal menyimpan data', 'status' => false);
+        if($check){ 
+        	$arr = array('msg' => 'Data Pendukung anda berhasil disimpan', 'status' => true, 'success'=>'Message sent successfully!');
+        }
+        return response()->json($arr);
+    }
+}

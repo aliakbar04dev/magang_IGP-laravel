@@ -1,0 +1,349 @@
+@extends('monitoring.mtc.layouts.app2')
+
+@section('content')
+	<BR>
+	<div class="container2">
+		<div class="row">
+			<div class="col-md-12">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<center><a href="{{ url('/monitoringlp') }}"><h4>Monitoring Laporan Pekerjaan {{ $periode->format('F Y') }}</h4></a></center>
+					</div>
+					<div class="panel-body">
+						<table id="tblMaster" class="table table-bordered" cellspacing="0" width="100%">
+	    			    	<thead>
+		  			            <tr>
+					                <th style='width: 1%;text-align: center'>Line</th>
+					                <th style='text-align: center'>Nama Line</th>
+					                @for ($i = 1; $i <= 31; $i++)
+		  			            		<th style='width: 1%;text-align: center'>{{ $i }}</th>
+		  			            	@endfor
+		  			            </tr>
+	    			        </thead>
+	    			        <tbody>
+	  			            	@foreach ($xmlines->get() as $data)
+	  			            		<tr>
+		    			        		<td>{{ $data->xkd_line }}</td>
+		    			        		<td>{{ $data->xnm_line }}</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->satu))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->dua))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->tiga))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->empat))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->lima))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->enam))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->tujuh))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->delapan))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->sembilan))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->sepuluh))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->sebelas))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->duabelas))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->tigabelas))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->empatbelas))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->limabelas))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->enambelas))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->tujuhbelas))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->delapanbelas))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->sembilanbelas))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->duapuluh))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->duasatu))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->duadua))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->duatiga))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->duaempat))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->dualima))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->duaenam))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->duatujuh))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->duadelapan))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->duasembilan))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->tigapuluh))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if (!empty($data->tigasatu))
+						                      <img src="{{ asset("images/green.png") }}">
+						                    @else
+						                      <img src="{{ asset("images/red.png") }}">
+						                    @endif
+		    			        		</td>
+			  			            </tr>
+	    			        	@endforeach
+	    			        </tbody>
+	    			    </table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+@endsection
+
+@section('scripts')
+<script>
+	$(document).ready(function(){
+		var tableMaster = $('#tblMaster').DataTable({
+		    "aLengthMenu": [[5, 10, 25, 50, 75, 100, -1], [5, 10, 25, 50, 75, 100, "All"]],
+		    "iDisplayLength": 10,
+		    "displayStart": {{ $displayStart }},
+		    "responsive": true,
+		    //"searching": false,
+		    "scrollX": false,
+		    //"scrollY": "300px",
+		    //"scrollCollapse": true,
+		    //"paging": false,
+		    //"lengthChange": false,
+		    //"ordering": true,
+		    "order": [[1, 'asc']],
+		    //"info": true,
+		    //"autoWidth": false,
+		    columns: [
+		      {orderable: true, searchable: true},
+		      {orderable: true, searchable: true},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false},
+		      {orderable: false, searchable: false}
+		    ],
+	  	});
+
+	  	$(function() {
+	      $('\
+	        <div id="filter_status" class="dataTables_length" style="display: inline-block; margin-left:0px;">\
+	          <label>Plant\
+	          <select size="1" name="filter_status" aria-controls="filter_status" \
+	            class="form-control select2" style="width: 120px;">\
+	              <option value="1" {{ $plant === "1" ? 'selected="selected"' : '' }}>IGP-1</option>\
+	              <option value="2" {{ $plant === "2" ? 'selected="selected"' : '' }}>IGP-2</option>\
+	              <option value="3" {{ $plant === "3" ? 'selected="selected"' : '' }}>IGP-3</option>\
+	              <option value="4" {{ $plant === "4" ? 'selected="selected"' : '' }}>IGP-4</option>\
+	              <option value="A" {{ $plant === "A" ? 'selected="selected"' : '' }}>KIM-1A</option>\
+	              <option value="B" {{ $plant === "B" ? 'selected="selected"' : '' }}>KIM-1B</option>\
+	            </select>\
+	          </label>\
+	        </div>\
+	      ').insertAfter('.dataTables_length');
+
+	      $('select[name="filter_status"]').change(function() {
+	      	var plant = $('select[name="filter_status"]').val();
+		  	var urlRedirect = "{{ url('/monitoringlp/param') }}";
+		  	urlRedirect = urlRedirect.replace('param', plant);
+		  	window.location.href = urlRedirect;
+	      });
+	    });
+	});
+
+	//auto refresh
+	setTimeout(function() {
+	  // location.reload();
+	  var plant = "{{ $plant }}";
+	  var displayStart = "{{ $displayStart }}";
+	  displayStart = Number(displayStart) + 10;
+	  var urlRedirect = "{{ url('/monitoringlp/param/param2') }}";
+	  urlRedirect = urlRedirect.replace('param2', displayStart);
+	  urlRedirect = urlRedirect.replace('param', plant);
+	  window.location.href = urlRedirect;
+	}, 180000); //1000 = 1 second
+</script>
+@endsection

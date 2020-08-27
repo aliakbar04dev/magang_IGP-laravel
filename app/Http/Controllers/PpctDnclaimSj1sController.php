@@ -1,0 +1,1165 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use App\PpctDnclaimSj1;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use App\Http\Requests\StorePpctDnclaimSj1Request;
+use Illuminate\Support\Facades\Session;
+use App\Http\Requests\UpdatePpctDnclaimSj1Request;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use DB;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\File;
+use App\User;
+use Intervention\Image\ImageManagerStatic as Image;
+use Illuminate\Support\Facades\Mail;
+use PDF;
+use JasperPHP\JasperPHP;
+// use DNS2D;
+use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\LabelAlignment;
+use Endroid\QrCode\QrCode;
+use Validator;
+use Illuminate\Support\Facades\Input;
+
+class PpctDnclaimSj1sController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        if(Auth::user()->can(['ppc-dnclaim-*']) && strlen(Auth::user()->username) > 5) {
+            return view('eppc.sjclaim.index');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function dashboard(Request $request)
+    {
+        if(Auth::user()->can(['ppc-dnclaim-*']) && strlen(Auth::user()->username) > 5) {
+            if ($request->ajax()) {
+
+                $ppctdnclaimsj1s = PpctDnclaimSj1::where("kd_bpid", "=", Auth::user()->kd_supp);
+
+                if(!empty($request->get('status'))) {
+                    if($request->get('status') !== 'ALL') {
+                        $ppctdnclaimsj1s->status($request->get('status'));
+                    }
+                }
+
+                return Datatables::of($ppctdnclaimsj1s)
+                ->editColumn('no_sj', function($data) {
+                    return '<a href="'.route('ppctdnclaimsj1s.show', base64_encode($data->no_certi)).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $data->no_sj .'">'.$data->no_sj.'</a>';
+                })
+                ->editColumn('tgl_sj', function($data){
+                    return Carbon::parse($data->tgl_sj)->format('d/m/Y');
+                })
+                ->filterColumn('tgl_sj', function ($query, $keyword) {
+                    $query->whereRaw("to_char(tgl_sj,'dd/mm/yyyy') like ?", ["%$keyword%"]);
+                })
+                ->editColumn('creaby', function($data){
+                    if(!empty($data->creaby)) {
+                        $name = $data->nama($data->creaby);
+                        if(!empty($data->dtcrea)) {
+                            $tgl = Carbon::parse($data->dtcrea)->format('d/m/Y H:i');
+                            return $data->creaby.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->creaby.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('creaby', function ($query, $keyword) {
+                    $query->whereRaw("(creaby||' - '||(select name from users where users.username = ppct_dnclaim_sj1s.creaby limit 1)||to_char(dtcrea,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->editColumn('pic_submit', function($data){
+                    $tgl = $data->tgl_submit;
+                    $username = $data->pic_submit;
+                    if(!empty($tgl)) {
+                        $name = $data->nama($username);
+                        if($name != null) {
+                            return $username.' - '.$name.' - '.Carbon::parse($tgl)->format('d/m/Y H:i');
+                        } else {
+                            return $username.' - '.Carbon::parse($tgl)->format('d/m/Y H:i');
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('pic_submit', function ($query, $keyword) {
+                    $query->whereRaw("(pic_submit||' - '||(select name from users where users.username = ppct_dnclaim_sj1s.pic_submit limit 1)||to_char(tgl_submit,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->editColumn('pic_aprov', function($data){
+                    $tgl = $data->tgl_aprov;
+                    $username = $data->pic_aprov;
+                    if(!empty($tgl)) {
+                        $name = $data->nama($username);
+                        if($name != null) {
+                            return $username.' - '.$name.' - '.Carbon::parse($tgl)->format('d/m/Y H:i');
+                        } else {
+                            return $username.' - '.Carbon::parse($tgl)->format('d/m/Y H:i');
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('pic_aprov', function ($query, $keyword) {
+                    $query->whereRaw("(pic_aprov||' - '||(select name from users where users.username = ppct_dnclaim_sj1s.pic_aprov limit 1)||to_char(tgl_aprov,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->editColumn('pic_reject', function($data){
+                    $tgl = $data->tgl_reject;
+                    $username = $data->pic_reject;
+                    $ket_reject = $data->ket_reject;
+                    if(!empty($tgl)) {
+                        $name = $data->nama($username);
+                        if($name != null) {
+                            return $username.' - '.$name.' - '.Carbon::parse($tgl)->format('d/m/Y H:i').' - '.$ket_reject;
+                        } else {
+                            return $username.' - '.Carbon::parse($tgl)->format('d/m/Y H:i').' - '.$ket_reject;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('pic_reject', function ($query, $keyword) {
+                    $query->whereRaw("(pic_reject||' - '||(select name from users where users.username = ppct_dnclaim_sj1s.pic_reject limit 1)||to_char(tgl_reject,'dd/mm/yyyy hh24:mi'))||' - '||(ket_reject) like ?", ["%$keyword%"]);
+                })
+                ->addColumn('total_qty', function($data) {
+                    return numberFormatter(0, 2)->format($data->ppctDnclaimSj2s()->sum('qty_sj'));
+                })
+                ->filterColumn('total_qty', function ($query, $keyword) {
+                    $query->whereRaw("trim(to_char(coalesce((select sum(qty_sj) from ppct_dnclaim_sj2s where ppct_dnclaim_sj2s.no_certi = ppct_dnclaim_sj1s.no_certi),0),'999999999999999999.99')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('total_qty', 'coalesce((select sum(qty_sj) from ppct_dnclaim_sj2s where ppct_dnclaim_sj2s.no_certi = ppct_dnclaim_sj1s.no_certi),0) $1')
+                ->addColumn('status', function($data){
+                    $status = "DRAFT";
+                    if($data->tgl_aprov != null) {
+                        $status = "APPROVE";
+                    } else if($data->tgl_submit != null) {
+                        $status = "SUBMIT";
+                    } else if($data->tgl_reject != null) {
+                        $status = "REJECT";
+                    }
+                    return $status;
+                })
+                ->addColumn('action', function($data){
+                    if(Auth::user()->can(['ppc-dnclaim-create','ppc-dnclaim-delete']) && $data->checkEdit() === "T") {
+                        $form_id = str_replace('/', '', $data->no_certi);
+                        $form_id = str_replace('-', '', $form_id);
+                        return view('datatable._action', [
+                            'model' => $data,
+                            'form_url' => route('ppctdnclaimsj1s.destroy', base64_encode($data->no_certi)),
+                            'edit_url' => route('ppctdnclaimsj1s.edit', base64_encode($data->no_certi)),
+                            'class' => 'form-inline js-ajax-delete',
+                            'form_id' => 'form-'.$form_id,
+                            'id_table' => 'tblMaster',
+                            'confirm_message' => 'Anda yakin menghapus Surat Jalan Claim: ' . $data->no_sj . '?'
+                            ]);
+                    } else {
+                        if($data->tgl_aprov != null) {
+                            return '<center><a target="_blank" class="btn btn-xs btn-success" data-toggle="tooltip" data-placement="top" title="Print Surat Jalan Claim '. $data->no_sj .'" href="'.route('ppctdnclaimsj1s.print', base64_encode($data->no_certi)).'"><span class="glyphicon glyphicon-print"></span></a></center>';
+                        } else if ($data->tgl_submit != null) {
+                            return '<center><a target="_blank" class="btn btn-xs btn-success" data-toggle="tooltip" data-placement="top" title="Print Surat Jalan Claim '. $data->no_sj .'" href="'.route('ppctdnclaimsj1s.print', base64_encode($data->no_certi)).'"><span class="glyphicon glyphicon-print"></span></a>&nbsp;&nbsp;<a class="btn btn-xs btn-success" data-toggle="tooltip" data-placement="top" title="Unsubmit Surat Jalan Claim '. $data->no_sj .'" href="'.route('ppctdnclaimsj1s.unsubmit', base64_encode($data->no_certi)).'"><span class="glyphicon glyphicon-repeat"></span></a></center>';
+                        } else {
+                            return "";
+                        }
+                    }
+                })
+                ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function indexAll()
+    {
+        if(Auth::user()->can(['ppc-dnclaim-*']) && strlen(Auth::user()->username) == 5) {
+            return view('eppc.sjclaim.indexall');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function dashboardAll(Request $request)
+    {
+        if(Auth::user()->can(['ppc-dnclaim-*']) && strlen(Auth::user()->username) == 5) {
+            if ($request->ajax()) {
+
+                $ppctdnclaimsj1s = PpctDnclaimSj1::whereNotNull('tgl_aprov');
+
+                return Datatables::of($ppctdnclaimsj1s)
+                ->editColumn('kd_bpid', function($data){
+                    return $data->kd_bpid." - ".$data->namaSupp($data->kd_bpid);
+                })
+                ->filterColumn('kd_bpid', function ($query, $keyword) {
+                    $query->whereRaw("(kd_bpid||' - '||(select nama from b_suppliers where b_suppliers.kd_supp = ppct_dnclaim_sj1s.kd_bpid limit 1)) like ?", ["%$keyword%"]);
+                })
+                ->editColumn('tgl_sj', function($data){
+                    return Carbon::parse($data->tgl_sj)->format('d/m/Y');
+                })
+                ->filterColumn('tgl_sj', function ($query, $keyword) {
+                    $query->whereRaw("to_char(tgl_sj,'dd/mm/yyyy') like ?", ["%$keyword%"]);
+                })
+                ->editColumn('no_certi', function($data) {
+                    return '<a href="'.route('ppctdnclaimsj1s.showall', base64_encode($data->no_certi)).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $data->no_certi .'">'.$data->no_certi.'</a>';
+                })
+                ->editColumn('tgl_certi', function($data){
+                    return Carbon::parse($data->tgl_certi)->format('d/m/Y');
+                })
+                ->filterColumn('tgl_certi', function ($query, $keyword) {
+                    $query->whereRaw("to_char(tgl_certi,'dd/mm/yyyy') like ?", ["%$keyword%"]);
+                })
+                ->editColumn('creaby', function($data){
+                    if(!empty($data->creaby)) {
+                        $name = $data->nama($data->creaby);
+                        if(!empty($data->dtcrea)) {
+                            $tgl = Carbon::parse($data->dtcrea)->format('d/m/Y H:i');
+                            return $data->creaby.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->creaby.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('creaby', function ($query, $keyword) {
+                    $query->whereRaw("(creaby||' - '||(select name from users where users.username = ppct_dnclaim_sj1s.creaby limit 1)||to_char(dtcrea,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->editColumn('pic_submit', function($data){
+                    $tgl = $data->tgl_submit;
+                    $username = $data->pic_submit;
+                    if(!empty($tgl)) {
+                        $name = $data->nama($username);
+                        if($name != null) {
+                            return $username.' - '.$name.' - '.Carbon::parse($tgl)->format('d/m/Y H:i');
+                        } else {
+                            return $username.' - '.Carbon::parse($tgl)->format('d/m/Y H:i');
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('pic_submit', function ($query, $keyword) {
+                    $query->whereRaw("(pic_submit||' - '||(select name from users where users.username = ppct_dnclaim_sj1s.pic_submit limit 1)||to_char(tgl_submit,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->editColumn('pic_aprov', function($data){
+                    $tgl = $data->tgl_aprov;
+                    $username = $data->pic_aprov;
+                    if(!empty($tgl)) {
+                        $name = $data->nama($username);
+                        if($name != null) {
+                            return $username.' - '.$name.' - '.Carbon::parse($tgl)->format('d/m/Y H:i');
+                        } else {
+                            return $username.' - '.Carbon::parse($tgl)->format('d/m/Y H:i');
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('pic_aprov', function ($query, $keyword) {
+                    $query->whereRaw("(pic_aprov||' - '||(select name from users where users.username = ppct_dnclaim_sj1s.pic_aprov limit 1)||to_char(tgl_aprov,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->addColumn('total_qty', function($data) {
+                    return numberFormatter(0, 2)->format($data->ppctDnclaimSj2s()->sum('qty_sj'));
+                })
+                ->filterColumn('total_qty', function ($query, $keyword) {
+                    $query->whereRaw("trim(to_char(coalesce((select sum(qty_sj) from ppct_dnclaim_sj2s where ppct_dnclaim_sj2s.no_certi = ppct_dnclaim_sj1s.no_certi),0),'999999999999999999.99')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('total_qty', 'coalesce((select sum(qty_sj) from ppct_dnclaim_sj2s where ppct_dnclaim_sj2s.no_certi = ppct_dnclaim_sj1s.no_certi),0) $1')
+                ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function scan()
+    {
+        if(Auth::user()->can('ppc-dnclaim-approve')) {
+            $ppctdnclaimsj1 = new PpctDnclaimSj1();
+            return view('eppc.sjclaim.scan', compact('ppctdnclaimsj1'));
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function approvereject(Request $request)
+    {
+        if ($request->ajax()) {
+            
+            $data = $request->all();
+            $no_certi = trim($data['no_certi']) !== '' ? trim($data['no_certi']) : null;
+            $status_approve = trim($data['status_approve']) !== '' ? trim($data['status_approve']) : null;
+            $status = "OK";
+            $msg = "Surat Jalan Claim Berhasil di-Approve/Reject.";
+            $action_new = "";
+            if($no_certi != null && $status_approve != null) {
+                $no_certi = base64_decode($no_certi);
+                $status_approve = base64_decode($status_approve);
+                $keterangan_reject = trim($data['keterangan_reject']) !== '' ? trim($data['keterangan_reject']) : null;
+                if($status_approve === "T") {
+                    $msg = "Surat Jalan Claim: ".$no_certi." Berhasil di-Approve.";
+                } else {
+                    $msg = "Surat Jalan Claim: ".$no_certi." Berhasil di-Reject.";
+                }
+                $akses = "F";
+                if(Auth::user()->can('ppc-dnclaim-approve')) {
+                    $akses = "T";
+                } else {
+                    $status = "NG";
+                    $msg = "Maaf, Anda tidak memiliki akses untuk Approve/Reject Surat Jalan Claim!";
+                }
+                if($akses === "T" && $status === "OK") {
+                    $ppctdnclaimsj1 = PpctDnclaimSj1::where('no_certi', $no_certi)->first();
+
+                    if($ppctdnclaimsj1 == null) {
+                        $status = "NG";
+                        if($status_approve === "T") {
+                            $msg = "Surat Jalan Claim: ".$no_certi." Gagal di-Approve. No. Certificate tidak ditemukan.";
+                        } else {
+                            $msg = "Surat Jalan Claim: ".$no_certi." Gagal di-Reject. No. Certificate tidak ditemukan.";
+                        }
+                    } else {
+                        $tgl_submit = $ppctdnclaimsj1->tgl_submit;
+                        $tgl_aprov = $ppctdnclaimsj1->tgl_aprov;
+                        $tgl_reject = $ppctdnclaimsj1->tgl_reject;
+                        if($tgl_submit == null) {
+                            $status = "NG";
+                            if($status_approve === "T") {
+                                $msg = "Maaf, data tidak dapat di-Approve karena belum di-Submit.";
+                            } else {
+                                $msg = "Maaf, data tidak dapat di-Reject karena belum di-Submit.";
+                            }
+                        } else if($tgl_reject != null) {
+                            $status = "NG";
+                            if($status_approve === "T") {
+                                $msg = "Maaf, data tidak dapat di-Approve karena sudah di-Reject.";
+                            } else {
+                                $msg = "Maaf, data tidak dapat di-Reject karena belum di-Reject.";
+                            }
+                        } else if($tgl_aprov != null) {
+                            $status = "NG";
+                            if($status_approve === "T") {
+                                $msg = "Maaf, data tidak dapat di-Approve karena sudah di-Approve.";
+                            } else {
+                                $msg = "Maaf, data tidak dapat di-Reject karena belum di-Approve.";
+                            }
+                        } else {
+                            DB::connection("pgsql")->beginTransaction();
+                            try {
+                                if($status_approve === "T") {
+                                    $ppctdnclaimsj1->update(["pic_aprov" => Auth::user()->username, "tgl_aprov" => Carbon::now(), "pic_reject" => NULL, "tgl_reject" => NULL, "ket_reject" => NULL]);
+                                } else {
+                                    $ppctdnclaimsj1->update(["pic_reject" => Auth::user()->username, "tgl_reject" => Carbon::now(), "ket_reject" => $keterangan_reject, "pic_submit" => NULL, "tgl_submit" => NULL]);
+                                }
+
+                                //insert logs
+                                $log_keterangan = "PpctDnclaimSj1sController.approvereject: ".$msg;
+                                $log_ip = \Request::session()->get('client_ip');
+                                $created_at = Carbon::now();
+                                $updated_at = Carbon::now();
+                                DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                                DB::connection("pgsql")->commit();
+                            } catch (Exception $ex) {
+                                DB::connection("pgsql")->rollback();
+                                $status = "NG";
+                                if($status_approve === "T") {
+                                    $msg = "Surat Jalan Claim: ".$no_certi." Gagal di-Approve.";
+                                } else {
+                                    $msg = "Surat Jalan Claim: ".$no_certi." Gagal di-Reject.";
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                $status = "NG";
+                $msg = "Surat Jalan Claim Gagal di-Approve/Reject.";
+            }
+            return response()->json(['status' => $status, 'message' => $msg, 'action_new' => $action_new]);
+        } else {
+            return redirect('home');
+        }
+    }
+
+    public function validasiNoCerti(Request $request, $no_certi)
+    {
+        if ($request->ajax()) {
+            $no_certi = base64_decode($no_certi);
+
+            $ppctdnclaimsj1 = DB::table(DB::raw("(select m.no_certi, m.kd_bpid, to_char(m.tgl_certi,'dd/mm/yyyy') tgl_certi, m.no_sj, to_char(m.tgl_sj,'dd/mm/yyyy') tgl_sj, m.no_dn, d.no_pos, coalesce((select kd_item from baan_iginh008s b where b.kd_pono = d.no_dn and b.no_pos = d.no_pos limit 1),'-') kd_item, coalesce((select baan_mpart.desc1||' ('||baan_mpart.itemdesc||')' from baan_mpart where baan_mpart.item = (select kd_item from baan_iginh008s b where b.kd_pono = d.no_dn and b.no_pos = d.no_pos limit 1)),'-') item_name, coalesce((select nm_trket from baan_iginh008s b where b.kd_pono = d.no_dn and b.no_pos = d.no_pos limit 1),'-') nm_trket, trim(to_char(coalesce((select qty from baan_iginh008s b where b.kd_pono = d.no_dn and b.no_pos = d.no_pos limit 1),0),'999999999999999999.99')) qty_dn, trim(to_char(coalesce((select sum(p.qty_sj) from ppct_dnclaim_sj2s p where p.no_dn = d.no_dn and p.no_pos = d.no_pos),0),'999999999999999999.99')) qty_kirim, trim(to_char(coalesce(d.qty_sj,0),'999999999999999999.99')) qty_sj from ppct_dnclaim_sj1s m, ppct_dnclaim_sj2s d where m.no_certi = d.no_certi and m.no_dn = d.no_dn and m.tgl_submit is not null and m.tgl_aprov is null and m.tgl_reject is null) v"))
+            ->select(DB::raw("no_certi, kd_bpid, tgl_certi, no_sj, tgl_sj, no_dn, no_pos, kd_item, item_name, nm_trket, qty_dn, qty_kirim, qty_sj"))
+            ->where(DB::raw("kd_bpid||'-'||no_sj"), $no_certi);
+
+            if($ppctdnclaimsj1->get()->count() > 0) {
+                return json_encode($ppctdnclaimsj1->get());
+            } else {
+                return json_encode(null);
+            }
+        } else {
+            return redirect('home');
+        }
+    }
+
+    public function validasiNoSj(Request $request, $no_certi, $no_sj)
+    {
+        if ($request->ajax()) {
+            $no_certi = base64_decode($no_certi);
+            $no_sj = base64_decode($no_sj);
+            $no_sj = trim($no_sj);
+            $kd_bpid = Auth::user()->kd_supp;
+
+            $data = DB::table("ppct_dnclaim_sj1s")
+            ->select(DB::raw("no_certi, no_sj"))
+            ->where("no_certi", "<>", $no_certi)
+            ->where(DB::raw("upper(no_sj)"), "=", strtoupper($no_sj))
+            ->where("kd_bpid", "=", $kd_bpid)
+            ->first();
+            return json_encode($data);
+        } else {
+            return redirect('home');
+        }
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        if(Auth::user()->can('ppc-dnclaim-create')) {
+            return view('eppc.sjclaim.create');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(StorePpctDnclaimSj1Request $request)
+    {
+        if(Auth::user()->can('ppc-dnclaim-create')) {
+            $ppctdnclaimsj1 = new PpctDnclaimSj1();
+
+            // $data = $request->only('tgl_certi', 'no_sj', 'tgl_sj', 'no_dn', 'st_submit', 'items');
+            $data = $request->only('no_sj', 'tgl_sj', 'no_dn', 'st_submit', 'items');
+
+            // $tgl_certi = Carbon::parse($data['tgl_certi']);
+            $tgl_certi = Carbon::now();
+            $tahun = Carbon::parse($tgl_certi)->format('Y');
+
+            $no_certi = $ppctdnclaimsj1->maxNoTransaksiTahun($tahun);
+            $no_certi = $no_certi + 1;
+            $no_certi = "KSJC".$tgl_certi->format('y').str_pad($no_certi, 4, "0", STR_PAD_LEFT);
+
+            $data['kd_bpid'] = Auth::user()->kd_supp;
+            $data['no_certi'] = $no_certi;
+            $data['tgl_certi'] = $tgl_certi;
+            $data['no_sj'] = trim($data['no_sj']) !== '' ? trim($data['no_sj']) : null;
+            $data['tgl_sj'] = Carbon::parse($data['tgl_sj']);
+            $data['no_dn'] = trim($data['no_dn']) !== '' ? trim($data['no_dn']) : null;
+            $data['creaby'] = Auth::user()->username;
+            $st_submit = trim($data['st_submit']) !== '' ? trim($data['st_submit']) : "F";
+
+            DB::connection("pgsql")->beginTransaction();
+            try {
+                $ppctdnclaimsj1 = PpctDnclaimSj1::create($data);
+                $no_certi = $ppctdnclaimsj1->no_certi;
+                $no_sj = $ppctdnclaimsj1->no_sj;
+                $no_dn = $ppctdnclaimsj1->no_dn;
+                $creaby = $ppctdnclaimsj1->creaby;
+
+                if($st_submit === "G") {
+                    $kd_bpid = Auth::user()->kd_supp;
+                    $items = trim($data['items']) !== '' ? trim($data['items']) : null;
+                    $list_no_pos = explode("#quinza#", $items);
+                    foreach ($list_no_pos as $no_pos) {
+                        DB::unprepared("insert into ppct_dnclaim_sj2s(no_certi, no_dn, no_pos, qty_sj, creaby, dtcrea) select '$no_certi', kd_pono, no_pos, (coalesce(qty,0)-coalesce((select sum(qty_sj) from ppct_dnclaim_sj2s p where p.no_dn = baan_iginh008s.kd_pono and p.no_pos = baan_iginh008s.no_pos),0)) qty_dn, '$creaby' creaby, now() dtcrea from baan_iginh008s where kd_pono = '$no_dn' and kd_bpid1 = '$kd_bpid' and coalesce(qty,0) > coalesce((select sum(qty_sj) from ppct_dnclaim_sj2s p where p.no_dn = baan_iginh008s.kd_pono and p.no_pos = baan_iginh008s.no_pos),0) and not exists (select 1 from ppct_dnclaim_sj2s where ppct_dnclaim_sj2s.no_certi = '$no_certi' and ppct_dnclaim_sj2s.no_dn = baan_iginh008s.kd_pono and ppct_dnclaim_sj2s.no_pos = baan_iginh008s.no_pos limit 1) and no_pos = '$no_pos'");
+                    }
+                }
+
+                //insert logs
+                $log_keterangan = "PpctDnclaimSj1sController.store: Create Surat Jalan Claim Berhasil. ".$no_certi;
+                $log_ip = \Request::session()->get('client_ip');
+                $created_at = Carbon::now();
+                $updated_at = Carbon::now();
+                DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                DB::connection("pgsql")->commit();
+
+                Session::flash("flash_notification", [
+                    "level"=>"success",
+                    "message"=>"Surat Jalan Claim berhasil disimpan dengan No. Surat Jalan: $no_sj"
+                    ]);
+                return redirect()->route('ppctdnclaimsj1s.edit', base64_encode($no_certi));
+            } catch (Exception $ex) {
+                DB::connection("pgsql")->rollback();
+                Session::flash("flash_notification", [
+                    "level"=>"danger",
+                    "message"=>"Data gagal disimpan!"
+                    ]);
+                return redirect()->back()->withInput(Input::all());
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        if(Auth::user()->can(['ppc-dnclaim-*']) && strlen(Auth::user()->username) > 5) {
+            $ppctdnclaimsj1 = PpctDnclaimSj1::find(base64_decode($id));
+            if ($ppctdnclaimsj1 != null) {
+                if($ppctdnclaimsj1->kd_bpid == Auth::user()->kd_supp) {
+                    return view('eppc.sjclaim.show', compact('ppctdnclaimsj1'));
+                } else {
+                    return view('errors.403');
+                }
+            } else {
+                return view('errors.404');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function showall($id)
+    {
+        if(Auth::user()->can(['ppc-dnclaim-*']) && strlen(Auth::user()->username) == 5) {
+            $ppctdnclaimsj1 = PpctDnclaimSj1::where('no_certi', base64_decode($id))->whereNotNull('tgl_aprov')->first();
+            if ($ppctdnclaimsj1 != null) {
+                return view('eppc.sjclaim.showall', compact('ppctdnclaimsj1'));
+            } else {
+                return view('errors.404');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        if(Auth::user()->can('ppc-dnclaim-create')) {
+            $ppctdnclaimsj1 = PpctDnclaimSj1::find(base64_decode($id));
+            if ($ppctdnclaimsj1 != null) {
+                if($ppctdnclaimsj1->kd_bpid == Auth::user()->kd_supp) {
+                    $valid = "T";
+                    $msg = "";
+                    if($ppctdnclaimsj1->tgl_aprov != null) {
+                        $valid = "F";
+                        $msg = "Surat Jalan Claim: $ppctdnclaimsj1->no_sj tidak dapat diubah karena sudah di-Approve.";
+                    } else if ($ppctdnclaimsj1->tgl_submit != null) {
+                        $valid = "F";
+                        $msg = "Surat Jalan Claim: $ppctdnclaimsj1->no_sj tidak dapat diubah karena sudah di-Submit.";
+                    }
+
+                    if($valid === "F") {
+                        Session::flash("flash_notification", [
+                            "level"=>"danger",
+                            "message"=>$msg
+                            ]);
+                        return redirect()->route('ppctdnclaimsj1s.index');
+                    } else {
+                        if($ppctdnclaimsj1->checkEdit() !== "T") {
+                            Session::flash("flash_notification", [
+                                "level"=>"danger",
+                                "message"=>"Maaf, data tidak dapat diubah."
+                                ]);
+                            return redirect()->route('ppctdnclaimsj1s.index');
+                        } else {
+                            $model = $ppctdnclaimsj1;
+                            return view('eppc.sjclaim.edit')->with(compact('model'));
+                        }
+                    }
+                } else {
+                    return view('errors.403');
+                }
+            } else {
+                return view('errors.404');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(UpdatePpctDnclaimSj1Request $request, $id)
+    {
+        if(Auth::user()->can('ppc-dnclaim-create')) {
+            $ppctdnclaimsj1 = PpctDnclaimSj1::find(base64_decode($id));
+            if ($ppctdnclaimsj1 != null) {
+                if($ppctdnclaimsj1->kd_bpid == Auth::user()->kd_supp) {
+                    $no_certi = $ppctdnclaimsj1->no_certi;
+                    $valid = "T";
+                    $msg = "";
+                    if($ppctdnclaimsj1->tgl_aprov != null) {
+                        $valid = "F";
+                        $msg = "Surat Jalan Claim: $ppctdnclaimsj1->no_sj tidak dapat diubah karena sudah di-Approve.";
+                    } else if ($ppctdnclaimsj1->tgl_submit != null) {
+                        $valid = "F";
+                        $msg = "Surat Jalan Claim: $ppctdnclaimsj1->no_sj tidak dapat diubah karena sudah di-Submit.";
+                    }
+                    if($valid === "F") {
+                        Session::flash("flash_notification", [
+                            "level"=>"danger",
+                            "message"=>$msg
+                            ]);
+                        return redirect()->route('ppctdnclaimsj1s.index');
+                    } else {
+                        if($ppctdnclaimsj1->checkEdit() !== "T") {
+                            Session::flash("flash_notification", [
+                                "level"=>"danger",
+                                "message"=>"Maaf, data tidak dapat diubah."
+                                ]);
+                            return redirect()->route('ppctdnclaimsj1s.index');
+                        } else {
+                            $data = $request->only('no_sj', 'tgl_sj', 'no_dn', 'st_submit', 'jml_row', 'items');
+
+                            $data['no_sj'] = trim($data['no_sj']) !== '' ? trim($data['no_sj']) : null;
+                            $data['tgl_sj'] = Carbon::parse($data['tgl_sj']);
+                            $data['no_dn'] = trim($data['no_dn']) !== '' ? trim($data['no_dn']) : null;
+                            $data['modiby'] = Auth::user()->username;
+                            $st_submit = trim($data['st_submit']) !== '' ? trim($data['st_submit']) : "F";
+                            $jml_row = trim($data['jml_row']) !== '' ? trim($data['jml_row']) : '0';
+
+                            if($st_submit === "T") {
+                                $data['pic_submit'] = Auth::user()->username;
+                                $data['tgl_submit'] = Carbon::now();
+                                $data['tgl_aprov'] = null;
+                                $data['pic_aprov'] = null;
+                                $data['pic_reject'] = null;
+                                $data['tgl_reject'] = null;
+                                $data['ket_reject'] = null;
+                            }
+
+                            DB::connection("pgsql")->beginTransaction();
+                            try {
+                                $ppctdnclaimsj1->update($data);
+
+                                $no_certi = $ppctdnclaimsj1->no_certi;
+                                $no_sj = $ppctdnclaimsj1->no_sj;
+                                $no_dn = $ppctdnclaimsj1->no_dn;
+                                $creaby = $ppctdnclaimsj1->modiby;
+
+                                if($st_submit === "G") {
+                                    $kd_bpid = Auth::user()->kd_supp;
+                                    $items = trim($data['items']) !== '' ? trim($data['items']) : null;
+                                    $list_no_pos = explode("#quinza#", $items);
+                                    foreach ($list_no_pos as $no_pos) {
+                                        DB::unprepared("insert into ppct_dnclaim_sj2s(no_certi, no_dn, no_pos, qty_sj, creaby, dtcrea) select '$no_certi', kd_pono, no_pos, (coalesce(qty,0)-coalesce((select sum(qty_sj) from ppct_dnclaim_sj2s p where p.no_dn = baan_iginh008s.kd_pono and p.no_pos = baan_iginh008s.no_pos),0)) qty_dn, '$creaby' creaby, now() dtcrea from baan_iginh008s where kd_pono = '$no_dn' and kd_bpid1 = '$kd_bpid' and coalesce(qty,0) > coalesce((select sum(qty_sj) from ppct_dnclaim_sj2s p where p.no_dn = baan_iginh008s.kd_pono and p.no_pos = baan_iginh008s.no_pos),0) and not exists (select 1 from ppct_dnclaim_sj2s where ppct_dnclaim_sj2s.no_certi = '$no_certi' and ppct_dnclaim_sj2s.no_dn = baan_iginh008s.kd_pono and ppct_dnclaim_sj2s.no_pos = baan_iginh008s.no_pos limit 1) and no_pos = '$no_pos'");
+                                    }
+                                }
+
+                                $detail = $request->all();
+
+                                for($i = 1; $i <= $jml_row; $i++) {
+                                    $no_pos = trim($detail['row-'.$i.'-no_pos']) !== '' ? trim($detail['row-'.$i.'-no_pos']) : null;
+                                    $qty_sj = trim($detail['row-'.$i.'-qty_sj']) !== '' ? trim($detail['row-'.$i.'-qty_sj']) : 0;
+
+                                    if($no_pos != null && $qty_sj >= 1) {
+                                        $ppct_dnclaim_sj2 = DB::table("ppct_dnclaim_sj2s")
+                                        ->select(DB::raw("no_pos, coalesce((select kd_item from baan_iginh008s b where b.kd_pono = ppct_dnclaim_sj2s.no_dn and b.no_pos = ppct_dnclaim_sj2s.no_pos limit 1),'-') kd_item, coalesce((select baan_mpart.desc1||' ('||baan_mpart.itemdesc||')' from baan_mpart where baan_mpart.item = (select kd_item from baan_iginh008s b where b.kd_pono = ppct_dnclaim_sj2s.no_dn and b.no_pos = ppct_dnclaim_sj2s.no_pos limit 1)),'-') item_name, coalesce((select nm_trket from baan_iginh008s b where b.kd_pono = ppct_dnclaim_sj2s.no_dn and b.no_pos = ppct_dnclaim_sj2s.no_pos limit 1),'-') nm_trket, coalesce((select qty from baan_iginh008s b where b.kd_pono = ppct_dnclaim_sj2s.no_dn and b.no_pos = ppct_dnclaim_sj2s.no_pos limit 1),0) qty_dn, coalesce((select sum(p.qty_sj) from ppct_dnclaim_sj2s p where p.no_dn = ppct_dnclaim_sj2s.no_dn and p.no_pos = ppct_dnclaim_sj2s.no_pos),0) qty_kirim, qty_sj"))
+                                        ->where('no_certi', $no_certi)
+                                        ->where('no_dn', $no_dn)
+                                        ->where('no_pos', $no_pos)
+                                        ->first();
+
+                                        if($ppct_dnclaim_sj2 != null) {
+                                            $qty_max = $ppct_dnclaim_sj2->qty_dn - $ppct_dnclaim_sj2->qty_kirim + $ppct_dnclaim_sj2->qty_sj;
+
+                                            if($qty_sj > $qty_max) {
+                                                $qty_sj = $qty_max;
+                                            }
+
+                                            DB::table(DB::raw("ppct_dnclaim_sj2s"))
+                                            ->where('no_certi', $no_certi)
+                                            ->where('no_dn', $no_dn)
+                                            ->where('no_pos', $no_pos)
+                                            ->update(["qty_sj" => $qty_sj, "modiby" => Auth::user()->username, "dtmodi" => Carbon::now()]);
+                                        }
+                                    }
+                                }
+
+                                //insert logs
+                                if($ppctdnclaimsj1->tgl_submit != null) {
+                                    $log_keterangan = "PpctDnclaimSj1sController.update: Submit Surat Jalan Claim Berhasil. ".$no_certi;
+                                } else {
+                                    $log_keterangan = "PpctDnclaimSj1sController.update: Update Surat Jalan Claim Berhasil. ".$no_certi;
+                                }
+                                $log_ip = \Request::session()->get('client_ip');
+                                $created_at = Carbon::now();
+                                $updated_at = Carbon::now();
+                                DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                                DB::connection("pgsql")->commit();
+
+                                if($ppctdnclaimsj1->tgl_submit != null) {
+                                    Session::flash("flash_notification", [
+                                        "level"=>"success",
+                                        "message"=>"Surat Jalan Claim: $no_sj berhasil di-Submit."
+                                        ]);
+                                    return redirect()->route('ppctdnclaimsj1s.index');
+                                } else {
+                                    Session::flash("flash_notification", [
+                                        "level"=>"success",
+                                        "message"=>"Surat Jalan Claim: $no_sj berhasil diubah."
+                                        ]);
+                                    return redirect()->route('ppctdnclaimsj1s.edit', base64_encode($no_certi));
+                                }
+                            } catch (Exception $ex) {
+                                DB::connection("pgsql")->rollback();
+                                Session::flash("flash_notification", [
+                                    "level"=>"danger",
+                                    "message"=>"Data gagal diubah!"
+                                    ]);
+                                return redirect()->back()->withInput(Input::all());
+                            }
+                        }
+                    }
+                } else {
+                    return view('errors.403');
+                }
+            } else {
+                return view('errors.404');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Request $request, $id)
+    {
+        if(Auth::user()->can('ppc-dnclaim-delete')) {
+            try {
+                DB::connection("pgsql")->beginTransaction();
+                $ppctdnclaimsj1 = PpctDnclaimSj1::findOrFail(base64_decode($id));
+                $no_certi = $ppctdnclaimsj1->no_certi;
+                $no_sj = $ppctdnclaimsj1->no_sj;
+                if ($request->ajax()) {
+                    $status = 'OK';
+                    $msg = 'Surat Jalan Claim: '.$no_sj.' berhasil dihapus.';
+                    if(!$ppctdnclaimsj1->delete()) {
+                        $status = 'NG';
+                        $msg = Session::get('flash_notification.message');
+                        Session::flash("flash_notification", null);
+                    } else {
+
+                        // DB::table(DB::raw("ppct_dnclaim_sj2s"))
+                        // ->where("no_certi", $no_certi)
+                        // ->delete();
+
+                        //insert logs
+                        $log_keterangan = "PpctDnclaimSj1sController.destroy: Delete Surat Jalan Claim Berhasil. ".$no_certi;
+                        $log_ip = \Request::session()->get('client_ip');
+                        $created_at = Carbon::now();
+                        $updated_at = Carbon::now();
+                        DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                        DB::connection("pgsql")->commit();
+                    }
+                    return response()->json(['id' => base64_decode($id), 'status' => $status, 'message' => $msg]);
+                } else {
+                    if(!$ppctdnclaimsj1->delete()) {
+                        return redirect()->back()->withInput(Input::all());
+                    } else {
+
+                        // DB::table(DB::raw("ppct_dnclaim_sj2s"))
+                        // ->where("no_certi", $no_certi)
+                        // ->delete();
+
+                        //insert logs
+                        $log_keterangan = "PpctDnclaimSj1sController.destroy: Delete Surat Jalan Claim Berhasil. ".$no_certi;
+                        $log_ip = \Request::session()->get('client_ip');
+                        $created_at = Carbon::now();
+                        $updated_at = Carbon::now();
+                        DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                        DB::connection("pgsql")->commit();
+
+                        Session::flash("flash_notification", [
+                            "level"=>"success",
+                            "message"=>"Surat Jalan Claim: ".$no_sj." berhasil dihapus."
+                            ]);
+
+                        return redirect()->route('ppctdnclaimsj1s.index');
+                    }
+                }
+            } catch (ModelNotFoundException $ex) {
+                DB::connection("pgsql")->rollback();
+                if ($request->ajax()) {
+                    return response()->json(['id' => base64_decode($id), 'status' => 'NG', 'message' => 'Data gagal dihapus! Surat Jalan Claim tidak ditemukan.']);
+                } else {
+                    Session::flash("flash_notification", [
+                        "level"=>"danger",
+                        "message"=>"Surat Jalan Claim tidak ditemukan."
+                    ]);
+                    return redirect()->route('ppctdnclaimsj1s.index');
+                }
+            } catch (Exception $ex) {
+                DB::connection("pgsql")->rollback();
+                if ($request->ajax()) {
+                    $status = 'NG';
+                    $msg = "Surat Jalan Claim gagal dihapus.";
+                    return response()->json(['id' => base64_decode($id), 'status' => $status, 'message' => $msg]);
+                } else {
+                    Session::flash("flash_notification", [
+                        "level"=>"danger",
+                        "message"=>"Surat Jalan Claim gagal dihapus."
+                    ]);
+                    return redirect()->route('ppctdnclaimsj1s.index');
+                }
+            }
+        } else {
+            if ($request->ajax()) {
+                return response()->json(['id' => base64_decode("0"), 'status' => 'NG', 'message' => 'Maaf, Anda tidak berhak menghapus data ini.']);
+            } else {
+                Session::flash("flash_notification", [
+                    "level"=>"danger",
+                    "message"=>"Maaf, Anda tidak berhak menghapus data ini."
+                ]);
+                return redirect()->route('ppctdnclaimsj1s.index');
+            }
+        }
+    }
+
+    public function delete($no_certi)
+    {
+        if(Auth::user()->can('ppc-dnclaim-delete')) {
+            try {
+                DB::connection("pgsql")->beginTransaction();
+                $no_certi = base64_decode($no_certi);
+                $ppctdnclaimsj1 = PpctDnclaimSj1::where('no_certi', $no_certi)->first();
+                $no_sj = $ppctdnclaimsj1->no_sj;
+                if(!$ppctdnclaimsj1->delete()) {
+                    return redirect()->back()->withInput(Input::all());
+                } else {
+                    // DB::table(DB::raw("ppct_dnclaim_sj2s"))
+                    // ->where("no_certi", $no_certi)
+                    // ->delete();
+
+                    //insert logs
+                    $log_keterangan = "PpctDnclaimSj1sController.destroy: Delete Surat Jalan Claim Berhasil. ".$no_certi;
+                    $log_ip = \Request::session()->get('client_ip');
+                    $created_at = Carbon::now();
+                    $updated_at = Carbon::now();
+                    DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                    DB::connection("pgsql")->commit();
+
+                    Session::flash("flash_notification", [
+                        "level"=>"success",
+                        "message"=>"Surat Jalan Claim: ".$no_sj." berhasil dihapus."
+                        ]);
+                    return redirect()->route('ppctdnclaimsj1s.index');
+                }
+            } catch (Exception $ex) {
+                DB::connection("pgsql")->rollback();
+                Session::flash("flash_notification", [
+                    "level"=>"danger",
+                    "message"=>"Surat Jalan Claim gagal dihapus."
+                ]);
+                return redirect()->route('ppctdnclaimsj1s.index');
+            }
+        } else {
+            Session::flash("flash_notification", [
+                "level"=>"danger",
+                "message"=>"Maaf, Anda tidak berhak menghapus data ini."
+            ]);
+            return redirect()->route('ppctdnclaimsj1s.index');
+        }
+    }
+
+    public function deletedetail(Request $request, $no_certi, $no_dn, $no_pos)
+    {
+        if(Auth::user()->can('ppc-dnclaim-delete')) {
+            if ($request->ajax()) {
+                $no_certi = base64_decode($no_certi);
+                $no_dn = base64_decode($no_dn);
+                $no_pos = base64_decode($no_pos);
+                $ppctdnclaimsj1 = PpctDnclaimSj1::where('no_certi', $no_certi)
+                ->where('no_dn', $no_dn)
+                ->first();
+                if($ppctdnclaimsj1 == null) {
+                    return response()->json(['id' => $no_pos, 'status' => 'NG', 'message' => 'Data gagal dihapus! Surat Jalan Claim tidak ditemukan.']);
+                } else if($ppctdnclaimsj1->checkEdit() !== "T") {
+                    return response()->json(['id' => $no_pos, 'status' => 'NG', 'message' => 'Data gagal dihapus! Surat Jalan Claim sudah tidak dapat diubah.']);
+                } else {
+                    try {
+                        DB::connection("pgsql")->beginTransaction();
+                        $status = 'OK';
+                        $msg = 'Item Surat Jalan Claim berhasil dihapus.';
+
+                        DB::table(DB::raw("ppct_dnclaim_sj2s"))
+                        ->where("no_certi", $no_certi)
+                        ->where("no_dn", $no_dn)
+                        ->where("no_pos", $no_pos)
+                        ->delete();
+
+                        //insert logs
+                        $log_keterangan = "PpctDnclaimSj1sController.deletedetail: Delete Item Surat Jalan Claim Berhasil. ".$no_certi."-".$no_dn."-".$no_pos;
+                        $log_ip = \Request::session()->get('client_ip');
+                        $created_at = Carbon::now();
+                        $updated_at = Carbon::now();
+                        DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                        DB::connection("pgsql")->commit();
+
+                        return response()->json(['id' => $no_pos, 'status' => $status, 'message' => $msg]);
+                    } catch (Exception $ex) {
+                        DB::connection("pgsql")->rollback();
+                        $status = 'NG';
+                        $msg = "Item Surat Jalan Claim GAGAL dihapus.";
+                        return response()->json(['id' => $no_pos, 'status' => $status, 'message' => $msg]);
+                    }
+                }
+            } else {
+                Session::flash("flash_notification", [
+                    "level"=>"danger",
+                    "message"=>"Item Surat Jalan Claim gagal dihapus."
+                    ]);
+                return redirect()->route('ppctdnclaimsj1s.index');
+            }
+        } else {
+            if ($request->ajax()) {
+                return response()->json(['id' => base64_decode($no_pos), 'status' => 'NG', 'message' => 'Maaf, Anda tidak berhak menghapus data ini.']);
+            } else {
+                Session::flash("flash_notification", [
+                    "level"=>"danger",
+                    "message"=>"Maaf, Anda tidak berhak menghapus data ini."
+                    ]);
+                return redirect()->route('ppctdnclaimsj1s.index');
+            }
+        }
+    }
+
+    public function unsubmit($no_certi)
+    {
+        if(Auth::user()->can(['ppc-dnclaim-create'])) {
+            $no_certi = base64_decode($no_certi);
+            $ppctdnclaimsj1 = PpctDnclaimSj1::where('no_certi', $no_certi)
+            ->whereNotNull("tgl_submit")
+            ->whereNull("tgl_aprov")
+            ->whereNull("tgl_reject")
+            ->first();
+
+            if($ppctdnclaimsj1 == null) {
+                Session::flash("flash_notification", [
+                    "level"=>"danger",
+                    "message"=>"Maaf, Surat Jalan Claim tidak bisa di-UNSUBMIT!"
+                ]);
+            } else {
+                $no_sj = $ppctdnclaimsj1->no_sj;
+                $status = "OK";
+                $level = "success";
+                $msg = "Surat Jalan Claim: ".$no_sj." berhasil di-UNSUBMIT.";
+                DB::connection("pgsql")->beginTransaction();
+                try {
+                    DB::table("ppct_dnclaim_sj1s")
+                    ->where('no_certi', $no_certi)
+                    ->whereNotNull("tgl_submit")
+                    ->whereNull("tgl_aprov")
+                    ->whereNull("tgl_reject")
+                    ->update(["tgl_submit" => NULL, "pic_submit" => NULL, "modiby" => Auth::user()->username, "dtmodi" => Carbon::now()]);
+
+                    //insert logs
+                    $log_keterangan = "PpctDnclaimSj1sController.unsubmit: ".$msg;
+                    $log_ip = \Request::session()->get('client_ip');
+                    $created_at = Carbon::now();
+                    $updated_at = Carbon::now();
+                    DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                    DB::connection("pgsql")->commit();
+                } catch (Exception $ex) {
+                    DB::connection("pgsql")->rollback();
+                    $status = 'NG';
+                    $level = "danger";
+                    $msg = "Surat Jalan Claim: ".$no_sj." gagal di-UNSUBMIT!";
+                }
+                Session::flash("flash_notification", [
+                    "level"=>$level,
+                    "message"=>$msg
+                ]);
+            }
+            return redirect()->route('ppctdnclaimsj1s.index');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function print($no_certi) 
+    { 
+        if(Auth::user()->can(['ppc-dnclaim-create'])) {
+            $no_certi = base64_decode($no_certi);
+            $ppctdnclaimsj1 = PpctDnclaimSj1::where('no_certi', $no_certi)
+            ->whereNotNull("tgl_submit")
+            ->whereNull("tgl_reject")
+            ->first();
+
+            if($ppctdnclaimsj1 == null) {
+                Session::flash("flash_notification", [
+                    "level"=>"danger",
+                    "message"=>"Maaf, Surat Jalan Claim belum bisa di-Print!"
+                ]);
+                return redirect()->route('ppctdnclaimsj1s.index');
+            } else {
+                $kd_bpid = $ppctdnclaimsj1->kd_bpid;
+                $no_sj = $ppctdnclaimsj1->no_sj;
+                $value_barcode = $kd_bpid."-".$no_sj;
+                $nama_file_barcode = str_replace('/', '-', $value_barcode);
+                try {
+                    $type = 'pdf';
+                    $input = public_path(). DIRECTORY_SEPARATOR .'report'. DIRECTORY_SEPARATOR .'ppc'. DIRECTORY_SEPARATOR .'surat_jalan_claim.jasper';
+                    $output = public_path(). DIRECTORY_SEPARATOR .'report'. DIRECTORY_SEPARATOR .'ppc'. DIRECTORY_SEPARATOR .$nama_file_barcode;
+                    $database = \Config::get('database.connections.postgres');
+
+                    $path = public_path(). DIRECTORY_SEPARATOR .'report'. DIRECTORY_SEPARATOR .'barcode'. DIRECTORY_SEPARATOR . $nama_file_barcode . '.png';
+                    $logo = public_path(). DIRECTORY_SEPARATOR .'images'. DIRECTORY_SEPARATOR .'logo.png';
+                    $logo_barcode = public_path(). DIRECTORY_SEPARATOR .'images'. DIRECTORY_SEPARATOR .'logo_barcode.png';
+
+                    //Cek barcode sudah ada atau belum
+                    if (!file_exists($path)) {
+                        //https://github.com/milon/barcode
+                        // DNS2D::getBarcodePNGPath($no_certi, "QRCODE", 60, 60);
+                        
+                        //https://github.com/endroid/QrCode
+                        $font = public_path(). DIRECTORY_SEPARATOR .'fonts'. DIRECTORY_SEPARATOR .'noto_sans.otf';
+
+                        // Create a basic QR code
+                        $qrCode = new QrCode($value_barcode);
+                        $qrCode->setSize(360);
+
+                        // Set advanced options
+                        $qrCode
+                            ->setWriterByName('png')
+                            ->setMargin(10)
+                            ->setEncoding('UTF-8')
+                            ->setErrorCorrectionLevel(ErrorCorrectionLevel::LOW) //LOW, MEDIUM, QUARTILE OR HIGH
+                            ->setForegroundColor(['r' => 0, 'g' => 0, 'b' => 0])
+                            ->setBackgroundColor(['r' => 255, 'g' => 255, 'b' => 255])
+                            ->setLabel($value_barcode, 16, $font, LabelAlignment::CENTER)
+                            ->setLogoPath($logo_barcode)
+                            ->setLogoWidth(100)
+                            ->setValidateResult(false)
+                        ;
+                        // Save it to a file
+                        $qrCode->writeFile($path);
+                    }
+
+                    $jasper = new JasperPHP;
+                    $jasper->process(
+                        $input,
+                        $output,
+                        array($type),
+                        array('no_certi' => $no_certi, 'barcode' => $path, 'logo' => $logo),
+                        $database,
+                        'id_ID'
+                    )->execute();
+
+                    ob_end_clean();
+                    ob_start();
+                    $headers = array(
+                        'Content-Description: File Transfer',
+                        'Content-Type: application/pdf',
+                        'Content-Disposition: attachment; filename='.$no_certi.$type,
+                        'Content-Transfer-Encoding: binary',
+                        'Expires: 0',
+                        'Cache-Control: must-revalidate, post-check=0, pre-check=0',
+                        'Pragma: public',
+                        'Content-Length: ' . filesize($output.'.'.$type)
+                    );
+                    return response()->file($output.'.'.$type, $headers)->deleteFileAfterSend(true);
+                } catch (Exception $ex) {
+                    Session::flash("flash_notification", [
+                        "level"=>"danger",
+                        "message"=>"Print Surat Jalan Claim: ".$no_sj." gagal!"
+                    ]);
+                    return redirect()->route('ppctdnclaimsj1s.index');
+                }
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function generate(Request $request, $no_certi, $no_dn, $kd_supp)
+    {
+        if(Auth::user()->can('ppc-dnclaim-create')) {
+            if ($request->ajax()) {
+                $no_certi = base64_decode($no_certi);
+                $no_dn = base64_decode($no_dn);
+                $kd_supp = base64_decode($kd_supp);
+                
+                $lists = DB::table(DB::raw("(
+                    select no_pos, kd_item, coalesce((select baan_mpart.desc1||' ('||baan_mpart.itemdesc||')' from baan_mpart where baan_mpart.item = baan_iginh008s.kd_item limit 1),'-') item_name, 
+                    coalesce(nm_trket,'-') nm_trket, 
+                    (coalesce(qty,0)-coalesce((select sum(qty_sj) from ppct_dnclaim_sj2s p where p.no_dn = baan_iginh008s.kd_pono and p.no_pos = baan_iginh008s.no_pos),0)) qty_dn 
+                    from baan_iginh008s 
+                    where kd_pono = '$no_dn' and kd_bpid1 = '$kd_supp' 
+                    and coalesce(qty,0) > coalesce((select sum(qty_sj) from ppct_dnclaim_sj2s p where p.no_dn = baan_iginh008s.kd_pono and p.no_pos = baan_iginh008s.no_pos),0) 
+                    and not exists (select 1 from ppct_dnclaim_sj2s where ppct_dnclaim_sj2s.no_certi = '$no_certi' and ppct_dnclaim_sj2s.no_dn = baan_iginh008s.kd_pono and ppct_dnclaim_sj2s.no_pos = baan_iginh008s.no_pos limit 1) 
+                ) po"))
+                ->select(DB::raw("no_pos, kd_item, item_name, nm_trket, qty_dn"));
+
+                return Datatables::of($lists)
+                ->editColumn('qty_dn', function($data){
+                    return numberFormatter(0, 5)->format($data->qty_dn);
+                })
+                ->addColumn('action', function($data){
+                    return '<input type="checkbox" name="row-'. $data->no_pos .'-chk" id="row-'. $data->no_pos .'-chk" value="'. $data->no_pos .'" class="icheckbox_square-blue">';
+                })
+                ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+}

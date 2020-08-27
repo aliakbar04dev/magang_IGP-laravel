@@ -1,0 +1,361 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use App\Http\Requests\StorePrcmNpkRequest;
+use Illuminate\Support\Facades\Session;
+use App\Http\Requests\UpdatePrcmNpkRequest;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use DB;
+use Exception;
+use App\User;
+use Illuminate\Support\Facades\Input;
+
+class PrcmNpksController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        if(Auth::user()->can('prc-po-setting-npk')) {
+            return view('eproc.po.npk.index');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function dashboard(Request $request)
+    {
+        if(Auth::user()->can('prc-po-setting-npk')) {
+            if ($request->ajax()) {
+                
+                $prcmnpks = DB::connection('oracle-usrbaan')
+                ->table(DB::raw("(select npk, usrhrcorp.fnm_npk(npk) nama, replace(wm_concat(decode(kd_dep, 'B', 'BUYER', 'G', 'GENERAL', 'P', 'PROJECT')),',',', ') nm_dep from prcm_npk group by npk) v"))
+                ->selectRaw("npk, nama, nm_dep");
+                
+                return Datatables::of($prcmnpks)
+                    ->editColumn('npk', function($prcmnpk) {
+                        return '<a href="'.route('prcmnpks.show', base64_encode($prcmnpk->npk)).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $prcmnpk->npk .'">'.$prcmnpk->npk.'</a>';
+                    })
+                    ->addColumn('action', function($prcmnpk){
+                        return view('datatable._action', [
+                            'model' => $prcmnpk,
+                            'form_url' => route('prcmnpks.destroy', base64_encode($prcmnpk->npk)),
+                            'edit_url' => route('prcmnpks.edit', base64_encode($prcmnpk->npk)),
+                            'class' => 'form-inline js-ajax-delete',
+                            'form_id' => 'form-'.$prcmnpk->npk,
+                            'id_table' => 'tblMaster',
+                            'confirm_message' => 'Anda yakin menghapus NPK ' . $prcmnpk->npk . '?'
+                        ]);
+                    })
+                    ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        if(Auth::user()->can('prc-po-setting-npk')) {
+            return view('eproc.po.npk.create');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(StorePrcmNpkRequest $request)
+    {
+        if(Auth::user()->can('prc-po-setting-npk')) {
+            $data = $request->all();
+            $npk = $data['npk'];
+            $deps = $data['kd_dep'];
+            $creaby = Auth::user()->username;
+
+            DB::beginTransaction();
+            try {
+
+                foreach($deps as $kd_dep) {
+                    DB::connection("oracle-usrbaan")
+                    ->table(DB::raw("prcm_npk"))
+                    ->insert(['npk' => $npk, 'kd_dep' => $kd_dep, 'creaby' => $creaby, 'dtcrea' => Carbon::now()]);
+
+                    DB::table(DB::raw("prcm_npks"))
+                    ->insert(['npk' => $npk, 'kd_dep' => $kd_dep, 'creaby' => $creaby, 'dtcrea' => Carbon::now()]);
+                }
+
+                //insert logs
+                $log_keterangan = "PrcmNpksController.store: Create Setting NPK Berhasil. ".$npk;
+                $log_ip = \Request::session()->get('client_ip');
+                $created_at = Carbon::now();
+                $updated_at = Carbon::now();
+                DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                DB::commit();
+
+                Session::flash("flash_notification", [
+                    "level"=>"success",
+                    "message"=>"Data Setting NPK berhasil disimpan: $npk"
+                ]);
+                return redirect()->route('prcmnpks.index');
+            } catch (Exception $ex) {
+                DB::rollback();
+                Session::flash("flash_notification", [
+                    "level"=>"danger",
+                    "message"=>"Data gagal disimpan!"
+                ]);
+                return redirect()->back()->withInput(Input::all());
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($npk)
+    {
+        if(Auth::user()->can('prc-po-setting-npk')) {
+            $prcmnpk = DB::connection('oracle-usrbaan')
+            ->table(DB::raw("(select npk, usrhrcorp.fnm_npk(npk) nama, replace(wm_concat(decode(kd_dep, 'B', 'BUYER', 'G', 'GENERAL', 'P', 'PROJECT')),',',', ') nm_dep from prcm_npk group by npk) v"))
+            ->selectRaw("npk, nama, nm_dep")
+            ->where("npk",base64_decode($npk))
+            ->first();
+            return view('eproc.po.npk.show', compact('prcmnpk'));
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($npk)
+    {
+        if(Auth::user()->can('prc-po-setting-npk')) {
+            $prcmnpk = DB::connection('oracle-usrbaan')
+            ->table(DB::raw("(select npk, usrhrcorp.fnm_npk(npk) nama, replace(wm_concat(decode(kd_dep, 'B', 'BUYER', 'G', 'GENERAL', 'P', 'PROJECT')),',',', ') nm_dep from prcm_npk group by npk) v"))
+            ->selectRaw("npk, nama, nm_dep")
+            ->where("npk",base64_decode($npk))
+            ->first();
+
+            $list = DB::connection('oracle-usrbaan')
+                ->table("prcm_npk")
+                ->selectRaw("npk, kd_dep")
+                ->where("npk", base64_decode($npk));
+
+            $deps = [];
+            foreach ($list->get() as $data) {
+                array_push($deps, $data->kd_dep);
+            }
+            return view('eproc.po.npk.edit')->with(compact('prcmnpk','deps'));
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(UpdatePrcmNpkRequest $request, $id)
+    {
+        if(Auth::user()->can('prc-po-setting-npk')) {
+            $data = $request->all();
+            $npk = $data['npk'];
+            $deps = $data['kd_dep'];
+            $creaby = Auth::user()->username;
+
+            DB::beginTransaction();
+            try {
+
+                $prcmnpk = DB::connection('oracle-usrbaan')
+                ->table("prcm_npk")
+                ->where("npk", $npk)
+                ->whereNotIn("kd_dep", $deps)
+                ->delete();
+
+                $prcmnpk = DB::table("prcm_npks")
+                ->where("npk", $npk)
+                ->whereNotIn("kd_dep", $deps)
+                ->delete();
+
+                foreach($deps as $kd_dep) {
+                    DB::connection("oracle-usrbaan")
+                    ->unprepared("begin insert into prcm_npk (npk, kd_dep, creaby, dtcrea) values ('$npk', '$kd_dep', '$creaby', sysdate); exception when dup_val_on_index then null; end;");
+
+                    DB::unprepared("insert into prcm_npks (npk, kd_dep, creaby, dtcrea) values ('$npk', '$kd_dep', '$creaby', now()) ON CONFLICT ON CONSTRAINT prcm_npks_pkey DO NOTHING;");
+                }
+
+                //insert logs
+                $log_keterangan = "PrcmNpksController.update: Update Setting NPK Berhasil. ".$npk;
+                $log_ip = \Request::session()->get('client_ip');
+                $created_at = Carbon::now();
+                $updated_at = Carbon::now();
+                DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                DB::commit();
+
+                Session::flash("flash_notification", [
+                    "level"=>"success",
+                    "message"=>"Data Setting NPK berhasil diubah: $npk"
+                ]);
+                return redirect()->route('prcmnpks.index');
+            } catch (Exception $ex) {
+                DB::rollback();
+                Session::flash("flash_notification", [
+                    "level"=>"danger",
+                    "message"=>"Data gagal diubah!"
+                ]);
+                return redirect()->back()->withInput(Input::all());
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Request $request, $npk)
+    {
+        if(Auth::user()->can('prc-po-setting-npk')) {
+            $npk = base64_decode($npk);
+            try {
+                DB::beginTransaction();
+                if ($request->ajax()) {
+                    $status = 'OK';
+                    $msg = 'NPK '.$npk.' berhasil dihapus.';
+
+                    DB::connection("oracle-usrbaan")
+                    ->unprepared("delete from prcm_npk where npk = '$npk'");
+
+                    DB::unprepared("delete from prcm_npks where npk = '$npk'");
+
+                    //insert logs
+                    $log_keterangan = "PrcmNpksController.destroy: Delete NPK Berhasil. ".$npk;
+                    $log_ip = \Request::session()->get('client_ip');
+                    $created_at = Carbon::now();
+                    $updated_at = Carbon::now();
+                    DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                    DB::commit();
+
+                    return response()->json(['id' => $npk, 'status' => $status, 'message' => $msg]);
+                } else {
+
+                    DB::connection("oracle-usrbaan")
+                    ->unprepared("delete from prcm_npk where npk = '$npk'");
+
+                    DB::unprepared("delete from prcm_npks where npk = '$npk'");
+
+                    //insert logs
+                    $log_keterangan = "PrcmNpksController.destroy: Delete NPK Berhasil. ".$npk;
+                    $log_ip = \Request::session()->get('client_ip');
+                    $created_at = Carbon::now();
+                    $updated_at = Carbon::now();
+                    DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                    DB::commit();
+
+                    Session::flash("flash_notification", [
+                    "level"=>"success",
+                    "message"=>"NPK ".$npk." berhasil dihapus."
+                    ]);
+
+                    return redirect()->route('prcmnpks.index');
+                }
+            } catch (Exception $ex) {
+                DB::rollback();
+                if ($request->ajax()) {
+                    $status = 'NG';
+                    $msg = "NPK ".$npk." gagal dihapus.";
+                    return response()->json(['id' => $npk, 'status' => $status, 'message' => $msg]);
+                } else {
+                    Session::flash("flash_notification", [
+                        "level"=>"danger",
+                        "message"=>"NPK ".$npk." gagal dihapus."
+                    ]);
+                    return redirect()->route('prcmnpks.index');
+                }
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function delete($npk)
+    {
+        if(Auth::user()->can('prc-po-setting-npk')) {
+            $npk = base64_decode($npk);
+            try {
+                DB::beginTransaction();
+                
+                DB::connection("oracle-usrbaan")
+                ->unprepared("delete from prcm_npk where npk = '$npk'");
+
+                DB::unprepared("delete from prcm_npks where npk = '$npk'");
+
+                //insert logs
+                $log_keterangan = "PrcmNpksController.destroy: Delete NPK Berhasil. ".$npk;
+                $log_ip = \Request::session()->get('client_ip');
+                $created_at = Carbon::now();
+                $updated_at = Carbon::now();
+                DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                DB::commit();
+
+                Session::flash("flash_notification", [
+                "level"=>"success",
+                "message"=>"NPK ".$npk." berhasil dihapus."
+                ]);
+
+                return redirect()->route('prcmnpks.index');
+            } catch (Exception $ex) {
+                DB::rollback();
+                Session::flash("flash_notification", [
+                    "level"=>"danger",
+                    "message"=>"NPK ".$npk." gagal dihapus."
+                ]);
+                return redirect()->route('prcmnpks.index');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+}

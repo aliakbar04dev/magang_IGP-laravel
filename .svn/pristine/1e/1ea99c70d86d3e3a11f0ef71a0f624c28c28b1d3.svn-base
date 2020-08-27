@@ -1,0 +1,110 @@
+<div class="form-group">
+    <div class="col-md-2">
+        <label>PERIODE</label>
+        <select class="form-control" id="periode">
+            <option value="I">I (SATU)</option>
+            <option value="II">II (DUA)</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label>TAHUN</label>
+        <input class="form-control" id="tahun" value="{{ \Carbon\Carbon::now()->format('Y') }}" readonly>
+    </div>
+    <div class="col-md-3">
+        <label>REVISI</label>
+        <input class="form-control" id="tahun" value="" readonly>
+    </div>
+    <div class="col-md-3">
+        <label>TANGGAL</label>
+        <input class="form-control" id="tahun" value="{{ \Carbon\Carbon::now()->format('d M y') }}" readonly>
+    </div>
+    <div class="col-md-2">
+        <label>ACTION</label>
+        <button class="btn btn-primary" id="display_filter" style="display:block;">Display</button>
+    </div>
+    <div class="col-md-2" style="margin-top: 8px;">
+        <!-- <label>ACTION</label> -->
+        <button class="btn btn-success" id="add_schedule">Tambah Jadwal</button>
+    </div>
+    <div class="col-md-12" style="margin-top:5px;">
+    <table id="tblSchedule" class="table-bordered" style="width:100%;">
+        <thead>
+            <tr>
+                <th rowspan="4" width="10px">NO</th>
+                <th rowspan="4">AREA/PROC</th>
+                <th rowspan="4">AUDITEE</th>
+                <th rowspan="2" colspan="2">AUDITOR</th>
+                <th>{{$data->first()->tahun}}</th>
+                <th rowspan="4">KETERANGAN</th>
+            </tr>
+            <tr>
+            @php 
+            switch ($data->first()->bulan) {
+                case "01":
+                    $nama_bulan = 'JAN';
+                    break;
+                case "02":
+                    $nama_bulan = 'FEB';
+                    break;
+                case "03":
+                    $nama_bulan = 'MAR';
+                    break;
+                case "04":
+                    $nama_bulan = 'APR';
+                    break;
+                case "05":
+                    $nama_bulan = 'MAY';
+                    break;
+                case "06":
+                    $nama_bulan = 'JUN';
+                    break;
+                case "07":
+                    $nama_bulan = 'JUL';
+                    break;
+                case "08":
+                    $nama_bulan = 'AUG';
+                    break;
+                case "09":
+                    $nama_bulan = 'SEP';
+                    break;
+                case "10":
+                    $nama_bulan = 'OCT';
+                    break;
+                case "11":
+                    $nama_bulan = 'NOV';
+                    break;
+                case "12":
+                    $nama_bulan = 'DEC';
+                    break;
+                default:
+                    $nama_bulan = 'Kosong';
+            }
+            @endphp
+                <th>{{ $nama_bulan }}</th>
+            </tr>
+            <tr>
+                <th rowspan="2">LEAD AUDITOR</th>
+                <th rowspan="2">AUDITOR</th>
+                <th>01</th>
+            </tr>
+            <tr>
+                <th>SEN</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($date as $tanggal)
+            <tr>
+                <td></td>
+                <td>{{ $tanggal->desc_div . ' - ' . $tanggal->desc_dep . ' - ' . $tanggal->desc_sie }}</td>
+                <td>@foreach ($auditor as $data_auditee) @if ($data_auditee->role_audit == 'AUDITEE') {{$data_auditee->init_dep}} @endif @endforeach</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+    </div>
+    <div class="col-md-12">
+        <button type="submit" class="btn btn-primary" style="float:right;">SAVE</button>
+        <button id="save_draft" type="button" class="btn btn-primary" style="float:right;margin-right: 8px;">SAVE DRAFT</button>
+        <button id="save_draft" type="button" class="btn btn-primary" style="float:right; margin-right: 8px;">EDIT</button>
+    </div>
+</div>

@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="555" pageHeight="200" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="4656bdc9-90d1-448d-aff9-c7de9140a6e7">
+	<property name="ireport.zoom" value="1.1000000000000025"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="no_dn" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="barcode" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="kanban_no" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="item" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select no_dn, kd_bpid, (select b_suppliers.nama from b_suppliers where b_suppliers.kd_supp = baan_dn_supps.kd_bpid) nm_bpid, 
+jns_dn, no_po, tgl_order, tgl_kirim, no_cycle, 
+item, dsca, qty_per_kanban, qty_kanban, qty_dn, kd_cwar, cean, lpad($P{kanban_no}, 3, '0') no_kanban
+from baan_dn_supps
+where no_dn = $P{no_dn} and item = $P{item}]]>
+	</queryString>
+	<field name="no_dn" class="java.lang.String"/>
+	<field name="kd_bpid" class="java.lang.String"/>
+	<field name="nm_bpid" class="java.lang.String"/>
+	<field name="jns_dn" class="java.lang.String"/>
+	<field name="no_po" class="java.lang.String"/>
+	<field name="tgl_order" class="java.sql.Timestamp"/>
+	<field name="tgl_kirim" class="java.sql.Timestamp"/>
+	<field name="no_cycle" class="java.math.BigDecimal"/>
+	<field name="item" class="java.lang.String"/>
+	<field name="dsca" class="java.lang.String"/>
+	<field name="qty_per_kanban" class="java.math.BigDecimal"/>
+	<field name="qty_kanban" class="java.math.BigDecimal"/>
+	<field name="qty_dn" class="java.math.BigDecimal"/>
+	<field name="kd_cwar" class="java.lang.String"/>
+	<field name="cean" class="java.lang.String"/>
+	<field name="no_kanban" class="java.lang.String"/>
+	<variable name="total1" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{qty_per_kanban}]]></variableExpression>
+	</variable>
+	<variable name="total2" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{qty_kanban}]]></variableExpression>
+	</variable>
+	<variable name="total3" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{qty_dn}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="200" splitType="Stretch">
+			<textField pattern="#,##0" isBlankWhenNull="true">
+				<reportElement x="370" y="50" width="100" height="30" uuid="630fb55e-5c25-4721-8fdb-c6082251438c"/>
+				<box topPadding="0" leftPadding="0" rightPadding="0">
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Courier New" size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{qty_per_kanban}]]></textFieldExpression>
+			</textField>
+			<frame>
+				<reportElement x="140" y="105" width="230" height="85" uuid="8513ebac-3f91-44e1-b049-9308b3f4fcc7"/>
+				<box>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<image scaleImage="FillFrame" onErrorType="Icon">
+					<reportElement isPrintRepeatedValues="false" x="10" y="25" width="210" height="35" uuid="5a13865e-2e5a-4d71-8557-c044e73c7776"/>
+					<imageExpression><![CDATA[$P{barcode} + "" + $F{item}.toLowerCase() + ".png"]]></imageExpression>
+				</image>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="10" y="5" width="210" height="15" uuid="38e2545e-ff7b-401c-a6a0-5bf826ca0726"/>
+					<box topPadding="0" leftPadding="0">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Courier New" size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cean}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="10" y="65" width="210" height="15" uuid="f6ec8a52-539e-47e9-b857-010b00f9868d"/>
+					<box topPadding="0" leftPadding="0">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Courier New" size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{item}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<staticText>
+				<reportElement x="0" y="0" width="555" height="25" uuid="5b04f4b7-110c-4f0f-8425-795a92c24ce6"/>
+				<box leftPadding="0">
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Courier New" size="10" isBold="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[KANBAN PT INTI GANDA PERDANA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="25" width="140" height="25" backcolor="#CCCCCC" uuid="6f9ed9f5-2dd7-4fbf-8e00-afc15d646e51"/>
+				<box leftPadding="0">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Courier New" size="10" isBold="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[SUPPLIER]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="140" y="25" width="230" height="25" backcolor="#CCCCCC" uuid="9bacd3f7-6976-4e53-a5e8-eae198e56bc4"/>
+				<box leftPadding="0">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Courier New" size="10" isBold="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[PART DESCRIPTION]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="370" y="25" width="100" height="25" backcolor="#CCCCCC" uuid="f3fe1efd-9957-4a5e-be83-37313a1eb591"/>
+				<box leftPadding="0">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Courier New" size="10" isBold="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[QTY / KANBAN]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="470" y="25" width="85" height="25" backcolor="#CCCCCC" uuid="254a9116-81db-408f-9947-2beb4bd7d448"/>
+				<box leftPadding="0">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Courier New" size="10" isBold="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[WAREHOUSE]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="50" width="140" height="30" uuid="cecef815-50c8-4016-a6cf-438303c2f590"/>
+				<box leftPadding="0">
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Courier New" size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nm_bpid}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="140" y="50" width="230" height="30" uuid="217d8d52-4fab-40bf-b77d-c070178af07f"/>
+				<box leftPadding="0">
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Courier New" size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{dsca}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="470" y="50" width="85" height="30" uuid="45a959b2-86ba-434b-a07e-52ded797bbd2"/>
+				<box leftPadding="0">
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Courier New" size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{kd_cwar}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="80" width="50" height="25" backcolor="#CCCCCC" uuid="398b1203-a3ad-43c5-b9e7-52c11948714c"/>
+				<box leftPadding="0">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Courier New" size="10" isBold="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[CYCLE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="50" y="80" width="90" height="25" backcolor="#CCCCCC" uuid="6af8fe7d-80a3-4a3a-8f97-26ae809a9d90"/>
+				<box leftPadding="0">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Courier New" size="10" isBold="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[DELIVERY TIME]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="140" y="80" width="230" height="25" backcolor="#CCCCCC" uuid="e9263287-c9ab-4538-87e0-02b7d177291c"/>
+				<box leftPadding="0">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Courier New" size="10" isBold="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[PART NUMBER]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="370" y="80" width="100" height="25" backcolor="#CCCCCC" uuid="06cd7575-e641-43c2-aa91-fbae7c1afe99"/>
+				<box leftPadding="0">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Courier New" size="10" isBold="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[KANBAN NO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="470" y="80" width="85" height="25" backcolor="#CCCCCC" uuid="ae600b27-07f8-447e-8990-b6c4228a2ae0"/>
+				<box leftPadding="0">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Courier New" size="10" isBold="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[ORDER NO]]></text>
+			</staticText>
+			<textField pattern="#,##0" isBlankWhenNull="true">
+				<reportElement x="0" y="105" width="50" height="85" uuid="b48ec874-fe37-4394-83f1-3c1afb2fcc97"/>
+				<box leftPadding="0">
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Courier New" size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{no_cycle}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="50" y="105" width="90" height="40" uuid="ce0d741c-316d-42b7-90e8-573e21844d93"/>
+				<box leftPadding="0" bottomPadding="5">
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font fontName="Courier New" size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tgl_kirim}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="470" y="105" width="85" height="85" uuid="c9bc24e1-b1f4-41d2-8ed1-62a643c3bdbf"/>
+				<box leftPadding="0">
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Courier New" size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{no_dn}]]></textFieldExpression>
+			</textField>
+			<textField pattern="HH:mm" isBlankWhenNull="true">
+				<reportElement x="50" y="145" width="90" height="45" uuid="ba767d73-7c70-41b2-ad69-5e7f10f5706e"/>
+				<box topPadding="5" leftPadding="0">
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="Courier New" size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tgl_kirim}]]></textFieldExpression>
+			</textField>
+			<textField pattern="" isBlankWhenNull="true">
+				<reportElement x="370" y="105" width="100" height="85" uuid="6a3848d1-a3cf-4b5b-aee3-faa781c3bfd3"/>
+				<box leftPadding="0">
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Courier New" size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{no_kanban}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

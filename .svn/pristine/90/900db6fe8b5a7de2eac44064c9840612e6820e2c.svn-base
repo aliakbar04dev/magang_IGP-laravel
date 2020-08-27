@@ -1,0 +1,55 @@
+{
+    "name": "laravel-notification-channels/telegram",
+    "description": "Telegram Notifications Driver",
+    "keywords": [
+      "telegram notification",
+      "laravel",
+      "telegram",
+      "notification",
+      "telegram notifications channel"
+    ],
+    "homepage": "https://github.com/laravel-notification-channels/telegram",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Syed Irfaq R.",
+            "email": "syed@lukonet.com",
+            "homepage": "https://lukonet.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.6.4",
+        "guzzlehttp/guzzle": "^6.2",
+        "illuminate/notifications": ">=5.3",
+        "illuminate/support": ">=5.1"
+    },
+    "require-dev": {
+        "mockery/mockery": "^0.9.5",
+        "phpunit/phpunit": "5.*",
+        "orchestra/testbench": "3.4.x-dev"
+    },
+    "autoload": {
+        "psr-4": {
+            "NotificationChannels\\Telegram\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "NotificationChannels\\Telegram\\Test\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "NotificationChannels\\Telegram\\TelegramServiceProvider"
+            ]
+        }
+    }
+}

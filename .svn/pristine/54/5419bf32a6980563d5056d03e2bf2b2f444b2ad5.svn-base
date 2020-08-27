@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="018f5d06-6ef2-4a85-be9c-d7e771760459">
+	<property name="ireport.zoom" value="1.1"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="logo" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="nm_dept" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="barcode" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select m.no_reg, m.kd_dept_pembuat, m.creaby, (select name from users where username = m.creaby) nm_creaby, m.npk_approve_div, (select name from users where username = m.npk_approve_div) nama_approve_div, to_char(tgl_approve_div,'dd/mm/yyyy HH24:MI') tgl_approve_div, m.npk_approve_prc, (select name from users where username = m.npk_approve_prc) nama_approve_prc, to_char(tgl_approve_prc,'dd/mm/yyyy HH24:MI') tgl_approve_prc, d.desc, d.qty_pp, d.nm_brg
+from pp_regs m, pp_reg_details d
+where d.pp_reg_id = m.id and m.id = $P{id}]]>
+	</queryString>
+	<field name="no_reg" class="java.lang.String"/>
+	<field name="kd_dept_pembuat" class="java.lang.String"/>
+	<field name="creaby" class="java.lang.String"/>
+	<field name="nm_creaby" class="java.lang.String"/>
+	<field name="npk_approve_div" class="java.lang.String"/>
+	<field name="nama_approve_div" class="java.lang.String"/>
+	<field name="tgl_approve_div" class="java.lang.String"/>
+	<field name="npk_approve_prc" class="java.lang.String"/>
+	<field name="nama_approve_prc" class="java.lang.String"/>
+	<field name="tgl_approve_prc" class="java.lang.String"/>
+	<field name="desc" class="java.lang.String"/>
+	<field name="qty_pp" class="java.math.BigDecimal"/>
+	<field name="nm_brg" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="154">
+			<staticText>
+				<reportElement x="0" y="39" width="94" height="20" uuid="78d2ba72-df5b-4d78-92c0-3246d9ee4417"/>
+				<box leftPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="12" isBold="false"/>
+				</textElement>
+				<text><![CDATA[No. Register]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="94" y="39" width="10" height="20" uuid="4f2597f5-194f-4ce5-8bd3-88c1e1a1f1e2"/>
+				<box leftPadding="2"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="12" isBold="false"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="104" y="39" width="350" height="20" uuid="a8c477c0-786d-49cd-a517-09048fef2b90"/>
+				<box leftPadding="5"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="12" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{no_reg}]]></textFieldExpression>
+			</textField>
+			<image scaleImage="FillFrame">
+				<reportElement isPrintRepeatedValues="false" x="0" y="0" width="80" height="30" uuid="aad0fc41-a269-45c8-8412-cec3765b869d"/>
+				<imageExpression><![CDATA[$P{logo}]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement x="268" y="0" width="287" height="15" uuid="ec0be3c9-918f-402d-a54a-9599cd9e54e9"/>
+				<box leftPadding="0" rightPadding="2"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[REGISTER PERMINTAAN PEMBELIAN]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="268" y="15" width="287" height="15" uuid="4eefb1b5-d051-41a5-9f82-506fe9fd63e9"/>
+				<box leftPadding="0" rightPadding="2"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="7" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Property of Inti Ganda Perdana]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="32" width="555" height="1" uuid="9692b3e7-cf83-4803-8f9c-8ddfaed7f364"/>
+			</line>
+			<staticText>
+				<reportElement x="0" y="79" width="94" height="20" uuid="b2ecb69a-8678-4335-9ab3-d836b820022a"/>
+				<box leftPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="12" isBold="false"/>
+				</textElement>
+				<text><![CDATA[PIC Pembuat]]></text>
+			</staticText>
+			<textField pattern="dd MMMMM yyyy" isBlankWhenNull="true">
+				<reportElement x="104" y="79" width="350" height="20" uuid="836a9e3e-4f32-4fbe-874d-a4c1b2c63afc"/>
+				<box leftPadding="5"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="12" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nm_creaby} + " (" + $F{creaby} + ")"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="94" y="79" width="10" height="20" uuid="4eb20bee-cbff-42e7-a465-15b5eeec91a1"/>
+				<box leftPadding="2"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="12" isBold="false"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="99" width="454" height="10" uuid="a4e7e548-97c8-4107-85e3-d86a5cee6fd6"/>
+				<box leftPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="12" isBold="false"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField pattern="dd MMMMM yyyy" isBlankWhenNull="true">
+				<reportElement x="104" y="109" width="350" height="20" uuid="c50aeb56-3da2-41b8-9177-ef10c9bad5c3"/>
+				<box leftPadding="5"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="12" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nama_approve_div} + " (" + $F{npk_approve_div} + ")" + " - " + $F{tgl_approve_div}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="109" width="94" height="20" uuid="c8f1c0f1-46c7-4828-92d2-b31e6e9b5656"/>
+				<box leftPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="12" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Approval DIV]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="94" y="109" width="10" height="20" uuid="5ec5ee4c-e628-4df9-b9a3-239fe7ad8d3c"/>
+				<box leftPadding="2"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="12" isBold="false"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<textField pattern="dd MMMMM yyyy" isBlankWhenNull="true">
+				<reportElement x="104" y="129" width="350" height="20" uuid="654fca9a-b968-464c-ac94-aee73b6b7adf"/>
+				<box leftPadding="5"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="12" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nama_approve_prc} + " (" + $F{npk_approve_prc} + ")" + " - " + $F{tgl_approve_prc}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="94" y="129" width="10" height="20" uuid="6e0e655e-c77c-46a9-8862-71cb4b85cbe1"/>
+				<box leftPadding="2"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="12" isBold="false"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="129" width="94" height="20" uuid="d8f6a90b-864e-4647-b3e6-c637c1cb4bce"/>
+				<box leftPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="12" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Approval PRC]]></text>
+			</staticText>
+			<textField pattern="dd MMMMM yyyy" isBlankWhenNull="true">
+				<reportElement x="104" y="59" width="350" height="20" uuid="32639ff0-fda7-401b-a2d7-02ffed50e523"/>
+				<box leftPadding="5"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="12" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{kd_dept_pembuat} + " - " + $P{nm_dept}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="59" width="94" height="20" uuid="33f00869-a4fa-49de-8cd3-eb0e47a445fc"/>
+				<box leftPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="12" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Dept. Pembuat]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="94" y="59" width="10" height="20" uuid="3d1b55b9-6dab-4e23-9e8c-9538e42958c1"/>
+				<box leftPadding="2"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="12" isBold="false"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<image scaleImage="FillFrame">
+				<reportElement isPrintRepeatedValues="false" x="467" y="39" width="80" height="80" uuid="ab2a9afb-52ed-4b7e-9584-8884ac6c5f0a"/>
+				<imageExpression><![CDATA[$P{barcode}]]></imageExpression>
+			</image>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="20">
+			<staticText>
+				<reportElement x="0" y="0" width="30" height="20" uuid="62d07a27-1a9a-40be-acab-4bd2dd451529"/>
+				<box leftPadding="0">
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="12" isBold="false"/>
+				</textElement>
+				<text><![CDATA[No.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="30" y="0" width="435" height="20" uuid="61d73ae0-39d8-4bf9-8c5b-27fa4a7ed50a"/>
+				<box leftPadding="0">
+					<topPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="12" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Nama Barang]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="465" y="0" width="90" height="20" uuid="dde24233-47ca-482b-8b97-fc0649109f74"/>
+				<box leftPadding="0">
+					<topPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="12" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Qty]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="20">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="30" height="20" uuid="1045be8e-400a-4c85-bd42-71fdf90ae974"/>
+				<box topPadding="2" leftPadding="0">
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="Tahoma" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="30" y="0" width="435" height="20" uuid="83c3fbc6-f921-4a01-ab8d-9aafaf6f85f7"/>
+				<box topPadding="2" leftPadding="4">
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font fontName="Tahoma" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nm_brg} != null ? $F{nm_brg} : $F{desc}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="465" y="0" width="90" height="20" uuid="9cf4e769-aec8-4631-b981-6ad766864f7f"/>
+				<box topPadding="2" rightPadding="4">
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font fontName="Tahoma" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{qty_pp}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="15">
+			<textField>
+				<reportElement x="435" y="0" width="80" height="15" uuid="851469a0-b44f-41d1-9f3e-c14b52f3c66e"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="515" y="0" width="40" height="15" uuid="f9298fd2-b662-4e66-88c2-886e8a39cad9"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd MMM yyyy HH:mm:ss">
+				<reportElement x="37" y="0" width="214" height="15" uuid="7d25be52-0170-4ea4-8e24-41bf84e6569d"/>
+				<box leftPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd MMM yyyy HH:mm:ss">
+				<reportElement x="0" y="0" width="37" height="15" uuid="4b8be28e-5bc5-4d27-99a2-e011f12d33c4"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Printed on "]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

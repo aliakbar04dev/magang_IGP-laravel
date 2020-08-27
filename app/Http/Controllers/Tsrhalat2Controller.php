@@ -1,0 +1,148 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Tsrhalat1;
+use App\Tsrhalat2;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
+use Laratrust\LaratrustFacade as Laratrust;
+use Illuminate\Support\Facades\File;
+use Intervention\Image\ImageManagerStatic as Image;
+use Carbon\Carbon;
+use DB;
+use Exception;
+
+class Tsrhalat2Controller extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        //
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        //
+    }
+
+    //hapus detail
+    public function hapus(Request $request, $no_srhalat, $no_seri, $kd_brg, $no_wdo)
+    {   
+        $no_srhalat = base64_decode($no_srhalat);
+        $no_wdo = base64_decode($no_wdo);
+        $no_seri = base64_decode($no_seri);
+        $kd_brg = base64_decode($kd_brg);
+        if(Auth::user()->can('qa-kalibrasi-delete')) {
+            $tsrhalat1 = new Tsrhalat1();  
+
+            try {
+                if ($request->ajax()) {
+                    DB::connection("oracle-usrklbr")
+                    ->unprepared("delete tsrhalat2 where no_srhalat = '$no_srhalat' and no_wdo='$no_wdo' and no_seri='$no_seri' and kd_brg='$kd_brg'");
+                    $status = 'OK';
+                    $msg = 'Data berhasil dihapus.';
+
+                                //insert logs
+                    $log_keterangan = "Tsrhalat2Controller.destroy: Hapus Detail Alat Ukur Berhasil. ".$no_srhalat." No Seri: ".$no_seri;
+                    $log_ip = \Request::session()->get('client_ip');
+                    $created_at = Carbon::now();
+                    $updated_at = Carbon::now();
+                    DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+                    DB::commit();
+                    return response()->json(['id' => $no_seri, 'status' => $status, 'message' => $msg]);
+                } else {
+                    DB::connection("oracle-usrklbr")
+                    ->unprepared("delete tsrhalat2 where no_srhalat = '$no_srhalat' and no_wdo='$no_wdo' and no_seri='$no_seri' and kd_brg='$kd_brg'");
+                    DB::commit();
+                    Session::flash("flash_notification", [
+                        "level"=>"success",
+                        "message"=>"Detail No Seri berhasil dihapus."
+                    ]);
+                    return redirect()->route('serahkalibrasi.index');
+                }
+            } catch (Exception $ex) {
+                if ($request->ajax()) {
+                    return response()->json(['id' => $no_seri, 'status' => 'NG', 'message' => 'Data gagal dihapus! Detail No Seri tidak ditemukan.']);
+                } else {
+                    Session::flash("flash_notification", [
+                        "level"=>"danger",
+                        "message"=>"Detail No Seri tidak ditemukan."
+                    ]);
+                    return redirect()->route('serahkalibrasi.index');
+                }
+            }
+
+        } else {
+            return view('errors.403');
+        }        
+    }
+}

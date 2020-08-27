@@ -1,0 +1,313 @@
+@extends('layouts.app')
+@section('content')
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <section class="content-header">
+    <h1>
+      Outstanding Serah Terima DS ke Fin
+      <small>DS Customer</small>
+    </h1>
+    <ol class="breadcrumb">
+      <li><a href="{{ url('/home') }}"><i class="fa fa-dashboard"></i> Home</a></li>
+      <li><i class="fa fa-truck"></i> PPC - Laporan</li>
+      <li class="active"><i class="fa fa-files-o"></i> OutStd. Serah Terima DS ke Fin</li>
+    </ol>
+  </section>
+
+  <!-- Main content -->
+  <section class="content">
+    @include('layouts._flash')
+    {!! Form::hidden('tgl_awal_h', null, ['class'=>'form-control', 'readonly'=>'readonly', 'id' => 'tgl_awal_h']) !!}
+    {!! Form::hidden('tgl_akhir_h', null, ['class'=>'form-control', 'readonly'=>'readonly', 'id' => 'tgl_akhir_h']) !!}
+    <div class="box box-primary">
+      <div class="box-header with-border">
+        <h3 class="box-title">OutStd. Serah Terima DS ke Fin</h3>
+      </div>
+      <!-- /.box-header -->
+
+      <div class="box-body form-horizontal">
+        <div class="form-group">
+          <div class="col-sm-6">
+            {!! Form::label('lblcustomer', 'Customer') !!}
+            <select id="filter_customer" name="filter_customer" aria-controls="filter_status" class="form-control select2" onchange="changeCustomer()">
+              @if (strlen(Auth::user()->username) <= 5)
+              <option value="ALL" selected="selected">ALL</option>
+              @endif
+              @foreach ($customers->get() as $customer)
+              <option value={{ $customer->ship_to }}>{{ $customer->nama.' - '.$customer->ship_to }}</option>
+              @endforeach
+            </select>
+          </div>
+          <div class="col-md-2">
+           {!! Form::label('tujuan', 'Tujuan (F9)') !!}  
+           <div class="input-group">
+            {!! Form::text('tujuan', null, ['class'=>'form-control','placeholder' => 'Tujuan','onkeydown' => 'btnpopupTujuanClick(event)', 'onchange' => 'validateTujuan()']) !!} 
+            <span class="input-group-btn">
+              <button id="btnpopupTujuan" type="button" class="btn btn-info" data-toggle="modal" data-target="#tujuanModal">
+                <label class="glyphicon glyphicon-search"></label>
+              </button>
+            </span>
+          </div>   
+          {!! $errors->first('tujuan', '<p class="help-block">:message</p>') !!}             
+        </div>
+        <div class="col-md-4">
+          {!! Form::label('namaTujuan', 'Nama Tujuan') !!}      
+          {!! Form::text('namaTujuan', null, ['class'=>'form-control','placeholder' => 'Nama Tujuan', 'disabled'=>'']) !!} 
+        </div>   
+      </div>
+      <!-- /.form-group -->
+      <div class="form-group">
+        <div class="col-sm-2">
+          {!! Form::label('tgl_awal', 'Dari Tanggal :') !!}
+          {!! Form::date('tgl_awal', \Carbon\Carbon::now()->startOfMonth(), ['class'=>'form-control','placeholder' => 'Tgl Order Awal', 'id' => 'tgl_awal']) !!}
+        </div>
+        <div class="col-sm-2">
+          {!! Form::label('tgl_akhir', 'Ke :') !!}
+          {!! Form::date('tgl_akhir', \Carbon\Carbon::now()->endOfMonth(), ['class'=>'form-control','placeholder' => 'Tgl Order Akhir', 'id' => 'tgl_akhir']) !!}
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-3">
+          {!! Form::label('lblparam', 'Parameter') !!}
+          <select id="filter_param" name="filter_param" aria-controls="filter_status" class="form-control select2">
+            <option value="ALL" selected="selected">ALL</option>
+            <option value="BELUM SERAH">BELUM SERAH (PPC)</option>
+            <option value="BELUM TERIMA">BELUM TERIMA (FIN)</option>
+            <option value="SUDAH SERAH TERIMA">SUDAH SERAH TERIMA</option>
+          </select>
+        </div>
+        <div class="col-sm-3">
+          {!! Form::label('lblwhsfrom', 'Ship From') !!}
+          <select id="filter_whs_from" name="filter_whs_from" aria-controls="filter_status" class="form-control select2">
+            <option value="ALL" selected="selected">ALL</option>
+            @foreach($baan_whs->get() as $whs)
+            <option value="{{ $whs->kd_cwar }}">{{ $whs->kd_cwar }} - {{ $whs->nm_dsca }}</option>
+            @endforeach
+          </select>
+        </div>
+      </div>
+      <!-- /.form-group -->
+      <div class="form-group">
+        <div class="col-sm-2">
+          {!! Form::label('lbldisplay', ' ') !!}
+          <button id="display" type="button" class="form-control btn btn-primary" data-toggle="tooltip" data-placement="top" title="Display">Display</button>
+        </div>
+      </div>
+      <!-- /.form-group -->
+    </div>
+    <!-- /.box-body -->
+
+    <div class="box-body">
+      <table id="tblMaster" class="table table-bordered table-striped" cellspacing="0" width="100%">
+        <thead>
+          <tr>
+            <th style="width: 1%;text-align:center;">No</th>
+            <th style="width: 10%;">No DS</th>
+            <th style="width: 10%;">No DN</th>
+            <th style="width: 10%;">No SO</th>
+            <th style="width: 10%;">No PO</th>
+            <th style="width: 10%;">Tgl DS Release</th>
+            <th style="width: 10%;">Scan Security</th>
+            <th style="width: 10%;">Lead Time DS</th>
+            <th style="width: 10%;">Tgl Serah PPC</th>
+            <th style="width: 10%;">Tgl Terima Fin</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+    <!-- /.box-body -->
+  </div>
+  <!-- /.box -->
+</section>
+<!-- /.content -->
+</div>
+<!-- /.content-wrapper -->
+
+@endsection
+
+<!-- Popup Tujuan Modal -->
+@include('ppc.dsfin.popup.tujuanModal')
+<!-- Popup Ds Modal -->
+@include('ppc.dsfin.popup.detaildsModal')
+
+@section('scripts')
+<script type="text/javascript">
+
+  document.getElementById("filter_customer").focus();
+
+  function btnpopupTujuanClick(e) {
+    if(e.keyCode == 120) {
+      $('#btnpopupTujuan').click();
+    }
+  }
+
+  //Initialize Select2 Elements
+  $(".select2").select2();
+
+  $(document).ready(function(){
+    $("#btnpopupTujuan").click(function(){
+      var cust = document.getElementById("filter_customer").value.trim();     
+      if(cust !== '') {
+        popupTujuan(cust);
+      }
+    });
+
+    var tableMaster = $('#tblMaster').DataTable({
+      "columnDefs": [{
+        "searchable": false,
+        "orderable": false,
+        "targets": 0,
+        render: function (data, type, row, meta) {
+          return meta.row + meta.settings._iDisplayStart + 1;
+        }
+      }],
+      "aLengthMenu": [[5, 10, 25, 50, 75, 100, -1], [5, 10, 25, 50, 75, 100, "All"]],
+      "iDisplayLength": 10,
+      responsive: true,
+      "order": [[1, 'asc'],[2, 'asc']],
+      processing: true, 
+      "oLanguage": {
+        'sProcessing': '<div id="processing" style="margin: 0px; padding: 0px; position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; background-color: rgb(102, 102, 102); z-index: 30001; opacity: 0.8;"><p style="position: absolute; color: White; top: 50%; left: 45%;"><img src="{{ asset('images/ajax-loader.gif') }}"></p></div>Processing...'
+      }, 
+      serverSide: true,
+      ajax: "{{ route('baanOutDsFin.dashboard') }}",
+      columns: [
+      {data: null, name: null, className: "dt-center"},
+      {data: 'no_shpm', name: 'no_shpm'},
+      {data: 'no_dn', name: 'no_dn'},
+      {data: 'no_so', name: 'no_so'},
+      {data: 'no_po', name: 'no_po'},
+      {data: 'tgl_ds', name: 'tgl_ds', className: "dt-center"},
+      {data: 'tgl_scan', name: 'tgl_scan', className: "dt-center", searchable: "false"},
+      {data: 'selisih_ds_serah', name: 'selisih_ds_serah', className: "dt-right"},
+      {data: 'tgl_serah', name: 'tgl_serah', className: "dt-center"},
+      {data: 'tgl_terima', name: 'tgl_terima', className: "dt-center"},
+      ],
+    });
+
+    $("#tblMaster").on('preXhr.dt', function(e, settings, data) {
+      data.tgl_awal = $('input[name="tgl_awal"]').val();
+      data.tgl_akhir = $('input[name="tgl_akhir"]').val();
+      data.customer = $('select[name="filter_customer"]').val();
+      data.parameter = $('select[name="filter_param"]').val();
+      data.whs_from = $('select[name="filter_whs_from"]').val();
+      data.tujuan = $('input[name="tujuan"]').val();
+    });
+
+    $('#display').click( function () {
+      tableMaster.ajax.reload();
+    });
+
+    // $('#display').click();
+  });
+
+  //POPUP TUJUAN
+  function popupTujuan(cust) {
+    var myHeading = "<p>Popup Tujuan</p>";
+    $("#tujuanModalLabel").html(myHeading);
+
+    var url = '{{ route('datatables.popupTujuan', ['param']) }}';
+    url = url.replace('param', window.btoa(cust));
+
+    var lookupTujuan = $('#lookupTujuan').DataTable({
+      processing: true, 
+      "oLanguage": {
+        'sProcessing': '<div id="processing" style="margin: 0px; padding: 0px; position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; background-color: rgb(102, 102, 102); z-index: 30001; opacity: 0.8;"><p style="position: absolute; color: White; top: 50%; left: 45%;"><img src="{{ asset('images/ajax-loader.gif') }}"></p></div>Processing...'
+      }, 
+      serverSide: true,
+      "pagingType": "numbers",
+      ajax: url,
+      "aLengthMenu": [[10, 25, 50, 75, 100, -1], [10, 25, 50, 75, 100, "All"]],
+      responsive: true,
+      columns: [
+      { data: 'tujuan', name: 'tujuan'},
+      { data: 'nama', name: 'nama'}
+      ],
+      "bDestroy": true,
+      "initComplete": function(settings, json) {
+        $('div.dataTables_filter input').focus();
+        $('#lookupTujuan tbody').on( 'dblclick', 'tr', function () {
+          var dataArr = [];
+          var rows = $(this);
+          var rowData = lookupTujuan.rows(rows).data();
+          $.each($(rowData),function(key,value){
+            document.getElementById("tujuan").value = value["tujuan"];
+            document.getElementById("namaTujuan").value = value["nama"];
+            $('#tujuanModal').modal('hide');
+            validateTujuan();
+          });
+        });
+        $('#tujuanModal').on('hidden.bs.modal', function () {
+          var kode = document.getElementById("tujuan").value.trim();
+          if(kode === '') {
+            $('#tujuan').focus();
+          } else {
+            $('#tujuan').focus();
+          }
+        });        
+      },
+    });
+  }
+
+  //VALIDASI TUJUAN
+  function validateTujuan() {
+    var cust = document.getElementById("filter_customer").value.trim(); 
+    var kode = document.getElementById("tujuan").value.trim();     
+    if(kode !== '') {
+      var url = '{{ route('datatables.validasiTujuan', ['param','param1']) }}';
+      url = url.replace('param', window.btoa(cust));
+      url = url.replace('param1', window.btoa(kode));
+          //use ajax to run the check
+          $.get(url, function(result){  
+            if(result !== 'null'){
+              result = JSON.parse(result);
+              document.getElementById("namaTujuan").value = result["nama"];
+            } else {
+              document.getElementById("tujuan").value = "";
+              document.getElementById("namaTujuan").value = "";
+              document.getElementById("tujuan").focus();
+              swal("Tujuan tidak valid!", "Perhatikan inputan anda! tekan F9 untuk tampilkan data.", "error");
+            }
+          });
+        } else {
+          document.getElementById("tujuan").value = "";
+        }   
+      }
+
+      function changeCustomer() {
+        document.getElementById("tujuan").value = "";
+        document.getElementById("namaTujuan").value = "";
+      }
+
+  //POPUP DETAIL
+  function popupDetailDs(noDs) {
+    var myHeading = "<p>Popup Detail DS "+noDs+"</p>";
+    $("#detaildsModalLabel").html(myHeading);
+
+    var url = '{{ route('datatables.popupDetailDs', ['param']) }}';
+    url = url.replace('param', window.btoa(noDs));
+    console.log(url);
+    var lookupDetailds = $('#lookupDetailds').DataTable({
+      processing: true, 
+      "oLanguage": {
+        'sProcessing': '<div id="processing" style="margin: 0px; padding: 0px; position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; background-color: rgb(102, 102, 102); z-index: 30001; opacity: 0.8;"><p style="position: absolute; color: White; top: 50%; left: 45%;"><img src="{{ asset('images/ajax-loader.gif') }}"></p></div>Processing...'
+      }, 
+      serverSide: true,
+      "pagingType": "numbers",
+      ajax: url,
+      "aLengthMenu": [[10, 25, 50, 75, 100, -1], [10, 25, 50, 75, 100, "All"]],
+      responsive: true,
+      columns: [
+      { data: 'kd_item', name: 'kd_item'},
+      { data: 'kd_seak', name: 'kd_seak'},
+      { data: 'q_qshp', name: 'q_qshp'}
+      ],
+      "bDestroy": true,
+      "initComplete": function(settings, json) {
+        $('div.dataTables_filter input').focus();        
+      },
+    });
+  }
+</script>
+@endsection

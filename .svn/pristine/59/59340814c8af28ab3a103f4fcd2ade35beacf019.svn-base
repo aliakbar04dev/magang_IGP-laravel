@@ -1,0 +1,17 @@
+  <li class="header">AUDIT NAVIGATION</li>
+    <li class="treeview">
+      <a href="#">
+        <i class="fa fa-files-o"></i> <span>MASTER</span>
+        <span class="pull-right-container">
+          <i class="fa fa-angle-left pull-right"></i>
+        </span>
+      </a>
+      <ul class="treeview-menu">
+        <li class="{{ route('auditors.auditorform') == request()->url() ? 'active' : '' }}">
+          <a href="{{ route('auditors.auditorform') }}"><i class="fa fa-circle-o"></i>Form Auditor</a>
+        </li>
+        <li class="{{ route('auditors.turtleform') == request()->url() ? 'active' : '' }}">
+          <a href="{{ route('auditors.turtleform') }}"><i class="fa fa-circle-o"></i>Form Turtle Diagram</a>
+        </li>
+      </ul>
+    </li>

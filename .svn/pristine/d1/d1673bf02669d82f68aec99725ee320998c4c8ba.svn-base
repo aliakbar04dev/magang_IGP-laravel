@@ -1,0 +1,50 @@
+<div class="box-body">
+	<div class="col-md-12">
+		<div class="form-group">
+			{!! Form::label('approve_dept ', 'APPROVED', ['class'=>'col-md-2 control-label']) !!}
+			<div class="col-md-4">
+				{!! Form::file('approve_dept') !!}
+			</div>
+		</div>
+	</div>
+	&nbsp;&nbsp;
+	&nbsp;&nbsp;
+	&nbsp;&nbsp;
+	&nbsp;&nbsp; 
+	<div class="form-group">
+		
+		<div class="col-md-2">
+			{!! Form::label('notedept', 'CATATAN', ['class'=>'col-md-2 control-label']) !!}
+		</div>
+		<div class="col-md-4">
+			{!! Form::textarea('notedept', null, ['class'=>'form-control']) !!}
+			
+		</div>
+	</div>
+	<div class="col-sm-3">
+		<div class="form-group">
+			<div class="col-sm-12 {{ $errors->has('tgl_doc') ? ' has-error' : '' }}">
+				{!! Form::hidden('PIS NO:', '') !!}
+				{!! Form::hidden('no_pis', null, ['class'=>'form-control']) !!}
+				{!! $errors->first('no_pis', '<p class="help-block">:message</p>') !!}
+			</div>
+		</div>
+	</div>
+</div>
+ 
+<div class="box-footer">
+	{!! Form::open(['url'=>'/admin/update' , 'class'=>'form-horizontal', 'onsubmit'=>"return confirm('Anda Yakin Ingin Menyetujui $pistandard->no_pis ?');", 'style' =>'display:inline;']) !!}
+	<input type="hidden" name="no_pis" value="{{ $pistandard->no_pis }}">
+	<button type="submit" data-toggle="tooltip" data-placement="top" title="Click untuk menyetujui" class="btn btn-success "><i class="fa fa-check"></i></button>
+	{!! Form::close() !!}
+	&nbsp;&nbsp;
+	&nbsp;&nbsp;
+	{!! Form::open(['url'=>'/admin/aprovalDeptTolak', 'class'=>'form-horizontal', 'onsubmit'=>"return confirm('Anda Yakin Ingin Menolak  $pistandard->no_pis ?');", 'style' =>'display:inline;']) !!}
+	<input type="hidden" name="no_pis" value="{{ $pistandard->no_pis }}">
+	<button type="submit" data-toggle="tooltip" data-placement="top" title="Click untuk reject" class="btn btn-danger"><i class="fa fa-remove"></i></button>
+	{!! Form::close() !!}
+	&nbsp;&nbsp;
+	&nbsp;&nbsp;
+	<a class="btn btn-primary" href="{{ route('pisdepthead.aprovalDeptHeadSQE') }}" data-toggle="tooltip" data-placement="top" title="Kembali ke approval sect head" id="btn-cancel">Back</a>
+	&nbsp;&nbsp;
+</div>

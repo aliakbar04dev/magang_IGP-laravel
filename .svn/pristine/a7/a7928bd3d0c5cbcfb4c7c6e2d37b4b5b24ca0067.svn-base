@@ -1,0 +1,139 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use App\Mcalsertihal2;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\File;
+use Intervention\Image\ImageManagerStatic as Image;
+use Carbon\Carbon;
+use DB;
+use Excel;
+use PDF;
+use JasperPHP\JasperPHP;
+use Exception;
+
+class Mcalsertihal2Controller extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        if(Auth::user()->can('qa-alatukur-view')) {             
+            return view('eqa.kalsertihal.index');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        //
+    }
+
+    public function dashboard(Request $request)
+    {
+         if(Auth::user()->can(['qa-alatukur-view'])) {
+            $tahun = $request->get('tahun');
+            $bulan = $request->get('bulan');
+            if($bulan < 10){
+                $bulan = '0'.$bulan;
+            }        
+                if ($request->ajax()) {
+                  $lists = DB::connection('oracle-usrklbr')
+                  ->table("vcal_serti")
+                  ->select(DB::raw("no_serti, tgl, no_seri, nm_alat, nm_type, nm_merk, nm_cust, tgl_kalibrasi"))
+                  ->whereRaw("to_char(tgl,'MMYYYY') = '".$bulan."".$tahun."'");
+
+                  return Datatables::of($lists)
+                  ->addColumn('action',function($lists){
+                    return '<center><a target="_blank" class="btn btn-xs btn-success" data-toggle="tooltip" data-placement="top" title="Print Sertifikat '. $lists->no_serti .'" href="'.route('kalserti.print', [base64_encode($lists->no_serti),base64_encode('jenisReport')]).'"><span class="glyphicon glyphicon-print"></span></a></center>';  
+                        })
+                          ->editColumn('no_serti', function($lists) {
+                            return '<a href="'.route('kalserti.edit',base64_encode($lists->no_serti)).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $lists->no_serti .'">'.$lists->no_serti.'</a>';
+                        })
+
+                          ->editColumn('tgl', function($lists){
+                            return Carbon::parse($lists->tgl)->format('d/m/Y');            
+                        })->editColumn('tgl_kalibrasi', function($lists){
+                            return Carbon::parse($lists->tgl_kalibrasi)->format('d/m/Y');            
+                        })
+                        ->make(true);
+                    } else {
+                      return redirect('home');
+                  }
+            } else {
+                return view('errors.403');
+            }
+    }
+}

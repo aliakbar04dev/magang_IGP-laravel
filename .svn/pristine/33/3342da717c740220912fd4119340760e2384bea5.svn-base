@@ -1,0 +1,251 @@
+<?php
+
+Route::group(['prefix'=>'ehs', 'middleware'=>['auth']], function () {
+	Route::get('ehstwp1s/all', [
+		'as' => 'ehstwp1s.all',
+		'uses'=>'EhstWp1sController@indexAll'
+	]);
+	Route::get('ehstwp1s/dashboard/all', [
+		'as' => 'dashboardall.ehstwp1s',
+		'uses'=>'EhstWp1sController@dashboardAll'
+	]);
+	Route::get('ehstwp1s/showall/{param}', [
+		'as' => 'ehstwp1s.showall',
+		'uses'=>'EhstWp1sController@showall'
+	]);
+	Route::post('ehstwp1s/reject', [
+		'as' => 'ehstwp1s.reject',
+		'uses' => 'EhstWp1sController@reject'
+	]);
+	Route::post('ehstwp1s/approve', [
+		'as' => 'ehstwp1s.approve',
+		'uses' => 'EhstWp1sController@approve'
+	]);
+	Route::post('ehstwp1s/approveehs', [
+		'as' => 'ehstwp1s.approveehs',
+		'uses' => 'EhstWp1sController@approveehs'
+	]);
+	Route::get('ehstwp1s/print/{param}', [
+		'as' => 'ehstwp1s.print',
+		'uses' => 'EhstWp1sController@print'
+	]);
+	Route::resource('ehsmwppics', 'EhsmWpPicsController');
+	Route::get('dashboard/ehsmwppics', [
+		'as'=>'dashboard.ehsmwppics',
+		'uses'=>'EhsmWpPicsController@dashboard'
+	]);
+	Route::get('ehsmwppics/delete/{param}', [
+		'as' => 'ehsmwppics.delete',
+		'uses' => 'EhsmWpPicsController@delete'
+	]);
+	Route::resource('mgmtgembaehss', 'MgmtGembaEhssController');
+	Route::get('dashboard/mgmtgembaehss', [
+		'as'=>'dashboard.mgmtgembaehss',
+		'uses'=>'MgmtGembaEhssController@dashboard'
+	]);
+	Route::get('mgmtgembaehss/cm/all', [
+		'as'=>'mgmtgembaehss.indexcm',
+		'uses'=>'MgmtGembaEhssController@indexcm'
+	]);
+	Route::get('dashboardcm/mgmtgembaehss', [
+		'as'=>'dashboardcm.mgmtgembaehss',
+		'uses'=>'MgmtGembaEhssController@dashboardcm'
+	]);
+	Route::get('mgmtgembaehss/{param}/cm', [
+		'as'=>'mgmtgembaehss.inputcm',
+		'uses'=>'MgmtGembaEhssController@inputcm'
+	]);
+	Route::get('mgmtgembaehss/showcm/{param}', [
+		'as' => 'mgmtgembaehss.showcm',
+		'uses'=>'MgmtGembaEhssController@showcm'
+	]);
+	Route::get('mgmtgembaehss/delete/{param}', [
+		'as' => 'mgmtgembaehss.delete',
+		'uses' => 'MgmtGembaEhssController@delete'
+	]);
+	Route::get('mgmtgembaehss/deleteimage/{param}/{param2}', [
+		'as' => 'mgmtgembaehss.deleteimage',
+		'uses' => 'MgmtGembaEhssController@deleteimage'
+	]);
+	Route::get('mgmtgembaehss/laporan/print', [
+		'as' => 'mgmtgembaehss.laporan',
+		'uses'=>'MgmtGembaEhssController@laporan'
+	]);
+	Route::get('mgmtgembaehss/printlaporan/{param}/{param2}/{param3}/{param4}/{param5}', [
+		'as' => 'mgmtgembaehss.printlaporan',
+		'uses' => 'MgmtGembaEhssController@printlaporan'
+	]);
+
+	//MAGANG S
+	// ROUTE EHS SAFETY PERFORMANCE (ACCIDENT) //
+	Route::resource('ehsspaccidents', 'EhsSpAccidentsController'); 
+	Route::get('sp/accident/', [
+		'as' => 'ehsspaccidents.index_sp_accident',
+		'uses'=>'EhsSpAccidentsController@index_sp_accident'
+	]);
+	Route::get('sp/accident/dashboard', [
+		'as' => 'ehsspaccidents.dashboard_sp_accident',
+		'uses'=>'EhsSpAccidentsController@dashboard_sp_accident'
+	]);
+	Route::post('sp/accident/store', [
+		'as' => 'ehsspaccidents.store_sp_accident',
+		'uses'=>'EhsSpAccidentsController@store_sp_accident'
+	]);
+	Route::get('sp/accident/monitoringal', [
+		'as' => 'ehsspaccidents.mon_airlimbah',
+		'uses'=>'EhsSpAccidentsController@mon_airlimbah'
+	]);
+	Route::get('sp/accident/monitoringbkimia', [
+		'as' => 'ehsspaccidents.mon_airlimbah',
+		'uses'=>'EhsSpAccidentsController@mon_airlimbah'
+	]);
+	// ROUTE SWAPANATU //
+	Route::get('ep/swapantau/', [
+		'as' => 'ehsspaccidents.index_swapantau',
+		'uses'=>'EhsSpAccidentsController@index_swapantau'
+	]);
+	Route::post('ep/swapantau/store', [
+		'as' => 'ehsspaccidents.store_swapantau',
+		'uses'=>'EhsSpAccidentsController@store_swapantau'
+	]);
+	Route::get('ep/swapantau/dashboard', [
+		'as' => 'ehsspaccidents.dashboard_swapantau',
+		'uses'=>'EhsSpAccidentsController@dashboard_swapantau'
+	]);
+	// ROUTE INSTALASI AIR LIMBAH //
+	Route::get('ep/lvlairlimbah', [
+		'as' => 'ehsspaccidents.index_lvlairlimbah',
+		'uses'=>'EhsSpAccidentsController@index_lvlairlimbah'
+	]);
+	Route::post('ep/lvlairlimbah/store', [
+		'as' => 'ehsspaccidents.store_lvlairlimbah',
+		'uses'=>'EhsSpAccidentsController@store_lvlairlimbah'
+	]);
+	Route::get('ep/lvlairlimbah/dashboard', [
+		'as' => 'ehsspaccidents.dashboard_lvlairlimbah',
+		'uses'=>'EhsSpAccidentsController@dashboard_lvlairlimbah'
+	]);
+	// ROUTE PEMAKAIAN BAHAN KIMIA //
+	Route::get('ep/pbhnkimia', [
+		'as' => 'ehsspaccidents.index_pbhnkimia',
+		'uses'=>'EhsSpAccidentsController@index_pbhnkimia'
+	]);
+	Route::post('ep/pbhnkimia/store', [
+		'as' => 'ehsspaccidents.store_pbhnkimia',
+		'uses'=>'EhsSpAccidentsController@store_pbhnkimia'
+	]);
+	Route::get('ep/pbhnkimia/dashboard', [
+		'as' => 'ehsspaccidents.dashboard_pbhnkimia',
+		'uses'=>'EhsSpAccidentsController@dashboard_pbhnkimia'
+	]);
+	// ROUTE PENGANGKUTAN LIMBAH B3 //
+	Route::get('ep/angkutlimb3', [
+		'as' => 'ehsspaccidents.index_angkutlimb3',
+		'uses'=>'EhsSpAccidentsController@index_angkutlimb3'
+	]);
+	Route::post('ep/angkutlimb3/store', [
+		'as' => 'ehsspaccidents.store_angkutlimb3',
+		'uses'=>'EhsSpAccidentsController@store_angkutlimb3'
+	]);
+	Route::get('ep/angkutlimb3/dashboard', [
+		'as' => 'ehsspaccidents.dashboard_angkutlimb3',
+		'uses'=>'EhsSpAccidentsController@dashboard_angkutlimb3'
+	]);
+	Route::get('festronik/', [
+		'as' => 'ehsspaccidents.index_festronik',
+		'uses'=>'EhsSpAccidentsController@index_festronik'
+	]);
+	Route::get('festronik/dashboard', [
+		'as' => 'ehsspaccidents.dashboard_festronik',
+		'uses'=>'EhsSpAccidentsController@dashboard_festronik'
+	]);
+	Route::get('festronik1/{param}/{param2}/{param3}', [
+		'as' => 'ehsspaccidents.approv_penghasil',
+		'uses'=>'EhsSpAccidentsController@approv_penghasil'
+	]);
+	Route::get('festronik2/{param}/{param2}/{param3}', [
+		'as' => 'ehsspaccidents.approv_transporter',
+		'uses'=>'EhsSpAccidentsController@approv_transporter'
+	]);
+	Route::get('festronik3/{param}/{param2}/{param3}', [
+		'as' => 'ehsspaccidents.approv_penerima',
+		'uses'=>'EhsSpAccidentsController@approv_penerima'
+	]);
+	// ROUTE EQUIPMENT FACILITY  //
+	Route::get('ep/equipfacility/', [
+		'as' => 'ehsspaccidents.index_equipfacility',
+		'uses'=>'EhsSpAccidentsController@index_equipfacility'
+	]);
+	Route::get('ep/equipfacility/dashboard', [
+		'as' => 'ehsspaccidents.dashboard_equipfacility',
+		'uses'=>'EhsSpAccidentsController@dashboard_equipfacility'
+	]);
+	Route::post('ep/equipfacility/store', [
+		'as' => 'ehsspaccidents.store_equipfacility', 
+		'uses'=>'EhsSpAccidentsController@store_equipfacility'
+	]);
+	Route::get('ep/equipfacility/create', [
+		'as' => 'ehsspaccidents.create_equipfacility',
+		'uses'=>'EhsSpAccidentsController@create_equipfacility'
+	]);
+	Route::get('ep/equipfacility/edit/{param}', [
+		'as' => 'ehsspaccidents.edit_equipfacility',
+		'uses'=>'EhsSpAccidentsController@edit_equipfacility'
+	]);
+/*	Route::post('equipfacility/update/{param}', [
+		'as'=>'ehsspaccidents.update',
+		'uses'=>'EhsSpAccidentsController@update'
+	]);*/
+	/*Route::get('ep/equipfacility/update/{param}', [
+		'as' => 'ehsspaccidents.update_equipfacility',
+		'uses'=>'EhsSpAccidentsController@update_equipfacility'
+	]);*/
+	Route::get('ep/equipfacility/delete/{param}', [
+		'as' => 'ehsspaccidents.delete_equipfacility',
+		'uses'=>'EhsSpAccidentsController@delete_equipfacility'
+	]);
+	Route::get('ep/equipfacility/{param}', [
+		'as' => 'ehsspaccidents.show_equipfacility',
+		'uses'=>'EhsSpAccidentsController@show_equipfacility'
+	]);
+	// ROUTE MASTER LIMBAH  //
+	Route::get('/mstrlimb3', [
+		'as' => 'ehsspaccidents.index_masterlimbah',
+		'uses'=>'EhsSpAccidentsController@index_masterlimbah'
+	]);
+	Route::get('/mstrlimb3/dashboard', [
+		'as' => 'ehsspaccidents.dashboard_masterlimbah',
+		'uses'=>'EhsSpAccidentsController@dashboard_masterlimbah'
+	]);
+	Route::post('/mstrlimb3/store', [
+		'as' => 'ehsspaccidents.store_masterlimbah',
+		'uses'=>'EhsSpAccidentsController@store_masterlimbah'
+	]);
+	Route::get('/mstrlimb3/delete/{param}', [
+		'as' => 'ehsspaccidents.delete_masterlimbah',
+		'uses'=>'EhsSpAccidentsController@delete_masterlimbah'
+	]);
+	Route::post('/mstrlimb3/update/', [
+		'as' => 'ehsspaccidents.update_masterlimbah',
+		'uses'=>'EhsSpAccidentsController@update_masterlimbah'
+	]);
+	Route::get('/kikenyoochi', [
+		'as' => 'ehsspaccidents.index_kikenyoochi',
+		'uses'=>'EhsSpAccidentsController@index_kikenyoochi'
+	]);
+	Route::get('kikenyoochi/karyawan/{param}', [
+		'as' => 'kikenyoochi.validasiKaryawanKy',
+		'uses' => 'EhsSpAccidentsController@validasiKaryawanKy'
+	]);
+	Route::get('kikenyoochi/popupKaryawanKy', [
+		'as' => 'kikenyoochi.popupKaryawanKy',
+		'uses' => 'EhsSpAccidentsController@popupKaryawanKy'
+	]);
+
+	Route::get('selectlimbah/{param}/{param2}', [
+		'as' => 'ehsspaccidents.selectlimbah',
+		'uses' => 'EhsSpAccidentsController@selectlimbah'
+	]);
+
+	//MAGANG E
+});

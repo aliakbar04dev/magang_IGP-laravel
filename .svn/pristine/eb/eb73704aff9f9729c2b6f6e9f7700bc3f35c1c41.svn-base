@@ -1,0 +1,1966 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use App\EhstWp1;
+use App\EhstWp2Mp;
+use App\EhstWp2K3;
+use App\EhstWp2Env;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use App\Http\Requests\StoreEhstWp1Request;
+use Illuminate\Support\Facades\Session;
+use App\Http\Requests\UpdateehsspaccidentsRequest;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use DB;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\File;
+use App\User;
+use Intervention\Image\ImageManagerStatic as Image;
+use Illuminate\Support\Facades\Mail;
+use PDF;
+use JasperPHP\JasperPHP;
+use DNS1D;
+use Illuminate\Support\Facades\Input;
+use App\Mobile;
+use DateTime;
+
+class EhsSpAccidentsController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index_sp_accident()
+    {
+         if(strlen(Auth::user()->username) == 5) {
+            $Accident = DB::table("sp_accident")
+            ->select(DB::raw("*"))
+            ->orderBy('tglkejadian');
+
+         $noUrutAkhir = DB::table("sp_accident")
+            ->max("no_accident");
+            $nourut= (int) substr($noUrutAkhir, 4,10);
+            $nourut++;
+            $tahun = date('y');
+            $idbaru ="AC".$tahun .sprintf("%06s",$nourut); 
+
+       return view('ehs.safety_performance.index_sp_accident', ['noid'=>$idbaru], compact('Accident'));
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function dashboard_sp_accident(Request $request)
+    {
+         if(strlen(Auth::user()->username) == 5) {
+           //  $tahun = $request->filter_tahun;
+            // $bulan = $request->filter_bulan;
+
+      
+             
+
+
+           /*  $tahun = "ALL";
+                    if(!empty($request->get('tahun'))) {
+                        $tahun = $request->get('tahun');
+                    }*/
+
+            if ($request->ajax()) {
+
+             /*  if(empty($request->filter_tahun)) {
+                      $tahun = '%%';
+                  }else{
+                     $tahun = $request->filter_tahun;
+                  }
+
+              if(empty($request->filter_bulan)) {
+                      $bulan = '%%';
+                  }else{
+                     $bulan = $request->filter_bulan;
+                  }*/
+
+               $Accident = DB::table("sp_accident")
+                ->select(DB::raw("*"))
+                //->whereYear('tglkejadian','=', $tahun)
+               // ->whereMonth('tglkejadian','=', $bulan)
+                ->orderBy('tglkejadian', 'desc');
+
+                return Datatables::of($Accident)
+                ->editColumn('tglkejadian', function($tglkejadian){
+                    return \Carbon\Carbon::parse($tglkejadian->tglkejadian)->format('j/m/Y');
+               })
+                ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+     }
+
+    public function store_sp_accident(Request $request)
+    {
+    if ($request->ajax()) {
+            try {
+                DB::beginTransaction();
+                $msg = "Berhasil disubmit.";
+
+     $noUrutAkhir = DB::table("sp_accident")
+            ->max("no_accident");
+            $nourut= (int) substr($noUrutAkhir, 4,10);
+            $nourut++;
+            $tahun = date('y');
+            $idbaru ="AC".$tahun .sprintf("%06s",$nourut); 
+
+     DB::table("sp_accident")
+                ->insert([
+                            'no_accident'=>$idbaru,
+                            'tglkejadian'=>$request->tgl_accident,
+                            'pt' =>$request->pt,
+                            'plant' =>$request->plant,
+                            'kecelakaan' =>$request->kecelakaan,
+                            'rank' =>$request->rank,
+                            'kronologi' =>$request->kronologi,
+                            ]
+                          );
+
+                  DB::commit();
+
+                return response()->json(['msg' => $msg]);
+            } catch (Exception $ex) {
+                DB::rollback();
+               $msg = $ex;
+             //   $msg = "Gagal submit! Hubungi Admin.";
+                return response()->json(['msg' => $msg]);
+            }
+        }else {
+            return view('errors.403');
+        }
+   //     return redirect()->route('ehsspaccidents.index_sp_accident');
+
+}
+
+
+
+
+
+
+
+// SWAPANTAU //
+ public function index_swapantau()
+    {
+       return view('ehs.safety_performance.index_swapantau');
+      
+    }
+    public function dashboard_swapantau(Request $request)
+    {
+         if(strlen(Auth::user()->username) == 5) {
+            if ($request->ajax()) {
+               $swapantau = DB::table("swapantau")
+                ->select(DB::raw("*"))
+                ->where('tgl_pantau','=', Carbon::now())
+                ->orderBy('tgl_pantau', 'desc');
+
+                        return Datatables::of($swapantau)
+                        ->editColumn('tgl_pantau', function($tgl_pantau){
+                    return \Carbon\Carbon::parse($tgl_pantau->tgl_pantau)->format('j/m/Y');
+               })
+                        ->make(true);
+
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+
+
+
+     public function store_swapantau(Request $request)
+    {
+
+     if ($request->ajax()) {
+            try {
+                DB::beginTransaction();
+                $msg = "Berhasil disubmit.";
+
+        $noUrutAkhir = DB::table("swapantau")
+            ->max("no_swapantau");
+            $nourut= (int) substr($noUrutAkhir, 4,10);
+            $nourut++;
+            $tahun = date('y');
+            $idbaru ="SP".$tahun .sprintf("%06s",$nourut); 
+
+
+     DB::table("swapantau")
+                ->insert([
+                            'no_swapantau'=>$idbaru,
+                            'tgl_pantau'=>$request->tgl_pantau,
+                            'outlet'=>$request->outlet,
+                            'ph' =>$request->ph,
+                            'debit' =>$request->debit,
+                            ]
+                          );
+
+                  DB::commit();
+        return response()->json(['msg' => $msg]);
+            } catch (Exception $ex) {
+                DB::rollback();
+                $msg = "Gagal submit! Hubungi Admin.";
+                return response()->json(['msg' => $msg]);
+            }
+        }
+
+      // return view('ehs.safety_performance.index_sp_accident');
+     //   return redirect('/ehs/ep/swapantau/index');
+    }
+
+
+
+    // SWAPANTAU //
+    public function index_lvlairlimbah()
+    {
+    $jenisproses =  DB::table("mas_mon_limbah")
+                ->select(DB::raw("*"))
+                ->where('kategori', '=', 'proses')
+                ->get();
+
+       return view('ehs.safety_performance.index_airlimbah', compact('jenisproses'));
+      
+    }
+
+     public function dashboard_lvlairlimbah(Request $request)
+    {
+         if(strlen(Auth::user()->username) == 5) {
+            if ($request->ajax()) {
+               $levelair = DB::table("level_airlimbah2")
+                ->select(DB::raw("level_airlimbah2.* , mas_mon_limbah.* , level_airlimbah1.*"))
+                ->join('level_airlimbah1', 'level_airlimbah2.no_lal', '=' , 'level_airlimbah1.no_lal')
+                ->join('mas_mon_limbah', 'level_airlimbah2.proses','=', 'mas_mon_limbah.kd_mon');
+
+
+             return Datatables::of($levelair)
+              ->editColumn('tanggal', function($tanggal){
+                    return \Carbon\Carbon::parse($tanggal->tanggal)->format('j/m/Y');
+               })
+             ->editColumn('status', function($statusvolume){
+                    if($statusvolume->proses =='ML003' and $statusvolume->volume > 11){
+                       return '<img src="'.asset('images/red.png').'" alt="X" >';
+                    }
+                    elseif ($statusvolume->proses =='ML003' and $statusvolume->volume > 8 and $statusvolume->volume <= 11) {
+                       return '<img src="'.asset('images/yellow.png').'" alt="X" >';
+                    }
+                    elseif ($statusvolume->proses =='ML003' and $statusvolume->volume <= 8) {
+                        return '<img src="'.asset('images/green.png').'" alt="X" >';
+                    }
+                    elseif($statusvolume->proses =='ML004' and $statusvolume->volume > 4){
+                       return '<img src="'.asset('images/red.png').'" alt="X" >';
+                    }
+                     elseif ($statusvolume->proses =='ML004' and $statusvolume->volume > 3 and $statusvolume->volume <= 4) {
+                        return '<img src="'.asset('images/yellow.png').'" alt="X" >';
+                    }
+                    elseif ($statusvolume->proses =='ML004' and $statusvolume->volume <= 3) {
+                        return '<img src="'.asset('images/green.png').'" alt="X" >';
+                    }
+                    elseif($statusvolume->proses =='ML001' and $statusvolume->volume > 68){
+                        return '<img src="'.asset('images/red.png').'" alt="X" >';
+                    }
+                     elseif ($statusvolume->proses =='ML001' and $statusvolume->volume >= 44 and $statusvolume->volume <= 68) {
+                        return '<img src="'.asset('images/yellow.png').'" alt="X" >';
+                    }
+                    elseif ($statusvolume->proses =='ML001' and $statusvolume->volume <= 43) {
+                        return '<img src="'.asset('images/green.png').'" alt="X" >';
+                    }
+                     elseif($statusvolume->proses =='ML002' and $statusvolume->volume > 39){
+                        return '<img src="'.asset('images/red.png').'" alt="X" >';
+                    }
+                     elseif ($statusvolume->proses =='ML002' and $statusvolume->volume <= 39 and $statusvolume->volume > 35) {
+                       return '<img src="'.asset('images/yellow.png').'" alt="X" >';
+                    }
+                    elseif ($statusvolume->proses =='ML002' and $statusvolume->volume <= 35) {
+                       return '<img src="'.asset('images/green.png').'" alt="X" >';
+                    }
+                   
+            })
+            ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+     public function store_lvlairlimbah(Request $request)
+    {
+
+          if ($request->ajax()) {
+            try {
+                DB::beginTransaction();
+                $msg = "Berhasil disubmit.";
+
+        $noUrutAkhir = DB::table("level_airlimbah1")
+            ->max("no_lal");
+            $nourut= (int) substr($noUrutAkhir, 4,10);
+            $nourut++;
+            $tahun = date('y');
+            $idbaru ="PK".$tahun .sprintf("%06s",$nourut); 
+
+             DB::table("level_airlimbah1")
+                ->insert([
+                            'tanggal'=>$request->tgl_monitoring,
+                            'no_lal' =>$idbaru]);
+
+
+
+    for ($i = 0; $i < count($request->proses); $i++) 
+       DB::table("level_airlimbah2")
+                ->insert(array(
+                            'no_lal' =>$idbaru,
+                            'proses' =>$request->proses[$i],
+                            'level'  =>$request->level[$i],
+                            'volume' =>$request->volume[$i]));
+                  DB::commit();
+
+     return response()->json(['msg' => $msg]);
+            } catch (Exception $ex) {
+                DB::rollback();
+                $msg = "Gagal submit! Hubungi Admin.";
+                return response()->json(['msg' => $msg]);
+            }
+        }
+       
+      
+      
+    }
+
+
+ // PEMAKAIAN BAHAN KIMIA //
+    public function index_pbhnkimia()
+    {
+    $jenischemical =  DB::table("mas_mon_limbah")
+                ->select(DB::raw("*"))
+                ->where('kategori', '=', 'pemakaian')
+                ->get();
+
+       return view('ehs.safety_performance.index_bhnkimia', compact('jenischemical'));
+      
+    }
+
+    public function dashboard_pbhnkimia(Request $request){
+         if(strlen(Auth::user()->username) == 5) {
+            if ($request->ajax()) {
+               $bkimiapakai = DB::table("pem_bhnkimia2")
+                ->select(DB::raw("pem_bhnkimia2.* , mas_mon_limbah.* , pem_bhnkimia1.*"))
+                ->join('pem_bhnkimia1', 'pem_bhnkimia2.no_pbk', '=', 'pem_bhnkimia1.no_pbk')
+                ->join('mas_mon_limbah', 'pem_bhnkimia2.chemical', '=', 'mas_mon_limbah.kd_mon');
+             return Datatables::of($bkimiapakai)
+             ->editColumn('tanggal', function($tanggal){
+                    return \Carbon\Carbon::parse($tanggal->tanggal)->format('j/m/Y');
+               })
+             ->editColumn('status', function($statuspakai){
+                    if($statuspakai->chemical =='ML005' and $statuspakai->total_pakai > 100){
+                       return '<img src="'.asset('images/red.png').'" alt="X" >';
+                    }
+                    elseif ($statuspakai->chemical =='ML005' and $statuspakai->total_pakai <= 100) {
+                        return '<img src="'.asset('images/green.png').'" alt="X" >';
+                    }
+                    elseif($statuspakai->chemical =='ML006' and $statuspakai->total_pakai > 350){
+                       return '<img src="'.asset('images/red.png').'" alt="X" >';
+                    }
+                    elseif ($statuspakai->chemical =='ML006' and $statuspakai->total_pakai <= 350) {
+                        return '<img src="'.asset('images/green.png').'" alt="X" >';
+                    }
+                    elseif($statuspakai->chemical =='ML007' and $statuspakai->total_pakai > 50){
+                       return '<img src="'.asset('images/red.png').'" alt="X" >';
+                    }
+                    elseif ($statuspakai->chemical =='ML007' and $statuspakai->total_pakai <= 50) {
+                        return '<img src="'.asset('images/green.png').'" alt="X" >';
+                    }
+                    elseif($statuspakai->chemical =='ML008' and $statuspakai->total_pakai > 0.20){
+                         return '<img src="'.asset('images/red.png').'" alt="X" >';
+                    }
+                    elseif ($statuspakai->chemical =='ML008' and $statuspakai->total_pakai <= 0.20) {
+                    return '<img src="'.asset('images/green.png').'" alt="X" >';
+                    }
+                    elseif($statuspakai->chemical =='ML009' and $statuspakai->total_pakai > 8){
+                       return '<img src="'.asset('images/red.png').'" alt="X" >';
+                    }
+                    elseif ($statuspakai->chemical =='ML009' and $statuspakai->total_pakai <= 8) {
+                        return '<img src="'.asset('images/green.png').'" alt="X" >';
+                    }
+                    elseif($statuspakai->chemical =='ML010' and $statuspakai->total_pakai > 2){
+                       return '<img src="'.asset('images/red.png').'" alt="X" >';
+                    }
+                    elseif ($statuspakai->chemical =='ML010' and $statuspakai->total_pakai <= 2) {
+                        return '<img src="'.asset('images/green.png').'" alt="X" >';
+                    }
+                    elseif($statuspakai->chemical =='ML011' and $statuspakai->total_pakai > 2){
+                       return '<img src="'.asset('images/red.png').'" alt="X" >';
+                    }
+                    elseif ($statuspakai->chemical =='ML011' and $statuspakai->total_pakai <= 2) {
+                        return '<img src="'.asset('images/green.png').'" alt="X" >';
+                    }        
+            })
+            ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+
+     public function store_pbhnkimia(Request $request)
+    {
+        if ($request->ajax()) {
+            try {
+                DB::beginTransaction();
+                $msg = "Berhasil disubmit.";
+
+
+         $noUrutAkhir = DB::table("pem_bhnkimia1")
+            ->max("no_pbk");
+            $nourut= (int) substr($noUrutAkhir, 4,10);
+            $nourut++;
+            $tahun = date('y');
+            $idbaru ="PK".$tahun .sprintf("%06s",$nourut); 
+
+         DB::table("pem_bhnkimia1")
+                ->insert([
+                            'tanggal'=>$request->tgl_monitoring,
+                            'no_pbk' =>$idbaru]);
+
+
+         for ($i = 0; $i < count($request->chemical); $i++) 
+         DB::table("pem_bhnkimia2")
+                    ->insert(array(
+                            'no_pbk'=>$idbaru,
+                            'chemical' =>$request->chemical[$i],
+                            'pemakaian'  =>$request->pemakaian[$i],
+                            'total_pakai' =>$request->totalpakai[$i]));
+
+            DB::commit();
+        return response()->json(['msg' => $msg]);
+            } catch (Exception $ex) {
+                DB::rollback();
+                $msg = "Gagal submit! Hubungi Admin.";
+                return response()->json(['msg' => $msg]);
+            }
+        }
+
+      // return redirect()->route('ehsspaccidents.index_pbhnkimia');  
+      
+      
+    }
+
+
+public function index_angkutlimb3() {
+
+    $jenislimbah =  DB::table("master_limbah")
+                ->select(DB::raw("*"))
+                ->where('kategori', '=', 'Buang')
+                ->get();
+
+    $noUrutAkhir = DB::table("angkutb3_2")
+            ->max("no_angkut");
+            $nourut= (int) substr($noUrutAkhir, 4,10);
+            $nourut++;
+            $tahun = date('y');
+            $idbaru ="PL".$tahun .sprintf("%06s",$nourut); 
+    return view('ehs.safety_performance.index_angkutb3',['noid'=>$idbaru], compact('jenislimbah'));
+} 
+
+
+public function dashboard_angkutlimb3(Request $request){
+         if(strlen(Auth::user()->username) == 5) {
+            if ($request->ajax()) {
+              $tgl = Carbon::now();
+               $limbah = DB::table("angkutb3_2")
+                ->select(DB::raw("angkutb3_2.* , master_limbah.*, angkutb3_1.*"))
+                ->orderBy('status', 'asc')
+                ->join('angkutb3_1', 'angkutb3_2.no_angkut', '=', 'angkutb3_1.no_angkut')
+                ->join('master_limbah', 'angkutb3_2.limbah', '=', 'master_limbah.kd_limbah')
+                ->where('tgl_angkut', '=' , $tgl);
+             return Datatables::of($limbah)
+               ->editColumn('tgl_angkut', function($tgl_angkut){
+                 return \Carbon\Carbon::parse($tgl_angkut->tgl_angkut)->format('j/m/Y');
+               })
+                ->editColumn('pt', function($pt){
+                    if($pt->pt == 'IGPJ'){
+                       return 'IGP-Jakarta';
+                    }
+                     elseif($pt->pt == 'IGPK'){
+                       return 'IGP-Karawang';
+                    }
+                   elseif($pt->pt == 'GKDJ'){
+                       return 'GKD-Jakarta';
+                    }
+                    elseif($pt->pt == 'GKDK'){
+                       return 'GKD-Karawang';
+                    }
+                    elseif($pt->pt == 'AGIJ'){
+                       return 'AGI-Jakarta';
+                    }
+                    elseif($pt->pt == 'AGIK'){
+                       return 'AGI-Karawang';
+                    }
+                })
+/*             ->editColumn('status', function($status){
+                    if($status->status == 1){
+                       return '<b style="color:red;">NG</b>';
+                    }
+                    elseif ($status->status == 2){
+                        return '<b style="color:orange;">OK PENGHASIL</b>';
+                    }
+                    elseif ($status->status == 3){
+                        return '<b style="color:orange;">OK TRANSPORTER</b>';
+                    }
+                    elseif ($status->status == 4){
+                        return '<b style="color:green;">OK</b>';
+                    }
+                })*/
+
+            ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+ public function store_angkutlimb3(Request $request)
+    {
+
+     if ($request->ajax()) {
+            try {
+                DB::beginTransaction();
+                $msg = "Berhasil disubmit.";
+
+         $noUrutAkhir = DB::table("angkutb3_1")
+            ->max("no_angkut");
+            $nourut= (int) substr($noUrutAkhir, 4,10);
+            $nourut++;
+            $tahun = date('y');
+            $idbaru ="FL".$tahun .sprintf("%06s",$nourut); 
+
+             DB::table("angkutb3_1")
+                ->insert([
+                            'no_angkut'=>$idbaru,
+                            'tgl_angkut'=>$request->tgl_angkut,
+                            'tgl_submit' => Carbon::now()]);
+        
+         for ($i = 0; $i < count($request->limbah); $i++) 
+             DB::table("angkutb3_2")
+                    ->insert(array(
+                            'no_angkut'=>$idbaru,
+                            'limbah' =>$request->limbah[$i],
+                            'pt'  =>$request->pt[$i],
+                            'qty' =>$request->qty[$i],
+                            'status' =>1));
+
+          /*   Session::flash("flash_notification", [
+            "level"=>"success",
+            "message"=>"Pengangkutan Limbah B3 Berhasil Ditambahkan"
+          ]);*/
+           
+            DB::commit();
+        return response()->json(['msg' => $msg]);
+            } catch (Exception $ex) {
+                DB::rollback();
+                $msg = "Gagal submit! Hubungi Admin.";
+                return response()->json(['msg' => $msg]);
+            }
+        }
+
+  //  return redirect()->route('ehsspaccidents.index_angkutlimb3');  
+    }
+
+
+
+
+
+    public function approv_penghasil(Request $request, $id, $id2, $id3)
+    {
+
+      //return $request->date_penghasil;
+        try {
+        DB::beginTransaction();
+            $msg = "Berhasil disubmit.";
+            $indctr = "1";
+
+        $date_penghasil = $_GET['date_penghasil'];
+
+        $penghasil =  DB::table("angkutb3_2")
+            ->where('no_angkut', '=', $id)
+            ->where('limbah', '=', $id2)
+            ->where('pt', '=', $id3)
+            ->update([
+                'tglok_penghasil'=>$date_penghasil,
+                'status'=>2,
+                'approv_penghasil' =>  Auth::user()->username,
+                ]);     
+        DB::commit();
+            return response()->json(['msg' => $msg, 'indctr' => $indctr]);
+            } catch (Exception $ex) {
+                DB::rollback();
+                $msg = "Gagal submit! Hubungi Admin.";
+                $indctr = "0";
+                return response()->json(['msg' => $msg, 'indctr' => $indctr]);
+            }
+
+    }
+
+    public function approv_transporter(Request $request, $id, $id2, $id3)
+    {
+        try {
+        DB::beginTransaction();
+            $msg = "Berhasil disubmit.";
+            $indctr = "1";
+
+        $date_transporter = $_GET['date_transporter'];
+        $no_festronik = $_GET['no_festronik'];
+
+        $penghasil =  DB::table("angkutb3_2")
+            ->where('no_angkut', '=', $id)
+            ->where('limbah', '=', $id2)
+            ->where('pt', '=', $id3)
+            ->update([
+                'tglok_transporter'=> $date_transporter,
+                'status'=>3,
+                'approv_transporter' =>  Auth::user()->username,
+                'no_festronik' => $no_festronik,
+                ]);     
+        DB::commit();
+            return response()->json(['msg' => $msg, 'indctr' => $indctr]);
+            } catch (Exception $ex) {
+                DB::rollback();
+                $msg = "Gagal submit! Hubungi Admin.";
+                $indctr = "0";
+                return response()->json(['msg' => $msg, 'indctr' => $indctr]);
+        }
+
+    }
+
+     public function approv_penerima(Request $request, $id, $id2, $id3)
+    {
+         try {
+        DB::beginTransaction();
+            $msg = "Berhasil disubmit.";
+            $indctr = "1";
+
+        $date_penerima = $_GET['date_penerima'];
+        $penerima =  DB::table("angkutb3_2")
+            ->where('no_angkut', '=', $id)
+            ->where('limbah', '=', $id2)
+            ->where('pt', '=', $id3)
+            ->update([
+                'tglok_penerima'=>$date_penerima,
+                'status'=>4,
+                'approv_penerima' =>  Auth::user()->username,
+                ]);
+        DB::commit();
+                return response()->json(['msg' => $msg, 'indctr' => $indctr]);
+            } catch (Exception $ex) {
+                DB::rollback();
+                $msg = "Gagal submit! Hubungi Admin.";
+                $indctr = "0";
+                return response()->json(['msg' => $msg, 'indctr' => $indctr]);
+        }
+
+    }
+
+    public function index_festronik()
+    {
+       $jenislimbah =  DB::table("master_limbah")
+                ->select(DB::raw("*"))
+                ->where('kategori', '=', 'Buang')
+                ->get();
+       return view('ehs.safety_performance.index_festronik', compact('jenislimbah'));
+    }   
+
+
+    public function dashboard_festronik(Request $request){
+         if(strlen(Auth::user()->username) == 5) {
+            if ($request->ajax()) {
+               $dateS = Carbon::now()->startOfMonth()->subMonth(3);
+               $dateE = Carbon::now()->endOfMonth();
+
+               $limbah = DB::table("angkutb3_2")
+                ->select(DB::raw("angkutb3_2.* , master_limbah.*, angkutb3_1.*"))
+                ->orderBy('status', 'asc')
+                ->join('angkutb3_1', 'angkutb3_2.no_angkut', '=', 'angkutb3_1.no_angkut')
+                ->join('master_limbah', 'angkutb3_2.limbah', '=', 'master_limbah.kd_limbah')
+                ->whereBetween('tgl_angkut', [$dateS, $dateE]);
+             return Datatables::of($limbah)
+               ->editColumn('tgl_angkut', function($tgl_angkut){
+                 return \Carbon\Carbon::parse($tgl_angkut->tgl_angkut)->format('j/m/Y');
+               })
+               ->editColumn('pt', function($pt){
+                    if($pt->pt == 'IGPJ'){
+                       return 'IGP-Jakarta';
+                    }
+                     elseif($pt->pt == 'IGPK'){
+                       return 'IGP-Karawang';
+                    }
+                   elseif($pt->pt == 'GKDJ'){
+                       return 'GKD-Jakarta';
+                    }
+                    elseif($pt->pt == 'GKDK'){
+                       return 'GKD-Karawang';
+                    }
+                    elseif($pt->pt == 'AGIJ'){
+                       return 'AGI-Jakarta';
+                    }
+                    elseif($pt->pt == 'AGIK'){
+                       return 'AGI-Karawang';
+                    }
+                })
+             ->editColumn('statuspenghasil', function($statuspenghasil){
+                    if($statuspenghasil->status >= 2){
+                       return '<i class="fa fa-check" style="font-size:20px;color:green"></i>';
+                    }
+                    elseif ($statuspenghasil->status < 2){
+                        return '<i class="fa fa-circle-o" style="font-size:20px;color:red"></i>';
+                    }
+                })
+             ->editColumn('statustransporter', function($statustransporter){
+                    if($statustransporter->status >= 3){
+                       return '<i class="fa fa-check" style="font-size:20px;color:green"></i>';
+                    }
+                    elseif ($statustransporter->status < 3){
+                        return '<i class="fa fa-circle-o" style="font-size:20px;color:red"></i>';
+                    }
+                })
+             ->editColumn('statuspenerima', function($statuspenerima){
+                    if($statuspenerima->status >= 4){
+                       return '<i class="fa fa-check" style="font-size:20px;color:green"></i>';
+                    }
+                   elseif ($statuspenerima->status < 4){
+                        return '<i class="fa fa-circle-o" style="font-size:20px;color:red"></i>';
+                    }
+                })
+            ->editColumn('action', function($limbah){
+
+     /*       $data =  table("angkutb3_2")
+             ->select(DB::raw("*"))
+             ->where('no_angkut', '=', $limbah->no_angkut)
+             ->where('limbah', '=', $limbah->limbah)
+             ->where('pt', '=', $limbah->pt)
+             ->get();
+         */
+
+            $approv_penghasil =  DB::table("v_mas_karyawan")
+            ->select("nama")
+            ->where('npk' ,'=' , $limbah->approv_penghasil)
+            ->value('nama');
+
+  
+            $approv_transporter =  DB::table("v_mas_karyawan")
+             ->select("nama")
+            ->where('npk' ,'=' , $limbah->approv_transporter)
+             ->value('nama');
+
+            $approv_penerima =   DB::table("v_mas_karyawan")
+             ->select("nama")
+            ->where('npk' ,'=' , $limbah->approv_penerima)
+             ->value('nama');
+        
+          return view('datatable._action-festronik')->with(compact('limbah', 'approv_penghasil', 'approv_transporter', 'approv_penerima'));
+         })
+            ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+
+
+   public function index_masterlimbah()
+    {
+       return view('ehs.safety_performance.master-limbahb3');
+    }   
+
+
+    public function dashboard_masterlimbah(Request $request)
+    {
+        if(strlen(Auth::user()->username) == 5) {
+            if ($request->ajax()) {
+               $Master = DB::table("master_limbah")
+                ->select(DB::raw("*"))
+                ->orderBy('kd_limbah', 'asc');
+
+                return Datatables::of($Master)
+                ->editColumn('action', function($limbah){
+         
+        
+                return view('datatable._action-masterlimbah')->with(compact(['limbah']));
+                })
+                ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    } 
+
+     public function store_masterlimbah(Request $request)
+    {
+
+     if ($request->ajax()) {
+            try {
+                DB::beginTransaction();
+                $msg = "Berhasil disubmit.";
+
+         $noUrutAkhir = DB::table("master_limbah")
+            ->max("kd_limbah");
+            $nourut= (int) substr($noUrutAkhir, 2,5);
+            $nourut++;
+            $idbaru ="KL".sprintf("%03s",$nourut); 
+          
+
+             DB::table("master_limbah")
+                ->insert([
+                            'kd_limbah'=>$idbaru,
+                            'jenislimbah'=>$request->jenislimbah,
+                            'desc' => $request->desc,
+                            'kategori' => $request->kategori,
+                            ]);
+        
+
+
+/*             Session::flash("flash_notification", [
+            "level"=>"success",
+            "message"=>"Master Limbah B3 Berhasil Ditambahkan"
+          ]);*/
+           
+            DB::commit();
+        return response()->json(['msg' => $msg]);
+            } catch (Exception $ex) {
+                DB::rollback();
+                $msg = "Gagal submit! Hubungi Admin.";
+                return response()->json(['msg' => $msg]);
+            }
+        }
+
+       //  return redirect()->route('ehsspaccidents.index_masterlimbah');  
+    }
+
+    public function delete_masterlimbah($id)
+    {
+          try {
+        DB::beginTransaction();
+            $msg = "Berhasil disubmit.";
+            $indctr = "1";
+        
+        $delete =  DB::table("master_limbah")
+            ->where('kd_limbah', '=', $id)
+            ->delete();
+
+        DB::commit();
+                return response()->json(['msg' => $msg, 'indctr' => $indctr]);
+            } catch (Exception $ex) {
+                DB::rollback();
+                $msg = "Gagal submit! Hubungi Admin.";
+                $indctr = "0";
+                return response()->json(['msg' => $msg, 'indctr' => $indctr]);
+        }
+     
+    }
+
+    public function update_masterlimbah(Request $request)
+    {
+          
+
+      try {
+        DB::beginTransaction();
+            $msg = "Berhasil disubmit.";
+            $indctr = "1";
+
+       $update =  DB::table("master_limbah")
+            ->where('kd_limbah', '=', $request->kd_limbah)
+            ->update([
+                'jenislimbah'=>$request->jenislimbah,
+                'desc' => $request->desc,
+                'kategori' => $request->kategori,
+                ]);
+         //   
+           DB::commit();
+          //   return response()->json(['msg' => $msg, 'indctr' => $indctr]);
+
+           Session::flash("flash_notification", [
+            "level"=>"success",
+            "message"=>"Limbah B3 $request->kd_limbah Berhasil Diupdate"
+          ]);
+           return redirect()->route('ehsspaccidents.index_masterlimbah');  
+
+         
+
+            } catch (Exception $ex) {
+                DB::rollback();
+                $msg = "Gagal submit! Hubungi Admin.";
+                $indctr = "0";
+              //  return response()->json(['msg' => $msg, 'indctr' => $indctr]);
+
+                 Session::flash("flash_notification", [
+            "level"=>"warning",
+            "message"=>"Limbah B3 $request->kd_limbah Gagal Diupdate"
+          ]);
+                return redirect()->route('ehsspaccidents.index_masterlimbah');  
+
+        
+        }
+
+    
+}
+
+
+
+            
+   
+ 
+
+   public function index_equipfacility()
+    {
+       return view('ehs.safety_performance.index_equipfacility');
+    }
+
+    public function create_equipfacility()
+    {
+ /*       $mefdetail = DB::table("equipment_facility")
+                ->select(DB::raw("*"))
+                ->get();*/
+              //  return $mefdetail;
+       return view('ehs.safety_performance.create_equipfacility');
+    }
+
+   public function dashboard_equipfacility(Request $request)
+    {
+        if(strlen(Auth::user()->username) == 5) {
+
+            if ($request->ajax()) {
+
+               $tahun = Carbon::now()->format('Y');
+               $bulan = Carbon::now()->format('m');
+               $equipfac = DB::table("equipment_facility")
+                ->select(DB::raw("*"))
+                ->whereYear('tgl_mon','=', $tahun)
+                ->whereMonth('tgl_mon','=', $bulan)
+                ->orderBy('no_mef', 'desc');
+
+                return Datatables::of($equipfac)
+                ->editColumn('tgl_mon', function($tgl_mon){
+                 return \Carbon\Carbon::parse($tgl_mon->tgl_mon)->format('j/m/Y');
+                  })
+                 ->editColumn('no_mef', function($mefdetail) {
+                    return '<a href="'.route('ehsspaccidents.show_equipfacility', base64_encode($mefdetail->no_mef)).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $mefdetail->no_mef .'">'.$mefdetail->no_mef.'</a>';
+                })
+                ->editColumn('status_valve', function($stat_valve){
+                    if($stat_valve->status_valve == '1'){
+                       return '<i class="fa fa-check" style="font-size:20px;color:green"></i>';
+                    }
+                    elseif ($stat_valve->status_valve == '0') {
+                        return '<i class="fa fa-close" style="font-size:20px;color:red"></i>';
+                    }
+                  })
+                ->editColumn('status_pompa', function($stat_pompa){
+                    if($stat_pompa->status_pompa == '1'){
+                       return '<i class="fa fa-check" style="font-size:20px;color:green"></i>';
+                    }
+                    elseif ($stat_pompa->status_pompa == '0') {
+                      return '<i class="fa fa-close" style="font-size:20px;color:red"></i>';
+                    }
+                  })
+                ->editColumn('status_radar', function($stat_radar){
+                    if($stat_radar->status_radar == '1'){
+                       return '<i class="fa fa-check" style="font-size:20px;color:green"></i>';
+                    }
+                    elseif ($stat_radar->status_radar == '0') {
+                         return '<i class="fa fa-close" style="font-size:20px;color:red"></i>';
+                    }
+                  })
+                ->editColumn('status_bak', function($stat_bak){
+                    if($stat_bak->status_bak == '1'){
+                       return '<i class="fa fa-check" style="font-size:20px;color:green"></i>';
+                    }
+                    elseif ($stat_bak->status_bak == '0') {
+                     return '<i class="fa fa-close" style="font-size:20px;color:red"></i>';
+                    }
+                  })
+                ->editColumn('status_spit', function($stat_spit){
+                    if($stat_spit->status_spit == '1'){
+                       return '<i class="fa fa-check" style="font-size:20px;color:green"></i>';
+                    }
+                    elseif ($stat_spit->status_spit == '0') {
+                        return '<i class="fa fa-close" style="font-size:20px;color:red"></i>';
+                    }
+                  })
+                ->editColumn('action', function($action){
+                    return '
+                    <center>
+                        <a class="btn btn-success btn-xs delete-row icon-trash glyphicon glyphicon-edit" data-toggle="modal" data-target="" data-toggle="tooltip" data-placement="bottom" title="Edit" href="'.route('ehsspaccidents.edit_equipfacility', base64_encode($action->no_mef)).'"> </a>  
+                        <button class="btn btn-danger btn-xs delete-row icon-trash glyphicon glyphicon-trash" onclick="hapus_mef(\''.$action->no_mef.'\')" data-toggle="tooltip" data-placement="bottom" title="Hapus"> </button>
+                    </center>';  
+               // return view('datatable._action-masterlimbah')->with(compact(['limbah']));
+                })
+                ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    } 
+
+
+     public function show_equipfacility($id)
+    {
+        $mefdetail = DB::table("equipment_facility")
+                ->select(DB::raw("*"))
+                ->where('no_mef', '=', base64_decode($id))
+                ->get();
+             //  return $mefdetail;
+
+       $mefdetail1 = DB::table("equipment_facility")
+                ->select(DB::raw("*"))
+                ->where('no_mef', '=', base64_decode($id))
+                ->first();
+
+        $cmvalve = DB::table("v_mas_karyawan")
+                ->select(DB::raw("nama, desc_dep, desc_div"))
+                ->where('npk', '=', $mefdetail1->cm_valve)->get()
+                ->first();
+
+        $cmpompa = DB::table("v_mas_karyawan")
+                ->select(DB::raw("nama, desc_dep, desc_div"))
+                ->where('npk', '=', $mefdetail1->cm_pompa)->get()
+                ->first();
+
+        $cmradar = DB::table("v_mas_karyawan")
+                ->select(DB::raw("nama, desc_dep, desc_div"))
+                ->where('npk', '=', $mefdetail1->cm_radar)->get()
+                ->first();
+
+        $cmbak = DB::table("v_mas_karyawan")
+                ->select(DB::raw("nama, desc_dep, desc_div"))
+                ->where('npk', '=', $mefdetail1->cm_bak)->get()
+                ->first();
+
+        $cmspit = DB::table("v_mas_karyawan")
+                ->select(DB::raw("nama, desc_dep, desc_div"))
+                ->where('npk', '=', $mefdetail1->cm_spit)->get()
+                ->first();
+
+        return view('ehs.safety_performance.show_equipfacility')->with(compact('mefdetail', 'cmvalve', 'cmpompa', 'cmradar', 'cmspit', 'cmbak'));
+    }
+
+    public function edit_equipfacility($id)
+    {
+        $mefdetail = DB::table("equipment_facility")
+                ->select(DB::raw("*"))
+                ->where('no_mef', '=', base64_decode($id))
+                ->first();
+
+        $cmvalve = DB::table("v_mas_karyawan")
+                ->select(DB::raw("nama, desc_dep, desc_div"))
+                ->where('npk', '=', $mefdetail->cm_valve)->get()
+                ->first();
+
+        $cmpompa = DB::table("v_mas_karyawan")
+                ->select(DB::raw("nama, desc_dep, desc_div"))
+                ->where('npk', '=', $mefdetail->cm_pompa)->get()
+                ->first();
+
+        $cmradar = DB::table("v_mas_karyawan")
+                ->select(DB::raw("nama, desc_dep, desc_div"))
+                ->where('npk', '=', $mefdetail->cm_radar)->get()
+                ->first();
+
+        $cmbak = DB::table("v_mas_karyawan")
+                ->select(DB::raw("nama, desc_dep, desc_div"))
+                ->where('npk', '=', $mefdetail->cm_bak)->get()
+                ->first();
+
+        $cmspit = DB::table("v_mas_karyawan")
+                ->select(DB::raw("nama, desc_dep, desc_div"))
+                ->where('npk', '=', $mefdetail->cm_spit)->get()
+                ->first();
+
+        return view('ehs.safety_performance.edit_equipfacility')->with(compact('mefdetail', 'cmvalve', 'cmpompa', 'cmradar', 'cmspit', 'cmbak'));
+    }
+
+
+    public function update(Request $request, $id)
+    {
+        DB::beginTransaction();
+        try {
+        if (empty($request->dd_valve)) {$dd_valve = NULL;}
+            else{$dd_valve = $request->dd_valve;}
+        if (empty($request->dd_pompa)) {$dd_pompa = NULL;}
+            else{$dd_pompa = $request->dd_pompa;}
+        if (empty($request->dd_radar)) {$dd_radar = NULL;}
+            else{$dd_radar = $request->dd_radar;}
+        if (empty($request->dd_bak)) {$dd_bak = NULL;}
+            else{$dd_bak = $request->dd_bak;}
+        if (empty($request->dd_spit)) {$dd_spit = NULL;}
+            else{$dd_spit = $request->dd_spit;}
+
+
+        if (empty($request->ket_valve_tb)) {$ket_valve_tb = NULL;}
+            else{$ket_valve_tb = $request->ket_valve_tb;}
+        if (empty($request->ket_valve_no)) {$ket_valve_no = NULL;}
+            else{$ket_valve_no = $request->ket_valve_no;}
+        if (empty($request->ket_valve_tts)) {$ket_valve_tts = NULL;}
+            else{$ket_valve_tts = $request->ket_valve_tts;}
+
+        if (empty($request->ket_pompa_tk)) {$ket_pompa_tk = NULL;}
+            else{$ket_pompa_tk = $request->ket_pompa_tk;}
+        if (empty($request->ket_pompa_man)) {$ket_pompa_man = NULL;}
+            else{$ket_pompa_man = $request->ket_pompa_man;}
+        if (empty($request->ket_pompa_ct)) {$ket_pompa_ct = NULL;}
+            else{$ket_pompa_ct = $request->ket_pompa_ct;}
+
+        if (empty($request->ket_radar_man)) {$ket_radar_man = NULL;}
+            else{$ket_radar_man = $request->ket_radar_man;}
+        if (empty($request->ket_radar_tts)) {$ket_radar_tts = NULL;}
+            else{$ket_radar_tts = $request->ket_radar_tts;}
+        if (empty($request->ket_radar_stp)) {$ket_radar_stp = NULL;}
+            else{$ket_radar_stp = $request->ket_radar_stp;}
+
+
+        if (empty($request->ket_bak_tas)) {$ket_bak_tas = NULL;}
+            else{$ket_bak_tas = $request->ket_bak_tas;}
+        if (empty($request->ket_bak_tal)) {$ket_bak_tal = NULL;}
+            else{$ket_bak_tal = $request->ket_bak_tal;}
+        if (empty($request->ket_bak_tb)) {$ket_bak_tb = NULL;}
+            else{$ket_bak_tb = $request->ket_bak_tb;}
+        if (empty($request->ket_bak_tac)) {$ket_bak_tac = NULL;}
+            else{$ket_bak_tac = $request->ket_bak_tac;}
+
+        if (empty($request->ket_spit_tas)) {$ket_spit_tas = NULL;}
+            else{$ket_spit_tas = $request->ket_spit_tas;}
+        if (empty($request->ket_spit_tal)) {$ket_spit_tal = NULL;}
+            else{$ket_spit_tal = $request->ket_spit_tal;}
+
+        $mefdetail = DB::table("equipment_facility")
+                ->select(DB::raw("*"))
+                ->where('no_mef', '=', base64_decode($id))
+                ->first();
+/*          $filename1=null;
+          $filename2=null;
+          $filename3=null;
+          $filename4='manager_spy';*/
+
+        if ($request->hasFile('pic_valve'))
+        {
+        $uploaded_valve = $request->file('pic_valve');
+        $extension = $uploaded_valve->getClientOriginalExtension();
+        $filenamevalve = md5(time()) . '.' . $extension;
+        $destinationPath = public_path() . DIRECTORY_SEPARATOR . 'img/equipmentfacility';
+        $uploaded_valve->move($destinationPath, $filenamevalve);      
+        }else {
+            $filenamevalve = $mefdetail->pic_valve;
+        }
+        
+        if ($request->hasFile('pic_pompa'))
+        {
+        $uploaded_pompa = $request->file('pic_pompa');
+        $extension = $uploaded_pompa->getClientOriginalExtension();
+        $filenamepompa = md5(time()) . '.' . $extension;
+        $destinationPath = public_path() . DIRECTORY_SEPARATOR . 'img/equipmentfacility';
+        $uploaded_pompa->move($destinationPath, $filenamepompa);      
+        }else {
+          $filenamepompa = $mefdetail->pic_pompa;
+        }
+
+
+        if ($request->hasFile('pic_radar'))
+        {
+        $uploaded_radar = $request->file('pic_radar');
+        $extension = $uploaded_radar->getClientOriginalExtension();
+        $filenameradar = md5(time()) . '.' . $extension;
+        $destinationPath = public_path() . DIRECTORY_SEPARATOR . 'img/equipmentfacility';
+        $uploaded_radar->move($destinationPath, $filenamepompa);      
+        }else{
+           $filenameradar = $mefdetail->pic_radar;
+        }
+
+        if ($request->hasFile('pic_bak'))
+        {
+        $uploaded_bak = $request->file('pic_bak');
+        $extension = $uploaded_bak->getClientOriginalExtension();
+        $filenamebak = md5(time()) . '.' . $extension;
+        $destinationPath = public_path() . DIRECTORY_SEPARATOR . 'img/equipmentfacility';
+        $uploaded_bak->move($destinationPath, $filenamebak);      
+        }else {
+            $filenamebak = $mefdetail->pic_bak;
+        }
+
+        if ($request->hasFile('pic_spit'))
+        {
+        $uploaded_spit = $request->file('pic_spit');
+        $extension = $uploaded_spit->getClientOriginalExtension();
+        $filenamespit = md5(time()) . '.' . $extension;
+        $destinationPath = public_path() . DIRECTORY_SEPARATOR . 'img/equipmentfacility';
+        $uploaded_spit->move($destinationPath, $filenamespit);      
+        }else{
+           $filenamespit = $mefdetail->pic_spit;
+        }
+/*         $data_chk = $request->only('ket_pompa_tk', 'ket_pompa_man', 'ket_pompa_ct', 'ket_valve_tb', 'ket_valve_no', 'ket_valve_tts','ket_radar_tts', 'ket_radar_man', 'ket_radar_stp', 'ket_bak_tas', 'ket_bak_tal', 'ket_bak_tb', 'ket_bak_tac', 'ket_spit_tas', 'ket_spit_tal'  );
+         $kat_kerja_sfp = trim($data_chk['kat_kerja_sfp']) !== '' ? trim($data_chk['kat_kerja_sfp']) : null;*/
+ 
+//return $request->no_mef;
+         DB::table("equipment_facility")
+                ->where('no_mef', '=', base64_decode($id))
+                ->update([
+                            'tgl_mon'=>$request->tgl_mon,
+                            'kd_ot' => $request->kd_ot,
+                            'status_valve' => $request->status_valve,
+                            'ket_valve_tb'=>$request->ket_valve_tb,
+                            'ket_valve_no' => $request->ket_valve_no,
+                            'ket_valve_tts' => $request->ket_valve_tts,
+                            'prob_valve' => $request->prob_valve,
+                            'dd_valve' => $dd_valve,
+                            'pic_valve' => $filenamevalve,
+                            'cm_valve' => $request->cm_valve,
+                            'status_pompa' => $request->status_pompa,
+                            'ket_pompa_tk' => $request->ket_pompa_tk,
+                            'ket_pompa_man' => $request->ket_pompa_man,
+                            'ket_pompa_ct' => $request->ket_pompa_ct,
+                            'prob_pompa' => $request->prob_pompa,
+                            'dd_pompa' => $dd_pompa,
+                            'pic_pompa' => $filenamepompa,
+                            'cm_pompa' => $request->cm_pompa,
+                            'status_radar' => $request->status_radar,
+                            'ket_radar_tts' => $request->ket_radar_tts,
+                            'ket_radar_man' => $request->ket_radar_man,
+                            'ket_radar_stp' => $request->ket_radar_stp,
+                            'prob_radar' => $request->prob_radar,
+                            'dd_radar' => $dd_radar,
+                            'pic_radar' => $filenameradar,
+                            'cm_radar' => $request->cm_radar,
+                            'status_bak' => $request->status_bak,
+                            'ket_bak_tas' => $request->ket_bak_tas,
+                            'ket_bak_tal' => $request->ket_bak_tal,
+                            'ket_bak_tb' => $request->ket_bak_tb,
+                            'ket_bak_tac' => $request->ket_bak_tac,
+                            'prob_bak' => $request->prob_bak,
+                            'dd_bak' => $dd_bak,
+                            'pic_bak' => $filenamebak,
+                            'cm_bak' => $request->cm_bak,
+                            'status_spit' => $request->status_spit,
+                            'ket_spit_tas' => $request->ket_spit_tas,
+                            'ket_spit_tal' => $request->ket_spit_tal,
+                            'prob_spit' => $request->prob_spit,
+                            'dd_spit' => $dd_spit,
+                            'pic_spit' => $filenamespit,
+                            'cm_spit' => $request->cm_spit,
+                            ]);
+                DB::commit();
+
+                 Session::flash("flash_notification", [
+                    "level"=>"success",
+                    "message"=>"Berhasil Mengubah $request->no_mef."
+                ]);
+
+                return redirect()->route('ehsspaccidents.index_equipfacility');  
+       // return response()->json(['msg' => $msg]);
+            } catch (Exception $ex) {
+                DB::rollback();
+                Session::flash("flash_notification", [
+                    "level" => "danger",
+                    "message" => "Simpan Gagal!".$ex  ]);
+                 return redirect()->back()->withInput(Input::all());
+        }
+
+    }
+
+    public function update_1(Request $request, $id)
+    {
+        $data = $request->all();
+        echo $data['no_mef'];
+        die();
+
+      return $request->no_mef;
+    }
+
+               //  return redirect()->route('ehsspaccidents.index_equipfacility');  
+  /*     DB::commit();
+            return response()->json(['msg' => $msg]);
+                } catch (Exception $ex) {
+                    DB::rollback();
+                    $msg = "Gagal submit! Hubungi Admin.";
+                    return response()->json(['msg' => $msg]);
+                }
+            }
+*/
+
+     /*   $mefdetail = DB::table("equipment_facility")
+                ->select(DB::raw("*"))
+                ->where('no_mef', '=', $id)
+                ->get();
+             //  return $mefdetail;
+
+     return view('ehs.safety_performance.edit_equipfacility')->with(compact('mefdetail'));*/
+   // }
+
+    public function store_equipfacility(Request $request)
+    {
+
+  /*  if ($request->ajax()) {*/
+    DB::beginTransaction();
+        try {
+        if (empty($request->dd_valve)) {$dd_valve = NULL;}
+            else{$dd_valve = $request->dd_valve;}
+
+        if (empty($request->dd_pompa)) {$dd_pompa = NULL;}
+            else{$dd_pompa = $request->dd_pompa;}
+
+        if (empty($request->dd_radar)) {$dd_radar = NULL;}
+            else{$dd_radar = $request->dd_radar;}
+
+        if (empty($request->dd_bak)) {$dd_bak = NULL;}
+            else{$dd_bak = $request->dd_bak;}
+
+        if (empty($request->dd_spit)) {$dd_spit = NULL;}
+            else{$dd_spit = $request->dd_spit;}
+
+
+
+        if ($request->hasFile('pic_valve'))
+        {
+        $uploaded_valve = $request->file('pic_valve');
+        $extension = $uploaded_valve->getClientOriginalExtension();
+        $filenamevalve = md5(time()) . '.' . $extension;
+        $destinationPath = public_path() . DIRECTORY_SEPARATOR . 'img/equipmentfacility';
+        $uploaded_valve->move($destinationPath, $filenamevalve);      
+        }elseif (empty($request->hasFile('pic_valve'))) {
+            $filenamevalve = NULL;
+        }
+
+
+        
+        if ($request->hasFile('pic_pompa'))
+        {
+        $uploaded_pompa = $request->file('pic_pompa');
+        $extension = $uploaded_pompa->getClientOriginalExtension();
+        $filenamepompa = md5(time()) . '.' . $extension;
+        $destinationPath = public_path() . DIRECTORY_SEPARATOR . 'img/equipmentfacility';
+        $uploaded_pompa->move($destinationPath, $filenamepompa);      
+        }elseif (empty($request->hasFile('pompa_pic'))) {
+            $filenamepompa = NULL;
+        }
+
+
+        if ($request->hasFile('pic_radar'))
+        {
+        $uploaded_radar = $request->file('pic_radar');
+        $extension = $uploaded_radar->getClientOriginalExtension();
+        $filenameradar = md5(time()) . '.' . $extension;
+        $destinationPath = public_path() . DIRECTORY_SEPARATOR . 'img/equipmentfacility';
+        $uploaded_radar->move($destinationPath, $filenamepompa);      
+        }elseif (empty($request->hasFile('pic_radar'))) {
+            $filenameradar = NULL;
+        }
+
+        if ($request->hasFile('pic_bak'))
+        {
+        $uploaded_bak = $request->file('pic_bak');
+        $extension = $uploaded_bak->getClientOriginalExtension();
+        $filenamebak = md5(time()) . '.' . $extension;
+        $destinationPath = public_path() . DIRECTORY_SEPARATOR . 'img/equipmentfacility';
+        $uploaded_bak->move($destinationPath, $filenamebak);      
+        }elseif (empty($request->hasFile('pic_bak'))) {
+            $filenamebak = NULL;
+        }
+
+        if ($request->hasFile('pic_spit'))
+        {
+        $uploaded_spit = $request->file('pic_spit');
+        $extension = $uploaded_spit->getClientOriginalExtension();
+        $filenamespit = md5(time()) . '.' . $extension;
+        $destinationPath = public_path() . DIRECTORY_SEPARATOR . 'img/equipmentfacility';
+        $uploaded_spit->move($destinationPath, $filenamespit);      
+        }elseif (empty($request->hasFile('pic_spit'))) {
+            $filenamespit = NULL;
+        }
+/*         $data_chk = $request->only('ket_pompa_tk', 'ket_pompa_man', 'ket_pompa_ct', 'ket_valve_tb', 'ket_valve_no', 'ket_valve_tts','ket_radar_tts', 'ket_radar_man', 'ket_radar_stp', 'ket_bak_tas', 'ket_bak_tal', 'ket_bak_tb', 'ket_bak_tac', 'ket_spit_tas', 'ket_spit_tal'  );
+         $kat_kerja_sfp = trim($data_chk['kat_kerja_sfp']) !== '' ? trim($data_chk['kat_kerja_sfp']) : null;*/
+ 
+      $noUrutAkhir = DB::table("equipment_facility")
+            ->max("no_mef");
+            $nourut= (int) substr($noUrutAkhir, 4,10);
+            $nourut++;
+            $tahun = date('y');
+            $idbaru ="FL".$tahun .sprintf("%06s",$nourut); 
+
+             DB::table("equipment_facility")
+                ->insert([
+                            'no_mef'=>$idbaru,
+                            'tgl_mon'=>$request->tgl_mon,
+                            'kd_ot' => $request->kd_ot,
+                            'status_valve' => $request->status_valve,
+                            'ket_valve_tb'=>$request->ket_valve_tb,
+                            'ket_valve_no' => $request->ket_valve_no,
+                            'ket_valve_tts' => $request->ket_valve_tts,
+                            'prob_valve' => $request->prob_valve,
+                            'dd_valve' => $dd_valve,
+                            'pic_valve' => $filenamevalve,
+                            'cm_valve' => $request->cm_valve,
+                            'status_pompa' => $request->status_pompa,
+                            'ket_pompa_tk' => $request->ket_pompa_tk,
+                            'ket_pompa_man' => $request->ket_pompa_man,
+                            'ket_pompa_ct' => $request->ket_pompa_ct,
+                            'prob_pompa' => $request->prob_pompa,
+                            'dd_pompa' => $dd_pompa,
+                            'pic_pompa' => $filenamepompa,
+                            'cm_pompa' => $request->cm_pompa,
+                            'status_radar' => $request->status_radar,
+                            'ket_radar_tts' => $request->ket_radar_tts,
+                            'ket_radar_man' => $request->ket_radar_man,
+                            'ket_radar_stp' => $request->ket_radar_stp,
+                            'prob_radar' => $request->prob_radar,
+                            'dd_radar' => $dd_radar,
+                            'pic_radar' => $filenameradar,
+                            'cm_radar' => $request->cm_radar,
+                            'status_bak' => $request->status_bak,
+                            'ket_bak_tas' => $request->ket_bak_tas,
+                            'ket_bak_tal' => $request->ket_bak_tal,
+                            'ket_bak_tb' => $request->ket_bak_tb,
+                            'ket_bak_tac' => $request->ket_bak_tac,
+                            'prob_bak' => $request->prob_bak,
+                            'dd_bak' => $dd_bak,
+                            'pic_bak' => $filenamebak,
+                            'cm_bak' => $request->cm_bak,
+                            'status_spit' => $request->status_spit,
+                            'ket_spit_tas' => $request->ket_spit_tas,
+                            'ket_spit_tal' => $request->ket_spit_tal,
+                            'prob_spit' => $request->prob_spit,
+                            'dd_spit' => $dd_spit,
+                            'pic_spit' => $filenamespit,
+                            'cm_spit' => $request->cm_spit,
+                            ]);
+
+                 DB::commit();
+
+                 Session::flash("flash_notification", [
+                    "level"=>"success",
+                    "message"=>"Simpan No. MEF: $idbaru Berhasil."
+                ]);
+
+                return redirect()->route('ehsspaccidents.index_equipfacility');  
+       // return response()->json(['msg' => $msg]);
+            } catch (Exception $ex) {
+                DB::rollback();
+                Session::flash("flash_notification", [
+                    "level" => "danger",
+                    "message" => "Simpan Gagal!".$ex  ]);
+                 return redirect()->back()->withInput(Input::all());
+        }
+    }
+
+
+
+
+    public function delete_equipfacility($id)
+    {
+          try {
+        DB::beginTransaction();
+            $msg = "Berhasil disubmit.";
+            $indctr = "1";
+        
+        $delete =  DB::table("equipment_facility")
+            ->where('no_mef', '=', $id)
+            ->delete();
+
+        DB::commit();
+                return response()->json(['msg' => $msg, 'indctr' => $indctr]);
+            } catch (Exception $ex) {
+                DB::rollback();
+                $msg = "Gagal submit! Hubungi Admin.";
+                $indctr = "0";
+                return response()->json(['msg' => $msg, 'indctr' => $indctr]);
+        }
+     
+    }
+
+  public function index_kikenyoochi()
+    {
+      $year = Carbon::now()->format('Y');
+// Daftar Accident
+      $acigpj = DB::table('sp_accident')
+      ->select(DB::raw("count(rank) as rankigpj"))
+      ->where('pt', '=', 'IGP')
+      ->where('plant', '=', 'Jakarta')
+      ->whereYear('tglkejadian','=', Carbon::now()->format('Y'))
+      ->get();
+
+       $acigpk = DB::table('sp_accident')
+      ->select(DB::raw("count(rank) as rankigpk"))
+      ->where('pt', '=', 'IGP')
+      ->where('plant', '=', 'Karawang')
+      ->whereYear('tglkejadian','=', Carbon::now()->format('Y'))
+      ->get();
+
+      $acgkdj = DB::table('sp_accident')
+      ->select(DB::raw("count(rank) as rankgkdj"))
+      ->where('pt', '=', 'GKD')
+      ->where('plant', '=', 'Jakarta')
+      ->whereYear('tglkejadian','=', Carbon::now()->format('Y'))
+      ->get();
+
+      $acgkdk = DB::table('sp_accident')
+      ->select(DB::raw("count(rank) as rankgkdk"))
+      ->where('pt', '=', 'GKD')
+      ->where('plant', '=', 'Karawang')
+      ->whereYear('tglkejadian','=', Carbon::now()->format('Y'))
+      ->get();
+
+      $acagij = DB::table('sp_accident')
+      ->select(DB::raw("count(rank) as rankagij"))
+      ->where('pt', '=', 'AGI')
+      ->where('plant', '=', 'Jakarta')
+      ->whereYear('tglkejadian','=', Carbon::now()->format('Y'))
+      ->get();
+
+      $acagik = DB::table('sp_accident')
+      ->select(DB::raw("count(rank) as rankagik"))
+      ->where('pt', '=', 'AGI')
+      ->where('plant', '=', 'Karawang')
+      ->whereYear('tglkejadian','=', Carbon::now()->format('Y'))
+      ->get();
+
+//Urutan Bulan
+       /*$bulan = DB::table('tb_date')
+                  ->select(DB::raw("bulan, ket as desc"))
+                  ->groupBy('bulan')
+                  //->orderBy('bulan')
+                  ->get()->toArray();     
+                  $bulan = array_column($bulan, 'desc');*/
+   
+
+//IGP-JAKARTA                
+                  $ranka_igpj = DB::table('tb_date')
+                  ->select(DB::raw("tb_date.bulan, count(rank) as rank"))
+                  ->leftJoin('sp_accident', function ($join) {
+                      $join->on( DB::raw("to_char(sp_accident.tglkejadian, 'mm')"), '=' ,'tb_date.bulan')
+                        ->where('pt', '=', 'IGP')
+                        ->where('plant', '=', 'Jakarta')
+                        ->where('rank', '=', 'Rank A')
+                        ->whereYear('tglkejadian','=', Carbon::now()->format('Y') );})
+                  ->groupBy('bulan')
+                  ->orderBy('bulan')
+                  ->get()->toArray();     
+                  $ranka_igpj = array_column($ranka_igpj, 'rank');
+
+  
+                  $rankb_igpj = DB::table('tb_date')
+                  ->select(DB::raw("tb_date.bulan, count(rank) as rank"))
+                  ->leftJoin('sp_accident', function ($join) {
+                      $join->on( DB::raw("to_char(sp_accident.tglkejadian, 'mm')"), '=' ,'tb_date.bulan')
+                        ->where('pt', '=', 'IGP')
+                        ->where('plant', '=', 'Jakarta')
+                        ->where('rank', '=', 'Rank B')
+                        ->whereYear('tglkejadian','=', Carbon::now()->format('Y') );})
+                  ->groupBy('bulan')
+                  ->orderBy('bulan')
+                  ->get()->toArray();  
+                  $rankb_igpj = array_column($rankb_igpj, 'rank');
+
+                  $rankc_igpj = DB::table('tb_date')
+                  ->select(DB::raw("tb_date.bulan, count(rank) as rank"))
+                  ->leftJoin('sp_accident', function ($join) {
+                      $join->on( DB::raw("to_char(sp_accident.tglkejadian, 'mm')"), '=' ,'tb_date.bulan')
+                        ->where('pt', '=', 'IGP')
+                        ->where('plant', '=', 'Jakarta')
+                        ->where('rank', '=', 'Rank C')
+                        ->whereYear('tglkejadian','=', Carbon::now()->format('Y') );})
+                  ->groupBy('bulan')
+                  ->orderBy('bulan')
+                  ->get()->toArray();  
+                  $rankc_igpj = array_column($rankc_igpj, 'rank');
+
+
+//GKD-JAKARTA                
+                  $ranka_gkdj = DB::table('tb_date')
+                  ->select(DB::raw("tb_date.bulan, count(rank) as rank"))
+                  ->leftJoin('sp_accident', function ($join) {
+                      $join->on( DB::raw("to_char(sp_accident.tglkejadian, 'mm')"), '=' ,'tb_date.bulan')
+                        ->where('pt', '=', 'GKD')
+                        ->where('plant', '=', 'Jakarta')
+                        ->where('rank', '=', 'Rank A')
+                        ->whereYear('tglkejadian','=', Carbon::now()->format('Y') );})
+                  ->groupBy('bulan')
+                  ->orderBy('bulan')
+                  ->get()->toArray();     
+                  $ranka_gkdj = array_column($ranka_gkdj, 'rank');
+
+                  $rankb_gkdj = DB::table('tb_date')
+                  ->select(DB::raw("tb_date.bulan, count(rank) as rank"))
+                  ->leftJoin('sp_accident', function ($join) {
+                      $join->on( DB::raw("to_char(sp_accident.tglkejadian, 'mm')"), '=' ,'tb_date.bulan')
+                        ->where('pt', '=', 'GKD')
+                        ->where('plant', '=', 'Jakarta')
+                        ->where('rank', '=', 'Rank B')
+                        ->whereYear('tglkejadian','=', Carbon::now()->format('Y') );})
+                  ->groupBy('bulan')
+                  ->orderBy('bulan')
+                  ->get()->toArray();     
+                  $rankb_gkdj = array_column($rankb_gkdj, 'rank');
+
+                  $rankc_gkdj = DB::table('tb_date')
+                  ->select(DB::raw("tb_date.bulan, count(rank) as rank"))
+                  ->leftJoin('sp_accident', function ($join) {
+                      $join->on( DB::raw("to_char(sp_accident.tglkejadian, 'mm')"), '=' ,'tb_date.bulan')
+                        ->where('pt', '=', 'GKD')
+                        ->where('plant', '=', 'Jakarta')
+                        ->where('rank', '=', 'Rank C')
+                        ->whereYear('tglkejadian','=', Carbon::now()->format('Y') );})
+                  ->groupBy('bulan')
+                  ->orderBy('bulan')
+                  ->get()->toArray();  
+                  $rankc_gkdj = array_column($rankc_gkdj, 'rank');
+
+//AGI-JAKARTA                
+                  $ranka_agij = DB::table('tb_date')
+                  ->select(DB::raw("tb_date.bulan, count(rank) as rank"))
+                  ->leftJoin('sp_accident', function ($join) {
+                      $join->on( DB::raw("to_char(sp_accident.tglkejadian, 'mm')"), '=' ,'tb_date.bulan')
+                        ->where('pt', '=', 'AGI')
+                        ->where('plant', '=', 'Jakarta')
+                        ->where('rank', '=', 'Rank A')
+                        ->whereYear('tglkejadian','=', Carbon::now()->format('Y') );})
+                  ->groupBy('bulan')
+                  ->orderBy('bulan')
+                  ->get()->toArray();  
+                  $ranka_agij = array_column($ranka_agij, 'rank');
+
+                  $rankb_agij = DB::table('tb_date')
+                  ->select(DB::raw("tb_date.bulan, count(rank) as rank"))
+                  ->leftJoin('sp_accident', function ($join) {
+                      $join->on( DB::raw("to_char(sp_accident.tglkejadian, 'mm')"), '=' ,'tb_date.bulan')
+                        ->where('pt', '=', 'AGI')
+                        ->where('plant', '=', 'Jakarta')
+                        ->where('rank', '=', 'Rank B')
+                        ->whereYear('tglkejadian','=', Carbon::now()->format('Y') );})
+                  ->groupBy('bulan')
+                  ->orderBy('bulan')
+                  ->get()->toArray();  
+                  $rankb_agij = array_column($rankb_agij, 'rank');
+
+                  $rankc_agij = DB::table('tb_date')
+                  ->select(DB::raw("tb_date.bulan, count(rank) as rank"))
+                  ->leftJoin('sp_accident', function ($join) {
+                      $join->on( DB::raw("to_char(sp_accident.tglkejadian, 'mm')"), '=' ,'tb_date.bulan')
+                        ->where('pt', '=', 'AGI')
+                        ->where('plant', '=', 'Jakarta')
+                        ->where('rank', '=', 'Rank C')
+                        ->whereYear('tglkejadian','=', Carbon::now()->format('Y') );})
+                  ->groupBy('bulan')
+                  ->orderBy('bulan')
+                  ->get()->toArray();  
+                  $rankc_agij = array_column($rankc_agij, 'rank');
+
+
+  //IGP-KARAWANG                
+                  $ranka_igpk = DB::table('tb_date')
+                  ->select(DB::raw("tb_date.bulan, count(rank) as rank"))
+                  ->leftJoin('sp_accident', function ($join) {
+                      $join->on( DB::raw("to_char(sp_accident.tglkejadian, 'mm')"), '=' ,'tb_date.bulan')
+                        ->where('pt', '=', 'IGP')
+                        ->where('plant', '=', 'Karawang')
+                        ->where('rank', '=', 'Rank A')
+                        ->whereYear('tglkejadian','=', Carbon::now()->format('Y') );})
+                  ->groupBy('bulan')
+                  ->orderBy('bulan')
+                  ->get()->toArray();     
+                  $ranka_igpk = array_column($ranka_igpk, 'rank');
+
+  
+                  $rankb_igpk = DB::table('tb_date')
+                  ->select(DB::raw("tb_date.bulan, count(rank) as rank"))
+                  ->leftJoin('sp_accident', function ($join) {
+                      $join->on( DB::raw("to_char(sp_accident.tglkejadian, 'mm')"), '=' ,'tb_date.bulan')
+                        ->where('pt', '=', 'IGP')
+                        ->where('plant', '=', 'Karawang')
+                        ->where('rank', '=', 'Rank B')
+                        ->whereYear('tglkejadian','=', Carbon::now()->format('Y') );})
+                  ->groupBy('bulan')
+                  ->orderBy('bulan')
+                  ->get()->toArray();  
+                  $rankb_igpk = array_column($rankb_igpk, 'rank');
+
+                  $rankc_igpk = DB::table('tb_date')
+                  ->select(DB::raw("tb_date.bulan, count(rank) as rank"))
+                  ->leftJoin('sp_accident', function ($join) {
+                      $join->on( DB::raw("to_char(sp_accident.tglkejadian, 'mm')"), '=' ,'tb_date.bulan')
+                        ->where('pt', '=', 'IGP')
+                        ->where('plant', '=', 'Karawang')
+                        ->where('rank', '=', 'Rank C')
+                        ->whereYear('tglkejadian','=', Carbon::now()->format('Y') );})
+                  ->groupBy('bulan')
+                  ->orderBy('bulan')
+                  ->get()->toArray();  
+                  $rankc_igpk = array_column($rankc_igpk, 'rank');
+
+
+//GKD-KARAWANG                
+                  $ranka_gkdk = DB::table('tb_date')
+                  ->select(DB::raw("tb_date.bulan, count(rank) as rank"))
+                  ->leftJoin('sp_accident', function ($join) {
+                      $join->on( DB::raw("to_char(sp_accident.tglkejadian, 'mm')"), '=' ,'tb_date.bulan')
+                        ->where('pt', '=', 'GKD')
+                        ->where('plant', '=', 'Karawang')
+                        ->where('rank', '=', 'Rank A')
+                        ->whereYear('tglkejadian','=', Carbon::now()->format('Y') );})
+                  ->groupBy('bulan')
+                  ->orderBy('bulan')
+                  ->get()->toArray();     
+                  $ranka_gkdk = array_column($ranka_gkdk, 'rank');
+
+                  $rankb_gkdk = DB::table('tb_date')
+                  ->select(DB::raw("tb_date.bulan, count(rank) as rank"))
+                  ->leftJoin('sp_accident', function ($join) {
+                      $join->on( DB::raw("to_char(sp_accident.tglkejadian, 'mm')"), '=' ,'tb_date.bulan')
+                        ->where('pt', '=', 'GKD')
+                        ->where('plant', '=', 'Karawang')
+                        ->where('rank', '=', 'Rank B')
+                        ->whereYear('tglkejadian','=', Carbon::now()->format('Y') );})
+                  ->groupBy('bulan')
+                  ->orderBy('bulan')
+                  ->get()->toArray();     
+                  $rankb_gkdk = array_column($rankb_gkdk, 'rank');
+
+                  $rankc_gkdk = DB::table('tb_date')
+                  ->select(DB::raw("tb_date.bulan, count(rank) as rank"))
+                  ->leftJoin('sp_accident', function ($join) {
+                      $join->on( DB::raw("to_char(sp_accident.tglkejadian, 'mm')"), '=' ,'tb_date.bulan')
+                        ->where('pt', '=', 'GKD')
+                        ->where('plant', '=', 'Karawang')
+                        ->where('rank', '=', 'Rank C')
+                        ->whereYear('tglkejadian','=', Carbon::now()->format('Y') );})
+                  ->groupBy('bulan')
+                  ->orderBy('bulan')
+                  ->get()->toArray();  
+                  $rankc_gkdk = array_column($rankc_gkdk, 'rank');
+
+//AGI-KARAWANG                
+                  $ranka_agik = DB::table('tb_date')
+                  ->select(DB::raw("tb_date.bulan, count(rank) as rank"))
+                  ->leftJoin('sp_accident', function ($join) {
+                      $join->on( DB::raw("to_char(sp_accident.tglkejadian, 'mm')"), '=' ,'tb_date.bulan')
+                        ->where('pt', '=', 'AGI')
+                        ->where('plant', '=', 'Karawang')
+                        ->where('rank', '=', 'Rank A')
+                        ->whereYear('tglkejadian','=', Carbon::now()->format('Y') );})
+                  ->groupBy('bulan')
+                  ->orderBy('bulan')
+                  ->get()->toArray();  
+                  $ranka_agik = array_column($ranka_agik, 'rank');
+
+                  $rankb_agik = DB::table('tb_date')
+                  ->select(DB::raw("tb_date.bulan, count(rank) as rank"))
+                  ->leftJoin('sp_accident', function ($join) {
+                      $join->on( DB::raw("to_char(sp_accident.tglkejadian, 'mm')"), '=' ,'tb_date.bulan')
+                        ->where('pt', '=', 'AGI')
+                        ->where('plant', '=', 'Karawang')
+                        ->where('rank', '=', 'Rank B')
+                        ->whereYear('tglkejadian','=', Carbon::now()->format('Y') );})
+                  ->groupBy('bulan')
+                  ->orderBy('bulan')
+                  ->get()->toArray();  
+                  $rankb_agik = array_column($rankb_agik, 'rank');
+
+                  $rankc_agik = DB::table('tb_date')
+                  ->select(DB::raw("tb_date.bulan, count(rank) as rank"))
+                  ->leftJoin('sp_accident', function ($join) {
+                      $join->on( DB::raw("to_char(sp_accident.tglkejadian, 'mm')"), '=' ,'tb_date.bulan')
+                        ->where('pt', '=', 'AGI')
+                        ->where('plant', '=', 'Karawang')
+                        ->where('rank', '=', 'Rank C')
+                        ->whereYear('tglkejadian','=', Carbon::now()->format('Y') );})
+                  ->groupBy('bulan')
+                  ->orderBy('bulan')
+                  ->get()->toArray();  
+                  $rankc_agik = array_column($rankc_agik, 'rank');
+
+  //MONITORING PENGOLAHAN LIMBAH CAIR
+
+
+      //LEVEL INSTALASI AIR LIMBAH
+              $label_lal= DB::table('mas_mon_limbah')
+                   ->select(DB::raw("jenis_mon"))
+                   ->where('kategori', '=', 'proses')
+                   ->orderBy('kd_mon')
+                   ->get()->toArray();  
+
+                  $label_lal = array_column($label_lal, 'jenis_mon');
+
+              $lal_wwt = DB::table('level_airlimbah2')
+                  ->select(DB::raw("sum(volume) as volume"))
+                  ->join('level_airlimbah1', 'level_airlimbah2.no_lal', '=' , 'level_airlimbah1.no_lal')
+                  ->join('mas_mon_limbah', 'level_airlimbah2.proses', '=' , 'mas_mon_limbah.kd_mon')
+                  ->where('tanggal','=', Carbon::now() )
+                  ->where('kd_mon','=', 'ML001' )
+                  ->get()->toArray();  
+                  $lal_wwt = array_column($lal_wwt, 'volume');
+
+              $lal_stp = DB::table('level_airlimbah2')
+                  ->select(DB::raw("sum(volume) as volume"))
+                  ->join('level_airlimbah1', 'level_airlimbah2.no_lal', '=' , 'level_airlimbah1.no_lal')
+                  ->join('mas_mon_limbah', 'level_airlimbah2.proses', '=' , 'mas_mon_limbah.kd_mon')
+                  ->where('tanggal','=', Carbon::now() )
+                  ->where('kd_mon','=', 'ML002' )
+                  ->get()->toArray();  
+                  $lal_stp = array_column($lal_stp, 'volume');
+
+              $lal_bs = DB::table('level_airlimbah2')
+                  ->select(DB::raw("sum(volume) as volume"))
+                  ->join('level_airlimbah1', 'level_airlimbah2.no_lal', '=' , 'level_airlimbah1.no_lal')
+                  ->join('mas_mon_limbah', 'level_airlimbah2.proses', '=' , 'mas_mon_limbah.kd_mon')
+                  ->where('tanggal','=', Carbon::now() )
+                  ->where('kd_mon','=', 'ML003' )
+                  ->get()->toArray();  
+                  $lal_bs = array_column($lal_bs, 'volume');
+
+              $lal_et = DB::table('level_airlimbah2')
+                  ->select(DB::raw("sum(volume) as volume"))
+                  ->join('level_airlimbah1', 'level_airlimbah2.no_lal', '=' , 'level_airlimbah1.no_lal')
+                  ->join('mas_mon_limbah', 'level_airlimbah2.proses', '=' , 'mas_mon_limbah.kd_mon')
+                  ->where('tanggal','=', Carbon::now() )
+                  ->where('kd_mon','=', 'ML004' )
+                  ->get()->toArray();  
+                  $lal_et = array_column($lal_et, 'volume');
+
+
+        return view('ehs.safety_performance.index_kikenyoochi')
+        ->with('label_lal', json_encode($label_lal))
+        ->with('ranka_igpj', json_encode($ranka_igpj, JSON_NUMERIC_CHECK))
+        ->with('rankb_igpj', json_encode($rankb_igpj, JSON_NUMERIC_CHECK))
+        ->with('rankc_igpj', json_encode($rankc_igpj, JSON_NUMERIC_CHECK))
+        ->with('ranka_gkdj', json_encode($ranka_gkdj, JSON_NUMERIC_CHECK))
+        ->with('rankb_gkdj', json_encode($rankb_gkdj, JSON_NUMERIC_CHECK))
+        ->with('rankc_gkdj', json_encode($rankc_gkdj, JSON_NUMERIC_CHECK))
+        ->with('ranka_agij', json_encode($ranka_agij, JSON_NUMERIC_CHECK))
+        ->with('rankb_agij', json_encode($rankb_agij, JSON_NUMERIC_CHECK))
+        ->with('rankc_agij', json_encode($rankc_agij, JSON_NUMERIC_CHECK))
+        ->with('ranka_igpk', json_encode($ranka_igpk, JSON_NUMERIC_CHECK))
+        ->with('rankb_igpk', json_encode($rankb_igpk, JSON_NUMERIC_CHECK))
+        ->with('rankc_igpk', json_encode($rankc_igpk, JSON_NUMERIC_CHECK))
+        ->with('ranka_gkdk', json_encode($ranka_gkdk, JSON_NUMERIC_CHECK))
+        ->with('rankb_gkdk', json_encode($rankb_gkdk, JSON_NUMERIC_CHECK))
+        ->with('rankc_gkdk', json_encode($rankc_gkdk, JSON_NUMERIC_CHECK))
+        ->with('ranka_agik', json_encode($ranka_agik, JSON_NUMERIC_CHECK))
+        ->with('rankb_agik', json_encode($rankb_agik, JSON_NUMERIC_CHECK))
+        ->with('rankc_agik', json_encode($rankc_agik, JSON_NUMERIC_CHECK))
+        ->with('lal_wwt', json_encode($lal_wwt, JSON_NUMERIC_CHECK))
+        ->with('lal_stp', json_encode($lal_stp, JSON_NUMERIC_CHECK))
+        ->with('lal_bs', json_encode($lal_bs, JSON_NUMERIC_CHECK))
+        ->with('lal_et', json_encode($lal_et, JSON_NUMERIC_CHECK))
+        ->with(compact('acigpj', 'acigpk', 'acgkdj', 'acgkdk', 'acagij', 'acagik'));
+      // return view('ehs.safety_performance.index_kikenyoochi');
+      
+    }
+
+  public function popupKaryawanKy(Request $request)
+    {
+        if ($request->ajax()) {
+            $list = DB::table("v_mas_karyawan")
+            ->select(DB::raw("npk, nama, kd_pt, desc_dep, desc_div, email"))
+            ->where('desc_dep', '=', 'OFFICE of EHS')
+            ->whereNull('tgl_keluar');
+            return Datatables::of($list)->make(true);
+        } else {
+            return redirect('home');
+        }
+    }
+
+    public function validasiKaryawanKy(Request $request, $npk)
+    {
+        if ($request->ajax()) {
+            $data = DB::table("v_mas_karyawan")
+            ->select(DB::raw("npk, nama, kd_pt, desc_dep, desc_div, email"))
+            ->whereNull('tgl_keluar')
+            ->where("npk", "=", base64_decode($npk))
+            ->first();
+            return json_encode($data);
+        } else {
+            return redirect('home');
+        }
+    }
+
+    public function selectlimbah(Request $request, $id, $id2)
+    {
+//
+  $year = Carbon::now()->format('Y');
+         //for ($i = 0; $i < count($request->limbah); $i++)
+
+        $data = DB::table("angkutb3_2")
+                ->select(DB::raw('angkutb3_2.* , angkutb3_1.*'))
+                ->join('angkutb3_1', 'angkutb3_2.no_angkut', '=' , 'angkutb3_1.no_angkut')
+                ->where('limbah', '=', $id)
+                ->where('pt', '=', $id2)
+                ->whereyear('tgl_angkut','=', $year) 
+                ->avg('qty');
+                return $data;
+     /*   return json_encode($data);
+         } else {
+            return redirect('home');
+        }*/
+    }
+
+  public function mon_airlimbah(Request $request, $tgl = null, $displayStart = null)
+    {
+
+                if($tgl == null) {
+            $tgl = Carbon::now()->format("Ymd");
+            $tgl = base64_encode($tgl);
+        }
+
+        $ehstwp1sIGP = DB::connection('pgsql')
+        ->table("ehst_wp1s")
+        ->select(DB::raw("'IGP' kd_pt, no_wp, kd_supp, coalesce((select nama from b_suppliers where kd_supp = ehst_wp1s.kd_supp),'-') nm_supp, kd_site, nm_proyek, lok_proyek, pic_pp, coalesce((select nama from v_mas_karyawan where npk = ehst_wp1s.pic_pp),'-') nm_pic, status, jns_pekerjaan, scan_sec_in_tgl, scan_sec_out_tgl, tgl_laksana1, tgl_laksana2, to_char(scan_sec_in_tgl + '12 hour'::interval, 'yyyymmddhh24miss') batas, to_char(coalesce(scan_sec_out_tgl,now()), 'yyyymmddhh24miss') skrg"))
+        ->whereRaw("(scan_sec_in_tgl is not null or scan_sec_out_tgl is not null)")
+        ->where(DB::raw("to_char(scan_sec_in_tgl,'yyyymmdd')"), "=", base64_decode($tgl));
+
+        $ehstwp1sGKD = DB::connection('pgsql-gkd')
+        ->table("ehst_wp1s")
+        ->select(DB::raw("'GKD' kd_pt, no_wp, kd_supp, coalesce((select nama from b_suppliers where kd_supp = ehst_wp1s.kd_supp),'-') nm_supp, kd_site, nm_proyek, lok_proyek, pic_pp, coalesce((select nama from v_mas_karyawan where npk = ehst_wp1s.pic_pp),'-') nm_pic, status, jns_pekerjaan, scan_sec_in_tgl, scan_sec_out_tgl, tgl_laksana1, tgl_laksana2, to_char(scan_sec_in_tgl + '12 hour'::interval, 'yyyymmddhh24miss') batas, to_char(coalesce(scan_sec_out_tgl,now()), 'yyyymmddhh24miss') skrg"))
+        ->whereRaw("(scan_sec_in_tgl is not null or scan_sec_out_tgl is not null)")
+        ->where(DB::raw("to_char(scan_sec_in_tgl,'yyyymmdd')"), "=", base64_decode($tgl));
+        
+        $ehstwp1sAGI = DB::connection('pgsql-agi')
+        ->table("ehst_wp1s")
+        ->select(DB::raw("'AGI' kd_pt, no_wp, kd_supp, coalesce((select nama from b_suppliers where kd_supp = ehst_wp1s.kd_supp),'-') nm_supp, kd_site, nm_proyek, lok_proyek, pic_pp, coalesce((select nama from v_mas_karyawan where npk = ehst_wp1s.pic_pp),'-') nm_pic, status, jns_pekerjaan, scan_sec_in_tgl, scan_sec_out_tgl, tgl_laksana1, tgl_laksana2, to_char(scan_sec_in_tgl + '12 hour'::interval, 'yyyymmddhh24miss') batas, to_char(coalesce(scan_sec_out_tgl,now()), 'yyyymmddhh24miss') skrg"))
+        ->whereRaw("(scan_sec_in_tgl is not null or scan_sec_out_tgl is not null)")
+        ->where(DB::raw("to_char(scan_sec_in_tgl,'yyyymmdd')"), "=", base64_decode($tgl));
+
+        $total = $ehstwp1sIGP->get()->count() + $ehstwp1sGKD->get()->count() + $ehstwp1sAGI->get()->count();
+
+        if($displayStart == null) {
+            $displayStart = 0;
+        } else {
+            if($total <= $displayStart) {
+                $url = "monitoringwpall/".$tgl;
+                return redirect($url);
+            }
+        }
+  
+       return view('ehs.safety_performance.mon_airlimbah',  compact('tgl', 'displayStart', 'ehstwp1sIGP', 'ehstwp1sGKD', 'ehstwp1sAGI'));
+    }
+}

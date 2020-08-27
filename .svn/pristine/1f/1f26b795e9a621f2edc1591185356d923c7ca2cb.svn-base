@@ -1,0 +1,177 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use App\Pistandard;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Datatables;
+use Session;
+use exception;
+use Carbon\Carbon;
+use DB;
+use App\User;
+use Alert;
+
+
+class PisstaffController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+        public function aprovalstaf(Request $request, Builder $htmlBuilder)
+    {
+       if ($request->ajax()) {
+            $pistandards = DB::table("pistandards")
+            ->whereIn('status',[1,2,3]) 
+            ->select(DB::raw("no_pis, model, part_no, part_name, nama_supplier, status"))
+            ->get();
+            return Datatables::of($pistandards)
+                ->editColumn('status', function($pistandard){
+                    if($pistandard->status == 0){
+                        return '<b class="btn-xs btn-info btn-icon-pg" action="disable"> Belum Submit</b>';
+                    }
+                     elseif($pistandard->status == 1){
+                        return '<b class="btn-xs btn-info btn-icon-pg"  action="disable"> Belum Approv </b>';
+                    }
+                      elseif($pistandard->status == 2){
+                        return '<b class="btn-xs btn-success btn-icon-pg"  action="disable"> Disetujui </b>';
+                    }
+                      elseif($pistandard->status == 3){
+                        return '<b class="btn-xs btn-danger btn-icon-pg" action="disable"> Ditolak</b>';
+                    }
+                })
+                ->editColumn('no_pis', function($pistandard) {
+                        return '<a href="'.route('pisstaff.show', base64_encode($pistandard->no_pis)).'" data-toggle="tooltip" data-placement="top" title="Detail No Pis '. $pistandard->no_pis .'">'.$pistandard->no_pis.'</a>';
+                })
+
+                ->addColumn('action', function($pistandard){
+
+                        return view('datatable._action-unclock')->with(compact('pistandard'));
+
+                })
+                ->make(true);
+        } 
+        return view('pis.staff.aprovalstaf')->with(compact('$pistandard'));
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+
+
+
+    public function index()
+    {
+        //
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($no_pis)
+    {
+        $pistandards = DB::table("pistandards")
+                 ->select(DB::raw("no_pis, date_issue, model, part_no, part_name, nama_supplier, status, notestaff, approve_staff"))
+                 ->where("no_pis",base64_decode($no_pis))
+                 ->first();
+                 // echo json_encode($pistandards) ;
+                 // die();
+            return view('pis.staff.show', compact('pistandards'));
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($no_pis)
+    {
+       $no_pis = base64_decode($no_pis); 
+       $pistandard = DB::table('pistandards')
+       ->where(DB::raw("no_pis"), '=', $no_pis)
+       ->first();  
+
+       return view('pis.staff.upload')->with(compact('pistandard'));
+
+   }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        //
+        $data = $request->all();
+        $no_pis = trim($data['no_pis']) !== '' ? trim($data['no_pis']) : null;
+        $notestaff = trim($data['notestaff']) !== '' ? trim($data['notestaff']) : null;
+        $approve_staff = trim($data['approve_staff']) !== '' ? trim($data['approve_staff']) : null;
+         
+     
+        // isi field approve_staff jika ada approve_staff yang diupload
+      if ($request->hasFile('approve_staff')) {
+        // Mengambil file yang diupload
+        $uploaded_approve_staff = $request->file('approve_staff');
+        // mengambil extension file
+        $extension = $uploaded_approve_staff->getClientOriginalExtension();
+        // membuat nama file random berikut extension
+        $filename = md5(time()) . '.' . $extension;
+        // menyimpan approve_staff ke folder public/img
+        $destinationPath = public_path() . DIRECTORY_SEPARATOR . 'img';
+        $uploaded_approve_staff->move($destinationPath, $filename);
+        // mengisi field approve_staff di book dengan filename yang baru dibuat
+        
+      }
+
+        DB::table('pistandards')
+            ->where(DB::raw("no_pis"), '=', $no_pis)
+            ->Update([
+                      'notestaff'=>$request->notestaff,
+                      'approve_staff'=>$request->approve_staff = $filename
+                     ]); 
+             return redirect()->route('pisstaff.aprovalstaf');
+                        
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        //
+    }
+}

@@ -1,0 +1,36 @@
+<?php
+
+Route::group(['prefix' => 'hr', 'middleware' => ['auth']], function () {
+	Route::get('pengajuancuti/daftarpengajuancuti', [
+		'as' => 'pengajuancuti.daftarpengajuancuti',
+		'uses' => 'PengajuanCutiController@indexPengajuanCuti'
+	]);
+	Route::get('pengajuancuti/listpengajuancuti', [
+		'as' => 'pengajuancuti.listpengajuancuti',
+		'uses' => 'PengajuanCutiController@listpengajuancuti'
+	]);
+	Route::get('pengajuancuti/checkAtasan', [
+		'as' => 'pengajuancuti.checkAtasan',
+		'uses' => 'PengajuanCutiController@checkAtasan'
+	]);
+	Route::get('pengajuancuti/listkode_cuti', [
+		'as' => 'pengajuancuti.listkode_cuti',
+		'uses' => 'PengajuanCutiController@listkode_cuti'
+	]);
+	Route::post('pengajuancuti/submit', [
+		'as' => 'pengajuancuti.submit',
+		'uses' => 'PengajuanCutiController@submit'
+	]);
+	Route::get('pengajuancuti/viewdetails/{params}/{params2}/{params3}', [
+		'as' => 'pengajuancuti.viewdetails',
+		'uses' => 'PengajuanCutiController@viewdetails'
+	]);
+	Route::get('pengajuancuti/detailpengajuancuti/{params}', [
+		'as' => 'pengajuancuti.detailpengajuancuti',
+		'uses' => 'PengajuanCutiController@detailpengajuancuti'
+	]);
+	Route::post('pengajuancuti/cetak', [
+		'as' => 'pengajuancuti.cetak',
+		'uses' => 'PengajuanCutiController@cetak'
+	]);
+});

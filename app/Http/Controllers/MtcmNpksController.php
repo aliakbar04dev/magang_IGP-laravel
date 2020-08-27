@@ -1,0 +1,370 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use App\Http\Requests\StoreMtcmNpkRequest;
+use Illuminate\Support\Facades\Session;
+use App\Http\Requests\UpdateMtcmNpkRequest;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use DB;
+use Exception;
+use App\User;
+use Illuminate\Support\Facades\Input;
+
+class MtcmNpksController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        if(Auth::user()->can('mtc-plant-*')) {
+            return view('mtc.plant.index');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function dashboard(Request $request)
+    {
+        if(Auth::user()->can('mtc-plant-*')) {
+            if ($request->ajax()) {
+                
+                $mtcmnpks = DB::connection('oracle-usrbrgcorp')
+                ->table(DB::raw("(select npk, usrhrcorp.fnm_npk(npk) nama, replace(wm_concat(decode(kd_plant, '1', 'IGP-1', '2', 'IGP-2', '3', 'IGP-3', '4', 'IGP-4', 'A', 'KIM-1A', 'B', 'KIM-1B')),',',', ') nm_plant, lok_zona from mtcm_npk group by npk, lok_zona) v"))
+                ->selectRaw("npk, nama, nm_plant, lok_zona");
+                
+                return Datatables::of($mtcmnpks)
+                    ->editColumn('npk', function($mtcmnpk) {
+                        return '<a href="'.route('mtcmnpks.show', base64_encode($mtcmnpk->npk)).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $mtcmnpk->npk .'">'.$mtcmnpk->npk.'</a>';
+                    })
+                    ->addColumn('action', function($mtcmnpk){
+                        if(Auth::user()->can(['mtc-plant-create','mtc-plant-delete'])) {
+                            return view('datatable._action', [
+                                'model' => $mtcmnpk,
+                                'form_url' => route('mtcmnpks.destroy', base64_encode($mtcmnpk->npk)),
+                                'edit_url' => route('mtcmnpks.edit', base64_encode($mtcmnpk->npk)),
+                                'class' => 'form-inline js-ajax-delete',
+                                'form_id' => 'form-'.$mtcmnpk->npk,
+                                'id_table' => 'tblMaster',
+                                'confirm_message' => 'Anda yakin menghapus NPK/Plant ' . $mtcmnpk->npk . '?'
+                            ]);
+                        } else {
+                            return '';
+                        }
+                    })
+                    ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        if(Auth::user()->can('mtc-plant-create')) {
+            return view('mtc.plant.create');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(StoreMtcmNpkRequest $request)
+    {
+        if(Auth::user()->can('mtc-plant-create')) {
+            $data = $request->all();
+            $npk = $data['npk'];
+            $plants = $data['kd_plant'];
+            $lok_zona = trim($data['lok_zona']) !== '' ? trim($data['lok_zona']) : null;
+            $creaby = Auth::user()->username;
+
+            DB::connection("oracle-usrbrgcorp")->beginTransaction();
+            try {
+
+                foreach($plants as $kd_plant) {
+                    DB::connection("oracle-usrbrgcorp")
+                    ->table(DB::raw("mtcm_npk"))
+                    ->insert(['npk' => $npk, 'kd_plant' => $kd_plant, 'lok_zona' => $lok_zona, 'creaby' => $creaby, 'dtcrea' => Carbon::now()]);
+                }
+
+                //insert logs
+                $log_keterangan = "MtcmNpksController.store: Create NPK/Plant Berhasil. ".$npk;
+                $log_ip = \Request::session()->get('client_ip');
+                $created_at = Carbon::now();
+                $updated_at = Carbon::now();
+                DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                DB::connection("oracle-usrbrgcorp")->commit();
+
+                Session::flash("flash_notification", [
+                    "level"=>"success",
+                    "message"=>"Data NPK/Plant berhasil disimpan: $npk"
+                ]);
+                //return redirect()->route('mtcmnpks.edit', base64_encode($npk));
+                return redirect()->route('mtcmnpks.index');
+            } catch (Exception $ex) {
+                DB::connection("oracle-usrbrgcorp")->rollback();
+                Session::flash("flash_notification", [
+                    "level"=>"danger",
+                    "message"=>"Data gagal disimpan!"
+                ]);
+                return redirect()->back()->withInput(Input::all());
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($npk)
+    {
+        if(Auth::user()->can('mtc-plant-*')) {
+            $mtcmnpk = DB::connection('oracle-usrbrgcorp')
+                ->table(DB::raw("(select npk, usrhrcorp.fnm_npk(npk) nama, replace(wm_concat(decode(kd_plant, '1', 'IGP-1', '2', 'IGP-2', '3', 'IGP-3', '4', 'IGP-4', 'A', 'KIM-1A', 'B', 'KIM-1B')),',',', ') nm_plant, lok_zona from mtcm_npk group by npk, lok_zona) v"))
+                ->selectRaw("npk, nama, nm_plant, lok_zona")
+                ->where("npk",base64_decode($npk))
+                ->first();
+            return view('mtc.plant.show', compact('mtcmnpk'));
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($npk)
+    {
+        if(Auth::user()->can('mtc-plant-create')) {
+            $mtcmnpk = DB::connection('oracle-usrbrgcorp')
+            ->table(DB::raw("(select npk, usrhrcorp.fnm_npk(npk) nama, kd_plant, lok_zona from mtcm_npk) v"))
+            ->selectRaw("npk, nama, kd_plant, lok_zona")
+            ->where("npk", base64_decode($npk))
+            ->first();
+
+            $list = DB::connection('oracle-usrbrgcorp')
+            ->table("mtcm_npk")
+            ->selectRaw("npk, kd_plant, lok_zona")
+            ->where("npk",base64_decode($npk));
+
+            $plants = [];
+            foreach ($list->get() as $data) {
+                array_push($plants, $data->kd_plant);
+            }
+            return view('mtc.plant.edit')->with(compact('mtcmnpk','plants'));
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(UpdateMtcmNpkRequest $request, $id)
+    {
+        if(Auth::user()->can('mtc-plant-create')) {
+            $data = $request->all();
+            $npk = $data['npk'];
+            $plants = $data['kd_plant'];
+            $lok_zona = trim($data['lok_zona']) !== '' ? trim($data['lok_zona']) : null;
+            $creaby = Auth::user()->username;
+
+            DB::connection("oracle-usrbrgcorp")->beginTransaction();
+            try {
+
+                $mtcmnpk = DB::connection('oracle-usrbrgcorp')
+                ->table("mtcm_npk")
+                ->where("npk", $npk)
+                ->whereNotIn("kd_plant", $plants)
+                ->delete();
+
+                foreach($plants as $kd_plant) {
+
+                    $mtcmnpk_cek = DB::connection('oracle-usrbrgcorp')
+                    ->table("mtcm_npk")
+                    ->selectRaw("npk, kd_plant, lok_zona")
+                    ->where("npk", $npk)
+                    ->where("kd_plant", $kd_plant)
+                    ->first();
+
+                    if($mtcmnpk_cek != null) {
+                        DB::connection("oracle-usrbrgcorp")
+                        ->table(DB::raw("mtcm_npk"))
+                        ->where("npk", $npk)
+                        ->where("kd_plant", $kd_plant)
+                        ->update(['lok_zona' => $lok_zona, 'modiby' => $creaby, 'dtmodi' => Carbon::now()]);
+                    } else {
+                        DB::connection("oracle-usrbrgcorp")
+                        ->table(DB::raw("mtcm_npk"))
+                        ->insert(['npk' => $npk, 'kd_plant' => $kd_plant, 'lok_zona' => $lok_zona, 'creaby' => $creaby, 'dtcrea' => Carbon::now()]);
+                    }
+                }
+
+                //insert logs
+                $log_keterangan = "MtcmNpksController.update: Update NPK/Plant Berhasil. ".$npk;
+                $log_ip = \Request::session()->get('client_ip');
+                $created_at = Carbon::now();
+                $updated_at = Carbon::now();
+                DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                DB::connection("oracle-usrbrgcorp")->commit();
+
+                Session::flash("flash_notification", [
+                    "level"=>"success",
+                    "message"=>"Data NPK/Plant berhasil diubah: $npk"
+                ]);
+                //return redirect()->route('mtcmnpks.edit', base64_encode($npk));
+                return redirect()->route('mtcmnpks.index');
+            } catch (Exception $ex) {
+                DB::connection("oracle-usrbrgcorp")->rollback();
+                Session::flash("flash_notification", [
+                    "level"=>"danger",
+                    "message"=>"Data gagal diubah!"
+                ]);
+                return redirect()->back()->withInput(Input::all());
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Request $request, $npk)
+    {
+        if(Auth::user()->can('mtc-plant-delete')) {
+            $npk = base64_decode($npk);
+            try {
+                DB::connection("oracle-usrbrgcorp")->beginTransaction();
+                if ($request->ajax()) {
+                    $status = 'OK';
+                    $msg = 'NPK/Plant '.$npk.' berhasil dihapus.';
+
+                    DB::connection("oracle-usrbrgcorp")
+                    ->unprepared("delete from mtcm_npk where npk = '$npk'");
+
+                    //insert logs
+                    $log_keterangan = "MtcmNpksController.destroy: Delete NPK/Plant Berhasil. ".$npk;
+                    $log_ip = \Request::session()->get('client_ip');
+                    $created_at = Carbon::now();
+                    $updated_at = Carbon::now();
+                    DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                    DB::connection("oracle-usrbrgcorp")->commit();
+
+                    return response()->json(['id' => $npk, 'status' => $status, 'message' => $msg]);
+                } else {
+
+                    DB::connection("oracle-usrbrgcorp")
+                    ->unprepared("delete from mtcm_npk where npk = '$npk'");
+
+                    //insert logs
+                    $log_keterangan = "MtcmNpksController.destroy: Delete NPK/Plant Berhasil. ".$npk;
+                    $log_ip = \Request::session()->get('client_ip');
+                    $created_at = Carbon::now();
+                    $updated_at = Carbon::now();
+                    DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                    DB::connection("oracle-usrbrgcorp")->commit();
+
+                    Session::flash("flash_notification", [
+                    "level"=>"success",
+                    "message"=>"NPK/Plant ".$npk." berhasil dihapus."
+                    ]);
+
+                    return redirect()->route('mtcmnpks.index');
+                }
+            } catch (Exception $ex) {
+                DB::connection("oracle-usrbrgcorp")->rollback();
+                if ($request->ajax()) {
+                    $status = 'NG';
+                    $msg = "NPK/Plant ".$npk." gagal dihapus.";
+                    return response()->json(['id' => $npk, 'status' => $status, 'message' => $msg]);
+                } else {
+                    Session::flash("flash_notification", [
+                        "level"=>"danger",
+                        "message"=>"NPK/Plant ".$npk." gagal dihapus."
+                    ]);
+                    return redirect()->route('mtcmnpks.index');
+                }
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function delete($npk)
+    {
+        if(Auth::user()->can('mtc-plant-delete')) {
+            $npk = base64_decode($npk);
+            try {
+                DB::connection("oracle-usrbrgcorp")->beginTransaction();
+                
+                DB::connection("oracle-usrbrgcorp")
+                ->unprepared("delete from mtcm_npk where npk = '$npk'");
+
+                //insert logs
+                $log_keterangan = "MtcmNpksController.delete: Delete NPK/Plant Berhasil. ".$npk;
+                $log_ip = \Request::session()->get('client_ip');
+                $created_at = Carbon::now();
+                $updated_at = Carbon::now();
+                DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                DB::connection("oracle-usrbrgcorp")->commit();
+
+                Session::flash("flash_notification", [
+                "level"=>"success",
+                "message"=>"NPK/Plant ".$npk." berhasil dihapus."
+                ]);
+
+                return redirect()->route('mtcmnpks.index');
+            } catch (Exception $ex) {
+                DB::connection("oracle-usrbrgcorp")->rollback();
+                Session::flash("flash_notification", [
+                    "level"=>"danger",
+                    "message"=>"NPK/Plant ".$npk." gagal dihapus."
+                ]);
+                return redirect()->route('mtcmnpks.index');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+}

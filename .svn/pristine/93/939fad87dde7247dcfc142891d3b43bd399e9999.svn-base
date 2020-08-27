@@ -1,0 +1,84 @@
+@if (strlen(Auth::user()->username) == 5 || strlen(Auth::user()->username) == 7)
+@permission(['eng-pfc-*', 'eng-pfcsimbol-*', 'eng-msteng-*', 'eng-cycletime-*'])
+  <li class="header">ENGINEERING NAVIGATION</li>
+  @permission(['eng-pfcsimbol-*','eng-msteng-*'])
+    <li class="treeview">
+      <a href="#">
+        <i class="fa fa-files-o"></i> <span>MASTER</span>
+        <span class="pull-right-container">
+          <i class="fa fa-angle-left pull-right"></i>
+        </span>
+      </a>
+      <ul class="treeview-menu">
+        @permission(['eng-pfcsimbol-*'])
+          <li class="{{ route('engtmsimbols.index') == request()->url() ? 'active' : '' }}">
+            <a href="{{ route('engtmsimbols.index') }}"><i class="fa fa-circle-o"></i>Simbol PFC</a>
+          </li>
+        @endpermission
+        @permission(['eng-msteng-*'])
+          <li class="{{ route('engtmplants.index') == request()->url() ? 'active' : '' }}">
+            <a href="{{ route('engtmplants.index') }}"><i class="fa fa-circle-o"></i>Plant</a>
+          </li>
+          <li class="{{ route('engtmlines.index') == request()->url() ? 'active' : '' }}">
+            <a href="{{ route('engtmlines.index') }}"><i class="fa fa-circle-o"></i>Line</a>
+          </li>
+          <li class="{{ route('engtmmesins.index') == request()->url() ? 'active' : '' }}">
+            <a href="{{ route('engtmmesins.index') }}"><i class="fa fa-circle-o"></i>Mesin</a>
+          </li>
+          <li class="{{ route('engtmcusts.index') == request()->url() ? 'active' : '' }}">
+            <a href="{{ route('engtmcusts.index') }}"><i class="fa fa-circle-o"></i>Customer</a>
+          </li>
+          <li class="{{ route('engtmmodels.index') == request()->url() ? 'active' : '' }}">
+            <a href="{{ route('engtmmodels.index') }}"><i class="fa fa-circle-o"></i>Model</a>
+          </li>
+          <li class="{{ route('engtmdllines.index') == request()->url() ? 'active' : '' }}">
+            <a href="{{ route('engtmdllines.index') }}"><i class="fa fa-circle-o"></i>Model Lines</a>
+          </li>
+          <li class="{{ route('engtmparts.index') == request()->url() ? 'active' : '' }}">
+            <a href="{{ route('engtmparts.index') }}"><i class="fa fa-circle-o"></i>Part</a>
+          </li>
+        @endpermission
+      </ul>
+    </li>
+  @endpermission
+  @permission(['eng-pfc-*', 'eng-fcm-*'])
+    <li class="treeview">
+      <a href="#">
+        <i class="fa fa-files-o"></i> <span>TRANSAKSI</span>
+        <span class="pull-right-container">
+          <i class="fa fa-angle-left pull-right"></i>
+        </span>
+      </a>
+      <ul class="treeview-menu">
+        @permission(['eng-pfc-*'])
+          <li class="{{ route('engttpfc1s.index') == request()->url() ? 'active' : '' }}">
+            <a href="{{ route('engttpfc1s.index') }}"><i class="fa fa-circle-o"></i>Process Flow Chart</a>
+          </li>
+        @endpermission
+        @permission(['eng-fcm-*'])
+          <li class="{{ route('engtfcm1s.index') == request()->url() ? 'active' : '' }}">
+            <a href="{{ route('engtfcm1s.index') }}"><i class="fa fa-circle-o"></i>Form Characteristic Matrix</a>
+          </li>
+        @endpermission
+      </ul>
+    </li>
+  @endpermission
+  @permission(['eng-cycletime-*'])
+    <li class="treeview">
+      <a href="#">
+        <i class="fa fa-files-o"></i> <span>LAPORAN</span>
+        <span class="pull-right-container">
+          <i class="fa fa-angle-left pull-right"></i>
+        </span>
+      </a>
+      <ul class="treeview-menu">
+        @permission(['eng-cycletime-*'])
+          <li class="{{ route('vwtctperiods.indexeng') == request()->url() ? 'active' : '' }}">
+            <a href="{{ route('vwtctperiods.indexeng') }}"><i class="fa fa-circle-o"></i>Cycle Time</a>
+          </li>
+        @endpermission
+      </ul>
+    </li>
+  @endpermission
+@endpermission
+@endif

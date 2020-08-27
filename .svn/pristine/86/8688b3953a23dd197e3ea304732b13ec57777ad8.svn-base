@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="812" leftMargin="15" rightMargin="15" topMargin="20" bottomMargin="20" uuid="b12e1461-f2c2-4eb5-91b6-f20b18705cbe">
+	<property name="ireport.zoom" value="1.0000000000000004"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="tgl" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="kdSite" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="logo" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="npkPic" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="path" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String">
+		<defaultValueExpression><![CDATA["/"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="dep_gemba" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select no_gemba, tgl_gemba, kd_site, det_gemba, pict_gemba, kd_area, lokasi, coalesce(npk_pic,'-') npk_pic, coalesce((select coalesce(v.initial, split_part(v.nama,' ',1)) from v_mas_karyawan v where v.npk = mgmt_gembas.npk_pic limit 1),'-') inisial, cm_ket, cm_pict, st_gemba, $P{path}||pict_gemba pict_gemba2, $P{path}||cm_pict cm_pict2
+from mgmt_gembas
+where dep_gemba = $P{dep_gemba} 
+and kd_site = $P{kdSite}
+and to_char(tgl_gemba,'dd/mm/yyyy') = $P{tgl}
+and (npk_pic = $P{npkPic} or $P{npkPic} = '')
+order by no_gemba]]>
+	</queryString>
+	<field name="no_gemba" class="java.lang.String"/>
+	<field name="tgl_gemba" class="java.sql.Timestamp"/>
+	<field name="kd_site" class="java.lang.String"/>
+	<field name="det_gemba" class="java.lang.String"/>
+	<field name="pict_gemba" class="java.lang.String"/>
+	<field name="kd_area" class="java.lang.String"/>
+	<field name="lokasi" class="java.lang.String"/>
+	<field name="npk_pic" class="java.lang.String"/>
+	<field name="inisial" class="java.lang.String"/>
+	<field name="cm_ket" class="java.lang.String"/>
+	<field name="cm_pict" class="java.lang.String"/>
+	<field name="st_gemba" class="java.lang.String"/>
+	<field name="pict_gemba2" class="java.lang.String"/>
+	<field name="cm_pict2" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="50" splitType="Stretch">
+			<image onErrorType="Icon">
+				<reportElement x="0" y="0" width="100" height="45" uuid="5eeaa4df-3d2b-4475-8eda-7a5c0d5f393a"/>
+				<imageExpression><![CDATA[$P{logo} != null ? (!$P{logo}.equals("") ? $P{logo} : "../../src/images/igp_new.jpg") : "../../src/images/igp_new.jpg"]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement x="275" y="0" width="262" height="45" uuid="248b0a9f-f259-4c36-b5d3-eca5373b8d8d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[LAPORAN GENBA]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="60" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="40" width="20" height="20" uuid="fa6d2674-6a29-45d8-9bea-7c4aeded917d"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="20" y="40" width="70" height="20" uuid="09ee53d8-df6b-4097-b7cc-f00660f6b762"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[No. Genba]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="330" y="40" width="50" height="20" uuid="7013a940-8278-4996-8bd9-3b71e4507413"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Area]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="380" y="40" width="122" height="20" uuid="58484300-4942-4530-b0f8-a2555adb623b"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Lokasi]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="502" y="40" width="80" height="20" uuid="11374a5d-69e3-47bb-8669-3fd6376e2c21"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None">
+					<font size="10" isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[PIC Genba]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="582" y="40" width="190" height="20" uuid="cb81b6ed-f0b8-4c55-9993-726c44959bc9"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Countermeasure]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="772" y="40" width="40" height="20" uuid="7a4d743d-9fa9-4e4e-9734-c0c8a788a056"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Close]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="90" y="40" width="50" height="20" uuid="62b4b40d-b036-4b69-9baf-1c05e81f8304"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Tanggal]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="140" y="40" width="190" height="20" uuid="920c8cd4-4a9c-478b-a5e7-d561aea0e699"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Detail]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="50" height="15" uuid="4c846a30-603e-452b-a462-c3770e423405"/>
+				<box leftPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Site]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="15" width="50" height="15" uuid="5896c182-b604-4419-8373-ecf5ab38d5fa"/>
+				<box leftPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tanggal]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="65" y="0" width="300" height="15" uuid="bfa4d4d8-bfa2-4fb1-94f8-5cccdc96abbb"/>
+				<box leftPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{kdSite}.equals("IGPJ") ? "IGP - JAKARTA" : ($P{kdSite}.equals("IGPK") ? "IGP - KARAWANG" : ($P{kdSite}.equals("GKDJ") ? "GKD - JAKARTA" : "GKD - CIKAMPEK"))]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="65" y="15" width="300" height="15" uuid="505f6c2e-8a1a-49f3-824a-d20578a34f16"/>
+				<box leftPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{tgl}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="50" y="0" width="15" height="15" uuid="2636ad73-9dcd-4853-990b-de57205760dd"/>
+				<box leftPadding="0"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="50" y="15" width="15" height="15" uuid="38d1c433-6d76-44b0-9d48-ea3ab961b269"/>
+				<box leftPadding="0"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="150" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="20" height="150" uuid="fe2383b5-7908-40c0-969e-fa92460323b8"/>
+				<box topPadding="1">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="20" y="0" width="70" height="150" uuid="9d1dcc06-1a8f-48be-b83d-114dea55c94a"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{no_gemba}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="330" y="0" width="50" height="150" uuid="79e1f9bd-d90d-4219-b2a3-b461a0b48858"/>
+				<box topPadding="1" leftPadding="0">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{kd_area}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="380" y="0" width="122" height="150" uuid="aaefddf3-e264-4650-b927-af1f408d2ace"/>
+				<box topPadding="1" leftPadding="2" rightPadding="0">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{lokasi}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="502" y="0" width="80" height="150" uuid="917fadbe-65cd-4878-bac5-659a5639da19"/>
+				<box topPadding="1" leftPadding="0" rightPadding="0">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{npk_pic} + " - " + $F{inisial}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="772" y="0" width="40" height="150" uuid="da0efb31-8798-4fb2-9241-0db351b4cd45"/>
+				<box topPadding="1" leftPadding="0">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{st_gemba}.equals("T") ? "YES" : "NO"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="90" y="0" width="50" height="150" uuid="42e31b13-4bca-4798-8fed-960324ea45c2"/>
+				<box topPadding="1" leftPadding="0">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tgl_gemba}]]></textFieldExpression>
+			</textField>
+			<frame>
+				<reportElement stretchType="RelativeToBandHeight" x="140" y="0" width="190" height="150" uuid="f640244f-0523-47e3-bf88-ae1de76183e0"/>
+				<box>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="190" height="20" uuid="6df87dea-d60c-49df-89f8-5a82ba50ea18"/>
+					<box topPadding="1" leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Top">
+						<font size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{det_gemba}]]></textFieldExpression>
+				</textField>
+				<image scaleImage="FillFrame" onErrorType="Blank">
+					<reportElement isPrintRepeatedValues="false" x="5" y="22" width="180" height="125" uuid="8fe5db55-ea0c-44a4-aac4-9c2f7245947a">
+						<printWhenExpression><![CDATA[$F{pict_gemba} != null]]></printWhenExpression>
+					</reportElement>
+					<imageExpression><![CDATA[$F{pict_gemba2}]]></imageExpression>
+				</image>
+			</frame>
+			<frame>
+				<reportElement stretchType="RelativeToBandHeight" x="582" y="0" width="190" height="150" uuid="8e6a8568-52bf-476f-931f-fbb7186ef6bd"/>
+				<box>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="190" height="20" uuid="26f2b86d-261f-429a-ac59-9186859a86ea"/>
+					<box topPadding="1" leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Top">
+						<font size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cm_ket}]]></textFieldExpression>
+				</textField>
+				<image scaleImage="FillFrame" onErrorType="Blank">
+					<reportElement isPrintRepeatedValues="false" x="5" y="22" width="180" height="125" uuid="19fbb085-13e0-4a7f-b722-c79a5b018aed">
+						<printWhenExpression><![CDATA[$F{cm_pict} != null]]></printWhenExpression>
+					</reportElement>
+					<imageExpression><![CDATA[$F{cm_pict2}]]></imageExpression>
+				</image>
+			</frame>
+		</band>
+	</detail>
+	<summary>
+		<band height="35">
+			<subreport>
+				<reportElement x="0" y="15" width="812" height="20" uuid="658d7969-3bbd-43b1-9c43-97eaf35c1a25"/>
+				<subreportParameter name="tgl">
+					<subreportParameterExpression><![CDATA[$P{tgl}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="npkPic">
+					<subreportParameterExpression><![CDATA[$P{npkPic}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="dep_gemba">
+					<subreportParameterExpression><![CDATA[$P{dep_gemba}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="kdSite">
+					<subreportParameterExpression><![CDATA[$P{kdSite}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "ReportGembaSub2.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</summary>
+</jasperReport>

@@ -1,0 +1,385 @@
+<?php
+
+namespace App;
+
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Laratrust\Traits\LaratrustUserTrait;
+use Illuminate\Support\Facades\Mail;
+use DB;
+use Cache;
+use Exception;
+
+class User extends Authenticatable
+{
+    use LaratrustUserTrait;
+    use Notifiable;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name', 'username', 'email', 'password', 'is_verified', 'status_active', 'init_supp', 'telegram_id', 'no_hp', 'st_collapse'
+    ];
+
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'password', 'remember_token',
+    ];
+
+    protected $casts = [
+        'is_verified' => 'boolean',
+    ];
+
+    public static function boot()
+    {
+        parent::boot();
+
+        self::deleting(function($id) {
+            // // mengecek apakah penulis masih punya buku
+            // if ($author->books->count() > 0) {
+            //  // menyiapkan pesan error
+            //  $html = 'Penulis tidak bisa dihapus karena masih memiliki buku : ';
+            //  $html .= '<ul>';
+            //  foreach ($author->books as $book) {
+            //      $html .= "<li>$book->title</li>";
+            //  }
+            //  $html .= '</ul>';
+
+            //  Session::flash("flash_notification", [
+            //      "level"=>"danger",
+            //      "message"=>$html
+            //  ]);
+            //  // membatalkan proses penghapusan
+            //  return false;
+            // }
+        });
+    }
+
+    public function sendVerification()
+    {
+        $token = $this->generateVerificationToken();
+        $user = $this;
+
+        Mail::send('auth.emails.verification', compact('user', 'token'), function ($m) use ($user) 
+        {
+            $m->to($user->email, $user->name)->subject('Verifikasi Akun '. config('app.name', 'Laravel'));
+        });
+    }
+
+    public function verify()
+    {
+        $this->is_verified = 1;
+        $this->verification_token = null;
+        $this->save();
+    }
+
+    public function generateVerificationToken()
+    {
+        $token = $this->verification_token;
+        if (!$token) {
+            $token = str_random(40);
+            $this->verification_token = $token;
+            $this->save();
+        }
+        return $token;
+    }
+
+    public function getRolenameAttribute()
+    {
+        $rolenames = [];
+        $roles = $this->roles()->get();
+        foreach ($roles as $role) {
+            array_push($rolenames, $role->name);
+        }
+        return $rolenames;
+    }
+
+    public function getRolenameDescAttribute()
+    {
+        $role_name = "";
+        $roles = $this->roles()->get();
+        foreach ($roles as $role) {
+            if($role_name === "") {
+                $role_name = $role->display_name;
+            } else {
+                $role_name = $role_name.' | '.$role->display_name;
+            }
+        }
+        return $role_name;
+    }
+
+    public function getKdSuppAttribute()
+    {
+        $explode = explode(".", $this->username);
+        $kd_supp = $explode[0];
+        $kd_supp = strtoupper($kd_supp);
+        return $kd_supp;
+    }
+
+    public function getNmSuppAttribute()
+    {
+        $explode = explode(".", $this->username);
+        $kd_supp = $explode[0];
+        $kd_supp = strtoupper($kd_supp);
+
+        $nmSupp = DB::table("b_suppliers")
+        ->select(DB::raw("nama"))
+        ->where(DB::raw("kd_supp"), "=", $kd_supp)
+        ->value("nama");
+        return $nmSupp;
+    }
+
+    public function getNpwpSuppAttribute()
+    {
+        $explode = explode(".", $this->username);
+        $kd_supp = $explode[0];
+        $kd_supp = strtoupper($kd_supp);
+        
+        $npwpSupp = DB::table("b_suppliers")
+                    ->select(DB::raw("npwp"))
+                    ->where(DB::raw("kd_supp"), "=", $kd_supp)
+                    ->value("npwp");
+        return $npwpSupp;
+    }
+
+    public function namaSupplier($kd_supp)
+    {
+        $nmSupp = DB::table("b_suppliers")
+        ->select(DB::raw("nama"))
+        ->where(DB::raw("kd_supp"), "=", $kd_supp)
+        ->value("nama");
+        return $nmSupp;
+    }
+
+    public function namaByUsername($username)
+    {
+        $name = DB::table("users")
+            ->select("name")
+            ->where("username", "=", strtolower($username))
+            ->value("name");
+        return $name;
+    }
+
+    public function emailByUsername($username)
+    {
+        $email = DB::table("users")
+            ->select("email")
+            ->where("username", "=", strtolower($username))
+            ->value("email");
+        return $email;
+    }
+
+    public function masKaryawan()
+    {
+        $mas_karyawan = DB::table("v_mas_karyawan")
+            ->select(DB::raw("npk, nama, kd_pt, desc_dep, desc_div, email, kode_dep, kode_div, npk_atasan, kode_gol, desc_jab, tgl_lahir, tgl_masuk_gkd, coalesce(substr(foto,18),'-.jpg') foto, npk_sec_head, npk_dep_head, npk_div_head, tgl_keluar, kode_site"))
+            ->where("npk", "=", $this->username)
+            ->first();
+        if($mas_karyawan == null) {
+            $mas_karyawan = DB::connection('pgsql-mobile')
+                ->table("v_mas_karyawan")
+                ->select(DB::raw("npk, nama, kd_pt, desc_dep, desc_div, email, kode_dep, kode_div, npk_atasan, kode_gol, desc_jab, tgl_lahir, tgl_masuk_gkd, coalesce(substr(foto,18),'-.jpg') foto, npk_sec_head, npk_dep_head, npk_div_head, tgl_keluar, kode_site"))
+                ->where("npk", "=", $this->username)
+                ->first();
+        }
+        return $mas_karyawan;
+    }
+
+    public function kodeDep()
+    {
+        $kode_dep = "-";
+        if($this->masKaryawan() != null) {
+            $kode_dep = $this->masKaryawan()->kode_dep;
+        }
+        return $kode_dep;
+    }
+
+    public function namaByNpk($npk)
+    {
+        $nama = DB::table("v_mas_karyawan")
+            ->select("nama")
+            ->where("npk", "=", $npk)
+            ->value("nama");
+        if($nama == null) {
+            $nama = DB::connection('pgsql-mobile')
+            ->table("v_mas_karyawan")
+            ->select("nama")
+            ->where("npk", "=", $npk)
+            ->value("nama");
+        }
+        return $nama;
+    }
+
+    public function namaDivisi($kode_div)
+    {
+        $nama = DB::table("divisi")
+            ->select("desc_div")
+            ->where("kd_div", "=", $kode_div)
+            ->value("desc_div");
+        if($nama == null) {
+            $nama = DB::connection('pgsql-mobile')
+            ->table("v_mas_karyawan")
+            ->select("desc_div")
+            ->where("kode_div", "=", $kode_div)
+            ->value("desc_div");
+        }
+        return $nama;
+    }
+
+    public function namaDepartemen($kode_dep)
+    {
+        $nama = DB::table("departement")
+            ->select("desc_dep")
+            ->where("kd_dep", "=", $kode_dep)
+            ->value("desc_dep");
+        if($nama == null) {
+            $nama = DB::connection('pgsql-mobile')
+            ->table("v_mas_karyawan")
+            ->select("desc_dep")
+            ->where("kode_dep", "=", $kode_dep)
+            ->value("desc_dep");
+        }
+        return $nama;
+    }
+
+    public function fotoKaryawan() {
+        if(config('app.env', 'local') === 'production') {
+            $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR."foto".DIRECTORY_SEPARATOR.$this->username.".jpg";
+        } else {
+            $file_temp = "\\\\".config('app.ip_x', '-')."\\Batch\\Hrms_new\\foto\\".$this->username.".jpg";
+        }
+        if (!file_exists($file_temp)) {
+            if($this->masKaryawan() != null) {
+                if(config('app.env', 'local') === 'production') {
+                    $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR."foto".DIRECTORY_SEPARATOR.$this->masKaryawan()->foto;
+                } else {
+                    $file_temp = "\\\\".config('app.ip_x', '-')."\\Batch\\Hrms_new\\foto\\".$this->masKaryawan()->foto;
+                }
+            }
+        }
+        if (file_exists($file_temp)) {
+            $loc_image = file_get_contents('file:///'.str_replace("\\\\","\\",$file_temp));
+            $image_codes = "data:".mime_content_type($file_temp).";charset=utf-8;base64,".base64_encode($loc_image);
+            return $image_codes;
+        } else {
+            return \Avatar::create($this->name)->toBase64();
+        }
+    }
+
+    public function foto() {
+        if ($this->picture) {
+            if(config('app.env', 'local') === 'production') {
+                $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."avatar".DIRECTORY_SEPARATOR.$this->picture;
+            } else {
+                $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\avatar\\".$this->picture;
+            }
+            
+            if (file_exists($file_temp)) {
+                $loc_image = file_get_contents('file:///'.str_replace("\\\\","\\",$file_temp));
+                $image_codes = "data:".mime_content_type($file_temp).";charset=utf-8;base64,".base64_encode($loc_image);
+                return $image_codes;
+            } else {
+                if(strlen($this->username) == 5) {
+                    return $this->fotoKaryawan();
+                } else {
+                    return \Avatar::create($this->name)->toBase64();
+                }
+            }
+        } else {
+            if(strlen($this->username) == 5) {
+                return $this->fotoKaryawan();
+            } else {
+                return \Avatar::create($this->name)->toBase64();
+            }
+        }
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status_active', 'T');
+    }
+
+    public function scopeNotActive($query)
+    {
+        return $query->where('status_active', '<>', 'T');
+    }
+
+    public function scopeKaryawan($query)
+    {
+        return $query->whereRaw("length(username) = 5");
+    }
+
+    public function scopeSupplier($query)
+    {
+        return $query->whereRaw("length(username) > 5");
+    }
+
+    public function scopeOnline($query)
+    {
+        $onlines = [];
+        foreach ($query->get() as $user) {
+            if($user->isOnline()) {
+                array_push($onlines, $user->id);
+            }
+        }
+        return $query->whereIn('id', $onlines);
+    }
+
+    public function scopeNotOnline($query)
+    {
+        $onlines = [];
+        foreach ($query->get() as $user) {
+            if(!$user->isOnline()) {
+                array_push($onlines, $user->id);
+            }
+        }
+        return $query->whereIn('id', $onlines);
+    }
+
+    public function isOnline()
+    {
+        return Cache::has('user-is-online-' . $this->id);
+    }
+
+    public function cekOnline($id_user)
+    {
+        return Cache::has('user-is-online-' . $id_user);
+    }
+
+    public function getIp() {
+        $client_ip = \Request::ip();
+        try {
+            $json_ip = json_decode(file_get_contents("https://api.ipify.org?format=json"), true);
+            $client_ip = $json_ip['ip']." / ".\Request::ip();
+        } catch (Exception $ex) {
+            
+        }
+        session(['client_ip' => $client_ip]);
+        return $client_ip;
+    }
+
+    public function rekapAbsen($thn, $bln)
+    {
+        $v_absen_rekap = DB::connection("pgsql-mobile")
+            ->table("v_absen_rekap")
+            ->select(DB::raw("masuk, telat, ijin_telat, sakit, cuti, ijin_upah, inin_non_upah, libur_resmi, satu_prik, shift_1, shift_2, shift_3, tdk_ada_ket, libur_biasa, training, cbs, cth, cms, ct_hamil, ct_haid, ijin_dispensasi_puk, tgl_sync"))
+            ->where("npk", "=", $this->username)
+            ->where("thn", "=", $thn)
+            ->where("bln", "=", $bln)
+            ->first();
+        if($v_absen_rekap == null) {
+            $v_absen_rekap = DB::connection("pgsql-mobile")
+            ->table(DB::raw("(select 0 masuk, 0 telat, 0 ijin_telat, 0 sakit, 0 cuti, 0 ijin_upah, 0 inin_non_upah, 0 libur_resmi, 0 satu_prik, 0 shift_1, 0 shift_2, 0 shift_3, 0 tdk_ada_ket, 0 libur_biasa, 0 training, 0 cbs, 0 cth, 0 cms, 0 ct_hamil, 0 ct_haid, 0 ijin_dispensasi_puk, now() tgl_sync) v"))
+            ->select(DB::raw("v.masuk, v.telat, v.ijin_telat, v.sakit, v.cuti, v.ijin_upah, v.inin_non_upah, v.libur_resmi, v.satu_prik, v.shift_1, v.shift_2, v.shift_3, v.tdk_ada_ket, v.libur_biasa, v.training, v.cbs, v.cth, v.cms, v.ct_hamil, v.ct_haid, v.ijin_dispensasi_puk, v.tgl_sync"))
+            ->first();
+        }
+        return $v_absen_rekap;
+    }
+}

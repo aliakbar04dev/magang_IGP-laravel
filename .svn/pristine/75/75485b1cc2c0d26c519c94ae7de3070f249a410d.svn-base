@@ -1,0 +1,41 @@
+<?php
+
+Route::group(['prefix'=>'faco', 'middleware'=>['auth']], function () {
+	Route::resource('lalins', 'LalinsController');
+	Route::get('indexksracc', [
+		'as' => 'lalins.indexksracc',
+		'uses'=>'LalinsController@indexksracc'
+	]);
+	Route::get('indexaccfin', [
+		'as' => 'lalins.indexaccfin',
+		'uses'=>'LalinsController@indexaccfin'
+	]);
+	Route::get('indexfinksr', [
+		'as' => 'lalins.indexfinksr',
+		'uses'=>'LalinsController@indexfinksr'
+	]);
+	Route::get('dashboardksracc/lalins', [
+		'as'=>'lalins.dashboardksracc',
+		'uses'=>'LalinsController@dashboardksracc'
+	]);
+	Route::get('lalins/detailksracc/{param}', [
+		'as'=>'lalins.detailksracc',
+		'uses'=>'LalinsController@detailksracc'
+	]);
+	Route::get('dashboardaccfin/lalins', [
+		'as'=>'lalins.dashboardaccfin',
+		'uses'=>'LalinsController@dashboardaccfin'
+	]);
+	Route::get('lalins/detailaccfin/{param}', [
+		'as'=>'lalins.detailaccfin',
+		'uses'=>'LalinsController@detailaccfin'
+	]);
+	Route::get('dashboardfinksr/lalins', [
+		'as'=>'lalins.dashboardfinksr',
+		'uses'=>'LalinsController@dashboardfinksr'
+	]);
+	Route::get('lalins/detailfinksr/{param}', [
+		'as'=>'lalins.detailfinksr',
+		'uses'=>'LalinsController@detailfinksr'
+	]);
+});

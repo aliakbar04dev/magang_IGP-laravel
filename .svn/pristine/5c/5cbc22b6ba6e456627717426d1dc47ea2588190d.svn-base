@@ -1,0 +1,1415 @@
+@extends('layouts.app')
+<style>
+  
+html, body {
+    height: 100%;
+}
+body {
+    font-family: 'Source Sans Pro', sans-serif;
+    color: #666;
+}
+
+table, th, td {
+  border: 1px solid black;
+}
+/* button */
+.button {
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 0.6em;
+    font-weight: 400;
+    text-transform: uppercase;
+    display: inline-block;
+    padding: 4px 6px;
+    margin: 0 10px;
+    position: relative;
+    background: #ccc;
+    color: #fff;
+    box-shadow: 0 0 2px rgba(0,0,0,0.1);
+    background: rgb(190,190,190); /* Old browsers */
+    background: -moz-linear-gradient(top, rgba(190,190,190,1) 0%, rgba(170,170,170,1) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(190,190,190,1)), color-stop(100%,rgba(170,170,170,1))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top, rgba(190,190,190,1) 0%,rgba(170,170,170,1) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top, rgba(190,190,190,1) 0%,rgba(170,170,170,1) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top, rgba(190,190,190,1) 0%,rgba(170,170,170,1) 100%); /* IE10+ */
+    background: linear-gradient(to bottom, rgba(190,190,190,1) 0%,rgba(170,170,170,1) 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#bebebe', endColorstr='#aaaaaa',GradientType=0 ); /* IE6-9 */
+}
+.button:hover {
+    background: #637b85;
+}
+/* Header styles */
+header {
+    text-align: center;
+    background: #637b85;
+    color: #fff;
+    margin-bottom: 40px;
+}
+header span {
+    font-weight: 200;
+}
+header .button {
+    font-size: 0.2em;
+    top: -6px;
+}
+ 
+/* various containers */
+.container {
+    width: 200px;
+    margin: 0 auto;
+}
+.canvas-container {
+    min-height: 300px;
+    max-height: 600px;
+    position: relative;
+}
+.widget {
+    position: relative;
+    margin-bottom: 80px;
+    background: #fdf9f9;
+    padding: 7px;
+    border-width: 2px;
+    border-color: #f7f8ff;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+
+.chart-legend ul {
+    list-style: none;
+    width: 100%;
+    margin: 30px auto 0;
+}
+.chart-legend li {
+    text-indent: 16px;
+    line-height: 24px;
+    position: relative;
+    font-weight: 200;
+    display: block;
+    float: left;
+    width: 50%;
+    font-size: 0.8em;
+}
+.chart-legend  li:before {
+    display: block;
+    width: 10px;
+    height: 16px;
+    position: absolute;
+    left: 0;
+    top: 3px;
+    content: "";
+}
+.ship:before { background-color: #637b85; }
+.rework:before { background-color: #2c9c69; }
+.admin:before { background-color: #dbba34; }
+.prod:before { background-color: #c62f29; }
+
+
+
+.widget p {
+    margin-top: 0;
+    text-align: center;
+     font-size: 1.5em;
+}
+.widget h4 {
+    margin: 1px 1 1px 1px;
+    padding: 0px;
+    width: 100%;
+    text-align: center;
+    color: #f7f8ff;
+    line-height: 2em;
+    background: #777;
+}
+
+
+
+.widget.line p span {
+    color: #dbba34;
+}
+.widget.line p strong {
+    color: #637b85;
+    font-weight: 400;
+}
+
+
+@media only screen and (min-width:300px){
+    .container {
+        width: 300px;
+        margin: 0 auto;
+    }
+}
+ 
+@media only screen and (min-width:600px){
+    .container {
+        width: 580px;
+        margin: 0 auto;
+    }
+    .third {
+        float: left;
+        width: 47.5%;
+        margin-left: 5%;
+        border-style: outset;
+    }
+    .third:first-child {
+        margin-left: 0;
+    }
+    .third:last-child {
+        display: block;
+        width: 100%;
+        margin-left: 0;
+    }
+    .second{
+      float: center;
+        width: 80%;
+        margin-left: 5%;
+        margin-right: 5%;
+    }
+}
+ 
+@media only screen and (min-width:960px){
+    .container {
+        width: 940px;
+    }
+    .third {
+        border-style: outset;
+        float: left;
+        width: 30%;
+        margin-left: 2.5%;
+        margin-right: 2.5%;
+    }
+    .third:first-child {
+        margin-left: 0;
+    }
+    .third:last-child {
+        margin-right: 0;
+        margin-left: 2.5%;
+        width: 30%;
+    }
+     .second{
+      float: center;
+        width: 80%;
+        margin-left: 5%;
+        margin-right: 5%;
+    }
+}
+@media only screen and (min-width:1140px){
+    .container {
+        width: 1120px;
+    }
+}
+@media only screen and (min-width:1360px){
+    .container {
+        width: 1300px;
+    }
+}
+</style>
+@section('content')
+
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <h1>
+        Dashboard
+        <small>Dashboard</small>
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="{{ url('/home') }}"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li class="active">Dashboard</li>
+      </ol>
+    </section>
+
+    <!-- Main content -->
+   
+ <section class="content">
+
+          <div class="row">
+            <div class="col-md-12">
+              <div class="box">
+                <div class="box-header with-border">
+                  <h3 class="box-title">Data Accident Tahun {{\Carbon\Carbon::now()->format('Y')}}</h3>
+
+                  <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                  </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                 <table class="table table-bordered" > 
+                   <thead style="background-color:lightblue;">
+                     <th style="width:25%;">DAILY</th>
+                     <th style="width:25%;">IGP</th>
+                     <th style="width:25%;">GKD</th>
+                     <th style="width:25%;">AGI</th>
+                   </thead>
+                   <tbody>
+                   <tr>
+                     <th>Jakarta</th>
+                     <td> <p> <a  data-toggle="collapse" data-target="#showigpj" >
+                    <span class="fa fa-eye"></span>  {{$acigpj->first()->rankigpj}} </a>
+                    </p> </td>
+                     <td> <p> <a  data-toggle="collapse" data-target="#showgkdj" >
+                    <span class="fa fa-eye"></span>  {{$acgkdj->first()->rankgkdj}}</td>
+                     <td> <p> <a  data-toggle="collapse" data-target="#showagij" >
+                    <span class="fa fa-eye"></span>  {{$acagij->first()->rankagij}}</td>
+                   </tr>
+                    <tr>
+                     <th>Karawang</th>
+                     <td> <p> <a  data-toggle="collapse" data-target="#showigpk" >
+                    <span class="fa fa-eye"></span>  {{$acigpk->first()->rankigpk}}</td>
+                     <td> <p> <a  data-toggle="collapse" data-target="#showgkdk" >
+                    <span class="fa fa-eye"></span> {{$acgkdk->first()->rankgkdk}}</td>
+                     <td> <p> <a  data-toggle="collapse" data-target="#showagik" >
+                    <span class="fa fa-eye"></span>  {{$acagik->first()->rankagik}}</td>
+                   </tr>
+                   </tbody>
+                 </table>
+                  <!-- /.row -->
+                </div>
+                <!-- ./box-body -->
+              </div>
+              <!-- /.box -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+      
+
+<div class="push"></div>
+
+
+
+ <div class="row collapse" id="showigpj" >
+            <div class="col-md-12">
+              <div class="box">
+                <div class="box-header with-border">
+                  <h3 class="box-title">Accident IGP Plant Jakarta Tahun {{\Carbon\Carbon::now()->format('Y')}}</h3>
+
+                  <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                  </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <div class="second">
+                         <canvas id="accident_igpj" ></canvas>
+                     </div>
+                  <!-- /.row -->
+                </div>
+                <!-- ./box-body -->
+              </div>
+              <!-- /.box -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+
+
+
+
+<div class="row collapse" id="showigpk" >
+            <div class="col-md-12">
+              <div class="box">
+                <div class="box-header with-border">
+                  <h3 class="box-title">Accident IGP Plant Karawang Tahun {{\Carbon\Carbon::now()->format('Y')}}</h3>
+
+                  <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                  </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <div class="second">
+                         <canvas id="accident_igpk" ></canvas>
+                     </div>
+                  <!-- /.row -->
+                </div>
+                <!-- ./box-body -->
+              </div>
+              <!-- /.box -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+
+
+          <div class="row collapse" id="showgkdj" >
+            <div class="col-md-12">
+              <div class="box">
+                <div class="box-header with-border">
+                  <h3 class="box-title">Accident GKD Plant Jakarta Tahun {{\Carbon\Carbon::now()->format('Y')}}</h3>
+
+                  <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                  </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <div class="second">
+                         <canvas id="accident_gkdj" ></canvas>
+                     </div>
+                  <!-- /.row -->
+                </div>
+                <!-- ./box-body -->
+              </div>
+              <!-- /.box -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+
+
+          <div class="row collapse" id="showgkdk" >
+            <div class="col-md-12">
+              <div class="box">
+                <div class="box-header with-border">
+                  <h3 class="box-title">Accident GKD Plant Karawang Tahun {{\Carbon\Carbon::now()->format('Y')}}</h3>
+
+                  <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                  </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <div class="second">
+                         <canvas id="accident_gkdk" ></canvas>
+                     </div>
+                  <!-- /.row -->
+                </div>
+                <!-- ./box-body -->
+              </div>
+              <!-- /.box -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+
+
+<div class="row collapse" id="showagij" >
+            <div class="col-md-12">
+              <div class="box">
+                <div class="box-header with-border">
+                  <h3 class="box-title">Accident AGI Plant Jakarta Tahun {{\Carbon\Carbon::now()->format('Y')}}</h3>
+
+                  <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                  </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <div class="second">
+                         <canvas id="accident_agij" ></canvas>
+                     </div>
+                  <!-- /.row -->
+                </div>
+                <!-- ./box-body -->
+              </div>
+              <!-- /.box -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+
+<div class="row collapse" id="showagik" >
+            <div class="col-md-12">
+              <div class="box">
+                <div class="box-header with-border">
+                  <h3 class="box-title">Accident AGI Plant Karawang Tahun {{\Carbon\Carbon::now()->format('Y')}}</h3>
+
+                  <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                  </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <div class="second">
+                         <canvas id="accident_agik" ></canvas>
+                     </div>
+                  <!-- /.row -->
+                </div>
+                <!-- ./box-body -->
+              </div>
+              <!-- /.box -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+
+ <div class="row">
+            <div class="col-md-12">
+              <div class="box">
+                <div class="box-header with-border">
+                  <h3 class="box-title">Monitoring Pengolahan Limbah Cair</h3>
+
+                  <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                  </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+
+                <div class="second">
+                  <div class="chart-legend">
+                      <canvas id="levelair" style="height: 50px;width: 100px;" ></canvas>
+                    <img src="{{ asset('images/red.png') }}" alt="X"> Emergency
+                    <img src="{{ asset('images/yellow.png') }}" alt="X"> Warning
+                    <img src="{{ asset('images/green.png') }}" alt="X"> Normal
+                 </div>
+                </div>
+
+                <div class="second">
+                  <div class="chart-legend">
+                      <canvas id="pbkimia" style="height: 50px;width: 100px;" ></canvas>
+                 <!--      <canvas id="speedChart" height="50" width="60" ></canvas> -->    
+                  </div>
+                  </div>
+
+                  <!-- /.row -->
+                </div>
+                <!-- ./box-body -->
+              </div>
+              <!-- /.box -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+
+
+           <div class="row">
+            <div class="col-md-12">
+              <div class="box">
+                <div class="box-header with-border">
+                  <h3 class="box-title">Monitoring Equipment & Facility</h3>
+
+                  <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                  </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+
+
+                  <div class="second">
+                  <div class="chart-legend">
+                      <canvas id="equipment" style="height: 50px;width: 100px;" ></canvas>
+                  </div>
+                  </div>
+                  <!-- /.row -->
+                </div>
+                <!-- ./box-body -->
+              </div>
+              <!-- /.box -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+
+
+            <div class="row">
+            <div class="col-md-12">
+              <div class="box">
+                <div class="box-header with-border">
+                  <h3 class="box-title">Pengangkutan Limbah B3</h3>
+
+                  <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                  </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+
+                  <div class="second">
+                  <div class="chart-legend">
+                      <canvas id="festronik" style="height: 50px;width: 100px;" ></canvas>
+                  </div>
+                  </div>
+
+                   <div class="second">
+                  <div class="chart-legend">
+                  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js"></script>
+                      <canvas id="angkut" style="height: 50px;width: 100px;" ></canvas>
+                  </div>
+                  </div>
+                  <!-- /.row -->
+                </div>
+                <!-- ./box-body -->
+              </div>
+              <!-- /.box -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+
+
+
+           <div class="row">
+            <div class="col-md-12">
+              <div class="box">
+                <div class="box-header with-border">
+                  <h3 class="box-title">SWAPANTAU</h3>
+
+                  <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                  </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                  <h3>WWT</h3>
+
+                  <div class="second">
+                  <div class="chart-legend">
+                      <canvas id="wwtph" style="height: 50px;width: 100px;" ></canvas>
+                  </div>
+                  </div>
+
+                     <div class="second">
+                  <div class="chart-legend">
+                      <canvas id="wwtdebit" style="height: 50px;width: 100px;" ></canvas>
+                  </div>
+                  </div>
+
+                   <h3>SPT</h3>
+           
+                  <!-- /.row -->
+                </div>
+                <!-- ./box-body -->
+              </div>
+              <!-- /.box -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+
+    </section>
+
+</div>
+
+@endsection
+
+
+@section('scripts')
+  <script src="/js/Chart.min.js"></script>
+
+<script>
+
+
+    var bulan = ['Jan','Feb','Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sept', 'Okt', 'Nov', 'Des'];
+    var labeltgl = <?php echo $labeltgl; ?>;
+
+    var ranka_igpj = <?php echo $ranka_igpj; ?>;
+    var rankb_igpj = <?php echo $rankb_igpj; ?>;
+    var rankc_igpj = <?php echo $rankc_igpj; ?>;
+    var ranka_gkdj = <?php echo $ranka_gkdj; ?>;
+    var rankb_gkdj = <?php echo $rankb_gkdj; ?>;
+    var rankc_gkdj = <?php echo $rankc_gkdj; ?>;
+    var ranka_agij = <?php echo $ranka_agij; ?>;
+    var rankb_agij = <?php echo $rankb_agij; ?>;
+    var rankc_agij = <?php echo $rankc_agij; ?>;
+    var ranka_igpk = <?php echo $ranka_igpk; ?>;
+    var rankb_igpk = <?php echo $rankb_igpk; ?>;
+    var rankc_igpk = <?php echo $rankc_igpk; ?>;
+    var ranka_gkdk = <?php echo $ranka_gkdk; ?>;
+    var rankb_gkdk = <?php echo $rankb_gkdk; ?>;
+    var rankc_gkdk = <?php echo $rankc_gkdk; ?>;
+    var ranka_agik = <?php echo $ranka_agik; ?>;
+    var rankb_agik = <?php echo $rankb_agik; ?>;
+    var rankc_agik = <?php echo $rankc_agik; ?>;
+
+    var pembk1 = <?php echo $pembk1; ?>;
+    var pembk2 = <?php echo $pembk2; ?>;
+    var pembk3 = <?php echo $pembk3; ?>;
+    var pembk4 = <?php echo $pembk4; ?>;
+    var pembk5 = <?php echo $pembk5; ?>;
+    var pembk6 = <?php echo $pembk6; ?>;
+    var pembk7 = <?php echo $pembk7; ?>;
+    var label_pk = <?php echo $label_pk; ?>;
+
+
+    var label_lal = <?php echo $label_lal; ?>;
+    var lal_wwt = <?php echo $lal_wwt; ?>;
+    var lal_stp = <?php echo $lal_stp; ?>;
+    var lal_bs = <?php echo $lal_bs; ?>;
+    var lal_et = <?php echo $lal_et; ?>;
+
+    var transporter_ng = <?php echo $transporter_ng; ?>;
+    var transporter_ok = <?php echo $transporter_ok; ?>;
+    var penghasil_ok = <?php echo $penghasil_ok; ?>;
+    var penerima_ok = <?php echo $penerima_ok; ?>;
+
+    var wwtp_ng = <?php echo $wwtp_ng; ?>;
+    var wwtp_ok = <?php echo $wwtp_ok; ?>;
+    var stp_ng = <?php echo $stp_ng; ?>;
+    var stp_ok = <?php echo $stp_ok; ?>;
+
+    var sipal = <?php echo $sipal; ?>;
+    var kembekas = <?php echo $kembekas; ?>;
+    var kainmajun = <?php echo $kainmajun; ?>;
+    var plumasbekas = <?php echo $plumasbekas; ?>;
+    var spainting = <?php echo $spainting; ?>;
+    var soil = <?php echo $soil; ?>;
+    var akibekas = <?php echo $akibekas; ?>;
+    var emulsiminyak = <?php echo $emulsiminyak; ?>;
+    var bkkadaluarsa = <?php echo $bkkadaluarsa; ?>;
+    var lklinis = <?php echo $lklinis; ?>;
+    var fbekas = <?php echo $fbekas; ?>;
+    var elektronik = <?php echo $elektronik; ?>;
+    var spengolahan = <?php echo $spengolahan; ?>;
+    var lbdegreasing = <?php echo $lbdegreasing; ?>;
+    var kbtinta = <?php echo $kbtinta; ?>;
+    var rmanufaktur = <?php echo $rmanufaktur; ?>;
+
+    var phwwt = <?php echo $phwwt; ?>;
+    var debitwwt = <?php echo $debitwwt; ?>;
+
+    //WWT PH
+
+    var WWTPHChartData = {
+        labels: labeltgl ,
+        datasets: [{
+            borderColor: "rgba(151,187,205,5)",
+            data: phwwt,
+            label : 'pH',
+             }, {
+            borderColor: '#FF0000',
+            data: ['6'],
+            label: 'Baku Mutu',
+        }]
+    };
+
+    var WWTDebitChartData = {
+        labels: labeltgl ,
+        datasets: [{
+            borderColor: "rgba(151,187,205,5)",
+            data: debitwwt,
+            label : 'Debit (M3)',
+             }, {
+            borderColor: '#FF0000',
+            data: ['6'],
+            label: 'Baku Mutu',
+        }]
+    };
+
+    //Equipment Facility
+    var EquipmentChartData = {
+        labels: ['WWTP', 'STP'],
+        datasets: [{
+            backgroundColor: 'rgba(241, 196, 15,1.0)',
+            data: [wwtp_ng.toString(),  stp_ng.toString()],
+            label: 'NG',
+        }, {
+           backgroundColor: 'rgba(151,187,205,5)',
+            data: [wwtp_ok.toString(),  stp_ok.toString()],
+            label: 'OK',
+        }]
+    };
+
+    //Festronik
+    var FestronikChartData = {
+        labels: ['Transporter', 'Penghasil', 'Penerima'],
+        datasets: [{
+            backgroundColor: 'rgba(241, 196, 15,1.0)',
+            data: [transporter_ng.toString(), transporter_ok.toString(), penghasil_ok.toString()],
+            label: 'NG',
+        }, {
+           backgroundColor: 'rgba(151,187,205,5)',
+            data: [transporter_ok.toString(), penghasil_ok.toString(), penerima_ok.toString()],
+            label: 'OK',
+        }]
+    };
+
+
+   //LAL WTP
+
+    if (lal_wwt >= 68) {
+      var warna = '#FF0000';
+      var labelwarna = 'Emergency'; 
+    } else if (lal_wwt < 68 && lal_wwt >= 44 ){
+      var warna = '#FFFF00';
+      var labelwarna = 'Warning'; 
+    }
+    else if (lal_wwt < 43 && lal_wwt >= 0 ){
+      var warna = '#006400'; 
+      var labelwarna = 'Normal';
+    }
+
+     if (lal_stp >= 39) {
+      var warna2= '#FF0000'; 
+      var labelwarna2 = 'Emergency'; 
+    } else if (lal_stp < 39 && lal_stp >= 35 ){
+      var warna2 = 'rgba(253,215,3,5)';
+      var labelwarna2 = 'Warning';  
+    }
+    else if (lal_stp < 35 && lal_stp >= 0 ){
+      var warna2 = '#006400'; 
+      var labelwarna2 = 'Normal';  
+    }
+
+    if (lal_bs >= 11) {
+      var warna3= '#FF0000'; 
+      var labelwarna3 = 'Emergency'; 
+    } else if (lal_bs < 11 && lal_bs >= 8 ){
+      var warna3 = '#FFFF00'; 
+      var labelwarna3 = 'Warning'; 
+    }
+    else if (lal_bs < 8 && lal_bs >= 0 ){
+      var warna3 = '#006400'; 
+      var labelwarna3 = 'Normal';
+    }
+
+    if (lal_et >= 4) {
+      var warna4= '#FF0000'; 
+      var labelwarna4 = 'Emergency'; 
+    } else if (lal_et < 4 && lal_et >= 3 ){
+      var warna4 = '#FFFF00'; 
+      var labelwarna4 = 'Warning'; 
+    }
+    else if (lal_et < 3 && lal_et >= 0 ){
+      var warna4 = '#006400'; 
+      var labelwarna4 = 'Normal';
+    }
+
+    var asd = [];
+    asd.push(lal_wwt.toString());
+    asd.push(lal_stp.toString());
+    asd.push(lal_bs.toString());
+    asd.push(lal_et.toString());
+    var asde = [];
+    asde.push(warna);
+    asde.push(warna2);
+    asde.push(warna3);
+    asde.push(warna4);
+    var asdf = [];
+    asdf.push(labelwarna);
+    asdf.push(labelwarna2);
+    asdf.push(labelwarna3);
+    asdf.push(labelwarna4);
+
+
+    var LalWtpChartData = {
+        title : 'Level Instalasi Air Limbah',
+        labels: label_lal,
+        datasets: [{
+            backgroundColor: asde,
+            data: asd
+        }]
+    };
+
+
+//Pemakaian Bahan Kimia
+if (pembk1 > 100) {
+      var w1= '#FF0000'; 
+    } else{
+      var w1 = '#006400'; 
+    }
+if (pembk2 > 350) {
+      var w2= '#FF0000'; 
+    } else{
+      var w2 = '#006400'; 
+    }
+if (pembk3 > 50) {
+      var w3= '#FF0000'; 
+     } else{
+      var w3 = '#006400'; 
+     }
+if (pembk4 > 0.20) {
+      var w4= '#FF0000'; 
+     } else{
+      var w4 = '#006400'; 
+     }
+if (pembk5 > 8) {
+      var w5= '#FF0000'; 
+     } else{
+      var w5 = '#006400'; 
+     }
+if (pembk6 > 2) {
+      var w6= '#FF0000'; 
+     } else{
+      var w6 = '#006400'; 
+     }
+if (pembk7 > 2) {
+      var w7= '#FF0000'; 
+     } else{
+      var w7 = '#006400'; 
+     }
+   var PembkChartData = {
+        title : 'Pemakaian Bahan Kimia',
+        labels: ['Ca(OH)2', 'AL2O3', 'H2SO4', 'Polimer', 'Clevpro 103', 'Bacteria Booster', 'Metal Remove'],
+        datasets: [{
+            backgroundColor: [w1, w2, w3, w4, w5, w6, w7 ],
+            data:  [pembk1.toString(), pembk2.toString(), pembk3.toString(), pembk4.toString(), pembk5.toString(), pembk6.toString(), pembk7.toString() ],
+        }]
+    };
+    //IGPJ
+    var IGPJChartData = {
+        labels: bulan,
+        datasets: [{
+            backgroundColor: "rgba(220,20,60,5)",
+            data: ranka_igpj,
+             label: 'Rank A',
+        }, {
+            backgroundColor: "rgba(151,187,205,5)",
+            data: rankb_igpj,
+            label: 'Rank B',
+        },{
+            backgroundColor: "rgba(218,165,32,5)",
+            data: rankc_igpj,
+            label: 'Rank C',
+        }]
+    };
+
+    //GKDJ
+    var GKDJChartData = {
+        labels: bulan,
+        datasets: [{
+            backgroundColor: "rgba(220,20,60,5)",
+            data: ranka_gkdj,
+             label: 'Rank A',
+        }, {
+            backgroundColor: "rgba(151,187,205,5)",
+            data: rankb_gkdj,
+            label: 'Rank B',
+        },{
+            backgroundColor: "rgba(218,165,32,5)",
+            data: rankc_gkdj,
+            label: 'Rank C',
+        }]
+    };
+
+    //AGIJ
+    var AGIJChartData = {
+        labels: bulan,
+        datasets: [{
+            backgroundColor: "rgba(220,20,60,5)",
+            data: ranka_agij,
+             label: 'Rank A',
+        }, {
+            backgroundColor: "rgba(151,187,205,5)",
+            data: rankb_agij,
+            label: 'Rank B',
+        },{
+            backgroundColor: "rgba(218,165,32,5)",
+            data: rankc_agij,
+            label: 'Rank C',
+        }]
+    };
+
+    //IGPK
+    var IGPKChartData = {
+        labels: bulan,
+        datasets: [{
+            backgroundColor: "rgba(220,20,60,5)",
+            data: ranka_igpk,
+             label: 'Rank A',
+        }, {
+            backgroundColor: "rgba(151,187,205,5)",
+            data: rankb_igpk,
+            label: 'Rank B',
+        },{
+            backgroundColor: "rgba(218,165,32,5)",
+            data: rankc_igpk,
+            label: 'Rank C',
+        }]
+    };
+
+    //GKDK
+    var GKDKChartData = {
+        labels: bulan,
+        datasets: [{
+            backgroundColor: "rgba(220,20,60,5)",
+            data: ranka_gkdk,
+             label: 'Rank A',
+        }, {
+            backgroundColor: "rgba(151,187,205,5)",
+            data: rankb_gkdk,
+            label: 'Rank B',
+        },{
+            backgroundColor: "rgba(218,165,32,5)",
+            data: rankc_gkdk,
+            label: 'Rank C',
+        }]
+    };
+
+    //AGIK
+    var AGIKChartData = {
+        labels: bulan,
+        datasets: [{
+            backgroundColor: "rgba(220,20,60,5)",
+            data: ranka_agik,
+             label: 'Rank A',
+        }, {
+            backgroundColor: "rgba(151,187,205,5)",
+            data: rankb_agik,
+            label: 'Rank B',
+        },{
+            backgroundColor: "rgba(218,165,32,5)",
+            data: rankc_agik,
+            label: 'Rank C',
+        }]
+    };
+ 
+
+  //CONTOH
+  var contoh = {
+      labels: bulan, // responsible for how many bars are gonna show on the chart
+      // create 12 datasets, since we have 12 items
+      // data[0] = labels[0] (data for first bar - 'Standing costs') | data[1] = labels[1] (data for second bar - 'Running costs')
+      // put 0, if there is no data for the particular bar
+      datasets: [{
+         label: 'Sludge IPAL',
+         data: sipal,
+         backgroundColor: '#ffa500'
+      }, {
+         label: 'Kemasan Bekas B3',
+         data: kembekas,
+         backgroundColor: '#994499'
+     }, {
+         label: 'Kain Majun',
+         data: kainmajun,
+         backgroundColor: '#316395'
+    }, {
+         label: 'Minyak Pelumas Bekas',
+         data: plumasbekas,
+         backgroundColor: '#b82e2e'
+      }, {
+         label: 'Sludge Painting',
+         data: spainting,
+         backgroundColor: '#66aa00'
+    }, {
+         label: 'Sludge Oil',
+         data: soil,
+         backgroundColor: '#dd4477'
+    }, {
+         label: 'Aki Bekas',
+         data: akibekas,
+         backgroundColor: '#0099c6'
+    }, {
+         label: 'Emulsi Minyak',
+         data: emulsiminyak,
+         backgroundColor: '#990099'
+     }, {
+         label: 'Bahan Kimia Kadaluarsa',
+         data: bkkadaluarsa,
+         backgroundColor: '#109618'
+      }, {
+         label: 'Limbah Klinis',
+         data: lklinis,
+         backgroundColor: '#dc3912'
+      }, {
+         label: 'Filter Bekas',
+         data: fbekas,
+         backgroundColor: '#3366cc'
+      }, {
+         label: 'Limbah Elektronik',
+         data: elektronik,
+         backgroundColor: '#000080'
+      }, {
+         label: 'Sludge Proses Pengolahan',
+         data: spengolahan,
+         backgroundColor: '#787878'
+      }, {
+         label: 'Larutan Bekas Degreasing',
+         data: lbdegreasing,
+         backgroundColor: '#2ecc71'
+      }, {
+         label: 'Kemasan Bekas Tinta',
+         data: kbtinta,
+         backgroundColor: '#34495e'
+      }, {
+         label: 'Risidu Proses Manufaktur',
+         data: rmanufaktur,
+         backgroundColor: '#16a085'
+      }]
+  };
+  
+
+ 
+
+    window.onload = function() {
+        var accident_igpj = document.getElementById("accident_igpj").getContext("2d");
+        var accident_gkdj = document.getElementById("accident_gkdj").getContext("2d");
+        var accident_agij = document.getElementById("accident_agij").getContext("2d");
+        var accident_igpk = document.getElementById("accident_igpk").getContext("2d");
+        var accident_gkdk = document.getElementById("accident_gkdk").getContext("2d");
+        var accident_agik = document.getElementById("accident_agik").getContext("2d");
+        var levelair = document.getElementById("levelair").getContext("2d");
+        var pbkimia = document.getElementById("pbkimia").getContext("2d");
+        var festronik = document.getElementById("festronik").getContext("2d");
+        var equipment = document.getElementById("equipment").getContext("2d");
+        var wwtph = document.getElementById("wwtph").getContext("2d");
+        var wwtdebit = document.getElementById("wwtdebit").getContext("2d");
+
+
+
+   window.myBar = new Chart(angkut, {
+   type: 'bar',
+   data: contoh,
+   options: {
+      responsive: true,
+      legend: {
+         position: 'bottom' // place legend on the right side of chart
+        },
+       title : {
+                display:true,
+                text:'Pembuangan Limbah B3'
+        }, 
+      scales: {
+
+         xAxes: [{
+            stacked: true // this should be set to make the bars stacked
+         }],
+         yAxes: [{
+          scaleLabel: {
+                          display: true,
+                          labelString: "Ton",
+                          fontColor: "black"
+                        },
+            stacked: true // this also..
+         }]
+      }
+   }
+});
+
+
+ window.myBar = new Chart(equipment, {
+            type: 'bar',
+            data: EquipmentChartData,
+            options: {
+                elements: {
+                    rectangle: {
+                        borderWidth: 0.3,
+                        borderColor: 'rgb(0, 0, 0)',
+                        borderSkipped: 'bottom'
+                    }
+                },
+                responsive: true,  
+                title : {
+                display:true,
+                text:'Equipment & Facility'
+                  },       
+                scales: {
+                  yAxes:[{
+                    barPercentage :5,
+                    ticks : {
+                      beginAtZero : true
+                    }
+                  }]
+                },      
+            }       
+        });
+
+
+
+
+
+
+
+       
+
+        window.myBar = new Chart(festronik, {
+            type: 'bar',
+            data: FestronikChartData,
+            options: {
+                elements: {
+                    rectangle: {
+                        borderWidth: 0.3,
+                        borderColor: 'rgb(0, 0, 0)',
+                        borderSkipped: 'bottom'
+                    }
+                },
+                responsive: true,  
+                title : {
+                display:true,
+                text:'Festronik'
+                  },       
+                scales: {
+                  yAxes:[{
+                    barPercentage :5,
+                    ticks : {
+                      beginAtZero : true
+                    }
+                  }]
+                },      
+            }       
+        });
+
+         window.myBar = new Chart(wwtph, {
+            type: 'line',
+            data: WWTPHChartData,
+            options: {
+                elements: {
+                    rectangle: {
+                        borderWidth: 0.3,
+                        borderColor: 'rgb(0, 0, 0)',
+                        borderSkipped: 'bottom'
+                    }
+                },
+                responsive: true, 
+                    scales: {
+                  yAxes:[{
+                    ticks : {
+                      beginAtZero : true
+                    }
+                  }]
+                },              
+            }       
+        });
+
+
+        window.myBar = new Chart(wwtdebit, {
+            type: 'line',
+            data: WWTDebitChartData,
+            options: {
+                elements: {
+                    rectangle: {
+                        borderWidth: 0.3,
+                        borderColor: 'rgb(0, 0, 0)',
+                        borderSkipped: 'bottom'
+                    }
+                },
+                responsive: true, 
+                    scales: {
+                  yAxes:[{
+                    ticks : {
+                      beginAtZero : true
+                    }
+                  }]
+                },              
+            }       
+        });
+
+        window.myBar = new Chart(levelair, {
+            type: 'bar',
+            data: LalWtpChartData,
+            options: {
+              legend: {
+                    display:false,
+                   },
+                elements: {
+                    rectangle: {
+                        borderWidth: 0.3,
+                        borderColor: 'rgb(0, 0, 0)',
+                        borderSkipped: 'bottom'
+                    }
+                },
+                responsive: true,  
+                title : {
+                display:true,
+                text:'Level Instalasi Air Limbah'
+                  },       
+                scales: {
+                  yAxes:[{
+                    scaleLabel: {
+                          display: true,
+                          labelString: "M3",
+                          fontColor: "black"
+                        },
+                    ticks : {
+                      beginAtZero : true
+                    }
+                  }]
+                },      
+            }       
+        });
+
+
+        window.myBar = new Chart(pbkimia, {
+            type: 'bar',
+            data: PembkChartData,
+            options: {
+              legend: {
+                    display:false,
+                   },
+                elements: {
+                    rectangle: {
+                        borderWidth: 0.3,
+                        borderColor: 'rgb(0, 0, 0)',
+                        borderSkipped: 'bottom'
+                    }
+                },
+                responsive: true,  
+                title : {
+                display:true,
+                text:'Pemakaian Bahan Kimia'
+                  },       
+                scales: {
+                  yAxes:[{
+                    scaleLabel: {
+                          display: true,
+                          labelString: "Kg",
+                          fontColor: "black"
+                        },
+                    barPercentage :5,
+                    ticks : {
+                      beginAtZero : true
+                    }
+                  }]
+                },      
+            }       
+        });
+
+        window.myBar = new Chart(accident_igpj, {
+            type: 'bar',
+            data: IGPJChartData,
+            options: {
+                elements: {
+                    rectangle: {
+                        borderWidth: 0.3,
+                        borderColor: 'rgb(0, 0, 0)',
+                        borderSkipped: 'bottom'
+                    }
+                },
+                responsive: true, 
+                    scales: {
+                  yAxes:[{
+                    ticks : {
+                      beginAtZero : true
+                    }
+                  }]
+                },              
+            }       
+        });
+
+        window.myBar = new Chart(accident_gkdj, {
+            type: 'bar',
+            data: GKDJChartData,
+            options: {
+                elements: {
+                    rectangle: {
+                        borderWidth: 0.3,
+                        borderColor: 'rgb(0, 0, 0)',
+                        borderSkipped: 'bottom'
+                    }
+                },
+                responsive: true, 
+                scales: {
+                  yAxes:[{
+                    ticks : {
+                      beginAtZero : true
+                    }
+                  }]
+                },               
+            }       
+        });
+
+        window.myBar = new Chart(accident_agij, {
+            type: 'bar',
+            data: AGIJChartData,
+            options: {
+                elements: {
+                    rectangle: {
+                        borderWidth: 0.3,
+                        borderColor: 'rgb(0, 0, 0)',
+                        borderSkipped: 'bottom'
+                    }
+                },
+                responsive: true,
+                  scales: {
+                  yAxes:[{
+                    ticks : {
+                      beginAtZero : true
+                    }
+                  }]
+                },     
+            }       
+        });
+
+         window.myBar = new Chart(accident_igpk, {
+            type: 'bar',
+            data: IGPKChartData,
+            options: {
+                elements: {
+                    rectangle: {
+                        borderWidth: 0.3,
+                        borderColor: 'rgb(0, 0, 0)',
+                        borderSkipped: 'bottom'
+                    }
+                },
+                responsive: true,  
+                scales: {
+                  yAxes:[{
+                    ticks : {
+                      beginAtZero : true
+                    }
+                  }]
+                },             
+            }       
+        });
+
+        window.myBar = new Chart(accident_gkdk, {
+            type: 'bar',
+            data: GKDKChartData,
+            options: {
+                elements: {
+                    rectangle: {
+                        borderWidth: 0.3,
+                        borderColor: 'rgb(0, 0, 0)',
+                        borderSkipped: 'bottom'
+                    }
+                },
+                responsive: true,    
+                  scales: {
+                  yAxes:[{
+                    ticks : {
+                      beginAtZero : true
+                    }
+                  }]
+                },            
+            }       
+        });
+
+        window.myBar = new Chart(accident_agik, {
+            type: 'bar',
+            data: AGIKChartData,
+            options: {
+                elements: {
+                    rectangle: {
+                        borderWidth: 0.3,
+                        borderColor: 'rgb(0, 0, 0)',
+                        borderSkipped: 'bottom'
+                    }
+                },
+                responsive: true,  
+                    scales: {
+                  yAxes:[{
+                    ticks : {
+                      beginAtZero : true
+                    }
+                  }]
+                },   
+            }       
+        });
+    };
+
+</script>
+
+
+<script type="text/javascript">
+
+
+
+
+</script>
+
+@endsection

@@ -1,0 +1,455 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use DB;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\User;
+use App\Mobile;
+use App\HrdLupaPrik;
+use Excel;
+use DateTime;
+use PDF;
+
+class HrdLupaPriksController extends Controller
+{
+
+
+	
+// <PENGAJUAN LUPA PRIK>
+	
+	public function indexlupaprik()
+    {
+        if(strlen(Auth::user()->username) == 5) {
+			$mobiles = DB::connection("pgsql-mobile")
+			->table("lupa_p_pengajuan")
+			->select(DB::raw("*"))
+			->where("npk", "=", Auth::user()->username)
+			->orderBy('status');
+
+
+			$dapetnpk = Auth::User()->username;
+			$callkar =  DB::connection("pgsql-mobile")
+			->table("v_mas_karyawan")
+			->select(DB::raw("*"))
+			->where('npk', 'like', $dapetnpk)->get();
+      		 $tampilnama = DB::connection("pgsql-mobile")
+			->table("v_mas_karyawan")
+		    ->select(DB::raw("nama"))
+		    ->where('npk', 'like', $callkar->first()->npk_atasan)->get();
+
+		     $noUrutAkhir = DB::connection("pgsql-mobile")
+			->table("lupa_p_pengajuan")
+			->max("no_lp");
+			
+	        $nourut= (int) substr($noUrutAkhir, 4,10);
+	        $nourut++;
+	      	$tahun = date('y');
+	        $idbaru ="LP".$tahun .sprintf("%06s",$nourut);
+
+
+            return view('hr.mobile.lupaprik.indexlupaprik',['kar'=>$callkar, 'namaatasan'=>$tampilnama,  'nolp'=>$idbaru ], compact('mobiles'));
+        } else {
+            return view('errors.403');
+        }
+    }
+
+	
+	public function dashboardlupaprik(Request $request)
+    {
+	 if(strlen(Auth::user()->username) == 5) {	
+		if ($request->ajax()) {
+		
+		 $stat = "ALL";
+                if(!empty($request->get('status'))) {
+                    $stat = $request->get('status');
+                }
+			
+        $mobiles = DB::connection("pgsql-mobile")
+		->table("lupa_p_pengajuan")
+		->select(DB::raw("*"))
+		->where("npk", "=", Auth::user()->username)
+		->orderBy('lupa_p_pengajuan.status', 'desc');
+
+		 if($stat !== "ALL") {
+                 $mobiles->where(DB::raw("upper(trim(status))"), $stat);
+              }
+		
+        return Datatables::of($mobiles) 
+		  ->editColumn('tgllupa', function($tgllupa){
+		  return \Carbon\Carbon::parse($tgllupa->tgllupa)->format('d F Y');
+               })
+         ->editColumn('status', function($stat){
+                    if($stat->status == 3){
+                        return '<b style="color:orange;">BELUM APPROVAL</b>';
+                    }
+                     elseif($stat->status == 1){
+                        return '<b style="color:green;">DISETUJUI </b>';
+                    }
+                      elseif($stat->status == 2){
+                        return '<b style="color:red;" action="disable">DITOLAK</b>';
+                    }
+                    	elseif($stat->status == 4){
+                        return '<b style="color:orange;"> BELUM APPROVAL* </b>';
+                    }
+          })
+		  ->editColumn('action', function($mobiles){
+
+		$callkar =  DB::connection("pgsql-mobile")
+			->table("v_mas_karyawan")
+			->select("v_mas_karyawan.*")
+			->where('npk', 'like', $mobiles->npk)
+			->first();
+			$tampilnamaatasan = DB::connection("pgsql-mobile")
+			->table("v_mas_karyawan")
+			->select(DB::raw("nama"))
+			->where('npk', 'like', $callkar->npk_atasan)->get()
+			->first();
+
+
+          return view('datatable._action-lupaprik')->with(compact(['mobiles', 'callkar', 'tampilnamaatasan']));
+			// return $callkar;
+           
+           
+         })
+        ->make(true);
+        } else { 
+		return view('home');
+		} 
+	 }
+	else { 
+		return view('errors.403');
+
+		}
+	 }
+	 
+	 
+	 public function createlupaprik(Request $request)
+    {
+		$dapetnpk = Auth::User()->username;
+		$callkar =  DB::connection("pgsql-mobile")
+			->table("v_mas_karyawan")
+			->select(DB::raw("*"))
+			->where('npk', 'like', $dapetnpk)->get();
+       	$tampilnama = DB::connection("pgsql-mobile")
+			->table("v_mas_karyawan")
+		    ->select(DB::raw("nama"))
+		    ->where('npk', 'like', $callkar->first()->npk_atasan)->get();
+       
+      	return view('hr.mobile.lupaprik.createlupaprik', ['kar'=>$callkar, 'namaatasan'=>$tampilnama]);
+	}
+	 
+	  public function storelupaprik(Request $request)
+    { 
+    	$this->validate($request, ['alasanlupa' => 'required', 'tgllupa' => 'required'	]);
+        $now        = new datetime();
+        $awal       = new DateTime($request->tgllupa);
+        $dapetnpk   = Auth::User()->username;
+        $id         = $request->nolp;
+		$callkar =  DB::connection("pgsql-mobile")
+			->table("v_mas_karyawan")
+			->select(DB::raw("*"))
+			->where('npk', 'like', $dapetnpk)->get();
+        $npkatasan =  DB::connection("pgsql-mobile")
+			->table("v_mas_karyawan")
+			->select(DB::raw("npk"))
+			->where('npk', 'like', $callkar ->first()->npk_atasan)->get();
+
+        DB::connection("pgsql-mobile")
+			->table("lupa_p_pengajuan")
+			->insert([
+                            'no_lp'=>$request->nolp,
+                            'tglpengajuan'=>$now,
+                            'npk'=>Auth::User()->username,
+                            'npkatasan'=>$request->npkatasan,
+                            'tgllupa'=>$request->tgllupa,
+                            'jamin'=>$request->jamin,
+                            'jamout'=>$request->jamout,
+                            'alasanlupa'=>$request->alasanlupa,
+                            'status'=>3,
+                            'statuscetak'=>0,
+                            ]
+                          );
+
+	 return redirect()->route('mobiles.indexlupaprik')->with(compact('id'));
+          /*  Session::flash("flash_notification", [
+            "level"=>"success",
+            "message"=>" Nomer Pengajuan Terbaru Anda : <b> $request->nolp </b>
+						<br> <b> Note : </b>
+						<br> - Setelah melakukan pengajuan, pemohon harap konfirmasi kepada atasan masing-masing agar pengajuan ditindak lanjuti
+						<br> - Bila pengajuan disetujui, pemohon dapat mencetak bukti persetujuan permohonan"
+          ]);*/
+
+        
+	// return redirect('/hr/mobile/lupaprik')->with(compact('id'));
+		//return redirect()->route('mobiles.showlupaprik');
+		
+		
+	}
+	 
+	  public function showlupaprik($id)
+    {
+		
+		$LupaPPengajuans = DB::connection("pgsql-mobile")
+			->table("lupa_p_pengajuan")
+			->select(DB::raw("*"))
+			->where('no_lp', '=', $id)->first();
+		
+		
+		$dapetnpk = Auth::User()->username;
+		$callkar =  DB::connection("pgsql-mobile")
+			->table("v_mas_karyawan")
+			->select(DB::raw("*"))
+			->where('npk', 'like', $dapetnpk)->get();
+		 $tampilnamaatasan = DB::connection("pgsql-mobile")
+			->table("v_mas_karyawan")
+			->select(DB::raw("nama"))
+   
+			->where('npk', 'like', $callkar->first()->npk_atasan)->get();
+	  
+		return view('hr.mobile.lupaprik.showlupaprik', ['kar'=>$callkar, 'namaatasan'=>$tampilnamaatasan])->with(compact('LupaPPengajuans'));
+	}
+
+
+	public function printlupaprik($id)
+    {
+		$LupaPPengajuans = DB::connection("pgsql-mobile")
+			->table("lupa_p_pengajuan")
+			->select(DB::raw("*"))
+			->where('no_lp', '=', $id)->first();	
+       	$dapetnpk = Auth::User()->username;
+      	$callkar =  DB::connection("pgsql-mobile")
+			->table("v_mas_karyawan")
+			->select(DB::raw("*"))
+			->where('npk', 'like', $dapetnpk)->get();
+       	$tampilnamaatasan = DB::connection("pgsql-mobile")
+		   ->table("v_mas_karyawan")
+		   ->select(DB::raw("nama"))
+		   ->where('npk', 'like', $callkar->first()->npk_atasan)->get();
+	   	$setstatuscetak = DB::connection("pgsql-mobile")
+			->table("lupa_p_pengajuan")
+			->where('no_lp', 'like', $id)
+			->update(['statuscetak'=>1]);
+
+		// - Fungsi Print -//
+	   $error_level = error_reporting();
+       error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING); 
+       $pdf = PDF::loadview('hr.mobile.lupaprik.printlupaprik',['kar'=>$callkar, 'namaatasan'=>$tampilnamaatasan], compact('LupaPPengajuans'));
+      
+       return $pdf->download(''.$id.'.pdf');		
+	}
+
+
+	public function ajuankembalilupaprik($id)
+    {
+
+    try {
+        DB::beginTransaction();
+            $msg = "Berhasil disubmit.";
+            $indctr = "1";
+
+		$now   		     = new datetime();
+        $LupaPPengajuans =  DB::connection("pgsql-mobile")
+			->table("lupa_p_pengajuan")
+			->where('no_lp', '=', $id)
+			->update([
+				'tglnok'=>$now,
+				'status'=>4,
+				]);
+
+       
+ 		DB::commit();
+
+                return response()->json(['msg' => $msg, 'indctr' => $indctr]);
+
+            } catch (Exception $ex) {
+                DB::rollback();
+                $msg = "Gagal submit! Hubungi Admin.";
+                $indctr = "0";
+                return response()->json(['msg' => $msg, 'indctr' => $indctr]);
+        }
+       // return redirect()->route('mobiles.indexlupaprik')->with(compact('LupaPPengajuans'));  
+		
+		
+	}
+	
+       
+// </PENGAJUAN LUPA PRIK>
+
+	
+
+// <APPROVAL LUPA PRIK>
+	public function indexapprovallupaprik()
+    {
+        if(strlen(Auth::user()->username) == 5) {
+            return view('hr.mobile.lupaprik.indexapprovallupaprik');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+	
+	public function dashboardapprovallupaprik(Request $request)
+    {
+	 if(strlen(Auth::user()->username) == 5) {	
+		if ($request->ajax()) {
+			
+			$stat = "ALL";
+                if(!empty($request->get('status'))) {
+                    $stat = $request->get('status');
+                }
+				
+	        $mobiles = DB::connection("pgsql-mobile")
+				->table("lupa_p_pengajuan")
+				->select(DB::raw("lupa_p_pengajuan.*, v_mas_karyawan.nama"))
+				->join('v_mas_karyawan', 'lupa_p_pengajuan.npk', '=', 'v_mas_karyawan.npk')
+				->where('lupa_p_pengajuan.npkatasan', '=', Auth::user()->username)
+				->where('lupa_p_pengajuan.statuscetak', '=', 0)
+				->orderBy('lupa_p_pengajuan.status' ,  'desc')
+				->orderBy( 'lupa_p_pengajuan.no_lp',  'desc');
+			
+			if($stat !== "ALL") {
+                    $mobiles->where(DB::raw("upper(trim(status))"), $stat);
+                }
+		
+	   
+        return Datatables::of($mobiles) 
+   
+         ->editColumn('status', function($stat){
+                    if($stat->status == 3){
+                        return '<b style="color:orange;">BELUM APPROVAL</b>';
+                    }
+                    elseif($stat->status == 1){
+                        return '<b style="color:green;">DISETUJUI </b>';
+                    }
+                    elseif($stat->status == 2){
+                        return '<b style="color:red;" action="disable">DITOLAK</b>';
+                    }
+                    elseif($stat->status == 4){
+                        return '<b style="color:orange;"> BELUM APPROVAL* </b>';
+                    }
+          })
+		  
+		->editColumn('action', function($mobiles){
+            $callkar =  DB::connection("pgsql-mobile")
+			->table("v_mas_karyawan")
+			->select("v_mas_karyawan.*")
+			->where('npk', 'like', $mobiles->npk)
+			->first();
+			$tampilnamaatasan = DB::connection("pgsql-mobile")
+			->table("v_mas_karyawan")
+			->select(DB::raw("nama"))
+			->where('npk', 'like', $callkar->npk_atasan)->get()
+			->first();
+
+          return view('datatable._action-approv-lupaprik')->with(compact(['mobiles', 'callkar', 'tampilnamaatasan']));
+         })
+       	
+        ->make(true);
+		
+        } else { 
+		return view('home');
+		} 
+	 }
+	else { 
+		return view('errors.403');
+		}
+	 }
+	 
+	 
+	  public function showapprovallupaprik($id)
+    {
+		
+		$LupaPPengajuans = DB::connection("pgsql-mobile")
+			->table("lupa_p_pengajuan")
+			->select(DB::raw("*"))
+			->where('no_lp', '=', $id)->first();
+		$dapetnpk = Auth::User()->username;
+        $callkar =  DB::connection("pgsql-mobile")
+			->table("v_mas_karyawan")
+			->select(DB::raw("*"))
+			->where('npk', 'like', $dapetnpk)->get();
+       $tampilnamaatasan = DB::connection("pgsql-mobile")
+		   ->table("v_mas_karyawan")
+		   ->select(DB::raw("nama"))
+		   ->where('npk', 'like', $callkar->first()->npk_atasan)->get();
+  
+		return view('hr.mobile.lupaprik.showapprovallupaprik', ['kar'=>$callkar, 'namaatasan'=>$tampilnamaatasan])->with(compact('LupaPPengajuans'));	
+	}
+	
+	
+	  public function setujuapprovallupaprik($id)
+    {
+    	try {
+                DB::beginTransaction();
+                $msg = "Berhasil disubmit.";
+                $indctr = "1";
+                
+    	  	 
+
+		$now     		 = new datetime();
+        $LupaPPengajuans =  DB::connection("pgsql-mobile")
+			->table("lupa_p_pengajuan")
+			->where('no_lp', '=', $id)
+			->update([
+				'tglok'=>$now,
+				'status'=>1,
+				]);
+
+			 DB::commit();
+       
+        return response()->json(['msg' => $msg, 'indctr' => $indctr]);
+            } catch (Exception $ex) {
+                DB::rollback();
+                $msg = $ex;
+                $indctr = "0";
+                return response()->json(['msg' => $msg, 'indctr' => $indctr]);
+        } 
+       // return redirect()->route('mobiles.indexapprovallupaprik')->with(compact('LupaPPengajuans')); 
+
+	}
+	
+	
+	public function tolakapprovallupaprik($id)
+    {
+
+    	try {
+                DB::beginTransaction();
+                $msg = "Berhasil disubmit.";
+                $indctr = "1";
+                
+		$now        = new datetime();
+        $LupaPPengajuans =  DB::connection("pgsql-mobile")
+			->table("lupa_p_pengajuan")
+			->where('no_lp', '=', $id)
+			->update([
+				'tglnok'=>$now,
+				'status'=>2,
+				]);
+
+      DB::commit();
+       
+        return response()->json(['msg' => $msg, 'indctr' => $indctr]);
+            } catch (Exception $ex) {
+                DB::rollback();
+                $msg = $ex;
+                $indctr = "0";
+                return response()->json(['msg' => $msg, 'indctr' => $indctr]);
+        } 
+
+      //  return redirect()->route('mobiles.indexapprovallupaprik')->with(compact('LupaPPengajuans'));  
+	}
+	
+	
+// </APPROVAL LUPA PRIK>
+	
+}

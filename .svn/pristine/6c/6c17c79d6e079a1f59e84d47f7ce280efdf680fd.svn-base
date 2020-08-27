@@ -1,0 +1,295 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Http\Requests;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
+use Carbon\Carbon;
+use Exception;
+use Validator;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Pengajuancuti;
+use Excel;
+use PDF;
+use DB;
+use JasperPHP\JasperPHP;
+use Illuminate\Support\Facades\Input;
+use Mockery\Undefined;
+
+class PengajuanCutiController extends Controller
+{
+    public function indexPengajuanCuti()
+    {
+        if (strlen(Auth::user()->username) == 5) {
+            $r = new PengajuanCuti;
+            $inputkar = $r->masKaryawan(Auth::user()->username);
+            if (str_split($inputkar->kode_gol)[0] == 'K' || str_split($inputkar->kode_gol)[0] == 1 || str_split($inputkar->kode_gol)[0] == 2 || str_split($inputkar->kode_gol)[0] == 3) {
+                $inputNpkAtasan = $inputkar->npk_sec_head;
+                $inputatasan = $r->namaByNpk($inputkar->npk_sec_head);
+            } elseif (str_split($inputkar->kode_gol)[0] == 4 || str_split($inputkar->kode_gol)[0] == 5) {
+                $inputNpkAtasan = $inputkar->npk_atasan;
+                $inputatasan = $r->namaByNpk($inputkar->npk_atasan);
+            } else {
+                $inputNpkAtasan = 'Atasan Tidak Diketahui';
+                $inputatasan = 'Atasan Tidak Diketahui';
+            }
+
+            $saldocuti = DB::connection("pgsql-mobile")
+                ->table("v_cuti")
+                ->select(DB::raw("*"))
+                ->whereRaw("tahun||bulan <= to_char(now(),'yyyymm')")
+                ->where("npk", "=", Auth::user()->username)
+                ->orderBy('tahun', 'desc')
+                ->orderBy('bulan', 'desc')
+                ->first();
+
+            $indent_name = Auth::user()->name;
+            return view('hr.mobile.PengajuanCuti.indexPengajuanCuti', [
+                'indent_npk'     => Auth::user()->username,
+                'indent_name'     => $indent_name,
+                'indent_kar'     => $inputNpkAtasan,
+                'indent_atasan' => $inputatasan,
+                'saldocuti' => $saldocuti,
+            ]);
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /*******************************************
+   	  Get : List Pengajuan Cuti By User
+   	  Return : Datatables Data
+     *******************************************/
+    public function listpengajuancuti(Request $request)
+    {
+        if (strlen(Auth::user()->username) == 5) {
+            if ($request->ajax()) {
+                $rs = new PengajuanCuti;
+                return Datatables::of($rs->fetch(Auth::user()->username))
+                    ->editColumn('tglpengajuan', function ($row) {
+                        return  Carbon::parse($row->tglpengajuan)->format('d-m-Y');
+                    })
+                    ->editColumn('no_cuti', function ($row) {
+                        return  '<b>' . $row->no_cuti . '</b>';
+                    })
+                    ->editColumn('tglapprov', function ($row) {
+                        $row->tglapprov == NULL ? $tglapprov = "" : $tglapprov = Carbon::parse($row->tglapprov)->format('d-m-Y');
+                        return $tglapprov;
+                    })
+                    ->editColumn('status', function ($row) {
+                        if ($row->status == 1 || $row->status == 3) {
+                            return "<b style='color:green;'>" . "DISETUJUI" . "</b>";
+                        } elseif ($row->status == 2) {
+                            return  "<b style='color:red;'>" . "DITOLAK" . "</b>";
+                        } else {
+                            return  "<b style='color:orange;'>" . "BELUM DIPROSES" . "</b>";
+                        }
+                    })
+                    ->editColumn('cetak', function ($row) {
+                        if ($row->status == '1' || $row->status == '3') {
+                            // return '<center><input type="radio" name="chk" onclick=getInputChk("' . $row->no_cuti . '")></center>';
+                            $tglpengajuan = Carbon::parse($row->tglpengajuan)->format('Y-m-d');
+                            return '<center><a class="btn btn-primary btn-sm" href="' . route('pengajuancuti.viewdetails', [Crypt::encrypt($row->no_cuti), Crypt::encrypt($row->npk), Crypt::encrypt($tglpengajuan)]) . '" data-toggle="tooltip" data-placement="top" title="Show Detail ' . $tglpengajuan . '"><i class="glyphicon glyphicon-info-sign"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" class="flat-red" name="chk[]" value="' . $row->no_cuti . '"></center>';
+                        } else {
+                            $tglpengajuan = Carbon::parse($row->tglpengajuan)->format('Y-m-d');
+                            return '<center><a class="btn btn-primary btn-sm" href="' . route('pengajuancuti.viewdetails', [Crypt::encrypt($row->no_cuti), Crypt::encrypt($row->npk), Crypt::encrypt($tglpengajuan)]) . '" data-toggle="tooltip" data-placement="top" title="Show Detail ' . $tglpengajuan . '"><i class="glyphicon glyphicon-info-sign"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" class="flat-red" disabled></center>';
+                        }
+                    })
+                    ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /*************************************************
+      Get : Detail Pengajuan Cuti from View Action Details
+      Return : list detail pengajuan & Datatables Data
+     **************************************************/
+    public function viewdetails($req, $req2, $req3)
+    {
+        $no_cuti = $req;
+        $npk = $req2;
+        $tglpengajuan = $req3;
+
+        $db = new PengajuanCuti;
+        $employee = $db->masKaryawan(Crypt::decrypt($npk));
+
+        if (str_split($employee->kode_gol)[0] == 'K' || str_split($employee->kode_gol)[0] == 1 || str_split($employee->kode_gol)[0] == 2 || str_split($employee->kode_gol)[0] == 3) {
+            $headNama = $db->namaByNpk($employee->npk_sec_head);
+        } elseif (str_split($employee->kode_gol)[0] == 4 || str_split($employee->kode_gol)[0] == 5) {
+            $headNama = $db->namaByNpk($employee->npk_atasan);
+        } else {
+            $headNama = 'Atasan Tidak Diketahui';
+        }
+        $cuti = $db->fetchCuti($no_cuti);
+        $datatablesurl = route('pengajuancuti.detailpengajuancuti', [$req, $req2]);
+        return view('hr.mobile.pengajuancuti.formdetail')->with(compact('employee', 'headNama', 'cuti', 'datatablesurl'));
+    }
+
+
+    /*******************************************
+      Get : List Detail Pengajuan Cuti Yang Diambil Oleh User
+      Return : Datatables Data
+     *******************************************/
+    public function detailpengajuancuti($req, Request $request)
+    {
+        $no_cuti = $req;
+        if (strlen(Auth::user()->username) == 5) {
+            if ($request->ajax()) {
+                $rs = new PengajuanCuti;
+                return Datatables::of($rs->fetchpengajuancuti($no_cuti))
+                    ->editColumn('tglcuti', function ($row) {
+                        return Carbon::parse($row->tglcuti)->format('d/m/Y');
+                    })
+                    ->filterColumn('tglcuti', function ($query, $keyword) {
+                        $query->whereRaw("to_char(tglcuti,'dd/mm/yyyy') like ?", ["%$keyword%"]);
+                    })
+                    ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+
+    public function checkAtasan()
+    {
+        $r = new PengajuanCuti;
+        $inputkar = $r->masKaryawan(Auth::user()->username);
+        $inputatasan = $r->namaByNpk($inputkar->npk_sec_head);
+        if (count($inputatasan) > 0) {
+            echo json_encode(array('success' => true));
+        } else {
+            echo json_encode(array('success' => false, 'result' => 'Atasan anda tidak terdaftar di Master'));
+        }
+    }
+
+    /*******************************************
+   	  Get : List KD Cuti 
+   	  Return : Datatables Data
+     *******************************************/
+    public function listkode_cuti(Request $request)
+    {
+        if (strlen(Auth::user()->username) == 5) {
+            if ($request->ajax()) {
+                $pc = new PengajuanCuti;
+                return Datatables::of($pc->fetchkdCuti())
+                    ->filterColumn('desc_cuti', function ($query, $keyword) {
+                        $query->whereRaw("to_char(desc_cuti,'dd/mm/yyyy') like ?", ["%$keyword%"]);
+                    })
+                    ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function submit(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'tglpengajuan' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->route('pengajuancuti.formpengajuancuti')
+                ->withErrors($validator)
+                ->withInput();
+        } else {
+            $result = new PengajuanCuti;
+            $data = $request->all();
+            $res = $result->submit($data);
+            $arr = array('msg' => 'Something goes to wrong. Please try again later', 'status' => false);
+            if ($res['isMessage']) {
+                $arr = array('msg' => $res["message"], 'status' => true, 'pesan' => $res["pesan"], 'nodoc' => $res['nodoc']);
+            }
+            return Response()->json($arr);
+        }
+    }
+
+    public function cetak(Request $request)
+    {
+        $arrayIsi = explode(',', $request->isi);
+        $html = '<html>
+        <head>
+           
+            <title>Print Pengajuan Cuti</title>
+             <style>
+        @page { size: A4 }
+         
+            h1 {
+                font-weight: bold;
+                font-size: 20pt;
+                text-align: center;
+            }
+         
+            table {
+                border-collapse: collapse;
+                width: 100%;
+            }
+         
+            .table th {
+                padding: 8px 8px;
+                border:1px solid #000000;
+                text-align: center;
+            }
+         
+            .table td {
+                padding: 3px 3px;
+                border:1px solid #000000;
+            }
+         
+            .text-center {
+                text-align: center;
+            }
+        </style>
+        
+        </style>
+         </head>';
+        foreach ($arrayIsi as $key => $isiStr) {
+
+            // $isi = (int) $isiStr;
+            $cuti = DB::connection("pgsql-mobile")
+                ->table('cuti01')
+                ->select('cuti01.*', 'v_mas_karyawan.nama', 'v_mas_karyawan.desc_dep', 'v_mas_karyawan.desc_div')
+                ->where('cuti01.no_cuti', $isiStr)
+                ->join('v_mas_karyawan', 'cuti01.npk', '=', 'v_mas_karyawan.npk')->get();
+
+            DB::connection("pgsql-mobile")
+                ->table("cuti01")
+                ->where('no_cuti', $isiStr)
+                ->update(['tglapprov' => date('Y-m-d'), 'status' => 3]);
+
+
+            $cuti2 = DB::connection("pgsql-mobile")
+                ->table('cuti02')
+                ->select('cuti02.*', 'kode_cuti.*')
+                ->where('cuti02.no_cuti', $isiStr)
+                ->join('cuti01', 'cuti02.no_cuti', '=', 'cuti01.no_cuti')
+                ->join('kode_cuti', 'cuti02.kd_cuti', '=', 'kode_cuti.kd_cuti')
+                ->get();
+
+            $error_level = error_reporting();
+            error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
+
+            $view = view('hr.mobile.cetak-pengajuancuti')->with(compact('cuti', 'cuti2'));
+            $html .= $view->render();
+        }
+        $html .= '</html>';
+        $pdf = PDF::loadHTML($html);
+        $sheet = $pdf->setPaper('a4', 'portrait');
+        return $sheet->download('Bukti Persetujuan Cuti ' . date('d-m-Y') . '.pdf');
+    }
+}

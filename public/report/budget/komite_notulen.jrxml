@@ -1,0 +1,796 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="612" pageHeight="792" columnWidth="582" leftMargin="15" rightMargin="15" topMargin="20" bottomMargin="20" uuid="b12e1461-f2c2-4eb5-91b6-f20b18705cbe">
+	<property name="ireport.zoom" value="1.0000000000000018"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="9"/>
+	<parameter name="logo" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="no_komite" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="no_rev" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT NO_KOMITE, TGL_PENGAJUAN, NPK_PRESENTER, USRHRCORP.FNM_NPK(NPK_PRESENTER) NM_PRESENTER, 
+KD_DEPT, TOPIK, NO_IE_EA, CATATAN, TGL_KOMITE_ACT, REPLACE(TO_CHAR(TGL_KOMITE_ACT, 'DAY','nls_date_language = INDONESIAN'),'  ', '') HARI, REPLACE(TO_CHAR(TGL_KOMITE_ACT, 'DD MONTH YYYY','nls_date_language = INDONESIAN'),'  ', '') TGL_IND, TO_CHAR(TGL_KOMITE_ACT, 'HH24:MI') JAM_KOMITE_ACT, TO_CHAR(TGL_KOMITE_ACT+(1/24), 'HH24:MI') JAM_KOMITE_ACT_FINISH, PIC_KOMITE_ACT, LOK_KOMITE_ACT, (SELECT M.NAMA FROM USRINTRA.MEETING_MSTR_RUANGAN M WHERE M.ID_RUANGAN = LOK_KOMITE_ACT) NM_LOK_KOMITE_ACT, ST_PROJECT, 
+DTCREA, CREABY, DTMODI, MODIBY, JNS_KOMITE, NO_REV, NOTULEN, NOTULEN_2, HASIL_KOMITE, 
+NPK_PRESENTER_ACT, USRHRCORP.FNM_NPK(NPK_PRESENTER_ACT) NM_PRESENTER_ACT, 
+DT_APR1, PIC_APR1, NVL(USRHRCORP.F_INISIAL(PIC_APR1), USRHRCORP.FINIT_NAMA(PIC_APR1)) NM_PIC_APR1, DT_APR2, PIC_APR2, NVL(USRHRCORP.F_INISIAL(PIC_APR2), USRHRCORP.FINIT_NAMA(PIC_APR2)) NM_PIC_APR2, 
+LOK_FILE, LATAR_BELAKANG, ESTIMASI, PIC_SUBMIT, USRHRCORP.FNM_NPK(PIC_SUBMIT) NM_PIC_SUBMIT, TGL_SUBMIT, STATUS, 
+(SELECT REPLACE(WM_CONCAT(NVL(USRHRCORP.F_INISIAL(BGTT_KOMITE2.NPK_SUPPORT), USRHRCORP.FINIT_NAMA(BGTT_KOMITE2.NPK_SUPPORT))),',',', ') NM_NPK_SUPPORT_ACT
+FROM BGTT_KOMITE2 WHERE BGTT_KOMITE2.NO_KOMITE = BGTT_KOMITE1.NO_KOMITE AND BGTT_KOMITE2.NO_REV = BGTT_KOMITE1.NO_REV AND BGTT_KOMITE2.ACT = 'T') NM_NPK_SUPPORT_ACT 
+FROM BGTT_KOMITE1 
+WHERE NO_KOMITE = $P{no_komite} AND NO_REV = $P{no_rev}]]>
+	</queryString>
+	<field name="NO_KOMITE" class="java.lang.String"/>
+	<field name="TGL_PENGAJUAN" class="java.sql.Timestamp"/>
+	<field name="NPK_PRESENTER" class="java.lang.String"/>
+	<field name="NM_PRESENTER" class="java.lang.String"/>
+	<field name="KD_DEPT" class="java.lang.String"/>
+	<field name="TOPIK" class="java.lang.String"/>
+	<field name="NO_IE_EA" class="java.lang.String"/>
+	<field name="CATATAN" class="java.lang.String"/>
+	<field name="TGL_KOMITE_ACT" class="java.sql.Timestamp"/>
+	<field name="HARI" class="java.lang.String"/>
+	<field name="TGL_IND" class="java.lang.String"/>
+	<field name="JAM_KOMITE_ACT" class="java.lang.String"/>
+	<field name="JAM_KOMITE_ACT_FINISH" class="java.lang.String"/>
+	<field name="PIC_KOMITE_ACT" class="java.lang.String"/>
+	<field name="LOK_KOMITE_ACT" class="java.lang.String"/>
+	<field name="NM_LOK_KOMITE_ACT" class="java.lang.String"/>
+	<field name="ST_PROJECT" class="java.lang.String"/>
+	<field name="DTCREA" class="java.sql.Timestamp"/>
+	<field name="CREABY" class="java.lang.String"/>
+	<field name="DTMODI" class="java.sql.Timestamp"/>
+	<field name="MODIBY" class="java.lang.String"/>
+	<field name="JNS_KOMITE" class="java.lang.String"/>
+	<field name="NO_REV" class="java.math.BigDecimal"/>
+	<field name="NOTULEN" class="java.lang.String"/>
+	<field name="NOTULEN_2" class="java.lang.String"/>
+	<field name="HASIL_KOMITE" class="java.lang.String"/>
+	<field name="NPK_PRESENTER_ACT" class="java.lang.String"/>
+	<field name="NM_PRESENTER_ACT" class="java.lang.String"/>
+	<field name="DT_APR1" class="java.sql.Timestamp"/>
+	<field name="PIC_APR1" class="java.lang.String"/>
+	<field name="NM_PIC_APR1" class="java.lang.String"/>
+	<field name="DT_APR2" class="java.sql.Timestamp"/>
+	<field name="PIC_APR2" class="java.lang.String"/>
+	<field name="NM_PIC_APR2" class="java.lang.String"/>
+	<field name="LOK_FILE" class="java.lang.String"/>
+	<field name="LATAR_BELAKANG" class="java.lang.String"/>
+	<field name="ESTIMASI" class="java.lang.String"/>
+	<field name="PIC_SUBMIT" class="java.lang.String"/>
+	<field name="NM_PIC_SUBMIT" class="java.lang.String"/>
+	<field name="TGL_SUBMIT" class="java.sql.Timestamp"/>
+	<field name="STATUS" class="java.lang.String"/>
+	<field name="NM_NPK_SUPPORT_ACT" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="200">
+			<frame>
+				<reportElement x="0" y="0" width="110" height="64" uuid="5782784d-a13d-448b-bd4d-869a88c6224e"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<image hAlign="Center" vAlign="Middle" onErrorType="Icon">
+					<reportElement x="5" y="2" width="100" height="60" uuid="5eeaa4df-3d2b-4475-8eda-7a5c0d5f393a"/>
+					<imageExpression><![CDATA[$P{logo} != null ? (!$P{logo}.equals("") ? $P{logo} : "../../src/images/igp_new.jpg") : "../../src/images/igp_new.jpg"]]></imageExpression>
+				</image>
+			</frame>
+			<staticText>
+				<reportElement x="110" y="0" width="472" height="44" uuid="248b0a9f-f259-4c36-b5d3-eca5373b8d8d"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[NOTULEN KOMITE INVESTASI]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="312" y="79" width="90" height="30" uuid="a41982d2-8282-43dc-be2a-dc0aceac3a14"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="312" y="109" width="90" height="15" uuid="e38e68ac-1f67-4439-a96f-7251d2704f04"/>
+				<box topPadding="0" leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NM_PIC_APR1}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="110" y="44" width="65" height="20" uuid="f7d8e4e7-055c-43c2-a763-fd9d3d3af3aa"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[SUBJECT]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="175" y="44" width="407" height="20" uuid="d2c10abc-d311-43ff-b83b-17ee3421482b"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="64" width="65" height="15" uuid="e9b5a530-c84d-4d48-aae2-8c58c4a4dc59"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Hari]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="79" width="65" height="15" uuid="04db76b6-f337-4716-a4c7-427d47717b5c"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Tanggal]]></text>
+			</staticText>
+			<textField pattern="EEEEE">
+				<reportElement x="65" y="64" width="110" height="15" uuid="d3e87c30-fc15-4bcf-8e4e-a8c3881abc85"/>
+				<box leftPadding="2">
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{HARI}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd-MMM-yyyy">
+				<reportElement x="65" y="79" width="110" height="15" uuid="5d76bf67-e466-4503-83b3-85f3e27b9d70"/>
+				<box leftPadding="2">
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{TGL_IND}]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="272" y="64" width="40" height="15" uuid="9adbdd18-ffa6-4891-9c6b-0096c3c9c33b"/>
+				<box>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="175" y="64" width="97" height="15" uuid="333cf02b-2941-4ae0-bbda-353f7c170598"/>
+				<box>
+					<bottomPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Halaman "+$V{PAGE_NUMBER}+" dari"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="312" y="64" width="90" height="15" uuid="c3b7cce2-ffdf-46ff-96f6-0e4ee1d0b66b"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="false"/>
+				</textElement>
+				<text><![CDATA[DIBUAT]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="175" y="79" width="137" height="45" uuid="3c82dfff-bb5f-432a-939f-a91660c1ae55"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="402" y="64" width="90" height="15" uuid="95d8ce8f-f4f0-48d2-b0ea-7ad482492b0d"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="false"/>
+				</textElement>
+				<text><![CDATA[MENGETAHUI]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="402" y="79" width="90" height="30" uuid="a9544c18-dda2-4adb-9b36-edaeaba0fdc3"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="492" y="79" width="90" height="30" uuid="dbcae317-57fe-486f-aafd-ed66b4a094fd"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="492" y="64" width="90" height="15" uuid="547b601f-2376-4be9-a869-3d6f003d5c9b"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="false"/>
+				</textElement>
+				<text><![CDATA[DISETUJUI]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="402" y="109" width="90" height="15" uuid="33a43741-b846-440e-989f-6273e5af9186"/>
+				<box topPadding="0" leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="492" y="109" width="90" height="15" uuid="04a6a5cf-dc55-46e0-bead-4a7e2bbdf873"/>
+				<box topPadding="0" leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NM_PIC_APR2}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="94" width="65" height="30" uuid="6547c8be-86b5-4518-bc35-b8fd47c71bf0"/>
+				<box topPadding="0" leftPadding="5">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Ruang]]></text>
+			</staticText>
+			<textField pattern="EEEEE">
+				<reportElement x="65" y="94" width="110" height="30" uuid="0fd672c2-7ecc-40b4-8827-1ade85ac72cb"/>
+				<box topPadding="0" leftPadding="2">
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{NM_LOK_KOMITE_ACT}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="124" width="312" height="15" uuid="69c8dae2-9df7-45eb-afaf-c0707532711c"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Dihadiri: ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="312" y="124" width="270" height="15" uuid="9a6ed31e-3a70-4951-b468-71f1a73172ed"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="false" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Didistribusikan kepada: ]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="139" width="312" height="40" uuid="fd5c224f-6fa1-4b80-af84-88602ad091b7"/>
+				<box topPadding="3" leftPadding="5">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NM_NPK_SUPPORT_ACT}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="312" y="139" width="270" height="40" uuid="3eb6b6db-df55-41f7-9ef1-79b7734d8cc0"/>
+				<box topPadding="3" leftPadding="5">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font size="10" isBold="false"/>
+				</textElement>
+				<text><![CDATA[- Purchasing
+- User]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="20" y="179" width="562" height="21" uuid="5516c989-d049-4eb3-8406-5a11888f5288"/>
+				<box leftPadding="0">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Uraian]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="179" width="20" height="21" uuid="406c70e4-6384-4b22-a6c3-1ac19e04f9db"/>
+				<box leftPadding="0">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="false"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="35">
+			<frame>
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="582" height="35" uuid="72f75901-f647-4215-abd2-126070597ca5"/>
+				<box>
+					<leftPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="20" height="35" uuid="4348b3c5-e907-4701-80af-728ac647e16f"/>
+					<box topPadding="2" leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Top">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["1. "]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement stretchType="RelativeToBandHeight" x="20" y="0" width="562" height="15" uuid="302be2b5-e2d9-4224-b784-82f991a34fdb"/>
+					<box topPadding="2" leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Top">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Agenda Rapat:]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="20" y="15" width="562" height="20" uuid="24303f5c-123c-4930-a5d4-35d7e7a1d657"/>
+					<box topPadding="2" leftPadding="10">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Top">
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{NO_IE_EA} != null ? "a. " + $F{TOPIK} + " (" + $F{NO_IE_EA} + ") oleh " + $F{NM_PRESENTER_ACT} : "a. " + $F{TOPIK} + " oleh " + $F{NM_PRESENTER_ACT}]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+		<band height="45">
+			<frame>
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="582" height="45" uuid="c3645d77-7301-4a3b-958c-6db1e4e9067b"/>
+				<box>
+					<leftPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textField pattern="EEEEE">
+					<reportElement x="0" y="0" width="20" height="10" uuid="e7b36f93-1256-4ceb-9d0b-46780b4d1795"/>
+					<box topPadding="0" leftPadding="0">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Top">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="0" y="10" width="20" height="35" uuid="91370c9d-ce24-445d-8fc5-2c029d82e3ed"/>
+					<box topPadding="2" leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Top">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["2. "]]></textFieldExpression>
+				</textField>
+				<textField pattern="EEEEE">
+					<reportElement x="20" y="0" width="562" height="10" uuid="238ba450-fcf6-44b3-8f13-3f74e2276b19"/>
+					<box topPadding="0" leftPadding="0">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Top">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[]]></textFieldExpression>
+				</textField>
+				<textField pattern="EEEEE">
+					<reportElement x="20" y="10" width="562" height="15" uuid="38632c85-bd4e-49a2-9fd9-3103efa46cd8"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Top">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Rapat dimulai pukul " + $F{JAM_KOMITE_ACT} + "."]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="20" y="25" width="562" height="20" uuid="1ea4b15a-09b4-46cb-b630-8cbe5e57309c"/>
+					<box topPadding="2" leftPadding="10">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Top">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{NO_IE_EA} != null ? "a. " + $F{TOPIK} + " (" + $F{NO_IE_EA} + ") oleh " + $F{NM_PRESENTER_ACT} : "a. " + $F{TOPIK} + " oleh " + $F{NM_PRESENTER_ACT}]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+		<band height="55">
+			<frame>
+				<reportElement x="0" y="0" width="582" height="55" uuid="73f7b486-bf88-4274-9507-415d597611ea"/>
+				<box>
+					<leftPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="0" y="10" width="20" height="45" uuid="82aebf7d-2e78-42a5-b5fc-2895dc7a2724"/>
+					<box topPadding="2" leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Top">
+						<font size="10" isBold="true"/>
+					</textElement>
+				</textField>
+				<textField pattern="EEEEE">
+					<reportElement x="0" y="0" width="20" height="10" uuid="f5dcee8c-4748-4399-b3ef-ce4a5173c00a"/>
+					<box topPadding="0" leftPadding="0">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Top">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[]]></textFieldExpression>
+				</textField>
+				<textField pattern="EEEEE">
+					<reportElement x="20" y="0" width="562" height="10" uuid="63fc08fd-0532-4911-b0ad-d6eb1503e966"/>
+					<box topPadding="0" leftPadding="0">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Top">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[]]></textFieldExpression>
+				</textField>
+				<textField pattern="EEEEE">
+					<reportElement x="20" y="10" width="562" height="15" uuid="1185402d-9186-40e1-a577-893c7e0d5714"/>
+					<box leftPadding="17">
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["- Latar Belakang: "]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="20" y="25" width="562" height="30" uuid="b9ba8e06-a695-4756-b09c-a278ae115924"/>
+					<box topPadding="2" leftPadding="25">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Top">
+						<font size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{LATAR_BELAKANG}]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+		<band height="55">
+			<frame>
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="582" height="55" uuid="7677100b-b73a-4f42-8883-7784eb63ee82"/>
+				<box>
+					<leftPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textField pattern="EEEEE">
+					<reportElement x="0" y="0" width="20" height="10" uuid="ce47a70e-5af3-482a-a6e0-65942f2e6efd"/>
+					<box topPadding="0" leftPadding="0">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Top">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="0" y="10" width="20" height="45" uuid="22fdc0d5-a456-4c91-a931-80aafbb4ce2c"/>
+					<box topPadding="2" leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Top">
+						<font size="10" isBold="true"/>
+					</textElement>
+				</textField>
+				<textField pattern="EEEEE">
+					<reportElement x="20" y="0" width="562" height="10" uuid="14de4c20-cd3a-414f-a809-5b7672415ced"/>
+					<box topPadding="0" leftPadding="0">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Top">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[]]></textFieldExpression>
+				</textField>
+				<textField pattern="EEEEE">
+					<reportElement x="20" y="10" width="562" height="15" uuid="569863ed-1f0e-47f2-bf80-7a9a100deb1d"/>
+					<box leftPadding="17">
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["- Beberapa catatan: "]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="20" y="25" width="562" height="30" uuid="25d10a58-369e-46a2-bc1e-19f4b84bad94"/>
+					<box topPadding="2" leftPadding="25">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Top">
+						<font size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{NOTULEN_2} != null ? $F{NOTULEN}+""+$F{NOTULEN_2} : $F{NOTULEN}]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+		<band height="55">
+			<frame>
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="582" height="55" uuid="dba4ba45-3a85-429d-94f7-005bae368860"/>
+				<box>
+					<leftPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textField pattern="EEEEE">
+					<reportElement x="0" y="0" width="20" height="10" uuid="86f7138b-da91-4eb2-b9a3-4c19b76cee3e"/>
+					<box topPadding="0" leftPadding="0">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Top">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="0" y="10" width="20" height="45" uuid="87020ed7-3d6b-4e41-b66d-4bbfc7dc94db"/>
+					<box topPadding="2" leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Top">
+						<font size="10" isBold="true"/>
+					</textElement>
+				</textField>
+				<textField pattern="EEEEE">
+					<reportElement x="20" y="0" width="562" height="10" uuid="e49a2135-8204-4a5f-827f-e735eaa72dc3"/>
+					<box topPadding="0" leftPadding="0">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Top">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[]]></textFieldExpression>
+				</textField>
+				<textField pattern="EEEEE">
+					<reportElement x="20" y="10" width="562" height="15" uuid="1b627afd-c375-4f04-9393-b0711ba2da3c"/>
+					<box leftPadding="17">
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["- Estimasi Biaya: "]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="20" y="25" width="562" height="30" uuid="cbf848b9-7e98-4423-8111-fe92459acbb0"/>
+					<box topPadding="2" leftPadding="25">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Top">
+						<font size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{ESTIMASI}]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+		<band height="30">
+			<frame>
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="582" height="30" uuid="97966c38-f032-473c-9be6-635e018302d0"/>
+				<box>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textField pattern="EEEEE">
+					<reportElement x="0" y="0" width="20" height="10" uuid="d95ae4e3-e235-44d0-9ac1-8b004319cfec"/>
+					<box topPadding="0" leftPadding="0">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Top">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="0" y="10" width="20" height="20" uuid="a31fefb7-fae7-4635-ad88-928e7b8c3138"/>
+					<box topPadding="2" leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Top">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["3. "]]></textFieldExpression>
+				</textField>
+				<textField pattern="EEEEE">
+					<reportElement x="20" y="0" width="562" height="10" uuid="6ed91ce9-c0f1-43d8-adff-5eddf866942e"/>
+					<box topPadding="0" leftPadding="0">
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Top">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[]]></textFieldExpression>
+				</textField>
+				<textField pattern="EEEEE">
+					<reportElement x="20" y="10" width="562" height="20" uuid="48d2b2be-58ac-4d76-9f9d-54779541973e"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Top">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Rapat ditutup pukul " + $F{JAM_KOMITE_ACT_FINISH} + "."]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+	</detail>
+</jasperReport>

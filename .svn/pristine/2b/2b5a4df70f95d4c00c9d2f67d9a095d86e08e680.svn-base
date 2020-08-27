@@ -1,0 +1,105 @@
+<html>
+<head>
+  <title>Print Lupa Prik</title>
+ </head>
+<body>
+        
+        <!-- form start -->
+     <div class="box-body">
+		<div class="form-group">
+  
+			<div class="table-responsive">
+				<form method="POST" accept-charset="UTF-8" style="display:inline">
+					{{ csrf_field() }}
+                            <table class="table" style="border: 5px double black; width: 700px; height: 1000px;     float: center; margin: 150px; ">
+                                <tbody>
+								<tr> <th colspan="2"> <h3 > Bukti Pengajuan Lupa Prik </h3> </th> </tr>
+                                 <tr>
+                                        <th width="320px"> NPK </th>
+                                        <td>: {{$LupaPPengajuans->npk}}</td>
+                                    </tr>
+
+                               		 <tr>
+                                        <th> Nama Karyawan </th>
+                                        <td>: {{$kar->first()->nama}}  </td>
+                                    </tr>
+									
+									
+                               		 <tr>
+                                        <th> Nama PT </th>
+                                        <td>: {{$kar->first()->kd_pt}}  </td>
+                                    </tr>
+									
+									
+                               		 <tr>
+                                        <th> Nama Dept. </th>
+                                        <td>: {{$kar->first()->desc_dep}}  </td>
+                                    </tr>
+
+                                    <tr>
+                                        <th> Nama Atasan </th>
+                                        <td>: {{$namaatasan->first()->nama}} </td>
+                                    </tr>
+
+                                    <tr>
+                                        <th> No. Pengajuan </th>
+                                       	 <td>: <b> {{$LupaPPengajuans->no_lp}} <b> </td>
+                                    </tr>
+                                    
+                                    <tr>
+	                                    <th> Tanggal Lupa </th>
+	                                    <td>: {!! date('l, d F Y', strtotime($LupaPPengajuans->tgllupa)); !!} </td>
+                                   </tr>
+
+                                   <tr>
+	                                    <th> Jam Masuk </th>
+	                                    <td>: {{$LupaPPengajuans->jamin}} </td>
+                                   </tr>
+
+                                   <tr>
+	                                    <th> Jam Keluar </th>
+	                                    <td>: {{$LupaPPengajuans->jamout}} </td>
+                                   </tr>
+
+                                   <tr>
+	                                    <th> Alasan Lupa </th>
+	                                    <td>: {{$LupaPPengajuans->alasanlupa}}</td>
+                                   </tr>
+								   
+								   <tr>
+                                        <th> Status Permintaan </th>
+                                        <td>:  
+										@if ($LupaPPengajuans->status==1) <b class="btn-xs btn-success btn-icon-pg" >  Disetujui </b>
+                                        @elseif ($LupaPPengajuans->status==2) <b class="btn-xs btn-danger btn-icon-pg"  > Ditolak  </b> 
+										@else <b class="btn-xs btn-info btn-icon-pg" action="disable"> Belum Approval </b> 
+										@endif 
+										pada tanggal {!! date('d-m-Y', strtotime($LupaPPengajuans->tglok)); !!}
+										 </td>
+										
+                                    </tr>
+									<tr>
+                                        <th> </th>
+                                    </tr>
+                                </tbody>
+                            </table>
+				
+                   </form>
+                </div>
+
+  
+  
+  
+
+
+</div>
+</div>
+
+
+      </div>
+      <!-- /.box -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+  </body>
+  </html>

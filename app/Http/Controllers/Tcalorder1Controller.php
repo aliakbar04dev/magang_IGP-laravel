@@ -1,0 +1,494 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Tcalorder1;
+use App\Tcalorder2;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use App\Http\Requests\StoreTcalorder1Request;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
+use Laratrust\LaratrustFacade as Laratrust;
+use Illuminate\Support\Facades\File;
+use Intervention\Image\ImageManagerStatic as Image;
+use Carbon\Carbon;
+use DB;
+use Exception;
+use Illuminate\Support\Facades\Input;
+use PDF;
+use JasperPHP\JasperPHP;
+use DNS1D;
+
+class Tcalorder1Controller extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+      if(Auth::user()->can('qa-alatukur-view')) {   
+        $plants = DB::table("qcm_npks")
+        ->selectRaw("npk, kd_plant, (case when kd_plant = '1' then 'IGP-1' when kd_plant = '2' then 'IGP-2' when kd_plant = '3' then 'IGP-3' when kd_plant = '4' then 'IGP-4' when kd_plant = 'A' then 'KIM-1A' when kd_plant = 'B' then 'KIM-1B' else '-' end) as nm_plant")
+        ->where("npk", Auth::user()->username)
+        ->orderBy("kd_plant"); 
+        return view('eqa.kalibrasi.index', compact('plants'));
+      } else {
+        return view('errors.403');
+      }
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {   
+       if(Auth::user()->can('qa-alatukur-create')) {
+         $plants = DB::table("qcm_npks")
+         ->selectRaw("npk, kd_plant, (case when kd_plant = '1' then 'IGP-1' when kd_plant = '2' then 'IGP-2' when kd_plant = '3' then 'IGP-3' when kd_plant = '4' then 'IGP-4' when kd_plant = 'A' then 'KIM-1A' when kd_plant = 'B' then 'KIM-1B' else '-' end) as nm_plant")
+         ->where("npk", Auth::user()->username)
+         ->orderBy("kd_plant"); 
+         return view('eqa.kalibrasi.create', compact('plants'));
+         } else {
+          return view('errors.403');
+         }
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+      if(Auth::user()->can('qa-alatukur-create')) {
+        $tcalorder1 = new Tcalorder1();       
+        $tgl_order=$request->tgl_order;
+        $tahun = Carbon::parse($tgl_order)->format('Y');
+        $tahun = substr($tahun,2);
+        $bulan = Carbon::parse($tgl_order)->format('m');
+        $mmyyyy = Carbon::parse($tgl_order)->format('mY');
+        $pt = $request->pt;
+        $kd_plant = $request->kd_plant;
+        $kd_cust = $request->kd_cust;
+        $tgl_estimasi = $request->tgl_estimasi;
+        $tgl_estimasi_serti = $request->tgl_estimasi_serti;
+        $npk = Auth::user()->username;
+        $npk = substr($npk, -5, 5);
+        
+        DB::beginTransaction();
+        try {            
+
+          $no_order = $tcalorder1->maxNotag($mmyyyy);
+          $no_order = $no_order."/C/".$bulan."/".$tahun;
+          DB::connection("oracle-usrklbr")
+          ->unprepared("insert into tcalorder1(no_order,tgl_order,pt,kd_plant,st_cal,kd_cust,tgl_estimasi,tgl_estimasi_serti,dtcrea,creaby)  values ('$no_order',to_date('$tgl_order','yyyy/mm/dd'),'$pt','$kd_plant','C','$kd_cust', to_date('$tgl_estimasi','yyyy/mm/dd'), to_date('$tgl_estimasi_serti','yyyy/mm/dd'), sysdate,'$npk')");
+
+          $jmlDetail = $request->jml_tbl_detail;
+          $maxNoSert = $tcalorder1->noSertifikat();
+          $maxNoSert = substr($maxNoSert,1);
+          //compare lebih besar mana no sert di tcalorder2 atau di mcalserti
+          $maxNoSertOrder= $tcalorder1->noSertifikatOrder(); 
+          if($maxNoSertOrder > $maxNoSert){
+           $maxNoSert = $maxNoSertOrder;
+         }        
+
+         for ($i = 1; $i <= $jmlDetail; $i++) {
+          $no_serti = 'A'.$maxNoSert;
+          $detail = $request->only('row-'.$i.'-no_seri','row-'.$i.'-kd_brg','row-'.$i.'-nm_spec','row-'.$i.'-nm_reso','row-'.$i.'-jml_titik','row-'.$i.'-ket','row-'.$i.'-kd_au','row-'.$i.'-hrg_unit');
+          $no_seri = trim($detail['row-'.$i.'-no_seri']) !== '' ? trim($detail['row-'.$i.'-no_seri']) : ''; 
+          $kd_brg = trim($detail['row-'.$i.'-kd_brg']) !== '' ? trim($detail['row-'.$i.'-kd_brg']) : ''; 
+          $nm_spec = trim($detail['row-'.$i.'-nm_spec']) !== '' ? trim($detail['row-'.$i.'-nm_spec']) : ''; 
+          $nm_reso = trim($detail['row-'.$i.'-nm_reso']) !== '' ? trim($detail['row-'.$i.'-nm_reso']) : ''; 
+          $jml_titik = trim($detail['row-'.$i.'-jml_titik']) !== '' ? trim($detail['row-'.$i.'-jml_titik']) : '';
+          $kd_au = trim($detail['row-'.$i.'-kd_au']) !== '' ? trim($detail['row-'.$i.'-kd_au']) : ''; 
+          $ket = trim($detail['row-'.$i.'-ket']) !== '' ? trim($detail['row-'.$i.'-ket']) : '';
+          $hrg_unit = trim($detail['row-'.$i.'-hrg_unit']) !== '' ? trim($detail['row-'.$i.'-hrg_unit']) : ''; 
+          DB::connection("oracle-usrklbr")
+          ->unprepared("insert into tcalorder2(no_order, no_seri, kd_brg, kode, kd_kat, kd_au, nm_spec, nm_reso, jml_titik, ket, st_batal, dtcrea,creaby, no_serti, no_seq, hrg_unit)  values ('$no_order','$no_seri','$kd_brg','K','-','$kd_au','$nm_spec','$nm_reso','$jml_titik','$ket','F',sysdate,'$npk','$no_serti','$i', '$hrg_unit')");
+          DB::commit();
+          $maxNoSert= $tcalorder1->noSertifikatOrder(); 
+        }
+
+         //update tgl estimasi
+        $tgl_est = $tcalorder1->getEstimasi();
+        //tgl estimasi sertifikat +1 hari dari tgl estimasi
+        $tgl_est_serti = strtotime("+1 days", strtotime($tgl_est));
+        $tgl_est_serti = date("Y/m/d", $tgl_est_serti);
+        DB::connection("oracle-usrklbr")
+        ->unprepared("update tcalorder1 set tgl_estimasi=to_date('$tgl_est','yyyy/mm/dd'), tgl_estimasi_serti=to_date('$tgl_est_serti','yyyy/mm/dd') where no_order ='$no_order'");
+
+        Session::flash("flash_notification", [
+          "level"=>"success",
+          "message"=>"Data Berhasil Disimpan dengan No Order : ".$no_order
+        ]);
+                        //insert logs
+        $log_keterangan = "Tcalorder1Controller.store: Create No Order Berhasil. ".$no_order;
+        $log_ip = \Request::session()->get('client_ip');
+        $created_at = Carbon::now();
+        $updated_at = Carbon::now();
+        DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+        DB::commit();
+        return redirect()->route('kalibrasi.edit', base64_encode($no_order));
+      } catch (Exception $ex) {
+        DB::rollback();
+        Session::flash("flash_notification", [
+          "level"=>"danger",
+          "message"=>"Data Gagal Disimpan!"
+        ]);
+      }
+      } else {
+        return view('errors.403');
+      }
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+       if(Auth::user()->can('qa-alatukur-update')) {  
+         $no_order=base64_decode($id);
+         $tcalorder1 = DB::connection("oracle-usrklbr")->table('tcalorder1')->where(DB::raw("no_order"), '=', $no_order)->first();
+         $model = new Tcalorder1();        
+         $cekTarik = $model->cekTarik($no_order);
+         if($cekTarik->count() > 0) {
+           $cekTarik = $cekTarik->first()->tgl_tarik;
+         }else{
+           $cekTarik = null; 
+         }           
+
+         $plants = DB::table("qcm_npks")
+         ->selectRaw("npk, kd_plant, (case when kd_plant = '1' then 'IGP-1' when kd_plant = '2' then 'IGP-2' when kd_plant = '3' then 'IGP-3' when kd_plant = '4' then 'IGP-4' when kd_plant = 'A' then 'KIM-1A' when kd_plant = 'B' then 'KIM-1B' else '-' end) as nm_plant")
+         ->where("npk", Auth::user()->username)
+         ->orderBy("kd_plant"); 
+
+         return view('eqa.kalibrasi.edit')->with(compact(['tcalorder1','model','plants', 'cekTarik']));
+        } else {
+        return view('errors.403');
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+      if(Auth::user()->can('qa-alatukur-update')) {
+        $tcalorder1 = new Tcalorder1(); 
+        $no_order=$request->no_order;
+        $tgl_order=$request->tgl_order;
+        $tahun = Carbon::parse($tgl_order)->format('Y');
+        $tahun = substr($tahun,2);
+        $bulan = Carbon::parse($tgl_order)->format('m');
+        $mmyyyy = Carbon::parse($tgl_order)->format('mY');
+        $pt = $request->pt;
+        $kd_plant = $request->kd_plant;
+        $kd_cust = $request->kd_cust;
+        $tgl_estimasi = $request->tgl_estimasi;
+        $tgl_estimasi_serti = $request->tgl_estimasi_serti;
+        $npk = Auth::user()->username;
+        $npk = substr($npk, -5, 5);
+        $cekTarik = $tcalorder1->cekTarik($no_order);
+        if($cekTarik->count() > 0) {
+          Session::flash("flash_notification", [
+            "level"=>"danger",
+            "message"=>"Maaf, Transaksi Yang Sudah Ditarik Tidak Bisa Diubah."
+          ]);
+          return redirect()->back()->withInput(Input::all());
+        }else{ 
+          $maxNoSert = $tcalorder1->noSertifikat();
+          $maxNoSert = substr($maxNoSert,1);
+          //compare lebih besar mana no sert di tcalorder2 atau di mcalserti
+          $maxNoSertOrder= $tcalorder1->noSertifikatOrder(); 
+          if($maxNoSertOrder > $maxNoSert){
+           $maxNoSert = $maxNoSertOrder;
+         }        
+
+         DB::beginTransaction();
+         try {            
+
+          DB::connection("oracle-usrklbr")
+          ->unprepared("update tcalorder1 set tgl_order=to_date('$tgl_order','yyyy/mm/dd'), pt='$pt', kd_plant='$kd_plant', kd_cust='$kd_cust', tgl_estimasi=to_date('$tgl_estimasi','yyyy/mm/dd'), tgl_estimasi_serti=to_date('$tgl_estimasi_serti','yyyy/mm/dd'), dtmodi=sysdate, modiby='$npk' where no_order ='$no_order'");
+
+          $jmlDetail = $request->jml_tbl_detail;
+          for ($i = 1; $i <= $jmlDetail; $i++) {
+            $no_serti = 'A'.$maxNoSert;
+            $detail = $request->only('row-'.$i.'-no_seri','row-'.$i.'-kd_brg','row-'.$i.'-nm_spec','row-'.$i.'-nm_reso','row-'.$i.'-jml_titik','row-'.$i.'-ket','row-'.$i.'-kd_au','row-'.$i.'-hrg_unit');
+            $no_seri = trim($detail['row-'.$i.'-no_seri']) !== '' ? trim($detail['row-'.$i.'-no_seri']) : ''; 
+            $kd_brg = trim($detail['row-'.$i.'-kd_brg']) !== '' ? trim($detail['row-'.$i.'-kd_brg']) : ''; 
+            $nm_spec = trim($detail['row-'.$i.'-nm_spec']) !== '' ? trim($detail['row-'.$i.'-nm_spec']) : ''; 
+            $nm_reso = trim($detail['row-'.$i.'-nm_reso']) !== '' ? trim($detail['row-'.$i.'-nm_reso']) : ''; 
+            $jml_titik = trim($detail['row-'.$i.'-jml_titik']) !== '' ? trim($detail['row-'.$i.'-jml_titik']) : '';
+            $kd_au = trim($detail['row-'.$i.'-kd_au']) !== '' ? trim($detail['row-'.$i.'-kd_au']) : '';  
+            $ket = trim($detail['row-'.$i.'-ket']) !== '' ? trim($detail['row-'.$i.'-ket']) : '';
+            $hrg_unit = trim($detail['row-'.$i.'-hrg_unit']) !== '' ? trim($detail['row-'.$i.'-hrg_unit']) : ''; 
+          
+            $cek = $tcalorder1->cekDetail($no_order, $no_seri);
+            if($cek == $no_seri){
+              DB::connection("oracle-usrklbr")
+              ->unprepared("update tcalorder2 set kd_brg='$kd_brg', nm_spec='$nm_spec', nm_reso='$nm_reso', jml_titik='$jml_titik', ket='$ket', dtmodi=sysdate, modiby='$npk', hrg_unit='$hrg_unit' where no_order='$no_order' and no_seri='$no_seri'"); 
+            }else{
+              DB::connection("oracle-usrklbr")
+               ->unprepared("insert into tcalorder2(no_order, no_seri, kd_brg, kode, kd_kat, kd_au, nm_spec, nm_reso, jml_titik, ket, st_batal, dtcrea,creaby, no_serti, no_seq, hrg_unit)  values ('$no_order','$no_seri','$kd_brg','K','-','$kd_au','$nm_spec','$nm_reso','$jml_titik','$ket','F',sysdate,'$npk','$no_serti','$i', '$hrg_unit')");   
+              DB::commit();
+              $maxNoSert= $tcalorder1->noSertifikatOrder();                   
+            }   
+          }
+
+          //update tgl estimasi
+          $tgl_est = $tcalorder1->getEstimasi();
+          //tgl estimasi sertifikat +1 hari dari tgl estimasi
+          $tgl_est_serti = strtotime("+1 days", strtotime($tgl_est));
+          $tgl_est_serti = date("Y/m/d", $tgl_est_serti);
+          DB::connection("oracle-usrklbr")
+          ->unprepared("update tcalorder1 set tgl_estimasi=to_date('$tgl_est','yyyy/mm/dd'), tgl_estimasi_serti=to_date('$tgl_est_serti','yyyy/mm/dd') where no_order ='$no_order'");
+
+          Session::flash("flash_notification", [
+            "level"=>"success",
+            "message"=>"Data Berhasil Disimpan dengan No Order : ".$no_order
+          ]);
+                        //insert logs
+          $log_keterangan = "Tcalorder1Controller.update: Update No Order Berhasil. ".$no_order;
+          $log_ip = \Request::session()->get('client_ip');
+          $created_at = Carbon::now();
+          $updated_at = Carbon::now();
+          DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+          DB::commit();
+          return redirect()->route('kalibrasi.edit', base64_encode($no_order));
+        } catch (Exception $ex) {
+          DB::rollback();
+          Session::flash("flash_notification", [
+            "level"=>"danger",
+            "message"=>"Data Gagal Disimpan!"
+          ]);
+        }
+      }
+      } else {
+        return view('errors.403');
+      }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+
+    }
+
+    public function dashboard(Request $request)
+    {
+     if(Auth::user()->can(['qa-alatukur-view'])) {
+      $kdPlant = $request->get('plant');
+      $kdCust = $request->get('cust');
+      $pt = $request->get('pt');
+      $bulan = $request->get('bulan');
+      if($bulan < 10){
+        $bulan = '0'.$bulan;
+      }        
+      $tahun = $request->get('tahun');
+      if ($request->ajax()) {
+        $lists = DB::connection('oracle-usrklbr')
+        ->table("tcalorder1")
+        ->select(DB::raw("no_order, tgl_order, pt, usrigpmfg.fnm_plant(kd_plant) plant, fnm_cust_klbr(kd_cust) cust"))
+        ->where("pt", "=", $pt)
+        ->where("st_cal", "=", "C")
+        ->whereRaw("(kd_plant = '".$kdPlant."' OR '".$kdPlant."' IS NULL) AND (kd_cust = '".$kdCust."' OR '".$kdCust."' IS NULL) AND to_char(tgl_order,'MMYYYY') = '".$bulan."".$tahun."'");
+
+        return Datatables::of($lists)
+        ->editColumn('no_order', function($lists) {
+          return '<a href="'.route('kalibrasi.edit',base64_encode($lists->no_order)).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $lists->no_order .'">'.$lists->no_order.'</a>';
+        })
+
+        ->editColumn('tgl_order', function($lists){
+          return Carbon::parse($lists->tgl_order)->format('d/m/Y');            
+        })
+        ->filterColumn('tgl_order', function ($query, $keyword) {
+          $query->whereRaw("to_char(tgl_order,'dd/mm/yyyy') like ?", ["%$keyword%"]);
+        })
+        ->filterColumn('cust', function ($query, $keyword) {
+          $query->whereRaw("(nvl(fnm_cust_klbr(kd_cust),'-')) like ?", ["%$keyword%"]);
+        })
+        ->filterColumn('plant', function ($query, $keyword) {
+          $query->whereRaw("(nvl(usrigpmfg.fnm_plant(kd_plant),'-')) like ?", ["%$keyword%"]);
+        })
+        ->make(true);
+      } else {
+        return redirect('home');
+      }
+      } else {
+        return view('errors.403');
+      }
+    }
+
+    public function delete(Request $request, $id)
+    {
+      $no_order = base64_decode($id);
+      if(Auth::user()->can('qa-alatukur-delete')) {
+        $tcalorder1 = new Tcalorder1(); 
+        $cekTarik = $tcalorder1->cekTarik($no_order);
+        if($cekTarik->count() > 0) {
+          Session::flash("flash_notification", [
+            "level"=>"danger",
+            "message"=>"Maaf, Transaksi Yang Sudah Ditarik Tidak Bisa Dihapus."
+          ]);
+          return redirect()->back()->withInput(Input::all());
+        }else{  
+          try {
+            if ($request->ajax()) {
+              $status = 'OK';
+              $msg = 'Transaksi berhasil dihapus.';
+
+              DB::beginTransaction();
+              DB::connection("oracle-usrklbr")
+              ->unprepared("delete tcalorder2 where no_order='$no_order'");
+
+              DB::connection("oracle-usrklbr")
+              ->unprepared("delete tcalorder1 where no_order='$no_order'");
+
+                      //insert logs
+              $log_keterangan = "Tcalorder1Controller.destroy: Delete Transaksi Berhasil. ";
+              $log_ip = \Request::session()->get('client_ip');
+              $created_at = Carbon::now();
+              $updated_at = Carbon::now();
+              DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+              DB::commit();
+              return response()->json(['id' => base64_decode($no_order), 'status' => $status, 'message' => $msg]);
+            } else {
+              DB::beginTransaction();
+              DB::connection("oracle-usrklbr")
+              ->unprepared("delete tcalorder2 where no_order='$no_order'");
+
+              DB::connection("oracle-usrklbr")
+              ->unprepared("delete tcalorder1 where no_order='$no_order'");
+
+                      //insert logs
+              $log_keterangan = "Tcalorder1Controller.destroy: Delete Transaksi Berhasil. ";
+              $log_ip = \Request::session()->get('client_ip');
+              $created_at = Carbon::now();
+              $updated_at = Carbon::now();
+              DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+              DB::commit();
+              Session::flash("flash_notification", [
+                "level"=>"success",
+                "message"=>"Transaksi berhasil dihapus."
+              ]);
+              return redirect()->route('kalibrasi.index');
+            }
+          } catch (Exception $ex) {
+            if ($request->ajax()) {
+              return response()->json(['id' => base64_decode($no_order), 'status' => 'NG', 'message' => 'Transaksi gagal dihapus!']);
+            } else {
+              Session::flash("flash_notification", [
+                "level"=>"danger",
+                "message"=>"Transaksi gagal dihapus!"
+              ]);
+              return redirect()->route('kalibrasi.index');
+            }
+          }
+        }
+      } else {
+        if ($request->ajax()) {
+          return response()->json(['id' => base64_decode($no_order), 'status' => 'NG', 'message' => 'Anda tidak memiliki AKSES untuk MENGHAPUS Transaksi!']);
+        } else {
+          return view('errors.403');
+        }
+      }
+    }
+
+    public function print($noOrder) 
+    {
+        if(Auth::user()->can(['qa-alatukur-view'])) {
+            try {
+                $tcalorder1 = new Tcalorder1(); 
+                $noOrder = base64_decode($noOrder);
+                $cekTerima = $tcalorder1->cekTerima($noOrder);
+                $noSerti = 'BelumBisa';
+                if($cekTerima->count() > 0) {
+                  //update tgl terima
+                  DB::connection("oracle-usrklbr")
+                  ->unprepared("update tcalorder1 set tgl_terima=sysdate where no_order='$noOrder'");
+                  DB::commit();
+                }                
+
+                $logo = public_path(). DIRECTORY_SEPARATOR .'images'. DIRECTORY_SEPARATOR .'logo_ori.png';
+                
+                $type = 'pdf';
+
+                $input = public_path(). DIRECTORY_SEPARATOR .'report'. DIRECTORY_SEPARATOR .'eqc'. DIRECTORY_SEPARATOR .'tagKalibrasi.jasper';
+                $output = public_path(). DIRECTORY_SEPARATOR .'report'. DIRECTORY_SEPARATOR .'eqc'. DIRECTORY_SEPARATOR .'Tag Kalibrasi';
+                $database = \Config::get('database.connections.oracle-usrklbr');
+
+                $path = public_path(). DIRECTORY_SEPARATOR .'report'. DIRECTORY_SEPARATOR .'barcode'. DIRECTORY_SEPARATOR . strtolower($noSerti). '.png';
+                $SUBREPORT_DIR = public_path().DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR.'report'.DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR.'eqc'.DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR;
+                        //Cek barcode sudah ada atau belum
+                if (!file_exists($path)) {
+                  DNS1D::getBarcodePNGPath($noSerti, "C39");
+                    }
+
+                    $jasper = new JasperPHP;
+                    $jasper->process(
+                      $input,
+                      $output,
+                      array($type),
+                      array('noOrder' => $noOrder, 'logoPt' => $logo, 'logoBarcode' => $path),
+                      $database,
+                      'id_ID'
+                    )->execute();
+
+                    $headers = array(
+                      'Content-Description: File Transfer',
+                      'Content-Type: application/pdf',
+                      'Content-Disposition: attachment; filename=Tag Kalibrasi .'.$type,
+                      'Content-Transfer-Encoding: binary',
+                      'Expires: 0',
+                      'Cache-Control: must-revalidate, post-check=0, pre-check=0',
+                      'Pragma: public',
+                      'Content-Length: ' . filesize($output.'.'.$type)
+                  );
+                    
+                    ob_end_clean();
+                    ob_start();
+                    return response()->file($output.'.'.$type, $headers);
+                } catch (Exception $ex) {
+                  Session::flash("flash_notification", [
+                      "level"=>"danger",
+                      "message"=>"Print Tag Gagal!"
+                  ]);
+                  return $ex;
+              }
+          } else {
+              return view('errors.403');
+          }
+    }
+}

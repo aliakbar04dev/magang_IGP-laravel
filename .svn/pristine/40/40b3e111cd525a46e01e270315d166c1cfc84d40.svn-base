@@ -1,0 +1,289 @@
+<?php
+
+Route::group(['prefix'=>'ppc', 'middleware'=>['auth']], function () {
+	Route::get('stockohigps/ppc', [
+		'as' => 'stockohigps.ppc',
+		'uses'=>'StockohigpsController@indexppc'
+	]);
+	Route::get('dashboardppc/stockohigps', [
+		'as'=>'stockohigps.dashboardppc',
+		'uses'=>'StockohigpsController@dashboardppc'
+	]);
+	Route::resource('baanpags', 'BaanPagsController');
+	Route::get('dashboard/baanpags', [
+		'as'=>'baanpags.dashboard',
+		'uses'=>'BaanPagsController@dashboard'
+	]);
+	Route::get('baanpags/detail/{param}/{param2}/{param3}/{param4}/{param5}', [
+		'as'=>'baanpags.detail',
+		'uses'=>'BaanPagsController@detail'
+	]);
+	Route::resource('baandnsupps', 'BaanDnSuppsController');
+	Route::get('dashboard/baandnsupps', [
+		'as'=>'baandnsupps.dashboard',
+		'uses'=>'BaanDnSuppsController@dashboard'
+	]);
+	Route::get('baandnsupps/view/all', [
+		'as' => 'baandnsupps.view',
+		'uses'=>'BaanDnSuppsController@indexview'
+	]);
+	Route::get('baandnsupps/dashboardview/view', [
+		'as' => 'dashboardview.baandnsupps',
+		'uses'=>'BaanDnSuppsController@dashboardview'
+	]);
+	Route::get('baandnsupps/detail/{param}', [
+		'as'=>'baandnsupps.detail',
+		'uses'=>'BaanDnSuppsController@detail'
+	]);
+	Route::post('baandnsupps/revisi', [
+		'as' => 'baandnsupps.revisi',
+		'uses' => 'BaanDnSuppsController@revisi'
+	]);
+	Route::get('baandnsupps/print/{param}/{param2}', [
+		'as' => 'baandnsupps.print',
+		'uses' => 'BaanDnSuppsController@print'
+	]);
+	Route::get('baandnsupps/history/{param}', [
+		'as'=>'baandnsupps.history',
+		'uses'=>'BaanDnSuppsController@history'
+	]);
+	Route::resource('baandncusts', 'BaanDnCustomersController');
+	Route::get('dashboard/baandncusts', [
+		'as'=>'baandncusts.dashboard',
+		'uses'=>'BaanDnCustomersController@dashboard'
+	]);
+	Route::resource('baanOutDsFin', 'BaanOutSerahDsFinController');
+	Route::get('dashboard/baanOutDsFin', [
+		'as'=>'baanOutDsFin.dashboard',
+		'uses'=>'BaanOutSerahDsFinController@dashboard'
+	]);
+	Route::resource('ppctdprs', 'PpctDprsController');
+	Route::get('dashboard/ppctdprs', [
+		'as'=>'dashboard.ppctdprs',
+		'uses'=>'PpctDprsController@dashboard'
+	]);
+	Route::get('ppctdprs/index/sh', [
+		'as' => 'ppctdprs.indexsh',
+		'uses'=>'PpctDprsController@indexsh'
+	]);
+	Route::get('ppctdprs/dashboard/sh', [
+		'as' => 'dashboardsh.ppctdprs',
+		'uses'=>'PpctDprsController@dashboardsh'
+	]);
+	Route::get('ppctdprs/index/dep', [
+		'as' => 'ppctdprs.indexdep',
+		'uses'=>'PpctDprsController@indexdep'
+	]);
+	Route::get('ppctdprs/dashboard/dep', [
+		'as' => 'dashboarddep.ppctdprs',
+		'uses'=>'PpctDprsController@dashboarddep'
+	]);
+	Route::get('ppctdprs/delete/{param}', [
+		'as' => 'ppctdprs.delete',
+		'uses' => 'PpctDprsController@delete'
+	]);
+	Route::get('ppctdprs/deleteimage/{param}', [
+		'as' => 'ppctdprs.deleteimage',
+		'uses' => 'PpctDprsController@deleteimage'
+	]);
+	Route::post('ppctdprs/submit', [
+		'as' => 'ppctdprs.submit',
+		'uses' => 'PpctDprsController@submit'
+	]);
+	Route::post('ppctdprs/approve', [
+		'as' => 'ppctdprs.approve',
+		'uses' => 'PpctDprsController@approve'
+	]);
+	Route::post('ppctdprs/reject', [
+		'as' => 'ppctdprs.reject',
+		'uses' => 'PpctDprsController@reject'
+	]);
+	Route::get('ppctdprpicas/all', [
+		'as' => 'ppctdprpicas.all',
+		'uses'=>'PpctDprPicasController@indexAll'
+	]);
+	Route::get('ppctdprpicas/dashboard/all', [
+		'as' => 'dashboardall.ppctdprpicas',
+		'uses'=>'PpctDprPicasController@dashboardAll'
+	]);
+	Route::get('ppctdprpicas/showall/{param}', [
+		'as' => 'ppctdprpicas.showall',
+		'uses'=>'PpctDprPicasController@showall'
+	]);
+	Route::post('ppctdprpicas/reject', [
+		'as' => 'ppctdprpicas.reject',
+		'uses' => 'PpctDprPicasController@reject'
+	]);
+	Route::post('ppctdprpicas/approve', [
+		'as' => 'ppctdprpicas.approve',
+		'uses' => 'PpctDprPicasController@approve'
+	]);
+	Route::resource('mtruck', 'PpctTruckCustRemarkController');
+	Route::get('dashboard/mtruck', [
+		'as'=>'mtruck.dashboard',
+		'uses'=>'PpctTruckCustRemarkController@dashboard'
+	]);
+	Route::get('indexwhs/mtruck', [
+		'as'=>'mtruck.indexwhs',
+		'uses'=>'PpctTruckCustRemarkController@indexwhs'
+	]);
+	Route::get('dashboardwhs/mtruck', [
+		'as'=>'mtruck.dashboardwhs',
+		'uses'=>'PpctTruckCustRemarkController@dashboardwhs'
+	]);
+	Route::get('edit/mtruck/{param}/{param1}/{param2}/{param3}/{param4}', [
+		'as'=>'mtruck.edit',
+		'uses'=>'PpctTruckCustRemarkController@edit'
+	]);
+	Route::get('create/mtruck/{param}/{param1}/{param2}/{param3}/{param4}', [
+		'as'=>'mtruck.create',
+		'uses'=>'PpctTruckCustRemarkController@create'
+	]);
+	Route::delete('destroy/mtruck/{param}/{param1}/{param2}/{param3}', [
+		'as'=>'mtruck.destroy',
+		'uses'=>'PpctTruckCustRemarkController@destroy'
+	]);
+	Route::get('mtruck/print/{param}/{param1}/{param2}/{param3}/{param4}/{param5}', [
+		'as' => 'mtruck.print',
+		'uses'=>'PpctTruckCustRemarkController@print'
+	]);
+	Route::get('mtruck/printWhs/{param}/{param1}/{param2}/{param3}/{param4}/{param5}', [
+		'as' => 'mtruck.printWhs',
+		'uses'=>'PpctTruckCustRemarkController@printWhs'
+	]);
+	Route::get('stockohigps/componenpart', [
+		'as' => 'stockohigps.componenpart',
+		'uses'=>'StockohigpsController@indexcomponenpart'
+	]);
+	Route::get('stockohigps/componenpartkim', [
+		'as' => 'stockohigps.componenpartkim',
+		'uses'=>'StockohigpsController@indexcomponenpartkim'
+	]);
+	Route::get('dashboardinventorylevel/stockohigps', [
+		'as'=>'stockohigps.dashboardinventorylevel',
+		'uses'=>'StockohigpsController@dashboardinventorylevel'
+	]);
+	Route::get('dashboardinventorylevelctkim/stockohigps', [
+		'as'=>'stockohigps.dashboardinventorylevelctkim',
+		'uses'=>'StockohigpsController@dashboardinventorylevelctkim'
+	]);
+	Route::get('stockohigps/consumable', [
+		'as' => 'stockohigps.consumable',
+		'uses'=>'StockohigpsController@indexconsumable'
+	]);
+	Route::get('stockohigps/consumablekim', [
+		'as' => 'stockohigps.consumablekim',
+		'uses'=>'StockohigpsController@indexconsumablekim'
+	]);
+	Route::get('stockohigps/servicepart', [
+		'as' => 'stockohigps.servicepart',
+		'uses'=>'StockohigpsController@indexservicepart'
+	]);
+	Route::get('stockohigps/tools', [
+		'as' => 'stockohigps.tools',
+		'uses'=>'StockohigpsController@indextools'
+	]);
+	Route::get('stockohigps/toolskim', [
+		'as' => 'stockohigps.toolskim',
+		'uses'=>'StockohigpsController@indextoolskim'
+	]);
+	Route::post('stockohigps/updatecm', [
+		'as' => 'stockohigps.updatecm',
+		'uses' => 'StockohigpsController@updatecm'
+	]);
+	Route::get('stockohigps/history/{param}/{param2}', [
+		'as'=>'stockohigps.history',
+		'uses'=>'StockohigpsController@history'
+	]);
+	Route::get('stockohigps/finishgood', [
+		'as' => 'stockohigps.finishgood',
+		'uses'=>'StockohigpsController@indexfinishgood'
+	]);
+	Route::get('stockohigps/finishgoodkim', [
+		'as' => 'stockohigps.finishgoodkim',
+		'uses'=>'StockohigpsController@indexfinishgoodkim'
+	]);
+	Route::get('dashboardfinishgood/stockohigps', [
+		'as'=>'stockohigps.dashboardfinishgood',
+		'uses'=>'StockohigpsController@dashboardfinishgood'
+	]);
+	Route::resource('baaniginh008s', 'BaanIginh008sController');
+	Route::get('dashboard/baaniginh008s', [
+		'as'=>'baaniginh008s.dashboard',
+		'uses'=>'BaanIginh008sController@dashboard'
+	]);
+	Route::get('baaniginh008s/detail/{param}', [
+		'as'=>'baaniginh008s.detail',
+		'uses'=>'BaanIginh008sController@detail'
+	]);
+	Route::post('baaniginh008s/revisi', [
+		'as' => 'baaniginh008s.revisi',
+		'uses' => 'BaanIginh008sController@revisi'
+	]);
+	Route::post('baaniginh008s/tampil', [
+		'as' => 'baaniginh008s.tampil',
+		'uses' => 'BaanIginh008sController@tampil'
+	]);
+	Route::post('baaniginh008s/calculation', [
+		'as' => 'baaniginh008s.calculation',
+		'uses' => 'BaanIginh008sController@calculation'
+	]);
+	Route::get('monclaimcalculation', [
+		'as' => 'baaniginh008s.monclaimcalculation',
+		'uses'=>'BaanIginh008sController@indexmonclaimcalculation'
+	]);
+	Route::get('dashboardmonclaimcalculation/baaniginh008s', [
+		'as'=>'baaniginh008s.dashboardmonclaimcalculation',
+		'uses'=>'BaanIginh008sController@dashboardmonclaimcalculation'
+	]);
+	Route::get('baaniginh008s/detailmonclaimcalculation/{param}/{param2}/{param3}/{param4}', [
+		'as'=>'baaniginh008s.detailmonclaimcalculation',
+		'uses'=>'BaanIginh008sController@detailmonclaimcalculation'
+	]);
+	Route::get('ppctdnclaimsj1s/all', [
+		'as' => 'ppctdnclaimsj1s.all',
+		'uses'=>'PpctDnclaimSj1sController@indexAll'
+	]);
+	Route::get('ppctdnclaimsj1s/dashboard/all', [
+		'as' => 'dashboardall.ppctdnclaimsj1s',
+		'uses'=>'PpctDnclaimSj1sController@dashboardAll'
+	]);
+	Route::get('ppctdnclaimsj1s/showall/{param}', [
+		'as' => 'ppctdnclaimsj1s.showall',
+		'uses'=>'PpctDnclaimSj1sController@showall'
+	]);
+	Route::get('ppctdnclaimsj1s/scan', [
+		'as' => 'ppctdnclaimsj1s.scan',
+		'uses'=>'PpctDnclaimSj1sController@scan'
+	]);
+	Route::post('ppctdnclaimsj1s/approvereject', [
+		'as' => 'ppctdnclaimsj1s.approvereject',
+		'uses' => 'PpctDnclaimSj1sController@approvereject'
+	]);
+	Route::get('ppctdnclaimsj1s/validasiNoCerti/{param}', [
+		'as' => 'ppctdnclaimsj1s.validasiNoCerti',
+		'uses' => 'PpctDnclaimSj1sController@validasiNoCerti'
+	]);
+	Route::resource('uniqcodematuses', 'UniqCodeMatUsesController');
+	Route::get('dashboard/uniqcodematuses', [
+		'as'=>'uniqcodematuses.dashboard',
+		'uses'=>'UniqCodeMatUsesController@dashboard'
+	]);
+	Route::get('ppctdprs/index/rep', [
+		'as' => 'ppctdprs.indexrep',
+		'uses'=>'PpctDprsController@indexrep'
+	]);
+	Route::get('ppctdprs/dashboard/rep', [
+		'as' => 'dashboardrep.ppctdprs',
+		'uses'=>'PpctDprsController@dashboardrep'
+	]);
+	Route::get('ppctdprs/print/{param}/{param1}/{param2}/{param3}/{param4}/{param5}/{param6}', [
+		'as' => 'ppctdprs.print',
+		'uses'=>'PpctDprsController@print'
+	]);	
+	Route::resource('ppcvftodays', 'PpcvFtoDaysController');
+	Route::get('index/ppcvftodays/{param?}/{param2?}/{param3?}/{param4?}/{param5?}', [
+		'as'=>'ppcvftodays.index',
+		'uses'=>'PpcvFtoDaysController@index'
+	]);
+});

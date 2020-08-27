@@ -1,0 +1,565 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use App\MtctIsiOli1;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use App\Http\Requests\StoreMtctIsiOli1Request;
+use Illuminate\Support\Facades\Session;
+use App\Http\Requests\UpdateMtctIsiOli1Request;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use DB;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\User;
+use Illuminate\Support\Facades\Input;
+
+class MtctIsiOlisController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        if(Auth::user()->can('mtc-oli-*')) {
+            return view('mtc.oli.index');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function dashboard(Request $request)
+    {
+        if(Auth::user()->can('mtc-oli-*')) {
+            if ($request->ajax()) {
+                
+                $npk = Auth::user()->username;
+
+                $mtctisioli1s = MtctIsiOli1::whereRaw("to_char(tgl_isi,'yyyy') >= to_char(sysdate,'yyyy')-5")
+                ->whereRaw("exists (select 1 from mtcm_npk where mtcm_npk.npk = '$npk' and mtcm_npk.kd_plant = mtct_isi_oli1.kd_plant and rownum = 1)");
+                
+                return Datatables::of($mtctisioli1s)
+                    ->editColumn('no_isi', function($mtctisioli1) {
+                        return '<a href="'.route('mtctisioli1s.show', base64_encode($mtctisioli1->no_isi)).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $mtctisioli1->no_isi .'">'.$mtctisioli1->no_isi.'</a>';
+                    })
+                    ->editColumn('tgl_isi', function($mtctisioli1){
+                        return Carbon::parse($mtctisioli1->tgl_isi)->format('d/m/Y');
+                    })
+                    ->filterColumn('tgl_isi', function ($query, $keyword) {
+                        $query->whereRaw("to_char(tgl_isi,'dd/mm/yyyy') like ?", ["%$keyword%"]);
+                    })
+                    ->addColumn('line', function($mtctisioli1){
+                        if(!empty($mtctisioli1->kd_line)) {
+                            return $mtctisioli1->kd_line.' - '.$mtctisioli1->nm_line;
+                        } else {
+                            return "";
+                        }
+                    })
+                    ->filterColumn('line', function ($query, $keyword) {
+                        $query->whereRaw("(kd_line||' - '||nvl(usrigpmfg.fnm_linex(kd_line),'-')) like ?", ["%$keyword%"]);
+                    })
+                    ->orderColumn('line', 'kd_line $1')
+                    ->addColumn('mesin', function($mtctisioli1){
+                        if(!empty($mtctisioli1->kd_mesin)) {
+                            return $mtctisioli1->kd_mesin.' - '.$mtctisioli1->nm_mesin;
+                        } else {
+                            return "";
+                        }
+                    })
+                    ->filterColumn('mesin', function ($query, $keyword) {
+                        $query->whereRaw("(kd_mesin||' - '||nvl(fnm_mesin(kd_mesin),'-')) like ?", ["%$keyword%"]);
+                    })
+                    ->orderColumn('mesin', 'kd_mesin $1')
+                    ->editColumn('creaby', function($mtctisioli1){
+                        if(!empty($mtctisioli1->creaby)) {
+                            $name = $mtctisioli1->nama($mtctisioli1->creaby);
+                            if(!empty($mtctisioli1->dtcrea)) {
+                                $tgl = Carbon::parse($mtctisioli1->dtcrea)->format('d/m/Y H:i');
+                                return $mtctisioli1->creaby.' - '.$name.' - '.$tgl;
+                            } else {
+                                return $mtctisioli1->creaby.' - '.$name;
+                            }
+                        } else {
+                            return "";
+                        }
+                    })
+                    ->filterColumn('creaby', function ($query, $keyword) {
+                        $query->whereRaw("(creaby||' - '||(select nama from usrhrcorp.v_mas_karyawan where mtct_isi_oli1.creaby = npk and rownum = 1)||nvl(' - '||to_char(dtcrea,'dd/mm/yyyy hh24:mi'),'')) like ?", ["%$keyword%"]);
+                    })
+                    ->orderColumn('creaby', 'creaby $1')
+                    ->editColumn('modiby', function($mtctisioli1){
+                        if(!empty($mtctisioli1->modiby)) {
+                            $name = $mtctisioli1->nama($mtctisioli1->modiby);
+                            if(!empty($mtctisioli1->dtmodi)) {
+                                $tgl = Carbon::parse($mtctisioli1->dtmodi)->format('d/m/Y H:i');
+                                return $mtctisioli1->modiby.' - '.$name.' - '.$tgl;
+                            } else {
+                                return $mtctisioli1->modiby.' - '.$name;
+                            }
+                        } else {
+                            return "";
+                        }
+                    })
+                    ->filterColumn('modiby', function ($query, $keyword) {
+                        $query->whereRaw("(modiby||' - '||(select nama from usrhrcorp.v_mas_karyawan where mtct_isi_oli1.modiby = npk and rownum = 1)||nvl(' - '||to_char(dtmodi,'dd/mm/yyyy hh24:mi'),'')) like ?", ["%$keyword%"]);
+                    })
+                    ->orderColumn('modiby', 'modiby $1')
+                    ->addColumn('action', function($mtctisioli1){
+                        if(Auth::user()->can(['mtc-oli-create','mtc-oli-delete'])) {
+                            if($mtctisioli1->checkEdit() === "T") {
+                                $form_id = str_replace('/', '', $mtctisioli1->no_isi);
+                                $form_id = str_replace('-', '', $form_id);
+                                return view('datatable._action', [
+                                    'model' => $mtctisioli1,
+                                    'form_url' => route('mtctisioli1s.destroy', base64_encode($mtctisioli1->no_isi)),
+                                    'edit_url' => route('mtctisioli1s.edit', base64_encode($mtctisioli1->no_isi)),
+                                    'class' => 'form-inline js-ajax-delete',
+                                    'form_id' => 'form-'.$form_id,
+                                    'id_table' => 'tblMaster',
+                                    'confirm_message' => 'Anda yakin menghapus No. Pengisian Oli ' . $mtctisioli1->no_isi . '?'
+                                ]);
+                            } else {
+                                return '';
+                            }
+                        } else {
+                            return '';
+                        }
+                    })
+                    ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        if(Auth::user()->can('mtc-oli-create')) {
+            $plant = DB::connection('oracle-usrbrgcorp')
+                ->table("mtcm_npk")
+                ->selectRaw("npk, kd_plant, decode(kd_plant, '1', 'IGP-1', '2', 'IGP-2', '3', 'IGP-3', '4', 'IGP-4', 'A', 'KIM-1A', 'B', 'KIM-1B') nm_plant")
+                ->where("npk", Auth::user()->username)
+                ->orderBy("kd_plant");
+            return view('mtc.oli.create', compact('plant'));
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(StoreMtctIsiOli1Request $request)
+    {
+        if(Auth::user()->can('mtc-oli-create')) {
+            $mtctisioli1 = new MtctIsiOli1();
+            $data = $request->all();
+
+            $tgl_isi = Carbon::parse($data['tgl_isi']);
+            $tahun = Carbon::parse($tgl_isi)->format('Y');
+            $kd_plant = $data['kd_plant'];
+            if($kd_plant === "1" || $kd_plant === "2" || $kd_plant === "3" || $kd_plant === "4") {
+                $kd_site = "IGPJ";
+            } else {
+                $kd_site = "IGPK";
+            }
+            $kd_line = trim($data['kd_line']) !== '' ? trim($data['kd_line']) : null;
+            $kd_mesin = trim($data['kd_mesin']) !== '' ? trim($data['kd_mesin']) : null;
+            $no_isi = $mtctisioli1->generateNoIsi($kd_site, $tahun);
+            $creaby = Auth::user()->username;
+            $jml_row = trim($data['jml_row']) !== '' ? trim($data['jml_row']) : '0';
+
+            DB::beginTransaction();
+            try {
+
+                $header = ['no_isi'=>$no_isi, 'tgl_isi'=>$tgl_isi, 'kd_site'=>$kd_site, 'kd_plant'=>$kd_plant, 'kd_line'=>$kd_line, 'kd_mesin'=>$kd_mesin, 'creaby'=>$creaby];
+                $mtctisioli1 = MtctIsiOli1::create($header);
+                $no_isi = $mtctisioli1->no_isi;
+
+                $no_seq_max = 0;
+                for($i = 1; $i <= $jml_row; $i++) {
+                    
+                    $no_seq = trim($data['no_seq_'.$i]) !== '' ? trim($data['no_seq_'.$i]) : '0';
+                    $item_no = trim($data['item_no_'.$i]) !== '' ? trim($data['item_no_'.$i]) : null;
+                    $qty_isi = trim($data['qty_isi_'.$i]) !== '' ? trim($data['qty_isi_'.$i]) : 0;
+
+                    if($no_seq == '0' || $no_seq === "") {
+                        if($item_no != null) {
+                            $no_seq_max = $no_seq_max + 1;
+                            $no_seq = $no_seq_max;
+                            DB::connection("oracle-usrbrgcorp")
+                            ->table(DB::raw("mtct_isi_oli2"))
+                            ->insert(['no_isi' => $no_isi, 'no_seq' => $no_seq, 'item_no' => $item_no, 'qty_isi' => $qty_isi, 'creaby' => $creaby, 'dtcrea' => Carbon::now()]);
+                        }
+                    }
+                }
+
+                //insert logs
+                $log_keterangan = "MtctIsiOlisController.store: Create Pengisian Oli Berhasil. ".$no_isi;
+                $log_ip = \Request::session()->get('client_ip');
+                $created_at = Carbon::now();
+                $updated_at = Carbon::now();
+                DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                DB::commit();
+
+                Session::flash("flash_notification", [
+                    "level"=>"success",
+                    "message"=>"Data berhasil disimpan dengan No. Pengisian: $no_isi"
+                ]);
+                return redirect()->route('mtctisioli1s.edit', base64_encode($no_isi));
+            } catch (Exception $ex) {
+                DB::rollback();
+                Session::flash("flash_notification", [
+                    "level"=>"danger",
+                    "message"=>"Data gagal disimpan!"
+                ]);
+                return redirect()->back()->withInput(Input::all());
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($no_isi)
+    {
+        if(Auth::user()->can('mtc-oli-*')) {
+            $mtctisioli1 = MtctIsiOli1::find(base64_decode($no_isi));
+            if ($mtctisioli1->checkKdPlant() === "T") {
+                return view('mtc.oli.show', compact('mtctisioli1'));
+            } else {
+                return view('errors.403');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($no_isi)
+    {
+        if(Auth::user()->can('mtc-oli-create')) {
+            $mtctisioli1 = MtctIsiOli1::find(base64_decode($no_isi));
+            if ($mtctisioli1->checkKdPlant() === "T") {
+                if($mtctisioli1->checkEdit() !== "T") {
+                    Session::flash("flash_notification", [
+                        "level"=>"danger",
+                        "message"=>"Maaf, data tidak dapat diubah."
+                    ]);
+                    return redirect()->route('mtctisioli1s.index');
+                } else {
+                    $plant = DB::connection('oracle-usrbrgcorp')
+                        ->table("mtcm_npk")
+                        ->selectRaw("npk, kd_plant, decode(kd_plant, '1', 'IGP-1', '2', 'IGP-2', '3', 'IGP-3', '4', 'IGP-4', 'A', 'KIM-1A', 'B', 'KIM-1B') nm_plant")
+                        ->where("npk", Auth::user()->username)
+                        ->where(DB::raw("decode(kd_plant, '1', 'IGPJ', '2', 'IGPJ', '3', 'IGPJ', '4', 'IGPJ', 'A', 'IGPK', 'B', 'IGPK', 'IGPK')"), $mtctisioli1->kd_site)
+                        ->orderBy("kd_plant");
+                    return view('mtc.oli.edit')->with(compact('mtctisioli1', 'plant'));
+                }
+            } else {
+                Session::flash("flash_notification", [
+                    "level"=>"danger",
+                    "message"=>"Maaf, Anda tidak berhak mengubah data ini."
+                ]);
+                return redirect()->route('mtctisioli1s.index');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(UpdateMtctIsiOli1Request $request, $no_isi)
+    {
+        if(Auth::user()->can('mtc-oli-create')) {
+            $no_isi = base64_decode($no_isi);
+            $mtctisioli1 = MtctIsiOli1::find($no_isi);
+            $no_isi = $mtctisioli1->no_isi;
+            if ($mtctisioli1->checkKdPlant() === "T") {
+                if($mtctisioli1->checkEdit() !== "T") {
+                    Session::flash("flash_notification", [
+                        "level"=>"danger",
+                        "message"=>"Maaf, data tidak dapat diubah."
+                    ]);
+                    return redirect()->route('mtctisioli1s.index');
+                } else {
+                    $data = $request->all();
+                    $kd_plant = $data['kd_plant'];
+                    $kd_line = trim($data['kd_line']) !== '' ? trim($data['kd_line']) : null;
+                    $kd_mesin = trim($data['kd_mesin']) !== '' ? trim($data['kd_mesin']) : null;
+                    $creaby = Auth::user()->username;
+                    $jml_row = trim($data['jml_row']) !== '' ? trim($data['jml_row']) : '0';
+                    
+                    DB::beginTransaction();
+                    try {
+
+                        $header = ['kd_plant'=>$kd_plant, 'kd_line'=>$kd_line, 'kd_mesin'=>$kd_mesin, 'modiby'=>$creaby];
+                        $mtctisioli1->update($header);
+
+                        $no_seq_max = $mtctisioli1->details()->max("no_seq");
+                        for($i = 1; $i <= $jml_row; $i++) {
+                            
+                            $no_seq = trim($data['no_seq_'.$i]) !== '' ? trim($data['no_seq_'.$i]) : '0';
+                            $item_no = trim($data['item_no_'.$i]) !== '' ? trim($data['item_no_'.$i]) : null;
+                            $qty_isi = trim($data['qty_isi_'.$i]) !== '' ? trim($data['qty_isi_'.$i]) : 0;
+
+                            if($no_seq == '0' || $no_seq === "") {
+                                if($item_no != null) {
+                                    $no_seq_max = $no_seq_max + 1;
+                                    $no_seq = $no_seq_max;
+                                    DB::connection("oracle-usrbrgcorp")
+                                    ->table(DB::raw("mtct_isi_oli2"))
+                                    ->insert(['no_isi' => $no_isi, 'no_seq' => $no_seq, 'item_no' => $item_no, 'qty_isi' => $qty_isi, 'creaby' => $creaby, 'dtcrea' => Carbon::now()]);
+                                }
+                            } else {
+                                if($item_no != null) {
+                                    $no_seq = base64_decode($no_seq);
+                                    DB::connection("oracle-usrbrgcorp")
+                                    ->table('mtct_isi_oli2')
+                                    ->where('no_isi', $no_isi)
+                                    ->where('no_seq', $no_seq)
+                                    ->update(['item_no' =>$item_no, 'qty_isi' =>$qty_isi, 'modiby' =>$creaby, 'dtmodi' =>Carbon::now()]);
+                                }
+                            }
+                        }
+
+                        //insert logs
+                        $log_keterangan = "MtctIsiOlisController.update: Update Pengisian Oli Berhasil. ".$no_isi;
+                        $log_ip = \Request::session()->get('client_ip');
+                        $created_at = Carbon::now();
+                        $updated_at = Carbon::now();
+                        DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                        DB::commit();
+
+                        Session::flash("flash_notification", [
+                            "level"=>"success",
+                            "message"=>"Data No. Pengisian: $no_isi berhasil diubah."
+                        ]);
+                        return redirect()->route('mtctisioli1s.edit', base64_encode($no_isi));
+                    } catch (Exception $ex) {
+                        DB::rollback();
+                        Session::flash("flash_notification", [
+                            "level"=>"danger",
+                            "message"=>"Data No. Pengisian: $no_isi gagal diubah!"
+                        ]);
+                        return redirect()->back()->withInput(Input::all());
+                    }
+                }
+            } else {
+                Session::flash("flash_notification", [
+                    "level"=>"danger",
+                    "message"=>"Maaf, Anda tidak berhak mengubah data ini."
+                ]);
+                return redirect()->route('mtctisioli1s.index');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Request $request, $no_isi)
+    {
+        if(Auth::user()->can('mtc-oli-delete')) {
+            $no_isi = base64_decode($no_isi);
+            try {
+                DB::beginTransaction();
+                $mtctisioli1 = MtctIsiOli1::findOrFail($no_isi);
+                if ($request->ajax()) {
+                    $status = 'OK';
+                    $msg = 'No. Pengisian Oli '.$no_isi.' berhasil dihapus.';
+
+                    DB::connection("oracle-usrbrgcorp")
+                    ->unprepared("delete from mtct_isi_oli2 where no_isi = '$no_isi'");
+
+                    if(!$mtctisioli1->delete()) {
+                        $status = 'NG';
+                        $msg = Session::get('flash_notification.message');
+                        Session::flash("flash_notification", null);
+                    } else {
+                        //insert logs
+                        $log_keterangan = "MtctIsiOlisController.destroy: Delete Pengisian Oli Berhasil. ".$no_isi;
+                        $log_ip = \Request::session()->get('client_ip');
+                        $created_at = Carbon::now();
+                        $updated_at = Carbon::now();
+                        DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                        DB::commit();
+                    }
+                    return response()->json(['id' => $no_isi, 'status' => $status, 'message' => $msg]);
+                } else {
+
+                    DB::connection("oracle-usrbrgcorp")
+                    ->unprepared("delete from mtct_isi_oli2 where no_isi = '$no_isi'");
+
+                    if(!$mtctisioli1->delete()) {
+                        return redirect()->back()->withInput(Input::all());
+                    } else {
+                        //insert logs
+                        $log_keterangan = "MtctIsiOlisController.destroy: Delete Pengisian Oli Berhasil. ".$no_isi;
+                        $log_ip = \Request::session()->get('client_ip');
+                        $created_at = Carbon::now();
+                        $updated_at = Carbon::now();
+                        DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                        DB::commit();
+
+                        Session::flash("flash_notification", [
+                        "level"=>"success",
+                        "message"=>"No. Pengisian Oli ".$no_isi." berhasil dihapus."
+                        ]);
+
+                        return redirect()->route('mtctisioli1s.index');
+                    }
+                }
+            } catch (ModelNotFoundException $ex) {
+                DB::rollback();
+                if ($request->ajax()) {
+                    return response()->json(['id' => $no_isi, 'status' => 'NG', 'message' => 'Data gagal dihapus! No. Pengisian Oli tidak ditemukan.']);
+                } else {
+                    Session::flash("flash_notification", [
+                        "level"=>"danger",
+                        "message"=>"No. Pengisian Oli tidak ditemukan."
+                    ]);
+                    return redirect()->route('mtctisioli1s.index');
+                }
+            } catch (Exception $ex) {
+                DB::rollback();
+                if ($request->ajax()) {
+                    $status = 'NG';
+                    $msg = "No. Pengisian Oli gagal dihapus.";
+                    return response()->json(['id' => $no_isi, 'status' => $status, 'message' => $msg]);
+                } else {
+                    Session::flash("flash_notification", [
+                        "level"=>"danger",
+                        "message"=>"No. Pengisian Oli gagal dihapus."
+                    ]);
+                    return redirect()->route('mtctisioli1s.index');
+                }
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function delete($no_isi)
+    {
+        if(Auth::user()->can('mtc-oli-delete')) {
+            $no_isi = base64_decode($no_isi);
+            try {
+                DB::beginTransaction();
+                $mtctisioli1 = MtctIsiOli1::where('no_isi', $no_isi)->first();
+
+                DB::connection("oracle-usrbrgcorp")
+                ->unprepared("delete from mtct_isi_oli2 where no_isi = '$no_isi'");
+
+                if(!$mtctisioli1->delete()) {
+                    return redirect()->back()->withInput(Input::all());
+                } else {
+                    //insert logs
+                    $log_keterangan = "MtctIsiOlisController.delete: Delete Pengisian Oli Berhasil. ".$no_isi;
+                    $log_ip = \Request::session()->get('client_ip');
+                    $created_at = Carbon::now();
+                    $updated_at = Carbon::now();
+                    DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                    DB::commit();
+
+                    Session::flash("flash_notification", [
+                    "level"=>"success",
+                    "message"=>"No. Pengisian Oli ".$no_isi." berhasil dihapus."
+                    ]);
+
+                    return redirect()->route('mtctisioli1s.index');
+                }
+            } catch (Exception $ex) {
+                DB::rollback();
+                Session::flash("flash_notification", [
+                    "level"=>"danger",
+                    "message"=>"No. Pengisian Oli ".$no_isi." gagal dihapus."
+                ]);
+                return redirect()->route('mtctisioli1s.index');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function deletedetail(Request $request, $no_isi, $no_seq)
+    {
+        if(Auth::user()->can('mtc-oli-delete')) {
+            if ($request->ajax()) {
+                $no_isi = base64_decode($no_isi);
+                $no_seq = base64_decode($no_seq);
+                try {
+                    DB::beginTransaction();
+                    $status = 'OK';
+                    $msg = 'Part berhasil dihapus.';
+
+                    DB::connection("oracle-usrbrgcorp")
+                    ->unprepared("delete from mtct_isi_oli2 where no_isi = '$no_isi' and no_seq = $no_seq");
+
+                    //insert logs
+                    $log_keterangan = "MtctIsiOlisController.deletedetail: Delete Part Berhasil. ".$no_isi."-".$no_seq;
+                    $log_ip = \Request::session()->get('client_ip');
+                    $created_at = Carbon::now();
+                    $updated_at = Carbon::now();
+                    DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                    DB::commit();
+
+                    return response()->json(['id' => $no_seq, 'status' => $status, 'message' => $msg]);
+                } catch (Exception $ex) {
+                    DB::rollback();
+                    $status = 'NG';
+                    $msg = "Part GAGAL dihapus.";
+                    return response()->json(['id' => $no_seq, 'status' => $status, 'message' => $msg]);
+                }
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+}

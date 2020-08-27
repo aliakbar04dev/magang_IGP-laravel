@@ -1,0 +1,389 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use DB;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\User;
+use Illuminate\Support\Facades\Input;
+
+class MasIcheckController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        if (Auth::user()->can('mtc-master-view')) {
+            return view('mtc.masicheck.setting.index');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function dashboard(Request $request)
+    {
+        if (Auth::user()->can('mtc-master-view')) {
+            if ($request->ajax()) {
+
+                $mtcmasicheck = DB::connection('oracle-usrbrgcorp')
+                    ->table("mtct_item_cek")
+                    ->select("*");
+
+                return Datatables::of($mtcmasicheck)
+                    // ->filterColumn('nm_masicheck', function ($query, $keyword) {
+                    //     $query->whereRaw("fnm_masicheck(kd_masicheck) like ?", ["%$keyword%"]);
+                    // })
+                    ->editColumn('st_aktif', function ($mtcmasicheck) {
+                        if (!empty($mtcmasicheck->st_aktif)) {
+                            if ($mtcmasicheck->st_aktif == 'T') {
+                                return 'AKTIF';
+                            } else {
+                                return 'TIDAK AKTIF';
+                            }
+                        }
+                    })
+                    ->addColumn('action', function ($mtcmasicheck) {
+                        if (Auth::user()->can(['mtc-master-delete'])) {
+                            $form_id = str_replace('/', '', $mtcmasicheck->no_ic);
+                            $form_id = str_replace('-', '', $form_id);
+                            $form_id = str_replace(' ', '', $form_id);
+                            $kdItemDel = DB::connection('oracle-usrbrgcorp')
+                                ->table("mtct_dpm")
+                                ->where("no_ic", $mtcmasicheck->no_ic)
+                                ->first();
+                            return view('datatable._action-mtcmasicheck', [
+                                'model' => $mtcmasicheck,
+                                'form_url' => route('mtcmasicheck.destroy', base64_encode($mtcmasicheck->no_ic)),
+                                'edit_url' => route('mtcmasicheck.edit', base64_encode($mtcmasicheck->no_ic)),
+                                'class' => 'form-inline',
+                                'form_id' => 'form-' . $form_id,
+                                'id_table' => 'tblMaster',
+                                'kdItemDel' => $kdItemDel,
+                                'confirm_message' => 'Anda yakin menghapus data masicheck? ' . $mtcmasicheck->no_ic . '?'
+                            ]);
+                        } else {
+                            return '';
+                        }
+                    })
+                    ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        if (Auth::user()->can('mtc-master-create')) {
+            return view('mtc.masicheck.setting.create');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        if (Auth::user()->can('mtc-master-create')) {
+            $data = $request->all();
+
+            DB::connection("oracle-usrbrgcorp")->beginTransaction();
+            try {
+
+                DB::connection("oracle-usrbrgcorp")
+                    ->table("mtct_item_cek")
+                    ->insert([
+                        'nm_ic' => $data['nm_ic'],
+                        'st_aktif' => $data['st_aktif'],
+                        'creaby' => Auth::user()->username,
+                        'dtcrea' => Carbon::now()
+                    ]);
+
+                //insert logs
+
+                DB::connection("oracle-usrbrgcorp")->commit();
+
+                Session::flash("flash_notification", [
+                    "level" => "success",
+                    "message" => "Data item cek " . $data['nm_ic'] . " berhasil ditambahkan!"
+                ]);
+                return redirect()->route('mtcmasicheck.create');
+            } catch (Exception $ex) {
+                DB::connection("oracle-usrbrgcorp")->rollback();
+                Session::flash("flash_notification", [
+                    "level" => "danger",
+                    "message" => "Data gagal ditambah!"
+                ]);
+                return redirect()->back()->withInput(Input::all());
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        return view('errors.404');
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        if (Auth::user()->can('mtc-master-*')) {
+            $no_ic = base64_decode($id);
+
+            $mtcmasicheck = DB::connection('oracle-usrbrgcorp')
+                ->table("mtct_item_cek")
+                ->select('*')
+                ->where("no_ic", $no_ic)
+                ->first();
+
+            $kdItemCek = DB::connection('oracle-usrbrgcorp')
+                ->table("mtct_dpm")
+                ->where("no_ic", $no_ic)
+                ->first();
+
+            if ($mtcmasicheck != null) {
+
+                return view('mtc.masicheck.setting.edit')->with(compact('mtcmasicheck', 'kdItemCek'));
+            } else {
+                return view('errors.404');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        if (Auth::user()->can('mtc-master-create')) {
+
+            $mtcmasicheck = DB::connection('oracle-usrbrgcorp')
+                ->table("mtct_item_cek")
+                ->select(DB::raw("distinct no_ic"))
+                ->where("no_ic", base64_decode($id))
+                ->first();
+
+            if ($mtcmasicheck != null) {
+                $data = $request->all();
+                $no_ic = trim($data['no_ic']) !== '' ? trim($data['no_ic']) : null;
+
+                if ($no_ic != null) {
+                    if ($no_ic === $mtcmasicheck->no_ic) {
+                        DB::connection("oracle-usrbrgcorp")->beginTransaction();
+                        try {
+
+                            DB::connection("oracle-usrbrgcorp")
+                                ->table("mtct_item_cek")
+                                ->where('no_ic', $data['no_ic'])
+                                ->update([
+                                    'nm_ic' => $data['nm_ic'],
+                                    'st_aktif' => $data['st_aktif'],
+                                    'modiby' => Auth::user()->username,
+                                    'dtmodi' => Carbon::now()
+                                ]);
+
+                            //insert logs
+
+                            DB::connection("oracle-usrbrgcorp")->commit();
+
+                            Session::flash("flash_notification", [
+                                "level" => "success",
+                                "message" => "Data masicheck " . $no_ic . " berhasil diubah!"
+                            ]);
+                            return redirect()->route('mtcmasicheck.edit', base64_encode($no_ic));
+                        } catch (Exception $ex) {
+                            DB::connection("oracle-usrbrgcorp")->rollback();
+                            Session::flash("flash_notification", [
+                                "level" => "danger",
+                                "message" => "Data gagal diubah!"
+                            ]);
+                            return redirect()->back()->withInput(Input::all());
+                        }
+                    } else {
+                        Session::flash("flash_notification", [
+                            "level" => "danger",
+                            "message" => "Data gagal diubah! Kode masicheck tidak sama!"
+                        ]);
+                        return redirect()->route('mtcmasicheck.index');
+                    }
+                } else {
+                    Session::flash("flash_notification", [
+                        "level" => "danger",
+                        "message" => "Data gagal disimpan! Kode masicheck tidak boleh kosong!"
+                    ]);
+                    return redirect()->back()->withInput(Input::all());
+                }
+            } else {
+                Session::flash("flash_notification", [
+                    "level" => "danger",
+                    "message" => "Data gagal diubah! Kode masicheck tidak valid!"
+                ]);
+                return redirect()->route('mtcmasicheck.index');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Request $request, $id)
+    {
+        if (Auth::user()->can('mtc-setting-oli-delete')) {
+            $no_ic = base64_decode($id);
+
+            $mtcmasicheck = DB::connection('oracle-usrbrgcorp')
+                ->table("mtct_item_cek")
+                ->select(DB::raw("no_ic"))
+                ->where("no_ic", $no_ic)
+                ->first();
+
+            if ($mtcmasicheck != null) {
+                try {
+                    DB::connection("oracle-usrbrgcorp")->beginTransaction();
+                    if ($request->ajax()) {
+                        $status = 'OK';
+                        $msg = "Data masicheck " . $no_ic . " berhasil dihapus.";
+
+                        DB::connection("oracle-usrbrgcorp")
+                            ->table(DB::raw("mtct_item_cek"))
+                            ->where("no_ic", $no_ic)
+                            ->delete();
+
+                        //insert logs
+
+                        DB::connection("oracle-usrbrgcorp")->commit();
+                        return response()->json(['id' => $no_ic, 'status' => $status, 'message' => $msg]);
+                    } else {
+
+                        DB::connection("oracle-usrbrgcorp")
+                            ->table(DB::raw("mtct_item_cek"))
+                            ->where("no_ic", $no_ic)
+                            ->delete();
+
+                        DB::connection("oracle-usrbrgcorp")->commit();
+
+                        Session::flash("flash_notification", [
+                            "level" => "success",
+                            "message" => "Data masicheck " . $no_ic . " berhasil dihapus."
+                        ]);
+
+                        return redirect()->route('mtcmasicheck.index');
+                    }
+                } catch (Exception $ex) {
+                    DB::connection("oracle-usrbrgcorp")->rollback();
+                    if ($request->ajax()) {
+                        $status = 'NG';
+                        $msg = "Data masicheck " . $no_ic . " gagal dihapus.";
+                        return response()->json(['id' => $no_ic, 'status' => $status, 'message' => $msg]);
+                    } else {
+                        Session::flash("flash_notification", [
+                            "level" => "danger",
+                            "message" => "Data masicheck " . $no_ic . " gagal dihapus."
+                        ]);
+                        return redirect()->route('mtcmasicheck.index');
+                    }
+                }
+            } else {
+                if ($request->ajax()) {
+                    return response()->json(['id' => $no_ic, 'status' => 'NG', 'message' => 'Data gagal dihapus! Kode masicheck tidak ditemukan.']);
+                } else {
+                    Session::flash("flash_notification", [
+                        "level" => "danger",
+                        "message" => "Kode masicheck tidak ditemukan."
+                    ]);
+                    return redirect()->route('mtcmasicheck.index');
+                }
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function delete($id)
+    {
+        if (Auth::user()->can(['mtc-master-delete'])) {
+            try {
+                DB::connection("oracle-usrbrgcorp")->beginTransaction();
+                $no_ic = base64_decode($id);
+
+                DB::connection("oracle-usrbrgcorp")
+                    ->table(DB::raw("mtct_item_cek"))
+                    ->where("no_ic", $no_ic)
+                    ->delete();
+
+                DB::connection("oracle-usrbrgcorp")->commit();
+
+                Session::flash("flash_notification", [
+                    "level" => "success",
+                    "message" => "Data masicheck " . $no_ic . " berhasil dihapus."
+                ]);
+
+                return redirect()->route('mtcmasicheck.index');
+            } catch (Exception $ex) {
+                DB::connection("oracle-usrbrgcorp")->rollback();
+
+                Session::flash("flash_notification", [
+                    "level" => "danger",
+                    "message" => "Data masicheck " . $no_ic . " gagal dihapus."
+                ]);
+                return redirect()->route('mtcmasicheck.index');
+            }
+        } else {
+            Session::flash("flash_notification", [
+                "level" => "danger",
+                "message" => "Maaf, Anda tidak berhak menghapus data ini."
+            ]);
+            return redirect()->route('mtcmasicheck.index');
+        }
+    }
+}

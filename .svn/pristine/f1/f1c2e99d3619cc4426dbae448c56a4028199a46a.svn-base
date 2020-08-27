@@ -1,0 +1,203 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use DB;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\User;
+use Illuminate\Support\Facades\Input;
+
+class SqlServersController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        return view('errors.404');
+    }
+
+    public function dpm($tanggal = null, $mdb = null)
+    {
+        if(Auth::user()->can(['mtc-dpm-*'])) {
+            if($tanggal != null) {
+                $tanggal = base64_decode($tanggal);
+                $tanggal = Carbon::parse($tanggal);
+            } else {
+                $tanggal = Carbon::now();
+            }
+            if($mdb != null) {
+                $mdb = base64_decode($mdb);
+
+                if($mdb == "1") {
+                    $list = DB::connection('sqlsrv')
+                    ->table(DB::raw("Table_1"))
+                    ->select(DB::raw("TGL as tgl, CurrentAvg1 as currentavg, Volt3PAvg1 as volt3pavg, Volt2PAvg1 as volt2pavg, Freq1 as freq, Power1 as power, CosPi1 as cospi, EnergiA1 as energia, EnergiB1 as energib, EnergiC1 as energic, EnergiD1 as energid, Energi1 as energi"))
+                    ->where(DB::raw("CONVERT(varchar, TGL, 112)"), $tanggal->format('Ymd'))
+                    ->orderByRaw("TGL DESC");
+                } else if($mdb == "2") {
+                    $list = DB::connection('sqlsrv')
+                    ->table(DB::raw("Table_1"))
+                    ->select(DB::raw("TGL as tgl, CurrentAvg2 as currentavg, Volt3PAvg2 as volt3pavg, Vot2PAvg2 as volt2pavg, Freq2 as freq, Power2 as power, CosPi2 as cospi, EnergiA2 as energia, EnergiB2 as energib, EnergiC2 as energic, EnergiD2 as energid, Energi2 as energi"))
+                    ->where(DB::raw("CONVERT(varchar, TGL, 112)"), $tanggal->format('Ymd'))
+                    ->orderByRaw("TGL DESC");
+                } else if($mdb == "3") {
+                    $list = DB::connection('sqlsrv')
+                    ->table(DB::raw("Table_1"))
+                    ->select(DB::raw("TGL as tgl, CurrentAvg3 as currentavg, Volt3PAvg3 as volt3pavg, Volt2PAvg3 as volt2pavg, Freq3 as freq, Power3 as power, CosPi3 as cospi, EnergiA3 as energia, EnergiB3 as energib, EnergiC3 as energic, EnergiD3 as energid, Energi3 as energi"))
+                    ->where(DB::raw("CONVERT(varchar, TGL, 112)"), $tanggal->format('Ymd'))
+                    ->orderByRaw("TGL DESC");
+                } else {
+                    $list = DB::connection('sqlsrv')
+                    ->table(DB::raw("Table_1"))
+                    ->select(DB::raw("TGL as tgl, CurrentAvg4 as currentavg, Volt3PAvg4 as volt3pavg, Volt2PAvg4 as volt2pavg, Freq4 as freq, Power4 as power, CosPi4 as cospi, EnergiA4 as energia, EnergiB4 as energib, EnergiC4 as energic, EnergiD4 as energid, Energi4 as energi"))
+                    ->where(DB::raw("CONVERT(varchar, TGL, 112)"), $tanggal->format('Ymd'))
+                    ->orderByRaw("TGL DESC");
+                }
+
+                if($list->get()->count() > 0) {
+
+                    $data = $list;
+                    $data = $data->first();
+
+                    if($mdb == "1") {
+                        $list = DB::connection('sqlsrv')
+                        ->table(DB::raw("Table_1"))
+                        ->select(DB::raw("substring(convert(varchar, TGL, 8),1,2) as jam, avg(CurrentAvg1) as currentavg, avg(Volt3PAvg1) as volt3pavg, avg(Power1) as power"))
+                        ->where(DB::raw("CONVERT(varchar, TGL, 112)"), $tanggal->format('Ymd'))
+                        ->groupBy(DB::raw("substring(convert(varchar, TGL, 8),1,2)"))
+                        ->orderByRaw("substring(convert(varchar, TGL, 8),1,2) asc");
+                    } else if($mdb == "2") {
+                        $list = DB::connection('sqlsrv')
+                        ->table(DB::raw("Table_1"))
+                        ->select(DB::raw("substring(convert(varchar, TGL, 8),1,2) as jam, avg(CurrentAvg2) as currentavg, avg(Volt3PAvg2) as volt3pavg, avg(Power2) as power"))
+                        ->where(DB::raw("CONVERT(varchar, TGL, 112)"), $tanggal->format('Ymd'))
+                        ->groupBy(DB::raw("substring(convert(varchar, TGL, 8),1,2)"))
+                        ->orderByRaw("substring(convert(varchar, TGL, 8),1,2) asc");
+                    } else if($mdb == "3") {
+                        $list = DB::connection('sqlsrv')
+                        ->table(DB::raw("Table_1"))
+                        ->select(DB::raw("substring(convert(varchar, TGL, 8),1,2) as jam, avg(CurrentAvg3) as currentavg, avg(Volt3PAvg3) as volt3pavg, avg(Power3) as power"))
+                        ->where(DB::raw("CONVERT(varchar, TGL, 112)"), $tanggal->format('Ymd'))
+                        ->groupBy(DB::raw("substring(convert(varchar, TGL, 8),1,2)"))
+                        ->orderByRaw("substring(convert(varchar, TGL, 8),1,2) asc");
+                    } else {
+                        $list = DB::connection('sqlsrv')
+                        ->table(DB::raw("Table_1"))
+                        ->select(DB::raw("substring(convert(varchar, TGL, 8),1,2) as jam, avg(CurrentAvg4) as currentavg, avg(Volt3PAvg4) as volt3pavg, avg(Power4) as power"))
+                        ->where(DB::raw("CONVERT(varchar, TGL, 112)"), $tanggal->format('Ymd'))
+                        ->groupBy(DB::raw("substring(convert(varchar, TGL, 8),1,2)"))
+                        ->orderByRaw("substring(convert(varchar, TGL, 8),1,2) asc");
+                    }
+
+                    $value_x_1 = [];
+                    $value_y_1 = [];
+
+                    $value_x_2 = [];
+                    $value_y_2 = [];
+
+                    $value_x_3 = [];
+                    $value_y_3 = [];
+
+                    $no = 0;
+                    foreach ($list->get() as $model) {
+                        $no = $no + 1;
+                        array_push($value_x_1, $model->jam);
+                        array_push($value_y_1, $model->volt3pavg);
+
+                        array_push($value_x_2, $model->jam);
+                        array_push($value_y_2, $model->currentavg);
+
+                        array_push($value_x_3, $model->jam);
+                        array_push($value_y_3, $model->power);
+                    }
+
+                    return view('mtc.dpm.report', compact('tanggal', 'mdb', 'data', 'value_x_1', 'value_y_1', 'value_x_2', 'value_y_2', 'value_x_3', 'value_y_3'));
+                } else {
+                    return view('mtc.dpm.report', compact('tanggal', 'mdb'));
+                }
+            } else {
+                return view('mtc.dpm.report');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        return view('errors.404');
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        return view('errors.404');
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        return view('errors.404');
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        return view('errors.404');
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        return view('errors.404');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        return view('errors.404');
+    }
+}

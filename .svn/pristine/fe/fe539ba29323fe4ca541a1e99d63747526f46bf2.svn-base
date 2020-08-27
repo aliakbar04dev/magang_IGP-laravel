@@ -1,0 +1,481 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Http\Requests;
+use App\Pistandard;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Datatables;
+use Session;
+use exception;
+use Carbon\Carbon;
+use DB;
+use App\User;
+use Alert;
+use Intervention\Image\ImageManagerStatic as Image;
+use Illuminate\Support\Facades\Mail;
+
+class PisdeptheadController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+
+
+    public function aprovalDeptHeadSQE(Request $request, Builder $htmlBuilder)
+    {
+       if ($request->ajax()) {
+            $pistandards = DB::table("pistandards")
+                ->whereIn('status',[1,2,3]) 
+                ->select(DB::raw("no_pisigp, no_pis, model, part_no, part_name, nama_supplier, status, norev"))
+                ->get();
+            return Datatables::of($pistandards)
+            ->editColumn('status', function($pistandard){
+                if($pistandard->status == 0){
+                    return '<b class="btn-xs btn-info btn-icon-pg" action="disable"> Belum Submit</b>';
+                }
+                elseif($pistandard->status == 1){
+                    return '<b class="btn-xs btn-info btn-icon-pg"  action="disable"> Belum Approv </b>';
+                
+                }elseif($pistandard->status == 2){
+                    return '<b class="btn-xs btn-success btn-icon-pg"  action="disable"> Disetujui </b>';
+            
+                 }elseif($pistandard->status == 3){
+                    return '<b class="btn-xs btn-danger btn-icon-pg" action="disable"> Ditolak</b>';
+                }
+            })
+
+            ->editColumn('no_pis', function($pistandard) {
+                return '<a href="'.route('pisdepthead.show',[base64_encode($pistandard->no_pisigp),base64_encode($pistandard->norev)]).'" data-toggle="tooltip" data-placement="top" title="Detail No Pis '. $pistandard->no_pis .'">'.$pistandard->no_pis.'</a>';
+            })
+
+            ->addColumn('action', function($pistandard){
+                if ($pistandard->status == 1) {
+                     return (['<a href="'.route('pistandards.printpis', [base64_encode($pistandard->no_pisigp),base64_encode($pistandard->norev)]).'" data-toggle="tooltip" data-placement="top" title="Detail No Pis " class="btn btn-xs btn-info"><span class="glyphicon glyphicon-print"></span></a>'.
+                      '<a href="'.route('pisdepthead.unlock', [base64_encode($pistandard->no_pisigp),base64_encode($pistandard->norev)]).'" data-toggle="tooltip" data-placement="top" title="Unlock for editing " class="btn btn-xs btn-success"><span class="glyphicon glyphicon-edit"></span></a>'
+                      
+                    ]);
+                }elseif ($pistandard->status == 2) {
+                     return (['<a href="'.route('pistandards.printpis', [base64_encode($pistandard->no_pisigp),base64_encode($pistandard->norev)]).'" data-toggle="tooltip" data-placement="top" title="Detail No Pis " class="btn btn-xs btn-info"><span class="glyphicon glyphicon-print"></span></a>'.
+                      '<a href="'.route('pisdepthead.unlock', [base64_encode($pistandard->no_pisigp),base64_encode($pistandard->norev)]).'" data-toggle="tooltip" data-placement="top" title="Unlock for editing " class="btn btn-xs btn-success"><span class="glyphicon glyphicon-edit"></span></a>'
+                      
+                    ]);
+
+                }elseif ($pistandard->status == 3) {
+                     return (['<a href="'.route('pistandards.printpis', [base64_encode($pistandard->no_pisigp),base64_encode($pistandard->norev)]).'" data-toggle="tooltip" data-placement="top" title="Detail No Pis " class="btn btn-xs btn-info"><span class="glyphicon glyphicon-print"></span></a>']);   
+                }
+            })
+            ->editColumn('rev_doc', function($pistandard){
+               return "Rev.".$pistandard->norev;
+           })->make(true);
+        } 
+        return view('pis.dept.aprovalDeptHeadSQE')->with(compact('$pistandard'));
+    }
+
+    public function unlock(Request $request,$no_pisigp, $norev)
+    {
+       $no_pisigp = base64_decode($no_pisigp); 
+       $norev = base64_decode($norev); 
+       $pistandards = DB::table('pistandards')
+       ->where('no_pisigp', '=', $no_pisigp)
+       ->where('norev', '=', $norev)
+       ->update([
+         'status' => 0,
+         ]);
+       Alert::success("Berhasil unlock","Nomor $request->no_pis")
+       ->autoclose(2000000)
+       ->persistent("Close");
+       return redirect()->route('pisdepthead.aprovalDeptHeadSQE')->with(compact('$pistandards'));
+   }
+
+    public function index()
+    {
+        //
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($no_pisigp, $norev)
+    {
+        //
+        $no_pisigp = base64_decode($no_pisigp); 
+          $norev = base64_decode($norev); 
+         $pistandards = DB::table('pistandards')
+                    ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+                    ->where(DB::raw("norev"), '=', $norev)
+                    ->first(); 
+
+               
+         $composition = DB::table('pisccompositions')
+                    ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+                     ->where(DB::raw("norev"), '=', $norev)
+                    ->first();
+
+         $properties = DB::table('pismproperties')
+                    ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+                     ->where(DB::raw("norev"), '=', $norev)
+                    ->first();
+
+          $performances = DB::table('piswperformances')
+                    ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+                     ->where(DB::raw("norev"), '=', $norev)
+                    ->first();
+
+          $treatements = DB::table('pisstreatements')
+                    ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+                     ->where(DB::raw("norev"), '=', $norev)
+                    ->first();
+
+          $htreatements = DB::table('pishtreatements')
+                    ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+                     ->where(DB::raw("norev"), '=', $norev)
+                    ->first();
+
+          $appearences = DB::table('pisappearences')
+                    ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+                     ->where(DB::raw("norev"), '=', $norev)
+                    ->first();
+
+          $dimentions = DB::table('pisdimentions')
+                    ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+                     ->where(DB::raw("norev"), '=', $norev)
+                    ->first();
+
+          $socfs = DB::table('pissocfs')
+                    ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+                     ->where(DB::raw("norev"), '=', $norev)
+                    ->first();
+
+          $routs = DB::table('pisroutes')
+                    ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+                     ->where(DB::raw("norev"), '=', $norev)
+                    ->first();
+           $revisi = DB::table('pisrevisions')
+                    ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+                    ->first();
+
+                         $logo_supplier = "";
+            if (!empty($pistandards->logo_supplier)) {
+                if(config('app.env', 'local') === 'production') {
+                    $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pis".DIRECTORY_SEPARATOR."logospy".DIRECTORY_SEPARATOR.$pistandard->logo_supplier;
+                } else {
+                    $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pis\\logospy\\".$pistandards->logo_supplier;
+                }
+
+                if (file_exists($file_temp)) {
+                    $loc_image = file_get_contents('file:///'.str_replace("\\\\","\\",$file_temp));
+                    $logo_supplier = "data:".mime_content_type($file_temp).";charset=utf-8;base64,".base64_encode($loc_image);
+                }
+            }
+
+            $staff_spy = "";
+            if (!empty($pistandards->staff_spy)) {
+                if(config('app.env', 'local') === 'production') {
+                    $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pis".DIRECTORY_SEPARATOR."staff_spy".DIRECTORY_SEPARATOR.$pistandards->staff_spy;
+                } else {
+                    $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pis\\staff_spy\\".$pistandards->staff_spy;
+                }
+
+                if (file_exists($file_temp)) {
+                    $loc_image = file_get_contents('file:///'.str_replace("\\\\","\\",$file_temp));
+                    $staff_spy = "data:".mime_content_type($file_temp).";charset=utf-8;base64,".base64_encode($loc_image);
+                }
+            }
+
+
+             $supervisor_spy = "";
+            if (!empty($pistandards->supervisor_spy)) {
+                if(config('app.env', 'local') === 'production') {
+                    $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pis".DIRECTORY_SEPARATOR."supervisor_spy".DIRECTORY_SEPARATOR.$pistandards->supervisor_spy;
+                } else {
+                    $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pis\\supervisor_spy\\".$pistandards->supervisor_spy;
+                }
+
+                if (file_exists($file_temp)) {
+                    $loc_image = file_get_contents('file:///'.str_replace("\\\\","\\",$file_temp));
+                    $supervisor_spy = "data:".mime_content_type($file_temp).";charset=utf-8;base64,".base64_encode($loc_image);
+                }
+            }
+
+             $manager_spy = "";
+            if (!empty($pistandards->manager_spy)) {
+                if(config('app.env', 'local') === 'production') {
+                    $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pis".DIRECTORY_SEPARATOR."manager_spy".DIRECTORY_SEPARATOR.$pistandards->manager_spy;
+                } else {
+                    $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pis\\manager_spy\\".$pistandards->manager_spy;
+                }
+
+                if (file_exists($file_temp)) {
+                    $loc_image = file_get_contents('file:///'.str_replace("\\\\","\\",$file_temp));
+                    $manager_spy = "data:".mime_content_type($file_temp).";charset=utf-8;base64,".base64_encode($loc_image);
+                }
+            }
+
+            //sketcdrawing1
+            $sketchdrawing = "";
+            if (!empty($pistandards->sketchdrawing)) {
+                if(config('app.env', 'local') === 'production') {
+                    $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pis".DIRECTORY_SEPARATOR."gambar1".DIRECTORY_SEPARATOR.$pistandards->sketchdrawing;
+                } else {
+                    $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pis\\gambar1\\".$pistandards->sketchdrawing;
+                }
+
+                if (file_exists($file_temp)) {
+                    $loc_image = file_get_contents('file:///'.str_replace("\\\\","\\",$file_temp));
+                    $sketchdrawing = "data:".mime_content_type($file_temp).";charset=utf-8;base64,".base64_encode($loc_image);
+                }
+            }
+
+             //sketchmmethode
+            $sketchmmethode = "";
+            if (!empty($pistandards->sketchmmethode)) {
+                if(config('app.env', 'local') === 'production') {
+                    $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pis".DIRECTORY_SEPARATOR."gambar2".DIRECTORY_SEPARATOR.$pistandards->sketchmmethode;
+                } else {
+                    $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pis\\gambar2\\".$pistandards->sketchmmethode;
+                }
+
+                if (file_exists($file_temp)) {
+                    $loc_image = file_get_contents('file:///'.str_replace("\\\\","\\",$file_temp));
+                    $sketchmmethode = "data:".mime_content_type($file_temp).";charset=utf-8;base64,".base64_encode($loc_image);
+                }
+            }
+
+
+            //sketchappearance
+            $sketchappearance = "";
+            if (!empty($pistandards->sketchappearance)) {
+                if(config('app.env', 'local') === 'production') {
+                    $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pis".DIRECTORY_SEPARATOR."gambar3".DIRECTORY_SEPARATOR.$pistandards->sketchappearance;
+                } else {
+                    $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pis\\gambar3\\".$pistandards->sketchappearance;
+                }
+
+                if (file_exists($file_temp)) {
+                    $loc_image = file_get_contents('file:///'.str_replace("\\\\","\\",$file_temp));
+                    $sketchappearance = "data:".mime_content_type($file_temp).";charset=utf-8;base64,".base64_encode($loc_image);
+                }
+            }
+
+            //approve_staff
+            $approve_staff = "";
+            if (!empty($pistandards->approve_staff)) {
+                if(config('app.env', 'local') === 'production') {
+                    $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pis".DIRECTORY_SEPARATOR."staffigp".DIRECTORY_SEPARATOR.$pistandards->approve_staff;
+                } else {
+                    $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pis\\staffigp\\".$pistandards->approve_staff;
+                }
+
+                if (file_exists($file_temp)) {
+                    $loc_image = file_get_contents('file:///'.str_replace("\\\\","\\",$file_temp));
+                    $approve_staff = "data:".mime_content_type($file_temp).";charset=utf-8;base64,".base64_encode($loc_image);
+                }
+            }
+
+             $approve_sect = "";
+            if (!empty($pistandards->approve_sect)) {
+                if(config('app.env', 'local') === 'production') {
+                    $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pis".DIRECTORY_SEPARATOR."secthead".DIRECTORY_SEPARATOR.$pistandards->approve_sect;
+                } else {
+                    $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pis\\secthead\\".$pistandards->approve_sect;
+                }
+
+                if (file_exists($file_temp)) {
+                    $loc_image = file_get_contents('file:///'.str_replace("\\\\","\\",$file_temp));
+                    $approve_sect = "data:".mime_content_type($file_temp).";charset=utf-8;base64,".base64_encode($loc_image);
+                }
+            }
+
+            $approve_dept = "";
+            if (!empty($pistandards->approve_dept)) {
+                if(config('app.env', 'local') === 'production') {
+                    $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pis".DIRECTORY_SEPARATOR."depthead".DIRECTORY_SEPARATOR.$pistandards->approve_dept;
+                } else {
+                    $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pis\\depthead\\".$pistandards->approve_dept;
+                }
+
+                if (file_exists($file_temp)) {
+                    $loc_image = file_get_contents('file:///'.str_replace("\\\\","\\",$file_temp));
+                    $approve_dept = "data:".mime_content_type($file_temp).";charset=utf-8;base64,".base64_encode($loc_image);
+                }
+            }
+
+            $entity = new Pistandard();
+
+            $pisemail = DB::table('pistandards')
+                    ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+                    ->where(DB::raw("norev"), '=', $norev)
+                    ->select(DB::raw("email"))
+                    ->first(); 
+ 
+
+        
+            //  echo json_encode($pisemail) ;
+            // die();
+
+        return view('pis.dept.upload')->with(compact(['approve_dept','approve_sect','approve_staff','sketchdrawing','sketchmmethode','sketchappearance','manager_spy','supervisor_spy','staff_spy','logo_supplier','pistandards','composition','properties','performances','treatements','htreatements','appearences','dimentions','socfs','routs','revisi', 'entity','no_pisigp','logo_supplier','staff_spy','supervisor_spy','manager_spy']));
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($no_pisigp, $norev )
+    {
+        //
+
+       $no_pisigp = base64_decode($no_pisigp); 
+       $norev = base64_decode($norev); 
+       $pistandard = DB::table('pistandards')
+       ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+       ->where(DB::raw("norev"), '=', $norev)
+       ->first();  
+         // echo json_encode($pistandard) ;
+         //    die();
+       return view('pis.dept.upload')->with(compact('pistandard'));
+
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        //
+
+       $data = $request->all();
+       $no_pisigp = trim($data['no_pisigp']) !== '' ? trim($data['no_pisigp']) : null;
+       $norev = trim($data['norev']) !== '' ? trim($data['norev']) : null;
+       $notedept = trim($data['notedept']) !== '' ? trim($data['notedept']) : null;
+   
+       $pistandard = DB::table('pistandards')
+       ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+       ->first(); 
+
+       $approve_dept = $pistandard->approve_dept;
+
+        // isi field approve_staff jika ada approve_staff yang diupload
+            $filename = $pistandard->approve_dept;
+            if ($request->hasFile('approve_dept')) {
+              $uploaded_cover = $request->file('approve_dept');
+              $extension = $uploaded_cover->getClientOriginalExtension();
+              $filename = md5(time()) . '.' . $extension;
+              if(config('app.env', 'local') === 'production') {
+                $destinationPath = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pis\\depthead";
+              } else {
+                $destinationPath = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pis\\depthead";
+              }
+              $img = Image::make($uploaded_cover->getRealPath());
+              if($img->filesize()/1024 > 1024) {
+                $img->save($destinationPath.DIRECTORY_SEPARATOR.$filename, 75);
+              } else {
+                $uploaded_cover->move($destinationPath, $filename);
+              }
+            }
+
+            
+
+            $to = [];
+              // $to = $pistandard->email;
+                   // doni.gustama@gkd-astra.co.id
+            array_push($to, "fadlya179@gmail.com");
+
+            
+
+        switch ($request->input('action')){
+                case 'save': 
+                //action approve
+
+                DB::table("pistandards")
+                    ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+                    ->where(DB::raw("norev"), '=', $norev)
+                    ->update([ 
+                             'notedept'=>$request->notedept,
+                             'approve_dept'=>$request->approve_dept = $filename,
+                             'status' => 2 ]); 
+
+                    $pis=$pistandard->no_pis;
+                    // $date = Carbon::now()->format('d-m-Y');  
+                    $catatan= $request->notedept;
+                   Mail::send('pis.dept.emailapproved', compact('pis','catatan'), function ($m) use ($to, $pis) {
+                    $m->to($to)
+                      ->subject('PIS: '.$pis);
+                  });     
+             
+            
+
+                Alert::success("Berhasil Setujui","Nomor $request->no_pis")
+                      ->autoclose(2000000)
+                      ->persistent("Close");
+                break;
+                case 'save_draft': 
+                //action for reject
+                DB::table("pistandards")
+                    ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+                    ->where(DB::raw("norev"), '=', $norev)
+                    ->update([ 
+                             'notedept'=>$request->notedept,
+                             'status' => 3 ]); 
+
+                    $pis=$pistandard->no_pis;
+                    // $date = Carbon::now()->format('d-m-Y');  
+                    $catatan= $request->notedept;
+                   Mail::send('pis.dept.emailreject', compact('pis','catatan'), function ($m) use ($to, $pis) {
+                    $m->to($to)
+                      ->subject('PIS: '.$pis);
+                  });     
+
+                Alert::success("Berhasil Reject","Nomor $request->no_pis")
+                     ->autoclose(2000000)
+                     ->persistent("Close");  
+                break;
+        }
+       
+        return redirect()->route('pisdepthead.aprovalDeptHeadSQE');
+
+    }
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        //
+    }
+}

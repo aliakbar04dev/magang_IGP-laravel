@@ -1,0 +1,365 @@
+<div class="box-body ">
+  <div class="form-group">
+    <div class="col-md-3">
+      {!! Form::label('no_doc', 'No Doc') !!}
+      @if (isset($noDoc))   
+      {!! Form::text('no_doc', $noDoc, ['class'=>'form-control', 'readonly']) !!}
+      @else    
+      {!! Form::text('no_doc', null, ['class'=>'form-control', 'readonly']) !!}
+      @endif   
+      {!! $errors->first('no_doc', '<p class="help-block">:message</p>') !!}   
+    </div>
+    <div class="col-md-2">
+      {!! Form::label('tgl', 'Tanggal') !!}
+      @if (empty($qatTrCpp01->tgl))
+      {!! Form::date('tgl', \Carbon\Carbon::now(), ['class'=>'form-control','placeholder' => \Carbon\Carbon::now()]) !!}
+      @else
+      {!! Form::date('tgl', \Carbon\Carbon::parse($qatTrCpp01->tgl), ['class'=>'form-control']) !!}
+      @endif
+      {!! $errors->first('tgl', '<p class="help-block">:message</p>') !!}
+    </div>
+  </div>
+  <div class="form-group{{ $errors->has('kd_plant') ? ' has-error' : '' }}">          
+    <div class="col-md-3">
+      {!! Form::label('pt', 'PT (*)') !!}
+      <div class="input-group">
+        {!! Form::select('pt', ['IGP' => 'INTI GANDA PERDANA'], null, ['class'=>'form-control select2', 'id' => 'pt', 'required']) !!} 
+      </div>
+    </div>
+    <div class="col-md-2">
+      {!! Form::label('kd_plant', 'Plant (*)') !!}
+      <div class="input-group">
+        <select id="kd_plant" name="kd_plant" class="form-control select2">
+          @if (isset($kdPlant))        
+          <option value="{{ $kdPlant }}" selected="selected">{{ $kdPlant }}</option>
+          @else
+          <option value="{{ $qatTrCpp01->kd_plant}}" selected="selected">{{ $qatTrCpp01->kd_plant }}</option>
+          @endif
+        </select>              
+      </div>
+    </div>
+  </div>
+  <div class="form-group">  
+    <div class="col-md-2">
+      {!! Form::label('kd_line', 'Kode Line') !!}
+      @if (isset($kdLine))
+      {!! Form::text('kd_line', $kdLine, ['class'=>'form-control', 'readonly']) !!}
+      @else
+      {!! Form::text('kd_line', null, ['class'=>'form-control', 'readonly']) !!}
+      @endif
+      {!! $errors->first('line', '<p class="help-block">:message</p>') !!}
+    </div>  
+    <div class="col-md-4">
+      {!! Form::label('nm_line', 'Nama Line') !!}
+      @if (isset($jnsLine))
+      {!! Form::text('nm_line', $jnsLine, ['class'=>'form-control','readonly']) !!}
+      @else
+      {!! Form::text('nm_line', null, ['class'=>'form-control','readonly']) !!}
+      @endif
+      {!! $errors->first('nm_line', '<p class="help-block">:message</p>') !!}
+    </div>
+    <div class="col-md-4">
+      {!! Form::label('kd_mesin', 'Mesin') !!}
+      @if (isset($kdMesin))
+      {!! Form::text('kd_mesin', $kdMesin, ['class'=>'form-control','readonly']) !!}
+      @else
+      {!! Form::text('kd_mesin', null, ['class'=>'form-control','readonly']) !!}
+      @endif
+      {!! $errors->first('kd_mesin', '<p class="help-block">:message</p>') !!}
+    </div>   
+  </div>
+  <div class="form-group"> 
+    <div class="col-md-4">
+      {!! Form::label('part_no', 'Part No') !!}     
+      {!! Form::text('part_no', null, ['class'=>'form-control', 'placeholder' => 'Part No', 'required']) !!}      
+      {!! $errors->first('no_seri', '<p class="help-block">:message</p>') !!}     
+    </div>
+    <div class="col-md-4">
+      {!! Form::label('model', 'Model') !!}     
+      {!! Form::text('model', null, ['class'=>'form-control', 'placeholder' => 'Model', 'required']) !!}      
+      {!! $errors->first('model', '<p class="help-block">:message</p>') !!}    
+    </div>
+  </div>
+  <div class="form-group"> 
+    <div class="col-md-4">
+      {!! Form::label('remark', 'Remark') !!}     
+      {!! Form::text('remark', null, ['class'=>'form-control', 'placeholder' => 'Remark']) !!}      
+      {!! $errors->first('remark', '<p class="help-block">:message</p>') !!}     
+    </div>
+    <div class="col-md-4">
+      {!! Form::label('status', 'Status') !!}     
+      {!! Form::text('status', null, ['class'=>'form-control', 'placeholder' => 'Status', 'readonly']) !!}      
+      {!! $errors->first('status', '<p class="help-block">:message</p>') !!}     
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-md-4">
+    </div>
+    <div class="col-md-4">
+      {!! Form::label('judge', 'Judge') !!}     
+      {!! Form::text('judge', null, ['class'=>'form-control', 'placeholder' => 'Judge', 'readonly']) !!}      
+      {!! $errors->first('judge', '<p class="help-block">:message</p>') !!}     
+    </div>
+  </div>        
+  <!-- /.form-group -->
+  <div class="form-group">
+    <div class="col-md-4">
+     <p class="help-block">(*) tidak boleh kosong</p>
+     {!! Form::hidden('jml_tbl_detail', null, ['class'=>'form-control', 'readonly'=>'readonly', 'id' => 'jml_tbl_detail']) !!}  
+   </div>
+ </div>
+</div>
+
+<div class="box-body">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="box box-primary">
+        <div class="box-header with-border">
+          <h3 class="box-title">Detail</h3>
+        </div>
+        <!-- /.box-header -->
+        <div class="box-body">            
+          <table id="tblDetail" class="table table-bordered table-hover" cellspacing="0" width="100%">
+            <thead>
+              <tr>
+                <th style="width: 2%;">No Cat</th>
+                <th style="width: 20%;">Categories</th>
+                <th style="width: 2%;">No</th>                
+                <th style="width: 2%;">*</th>
+                <th style="width: 40%;">Check Item ( * : Most critical and must be good )</th>
+                <th style="width: 20%;">Evaluation</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (!empty($qatTrCpp02)) 
+              @foreach ($qatTrCpp02->get() as $data)
+              <tr>
+                <td><input type='hidden' value="row-{{ $loop->iteration }}-id_kat"><input type='hidden' id="row-{{ $loop->iteration }}-id_kat" name="row-{{ $loop->iteration }}-id_kat" value='{{ $data->id_kat }}' size='3' style='background: #eee' readonly><input type='hidden' id="row-{{ $loop->iteration }}-id" name="row-{{ $loop->iteration }}-id" value='0' readonly='readonly'><center>{{ $data->id_kat }}</center></td>
+                <td>@if (!empty($qatTrCpp01->no_doc)) {{ $models->getKategori($qatTrCpp01->no_doc, $data->id_kat) }} @else {{ $data->kategori }} @endif </td>
+                <td><input type='hidden' id="row-{{ $loop->iteration }}-id_cek" name="row-{{ $loop->iteration }}-id_cek" value='{{ $data->id_cek }}' size='3' style='background: #eee' readonly><center>{{ $data->id_cek }}</center></td>
+                <td>@if (!empty($qatTrCpp01->no_doc)) @if(!empty($models->getStatus($qatTrCpp01->no_doc, $data->id_kat))) <h3><center>*</center></h3> @endif @else @if(!empty($data->status)) <h3><center>*</center></h3> @endif @endif</td>
+                <td>@if (!empty($qatTrCpp01->no_doc)) {{ $models->getItem($qatTrCpp01->no_doc, $data->id_kat) }} @else {{ $data->check_item }} @endif </td>
+                <td>
+                  <select id="row-{{ $loop->iteration }}-hasil" name="row-{{ $loop->iteration }}-hasil" class="form-control" required>
+                    <option value="">-</option>
+                    <option value="GI" @if (!empty($data->hasil)) {{ $data->hasil == 'GI' ? 'selected="selected"' : '' }} @endif > Good Item (○)</option>
+                    <option value="NA" @if (!empty($data->hasil)) {{ $data->hasil == 'NA' ? 'selected="selected"' : '' }} @endif >Not Aplicable (-)</option>
+                    <option value="CO" @if (!empty($data->hasil)) {{ $data->hasil == 'CO' ? 'selected="selected"' : '' }} @endif >Concern (△)</option>
+                    <option value="CR" @if (!empty($data->hasil)) {{ $data->hasil == 'CR' ? 'selected="selected"' : '' }} @endif >Critical (▲)</option>
+                  </select>
+                </td>
+              </tr>
+              @endforeach
+              @endif
+            </tbody>
+          </table>
+        </div>
+        <!-- /.box-body -->
+      </div>
+      <!-- /.box -->
+    </div>
+    <!-- /.col -->
+  </div>
+  <!-- /.row -->
+</div>
+
+<!-- /.box-body -->
+<div class="box-footer">
+	{!! Form::submit('Save', ['class'=>'btn btn-primary', 'id' => 'btn-save']) !!}
+	&nbsp;&nbsp;
+  @if (!empty($qatTrCpp01->no_doc))
+  {!! Form::button('Delete', ['class'=>'btn btn-danger', 'id' => 'btn-delete']) !!}
+  &nbsp;&nbsp;
+  @endif
+  <a class="btn btn-default" href="{{ route('schedulecpp.index') }}">Cancel</a>
+</div>
+
+@section('scripts')
+<script type="text/javascript">
+  validateLinePlant();
+  $(document).ready(function(){
+
+    $("#btn-delete").click(function(){
+      var no_doc = document.getElementById("no_doc").value.trim();
+      if(no_doc !== "") {
+        var msg = 'Anda yakin menghapus data ini?';
+        var txt = 'Nomor Check Sheet: ' + no_doc;
+        swal({
+          title: msg,
+          text: txt,
+          type: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: '<i class="fa fa-thumbs-up"></i> Yes, delete it!',
+          cancelButtonText: '<i class="fa fa-thumbs-down"></i> No, cancel!',
+          allowOutsideClick: true,
+          allowEscapeKey: true,
+          allowEnterKey: true,
+          reverseButtons: false,
+          focusCancel: true,
+        }).then(function () {
+          var urlRedirect = "{{ route('ceksheetcpp.destroy', 'param') }}";
+          urlRedirect = urlRedirect.replace('param', window.btoa(no_doc));
+          window.location.href = urlRedirect;
+        }, function (dismiss) {
+
+          if (dismiss === 'cancel') {
+
+          }
+        })
+      }
+    });
+  });
+
+//MEMBUAT TABEL DETAIL
+var table = $('#tblDetail').DataTable({
+  "aLengthMenu": [[5, 10, 25, 50, 75, 100, -1], [5, 10, 25, 50, 75, 100, "All"]],
+  "iDisplayLength": 10,
+        //responsive: true,
+        'searching': false,
+        "ordering": false,
+        "scrollX": "true",
+        "scrollY": "500px",
+        "scrollCollapse": true,
+        "paging": false
+      });
+
+var counter = table.rows().count();
+document.getElementById("jml_tbl_detail").value = counter;
+
+$('#tblDetail tbody').on( 'click', 'tr', function () {
+  if ( $(this).hasClass('selected') ) {
+    $(this).removeClass('selected');    
+  } else {
+    table.$('tr.selected').removeClass('selected');
+    $(this).addClass('selected');
+            //untuk memunculkan gambar
+            var row = table.row('.selected').index();  
+          }
+        });
+
+function validateLinePlant() {
+  var kd_line = document.getElementById('kd_line').value;
+  if(kd_line !== '') {
+    var url = '{{ route('datatables.validasiLinePlant', ['param']) }}';
+    url = url.replace('param', window.btoa(kd_line));
+      //use ajax to run the check
+      $.get(url, function(result){  
+        if(result !== 'null'){
+          result = JSON.parse(result);
+          document.getElementById("kd_line").value = result["kd_line"];
+          document.getElementById("nm_line").value = result["nm_line"];
+          document.getElementById('kd_mesin').focus();
+        } else {
+          document.getElementById("kd_line").value = "";
+          document.getElementById("nm_line").value = "";
+        }
+
+      });
+    } else {
+      document.getElementById("kd_line").value = "";
+      document.getElementById("nm_line").value = "";
+    }
+  }
+
+$(document).ready(function () {
+        $('#tblDetail').each(function () {
+          var Column_number_to_Merge = 1;
+          var Column_number_2 = 2;
+          var Column_number_3 = 3;
+          var Column_number_4 = 4;
+          var Column_number_5 = 5;
+     
+          // Previous_TD holds the first instance of same td. Initially first TD=null.
+          var Previous_TD = null;
+          var Previous_td_2 =null;
+          var Previous_td_3 = null;
+          var Previous_td_4 = null;
+          var Previous_td_5 = null;
+          var i = 1;
+          var i2 = 1;
+          var i3 = 1;
+          var i4 = 1;
+          var i5 = 1;
+          $("tbody",this).find('tr').each(function () {
+            // find the correct td of the correct column
+            // we are considering the table column 1, You can apply on any table column
+            var Current_td = $(this).find('td:nth-child(' + Column_number_to_Merge + ')');
+            var Current_td_2 = $(this).find('td:nth-child(' + Column_number_2 + ')');
+            var Current_td_3 = $(this).find('td:nth-child(' + Column_number_3 + ')');
+            var Current_td_4 = $(this).find('td:nth-child(' + Column_number_4 + ')');
+            var Current_td_5 = $(this).find('td:nth-child(' + Column_number_5 + ')');
+             
+            if (Previous_TD == null) {
+              Previous_TD = Current_td;
+              Previous_td_2 = Current_td_2;
+              Previous_td_3 = Current_td_3;
+              Previous_td_4 = Current_td_4;
+              Previous_td_5 = Current_td_5;
+              i = 1;
+            } 
+            else if (Current_td.text() == Previous_TD.text()) {
+              Current_td.attr('style', 'display: none;');
+              Previous_TD.attr('rowspan', i + 1);
+              i= i + 1;
+
+              if (Current_td_2.text() == Previous_td_2.text()) {
+                Current_td_2.attr('style', 'display: none;');;
+                Previous_td_2.attr('rowspan', i2 + 1);
+                i2 = i2 + 1;
+                if (Current_td_3.text() == Previous_td_3.text() && Current_td_5.text() == Previous_td_5.text()) {
+                  Current_td_3.attr('style', 'display: none;');
+                  Previous_td_3.attr('rowspan', i3 + 1);
+                  i3 = i3 + 1;
+                  Current_td_5.attr('style', 'display: none;');
+                  Previous_td_5.attr('rowspan', i5 + 1);
+                  i5 = i5 + 1;
+                  if (Current_td_4.text() == Previous_td_4.text()) {
+                    Current_td_4.attr('style', 'display: none;');
+                    Previous_td_4.attr('rowspan', i4 + 1);
+                    i4 = i4 + 1;
+                  }
+                  else {
+                    Previous_td_4 = Current_td_4;
+                    i4 = 1;
+                  } 
+                }
+                else {
+                  Previous_td_3 = Current_td_3;
+                  i3 = 1;
+                  Previous_td_4 = Current_td_4;
+                  i4 = 1;
+                  Previous_td_5 = Current_td_5;
+                  i5 = 1;
+                } 
+              }
+              else {
+                Previous_td_2 = Current_td_2;
+                i2 = 1;
+                Previous_td_3 = Current_td_3;
+                i3 = 1;
+                Previous_td_4 = Current_td_4;
+                i4 = 1;
+                Previous_td_5 = Current_td_5;
+                i5 = 1;
+              }
+            } 
+            else {
+              Previous_TD = Current_td;
+              i = 1;
+              Previous_td_2 = Current_td_2;
+              i2 = 1;
+              Previous_td_3 = Current_td_3;
+              i3 = 1;
+              Previous_td_4 = Current_td_4;
+              i4 = 1;
+              Previous_td_5 = Current_td_5;
+              i5 = 1;
+            }
+          });
+        });
+      });
+
+</script>
+@endsection

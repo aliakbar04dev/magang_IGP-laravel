@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    @include ('layouts.head')  
+  </head>
+  <body>
+    @include('monitoring.ops.layouts._flash')
+    @yield('content')
+    <!-- Scripts -->
+    @include ('layouts.script')
+    @yield('scripts')
+    @include ('layouts.script2')
+  </body>
+</html>

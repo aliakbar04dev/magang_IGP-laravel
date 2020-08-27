@@ -1,0 +1,176 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use App\Mcalworksheet;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\File;
+use Intervention\Image\ImageManagerStatic as Image;
+use Carbon\Carbon;
+use DB;
+use Excel;
+use PDF;
+use JasperPHP\JasperPHP;
+use Exception;
+
+class McalworksheetController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        if(Auth::user()->can('qa-alatukur-view')) {             
+            return view('eqa.kalworksheet.index');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        if(Auth::user()->can('qa-alatukur-create')) {   
+         return view('eqa.kalworksheet.create');
+     } else {
+        return view('errors.403');
+    }
+}
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        if(Auth::user()->can('qa-alatukur-update')) {  
+            $id = base64_decode($id);      
+            $mcalworksheet = DB::connection("oracle-usrklbr")
+            ->table('mcalworksheet')
+            ->where(DB::raw("no_ws"), '=', $id)
+            ->first();
+
+            $model = new Mcalworksheet();   
+            return view('eqa.kalworksheet.edit')->with(compact(['mcalworksheet', 'model']));
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        //
+    }
+
+    public function dashboard(Request $request)
+    {
+       if(Auth::user()->can(['qa-alatukur-view'])) {
+        $tahun = $request->get('tahun');
+        $bulan = $request->get('bulan');
+        if($bulan < 10){
+            $bulan = '0'.$bulan;
+        }        
+        if ($request->ajax()) {
+          $lists = DB::connection('oracle-usrklbr')
+          ->table("vcal_worksheet")
+          ->select(DB::raw("no_ws,tgl_kalibrasi,no_seri,nm_alat,tipe,maker,no_order"))
+          ->whereRaw("to_char(tgl_kalibrasi,'MMYYYY') = '".$bulan."".$tahun."'");
+
+          return Datatables::of($lists)
+          ->editColumn('no_ws', function($lists) {
+            return '<a href="'.route('kalworksheet.edit',base64_encode($lists->no_ws)).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $lists->no_ws .'">'.$lists->no_ws.'</a>';
+        })
+          ->editColumn('tgl_kalibrasi', function($lists){
+            return Carbon::parse($lists->tgl_kalibrasi)->format('d/m/Y');            
+        })
+          ->make(true);
+      } else {
+          return redirect('home');
+      }
+  } else {
+    return view('errors.403');
+}
+}
+
+public function showDetail($noWs, $noSeri){
+    $noWs = base64_decode($noWs);
+    $noSeri = base64_decode($noSeri);
+    if($noWs == '-'){
+        $list = DB::connection('oracle-usrklbr')
+        ->table('mcaltitik_ukur')
+        ->select(DB::raw("titik_ukur, '0' koreksi_naik, '0' koreksi_turun"))
+        ->where("no_seri", $noSeri)
+        ->orderByRaw('to_number(titik_ukur)');
+    }else{
+      $mcalworksheet = Mcalworksheet();
+      $mcalworksheet->mcalworksheetDet($noWs);
+            if($mcalworksheet->count() > 0){
+            $list = DB::connection('oracle-usrklbr')
+            ->table('mcalworksheetDet')
+            ->select(DB::raw("titik_ukur, '0' koreksi_naik, '0' koreksi_turun"))
+            ->where("no_ws", $noWs)
+            ->orderByRaw('to_number(titik_ukur)');
+            }else{
+                $list = DB::connection('oracle-usrklbr')
+                ->table('mcaltitik_ukur')
+                ->select(DB::raw("titik_ukur, '0' koreksi_naik, '0' koreksi_turun"))
+                ->where("no_seri", $noSeri)
+                ->orderByRaw('to_number(titik_ukur)');
+            }  
+    }
+}
+}

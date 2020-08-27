@@ -1,0 +1,389 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use DB;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\User;
+use App\Mobile;
+use App\HrdLupaPrik;
+use Excel;
+use DateTime;
+use PDF;
+
+class HrdLupaPriksController extends Controller
+{
+
+
+	
+// <PENGAJUAN LUPA PRIK>
+	
+	public function indexlupaprik()
+    {
+        if(strlen(Auth::user()->username) == 5) {
+            return view('hr.mobile.lupaprik.indexlupaprik');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+	
+	public function dashboardlupaprik(Request $request)
+    {
+	 if(strlen(Auth::user()->username) == 5) {	
+		if ($request->ajax()) {
+        $mobiles = DB::connection("pgsql-mobile")
+		->table("lupa_p_pengajuan")
+		->select(DB::raw("*"))
+		->where("npk", "=", Auth::user()->username)
+	  ->orderBy('lupa_p_pengajuan.no_lp', 'desc');
+		
+	   
+        return Datatables::of($mobiles) 
+
+		  ->editColumn('tgllupa', function($tgllupa){
+           //return date('d F Y', strtotime($tgllupa['tgllupa'])); 
+		  return \Carbon\Carbon::parse($tgllupa->tgllupa)->format('d F Y');
+		  // $tes = $tgllupa->tgllupa->format('d F Y');
+		   //return $tes;
+               })
+			   
+         ->editColumn('status', function($stat){
+                    if($stat->status == 3){
+                        return '<b class="btn-xs btn-info btn-icon-pg" action="disable"> Belum Approval </b>';
+                    }
+                     elseif($stat->status == 1){
+                        return '<b class="btn-xs btn-success btn-icon-pg"  action="disable">  Disetujui </b>';
+                    }
+                      elseif($stat->status == 2){
+                        return '<b class="btn-xs btn-danger btn-icon-pg"  action="disable"> Ditolak  </b>';
+                    }
+          })
+		  
+		  ->editColumn('action', function($LupaPPengajuans){
+		      if($LupaPPengajuans->status== 1){
+                 $button = '<a href="/hr/mobile/lupaprik/'.$LupaPPengajuans->no_lp.'" type="button" name="detail"  class="btn btn-primary btn-xs glyphicon glyphicon-info-sign" data-toggle="tooltip" data-placement="bottom" title="Lihat Detail">  </a>
+				 <a href="/hr/mobile/lupaprik/'.$LupaPPengajuans->no_lp.'/print" type=button class="btn btn-primary btn-xs  glyphicon glyphicon-print" target="_blank" data-toggle="tooltip" data-placement="bottom" title="Print"></a>';
+                    }
+              else {
+                        $button = '<a href="/hr/mobile/lupaprik/'.$LupaPPengajuans->no_lp.'" type="button" name="detail"  class="btn btn-primary btn-xs glyphicon glyphicon-info-sign" data-toggle="tooltip" data-placement="bottom" title="Lihat Detail">  </a>
+						<a href="" type=button class="btn btn-primary btn-xs glyphicon glyphicon-print disabled" target="_blank" data-toggle="tooltip" data-placement="bottom" title="Print"></a>';
+                    }
+           
+            return $button;
+          
+         })
+       	
+        ->make(true);
+		
+        } else { 
+		return view('home');
+		} 
+	 }
+	else { 
+		return view('errors.403');
+
+		}
+	 }
+	 
+	 
+	 public function createlupaprik(Request $request)
+    {
+		$dapetnpk = Auth::User()->username;
+		$callkar =  DB::connection("pgsql-mobile")
+			->table("v_mas_karyawan")
+			->select(DB::raw("*"))
+			->where('npk', 'like', $dapetnpk)->get();
+       $tampilnama = DB::connection("pgsql-mobile")
+			->table("v_mas_karyawan")
+		    ->select(DB::raw("nama"))
+		    ->where('npk', 'like', $callkar->first()->npk_atasan)->get();
+       
+      return view('hr.mobile.lupaprik.createlupaprik', ['kar'=>$callkar, 'namaatasan'=>$tampilnama]);
+	}
+	 
+	  public function storelupaprik(Request $request)
+    { 
+        $AWAL = 'LP';
+        $noUrutAkhir = DB::connection("pgsql-mobile")
+		->table("lupa_p_pengajuan")
+		->max("no_lp");
+		//->select(DB::raw("max(no_lp)"))->get();
+        $nourut= (int) substr($noUrutAkhir, 7,10);
+        $nourut++;
+        $bulan = date('m');
+        $tahun = date ('y');
+        $idbaru ="LP".$tahun.$bulan .sprintf("%04s",$nourut);
+		
+        $now        = new datetime();
+        $awal       = new DateTime($request->tgllupa);
+       
+
+        $dapetnpk = Auth::User()->username;
+		$callkar =  DB::connection("pgsql-mobile")
+			->table("v_mas_karyawan")
+			->select(DB::raw("*"))
+			->where('npk', 'like', $dapetnpk)->get();
+        $npkatasan =  DB::connection("pgsql-mobile")
+			->table("v_mas_karyawan")
+			->select(DB::raw("npk"))
+			->where('npk', 'like', $callkar ->first()->npk_atasan)->get();
+
+
+        DB::connection("pgsql-mobile")
+			->table("lupa_p_pengajuan")
+			->insert([
+                            'no_lp'=>$idbaru,
+                            'tglpengajuan'=>$now,
+                            'npk'=>Auth::User()->username,
+                            'npkatasan'=>$request->npkatasan,
+                            'tgllupa'=>$request->tgllupa,
+                            'jamin'=>$request->jamin,
+                            'jamout'=>$request->jamout,
+                            'alasanlupa'=>$request->alasanlupa,
+                            'status'=>3,
+                            'statuscetak'=>0,
+                            ]
+                          );
+        Session::flash("flash_notification", [
+            "level"=>"success",
+            "message"=>"Berhasil Mengajukan Lupa Prik <br> Nomer Pengajuan Anda : <b> $idbaru </b>"
+          ]);
+           
+		   
+		return redirect()->route('mobiles.indexlupaprik');
+		
+		
+	}
+	 
+	  public function showlupaprik($id)
+    {
+		
+		$LupaPPengajuans = DB::connection("pgsql-mobile")
+			->table("lupa_p_pengajuan")
+			->select(DB::raw("*"))
+			->where('no_lp', '=', $id)->first();
+		
+		
+		$dapetnpk = Auth::User()->username;
+		$callkar =  DB::connection("pgsql-mobile")
+			->table("v_mas_karyawan")
+			->select(DB::raw("*"))
+			->where('npk', 'like', $dapetnpk)->get();
+		
+       $tampilnamaatasan = DB::connection("pgsql-mobile")
+			->table("v_mas_karyawan")
+			->select(DB::raw("nama"))
+			->where('npk', 'like', $callkar->first()->npk_atasan)->get();
+	  
+		return view('hr.mobile.lupaprik.showlupaprik', ['kar'=>$callkar, 'namaatasan'=>$tampilnamaatasan])->with(compact('LupaPPengajuans'));
+	}
+
+
+	public function printlupaprik($id)
+    {
+		$LupaPPengajuans = DB::connection("pgsql-mobile")
+			->table("lupa_p_pengajuan")
+			->select(DB::raw("*"))
+			->where('no_lp', '=', $id)->first();
+		
+		
+       $dapetnpk = Auth::User()->username;
+	   
+       $callkar =  DB::connection("pgsql-mobile")
+			->table("v_mas_karyawan")
+			->select(DB::raw("*"))
+			->where('npk', 'like', $dapetnpk)->get();
+
+     
+       $tampilnamaatasan = DB::connection("pgsql-mobile")
+		   ->table("v_mas_karyawan")
+		   ->select(DB::raw("nama"))
+		   ->where('npk', 'like', $callkar->first()->npk_atasan)->get();
+	   
+		$setstatuscetak = DB::connection("pgsql-mobile")
+			->table("lupa_p_pengajuan")
+			->where('no_lp', 'like', $id)
+			->update(['statuscetak'=>1,
+      ]);
+
+		
+     //$pdf = PDF::loadview('hr.mobile.lupaprik.printlupaprik', ['namaatasan'=>$tampilnamaatasan, 'kar'=>$callkar], compact('LupaPPengajuans'));
+
+    //  return $pdf->output();  
+     // return $pdf->download('Lupa-Prik-'.$id.'.pdf');
+    // return redirect()->route('hr.mobile.lupaprik.indexlupaprik')->with(compact('setstatuscetak')); 
+	return view('hr.mobile.lupaprik.printlupaprik', ['kar'=>$callkar, 'namaatasan'=>$tampilnamaatasan])->with(compact('LupaPPengajuans'));	
+		
+	}
+       
+// </PENGAJUAN LUPA PRIK>
+
+	
+// <APPROVAL LUPA PRIK>
+	public function indexapprovallupaprik()
+    {
+        if(strlen(Auth::user()->username) == 5) {
+            return view('hr.mobile.lupaprik.indexapprovallupaprik');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+	
+	public function dashboardapprovallupaprik(Request $request)
+    {
+	 if(strlen(Auth::user()->username) == 5) {	
+		if ($request->ajax()) {
+        $mobiles = DB::connection("pgsql-mobile")
+			->table("lupa_p_pengajuan")
+			->select(DB::raw("lupa_p_pengajuan.*, v_mas_karyawan.nama "))
+			->join('v_mas_karyawan', 'lupa_p_pengajuan.npk', '=', 'v_mas_karyawan.npk')
+			->where("lupa_p_pengajuan.npkatasan", "=", Auth::user()->username)
+			->orderBy('lupa_p_pengajuan.status' ,  'desc')
+			->orderBy( 'lupa_p_pengajuan.no_lp',  'desc');
+		
+	   
+        return Datatables::of($mobiles) 
+   
+         ->editColumn('status', function($stat){
+                    if($stat->status == 3){
+                        return '<b class="btn-xs btn-info btn-icon-pg" action="disable"> Belum Approval </b>';
+                    }
+                     elseif($stat->status == 1){
+                        return '<b class="btn-xs btn-success btn-icon-pg"  action="disable">  Disetujui </b>';
+                    }
+                      elseif($stat->status == 2){
+                        return '<b class="btn-xs btn-danger btn-icon-pg"  action="disable"> Ditolak  </b>';
+                    }
+          })
+		  
+		->editColumn('action', function($LupaPPengajuans){
+
+             if( $LupaPPengajuans->statuscetak == 1 and $LupaPPengajuans->status == 1 ){
+                $butom = '
+                <a href="/hr/mobile/approvallupaprik/'.$LupaPPengajuans->no_lp.'"   name="detail" class="btn btn-xs btn-primary  glyphicon glyphicon-info-sign" data-toggle="tooltip" data-placement="bottom" title="Lihat Detail" >   </a>
+				 <a href="#"  type="button" name="detail"  class="btn btn-xs btn-warning btn_edit glyphicon glyphicon-ok disabled"  data-toggle="tooltip" data-placement="bottom" title="Setujui" ></a>
+                 <a href="#"  type="button" name="detail"  class="btn btn-xs btn-danger btn_hapus glyphicon glyphicon-remove disabled"   data-toggle="tooltip" data-placement="bottom" title="Tolak"></a>';
+         
+                
+            }
+              elseif($LupaPPengajuans->status == 2){
+                $butom ='
+                <a href="/hr/mobile/approvallupaprik/'.$LupaPPengajuans->no_lp.'"   name="detail"  class="btn btn-xs btn-primary  glyphicon glyphicon-info-sign"  data-toggle="tooltip" data-placement="bottom" title="Lihat Detail">   </a>
+                <a href="/hr/mobile/approvallupaprik/'.$LupaPPengajuans->no_lp.'/setuju/"  type="button" name="detail"  class="btn btn-xs btn-warning btn_edit glyphicon glyphicon-ok" data-toggle="tooltip" data-placement="bottom" title="Setujui" ></a>
+                 <a href="#"  type="button" name="detail"  class="btn btn-xs btn-danger btn_hapus glyphicon glyphicon-remove disabled"   data-toggle="tooltip" data-placement="bottom" title="Tolak"></a> ';
+            }
+                 elseif($LupaPPengajuans->statuscetak == 0 and $LupaPPengajuans->status == 1){
+               $butom = '
+                <a href="/hr/mobile/approvallupaprik/'.$LupaPPengajuans->no_lp.'"   name="detail"  class="btn btn-xs btn-primary  glyphicon glyphicon-info-sign"data-toggle="tooltip" data-placement="bottom" title="Lihat Detail" >   </a>
+                <a href="#"  type="button" name="detail"  class="btn btn-xs btn-warning btn_edit glyphicon glyphicon-ok disabled"  data-toggle="tooltip" data-placement="bottom" title="Setujui" ></a>
+                 <a href="/hr/mobile/approvallupaprik/'.$LupaPPengajuans->no_lp.'/tolak/"  type="button" name="detail" class="btn btn-xs btn-danger btn_hapus glyphicon glyphicon-remove" data-toggle="tooltip" data-placement="bottom" title="Tolak"></a>';
+            }
+             elseif($LupaPPengajuans->status == 3){
+                 $butom =  '
+                <a href="/hr/mobile/approvallupaprik/'.$LupaPPengajuans->no_lp.'"   name="detail"  class="btn btn-xs btn-primary  glyphicon glyphicon-info-sign" data-toggle="tooltip" data-placement="bottom" title="Lihat Detail" >   </a>
+                <a href="/hr/mobile/approvallupaprik/'.$LupaPPengajuans->no_lp.'/setuju/"  type="button" name="detail"  class="btn btn-xs btn-warning btn_edit glyphicon glyphicon-ok"  data-toggle="tooltip" data-placement="bottom" title="Setujui" ></a>
+                 <a href="/hr/mobile/approvallupaprik/'.$LupaPPengajuans->no_lp.'/tolak/"  type="button" name="detail"  class="btn btn-xs btn-danger btn_hapus glyphicon glyphicon-remove"   data-toggle="tooltip" data-placement="bottom" title="Tolak"></a>';
+            }
+
+            return  $butom;
+          
+         })
+       	
+        ->make(true);
+		
+        } else { 
+		return view('home');
+		} 
+	 }
+	else { 
+		return view('errors.403');
+
+		}
+	 }
+	 
+	 
+	  public function showapprovallupaprik($id)
+    {
+		
+		$LupaPPengajuans = DB::connection("pgsql-mobile")
+			->table("lupa_p_pengajuan")
+			->select(DB::raw("*"))
+			->where('no_lp', '=', $id)->first();
+		
+		
+		$dapetnpk = Auth::User()->username;
+        $callkar =  DB::connection("pgsql-mobile")
+			->table("v_mas_karyawan")
+			->select(DB::raw("*"))
+			->where('npk', 'like', $dapetnpk)->get();
+		
+       $tampilnamaatasan = DB::connection("pgsql-mobile")
+		   ->table("v_mas_karyawan")
+		   ->select(DB::raw("nama"))
+		   ->where('npk', 'like', $callkar->first()->npk_atasan)->get();
+  
+		return view('hr.mobile.lupaprik.showapprovallupaprik', ['kar'=>$callkar, 'namaatasan'=>$tampilnamaatasan])->with(compact('LupaPPengajuans'));
+	}
+	
+	
+	  public function setujuapprovallupaprik($id)
+    {
+		$now        = new datetime();
+        //$LupaPPengajuans = LupaPPengajuan::where('no_lp', '=', $id)->first();
+        $LupaPPengajuans =  DB::connection("pgsql-mobile")
+			->table("lupa_p_pengajuan")
+			->where('no_lp', '=', $id)
+			->update([
+				'tglok'=>$now,
+				'status'=>1,
+				]);
+
+         Session::flash("flash_notification", [
+            "level"=>"success",
+            "message"=>"Nomor Pengajuan Lupa Prik <b> $id </b> Berhasil Disetujui"
+          ]);
+
+        return redirect()->route('mobiles.indexapprovallupaprik')->with(compact('LupaPPengajuans'));  
+		
+		
+	}
+	
+	
+	public function tolakapprovallupaprik($id)
+    {
+		 $now        = new datetime();
+        //$LupaPPengajuans = LupaPPengajuan::where('no_lp', '=', $id)->first();
+		
+        $LupaPPengajuans =  DB::connection("pgsql-mobile")
+			->table("lupa_p_pengajuan")
+			->where('no_lp', '=', $id)
+			->update([
+				'tglnok'=>$now,
+				'status'=>2,
+				]);
+
+         Session::flash("flash_notification", [
+            "level"=>"success",
+            "message"=>"Nomor Pengajuan Lupa Prik <b> $id </b> Berhasil Ditolak"
+          ]);
+
+        return redirect()->route('mobiles.indexapprovallupaprik')->with(compact('LupaPPengajuans'));  
+		
+		
+	}
+	
+	
+// </APPROVAL LUPA PRIK>
+	
+}

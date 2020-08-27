@@ -1,0 +1,214 @@
+@extends('layouts.app')
+@section('content')
+
+<!-- App_UN4 -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <h1>
+        Approval
+        <small>Permintaan Uniform</small>
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="{{ url('/home') }}"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li class="active">Approval Uniform</li>
+      </ol>
+    </section>
+
+   <!-- Main content -->
+   <section class="content">
+      @include('layouts._flash')
+      <!-- Form Utama Appr. Uniform Atasan -->
+      <!-- Info boxes -->
+      <div class="row">
+        <div class="col-md-12">
+          <div class="box">
+            <div class="box-header with-border">
+              <h3 class="box-title">List Approval Uniform</h3>
+                    
+              <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                </button>
+                <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+              </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+              <div class="row form-group">
+                <div class="col-sm-12">
+                <!-- <input class="form-control" placeholder="Cari nama..." style="float:left;width:150px;margin: 0px 12px 10px 0px;" type="text" id="table-text-nama"> -->
+                <input class="form-control" placeholder="Cari..." style="float:left;width:150px;margin: 0px 12px 10px 0px;" type="text" id="table-text-un">
+                <span style="padding-top: 10px;font-size: 15px;margin-left: -5px;color: #737373;" data-toggle="tooltip" title="nama, npk, nomor pengajuan" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+                <button class="btn btn-success" onclick="refreshList()" style="float:right;"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span></button>
+                <table id="dtApprovalUni" class="autonumber table-bordered table-striped" style="width:100%;">
+                  <thead>
+                    <tr>
+                      <!-- <th style="width:1%">No</th> -->
+                      <th style="width:1px;"></th>
+                      <th style="width:30%">Tgl</th>
+                      <th style="width:50px%">Nama</th>
+                      <th style="width:20px%">Action</th>
+                    </tr>
+                  </thead>
+                </table>
+                </div>
+              </div>
+              <!-- /.form-group -->
+            </div>
+            <!-- ./box-body -->
+          </div>
+          <!-- /.box -->
+        </div>
+        <!-- /.col -->
+      </div>
+      <!-- /.row -->
+      <!-- Form Utama Perm. Uniform -->
+
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+@endsection
+
+
+@section('scripts')
+<script type="text/javascript">
+    var table = $('#dtApprovalUni').DataTable({
+            "order": [[ 1, "desc" ]],
+            processing: true,
+            searching: true,
+            ajax: {
+                url: '{{ route("mobiles.uniformappr_data") }}'
+            },
+            "deferRender": true,
+            "pageLength": 10,
+            columns: [            
+            {data: 'DT_Row_Index', name: 'DT_Row_Index', orderable:false, searchable:false},
+            {data: 'tglsave', name: 'uniform1.tglsave',orderable:false, searchable:false},
+            {data: 'nama', name: 'v_mas_krayawan.nama',orderable:false},
+            {data: 'action', name: 'action', orderable:false},
+        ],
+        destroy: true,
+        dom: '<"top">rt<"bottom"pi>',    
+        }); 
+
+    $('#table-text-un').on('keyup', function(){
+        table.column(3).search(this.value).draw();   
+    });
+
+    function refreshList(){
+        table.ajax.reload();
+    }
+
+    function accApproval(ths){
+    var no_value = document.getElementById('nouni'+ths).value.trim();
+    var token = document.getElementsByName('_token')[0].value.trim();
+    var urlappr = "{{ route('mobiles.uniformappr_acc') }}";
+    swal({
+          title: 'Setujui pengajuan uniform?',
+          text: '',
+          type: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Ya, setujui',
+          cancelButtonText: 'Close',
+          allowOutsideClick: true,
+          allowEscapeKey: true,
+          allowEnterKey: true,
+          reverseButtons: false,
+          focusCancel: false,
+        }).then(function () {    
+        $.ajax({
+              url      : urlappr,
+              type     : 'POST',
+              dataType : 'json',
+              data     : {
+                nouni   : no_value,
+                _token  : token,
+              },
+              success: function(_response){
+                console.log(_response);
+                if(_response.indctr == '1'){
+                swal('Sukses', 'Pengajuan uniform telah disetujui!','success'
+                )
+                $('.modal').modal('hide');
+                refreshList();
+              } else if(_response.indctr == '0'){
+                console.log(_response)
+                swal('Terjadi kesalahan', 'Segera hubungi Admin!', 'error'
+                )
+              }
+            },
+            error: function(){
+              swal(
+                'Terjadi kesalahan',
+                'Segera hubungi Admin!',
+                'error'
+                )
+            }
+            });
+            });
+        }
+
+    function declineApproval(ths){
+    var no_value = document.getElementById('nouni'+ths).value.trim();
+    var token = document.getElementsByName('_token')[0].value.trim();
+    var urlappr = "{{ route('mobiles.uniformappr_dcln') }}";
+    swal({
+          title: 'Tolak pengajuan uniform?',
+          text: '',
+          type: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Ya, tolak',
+          cancelButtonText: 'Close',
+          allowOutsideClick: true,
+          allowEscapeKey: true,
+          allowEnterKey: true,
+          reverseButtons: false,
+          focusCancel: false,
+        }).then(function () {    
+        $.ajax({
+              url      : urlappr,
+              type     : 'POST',
+              dataType : 'json',
+              data     : {
+                nouni   : no_value,
+                _token  : token,
+              },
+              success: function(_response){
+                console.log(_response);
+                if(_response.indctr == '1'){
+                swal('Declined', 'Pengajuan uniform telah ditolak!','success'
+                )
+                $('.modal').modal('hide');
+                refreshList();
+              } else if(_response.indctr == '0'){
+                console.log(_response)
+                swal('Terjadi kesalahan', 'Segera hubungi Admin!', 'error'
+                )
+              }
+            },
+            error: function(){
+              swal(
+                'Terjadi kesalahan',
+                'Segera hubungi Admin!',
+                'error'
+                )
+            }
+            });
+            });
+        }
+
+      
+</script>
+
+<script>
+$(document).ready(function(){
+  $('[data-toggle="tooltip"]').tooltip();
+});
+</script>
+
+@endsection

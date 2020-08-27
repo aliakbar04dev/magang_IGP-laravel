@@ -1,0 +1,127 @@
+@extends('monitoring.ops.layouts.app')
+
+@section('content')
+	<BR>
+	<div class="container2">
+		<div class="row">
+			<div class="col-md-12">
+				<div class="panel panel-default">
+
+					<div class="panel-heading">
+						{{-- <center><h4>Monitoring Komite</h4></center> --}}
+						<center><a href="{{ url('/komite') }}"><h4>Papan Kontrol Manual</h4></a></center>
+						{{-- <center><h4>{{ $displayStart }}</h4></center> --}}
+					</div>
+
+					<div class="panel-body">
+						<table id="tblMaster" class="table table-bordered table-striped" cellspacing="0" width="100%">
+	    			    	<thead>
+		  			            <tr>
+		  			            	{{-- <th rowspan="2" style="width: 1%;text-align: center">No</th> --}}
+					                <th rowspan="2" style='width: 15%;text-align: center'>Tanggal Komite</th>
+					                <th rowspan="2" style='text-align: center'>Materi Komite</th>
+					                <th colspan="4" style='text-align: center'>Follow UP</th>
+					                <th rowspan="2" style='text-align: center'>Keterangan</th>
+		  			            </tr>
+		  			            <tr>
+				                    <th style='width: 5%;text-align: center'>PP</th>
+				                    <th style='width: 5%;text-align: center'>EA/IA</th>
+				                    <th style='width: 5%;text-align: center'>OPS</th>
+				                    <th style='width: 5%;text-align: center'>PO</th>
+				                </tr>
+	    			        </thead>
+	    			    </table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+@endsection
+
+@section('scripts')
+<script>
+	$(document).ready(function(){
+	   	var tableMaster = $('#tblMaster').DataTable({
+	     //  "columnDefs": [{
+	     //    "searchable": false,
+	     //    "orderable": false,
+	     //    "targets": 0,
+		    // render: function (data, type, row, meta) {
+		    //     return meta.row + meta.settings._iDisplayStart + 1;
+		    // }
+	     //  }],
+	      "aLengthMenu": [[5, 10, 25, 50, 75, 100, -1], [5, 10, 25, 50, 75, 100, "All"]],
+	      "iDisplayLength": 10,
+	      "displayStart": {{ $displayStart }},
+	      responsive: true,
+	      // "searching": false,
+	      // "scrollX": true,
+	      // "scrollY": "700px",
+	      // "scrollCollapse": true,
+	      // "paging": false,
+	      // "lengthChange": false,
+	      // "ordering": true,
+	      // "info": true,
+	      // "autoWidth": false,
+	      "order": [],
+	      processing: true,
+	      serverSide: true,
+	      ajax: "{{ route('dashboard.komite') }}",
+	      columns: [
+	      	// {data: 'rownum', name: 'rownum', className: "dt-center", orderable: false, searchable: false},
+	      	// {data: null, name: null, className: "dt-center"},
+	        {data: 'tglkomite', name: 'tglkomite', className: "dt-center"},
+	        {data: 'ket_komite', name: 'ket_komite'},
+	        {data: 'pp', name: 'pp', className: "dt-center", orderable: false, searchable: false},
+	        {data: 'eaia', name: 'eaia', className: "dt-center", orderable: false, searchable: false},
+	        {data: 'ops', name: 'ops', className: "dt-center", orderable: false, searchable: false},
+	        {data: 'po', name: 'po', className: "dt-center", orderable: false, searchable: false},
+	        {data: 'keterangan', name: 'keterangan', orderable: false, searchable: false}
+		  ]
+	    });
+	});
+
+	// setTimeout(function(){
+	//   var table = $('#tblMaster').DataTable();
+	//   var tgl_temp = "";
+	//   var number = 0;
+	//    for($i = 0; $i < table.rows().count(); $i++) {
+	//      var data = table.cell($i, 1).data() + "";
+	//      if(tgl_temp === "") {
+	//      	tgl_temp = data;
+	//      	number = number + 1;
+	//      	table.cell($i, 0).data(number);
+	//      } else {
+	//      	if(tgl_temp === data) {
+	//      		table.cell($i, 0).data("");
+	//      		table.cell($i, 1).data("");
+	//      	} else {
+	//      		number = number + 1;
+	//      		table.cell($i, 0).data(number);
+	//      	}
+	//      	tgl_temp = data;
+	//      }
+	//    }
+	// }, 1000);
+
+	$(function() {
+      $('\
+        <div id="filter_status" class="dataTables_length" style="display: inline-block; margin-left:10px;">\
+          <img src="{{ asset('images/red.png') }}" alt="X"> Doc. not yet released \
+          <img src="{{ asset('images/yellow.png') }}" alt="X"> In Progress \
+          <img src="{{ asset('images/green.png') }}" alt="X"> Doc. has been released \
+        </div>\
+      ').insertAfter('.dataTables_length');
+    });
+
+	//auto refresh
+	setTimeout(function() {
+	  // location.reload();
+	  var displayStart = "{{ $displayStart }}";
+	  displayStart = Number(displayStart) + 10;
+	  var urlRedirect = "{{ url('/komite/param') }}";
+	  urlRedirect = urlRedirect.replace('param', displayStart);
+	  window.location.href = urlRedirect;
+	}, 180000); //1000 = 1 second
+</script>
+@endsection

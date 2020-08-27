@@ -1,0 +1,453 @@
+<div class="form-group">
+<div id="head_sec">
+        @php 
+        switch ($data_schedule->first()->bulan) {
+            case "01":
+                $nama_bulan = 'JAN';
+                break;
+            case "02":
+                $nama_bulan = 'FEB';
+                break;
+            case "03":
+                $nama_bulan = 'MAR';
+                break;
+            case "04":
+                $nama_bulan = 'APR';
+                break;
+            case "05":
+                $nama_bulan = 'MAY';
+                break;
+            case "06":
+                $nama_bulan = 'JUN';
+                break;
+            case "07":
+                $nama_bulan = 'JUL';
+                break;
+            case "08":
+                $nama_bulan = 'AUG';
+                break;
+            case "09":
+                $nama_bulan = 'SEP';
+                break;
+            case "10":
+                $nama_bulan = 'OCT';
+                break;
+            case "11":
+                $nama_bulan = 'NOV';
+                break;
+            case "12":
+                $nama_bulan = 'DES';
+                break;
+            default:
+                $nama_bulan = 'Kosong';
+        }
+        @endphp
+    <div class="col-md-2">
+        <label>PERIODE</label>
+        <select class="form-control" id="periode_select" autocomplete="off">
+            @if ($data_schedule->first()->periode == 'I')
+            <option value="I" selected>I (SATU)</option>
+            <option value="II">II (DUA)</option>
+            @else
+            <option value="I">I (SATU)</option>
+            <option value="II" selected>II (DUA)</option>
+            @endif
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label>REVISI</label>
+        <select class="form-control" id="revisi_select" autocomplete="off">
+            @foreach ($all_periode_divisi as $revisi)
+                @if ($revisi->rev_no == $data_schedule->first()->rev_no)
+                <option periode="{{ $revisi->periode }}" value="{{ $revisi->rev_no }}" selected>{{ $revisi->rev_no }}</option>
+                @else
+                <option periode="{{ $revisi->periode }}" value="{{ $revisi->rev_no }}">{{ $revisi->rev_no }}</option>
+                @endif
+            @endforeach
+            </select>    
+        </div>
+    <div class="col-md-2">
+        <label>TANGGAL</label>
+        <input class="form-control" id="tanggal" value="{{ date('d F Y', strtotime($data_schedule->first()->created_date)) }}" readonly>
+    </div>
+    <div class="col-md-6">
+        <label>ACTION</label>
+        <button class="btn btn-primary" id="display_filter" style="display:block;">Display</button>
+    </div>
+    @if ($data_schedule->first()->status == '0')
+    <div class="col-md-12" style="margin-top: 15px;">
+        @if ($data_schedule->first()->rev_no != '00')
+        <div class="alert alert-info">
+            Schedule Internal Audit ini adalah draft. Schedule sebelumnya yang masih aktif bisa dicek 
+            <a style="font-weight: bold;" href="{{ route('auditors.schedule', [$data_schedule->first()->tahun, $data_schedule->first()->bulan, $data_schedule->first()->periode, sprintf('%02s', $data_schedule->first()->rev_no - 1)]) }}">di sini</a>
+        </div>
+        @else
+        <div class="alert alert-info">
+            Schedule Internal Audit ini adalah draft. 
+        </div>
+        @endif
+    </div>
+    @endif
+    <div class="col-md-4">
+        @if ($data_schedule->first()->status == '0')     
+        <button class="btn btn-success" id="add_schedule">Tambah Jadwal</button>
+        <button class="btn btn-danger" id="delete_schedule">Hapus Jadwal</button>
+        @endif
+    </div>
+    @php 
+$act_bulan_next = ($data_schedule->first()->bulan + 1);
+$act_tahun_next = $data_schedule->first()->tahun;
+switch ($data_schedule->first()->bulan + 1) {
+    case "01":
+        $next_month = 'JAN '.$data_schedule->first()->tahun;
+        break;
+    case "02":
+        $next_month = 'FEB '.$data_schedule->first()->tahun;
+        break;
+    case "03":
+        $next_month = 'MAR '.$data_schedule->first()->tahun;
+        break;
+    case "04":
+        $next_month = 'APR '.$data_schedule->first()->tahun;
+        break;
+    case "05":
+        $next_month = 'MAY '.$data_schedule->first()->tahun;
+        break;
+    case "06":
+        $next_month = 'JUN '.$data_schedule->first()->tahun;
+        break;
+    case "07":
+        $next_month = 'JUL '.$data_schedule->first()->tahun;
+        break;
+    case "08":
+        $next_month = 'AUG '.$data_schedule->first()->tahun;
+        break;
+    case "09":
+        $next_month = 'SEP '.$data_schedule->first()->tahun;
+        break;
+    case "10":
+        $next_month = 'OCT '.$data_schedule->first()->tahun;
+        break;
+    case "11":
+        $next_month = 'NOV '.$data_schedule->first()->tahun;
+        break;
+    case "12":
+        $next_month = 'DES '.$data_schedule->first()->tahun;
+        break;
+    case "13":
+        $next_month = 'JAN '.($data_schedule->first()->tahun + 1);
+        $act_bulan_next = '01';
+        $act_tahun_next = ($data_schedule->first()->tahun + 1);
+        break;
+    default:
+        $next_month = 'Kosong';
+}
+@endphp
+@php
+$act_bulan_prev = ($data_schedule->first()->bulan - 1);
+$act_tahun_prev = $data_schedule->first()->tahun;
+switch ($data_schedule->first()->bulan - 1) {
+    case "01":
+        $prev_month = 'JAN '.$data_schedule->first()->tahun;
+        break;
+    case "02":
+        $prev_month = 'FEB '.$data_schedule->first()->tahun;
+        break;
+    case "03":
+        $prev_month = 'MAR '.$data_schedule->first()->tahun;
+        break;
+    case "04":
+        $prev_month = 'APR '.$data_schedule->first()->tahun;
+        break;
+    case "05":
+        $prev_month = 'MAY '.$data_schedule->first()->tahun;
+        break;
+    case "06":
+        $prev_month = 'JUN '.$data_schedule->first()->tahun;
+        break;
+    case "07":
+        $prev_month = 'JUL '.$data_schedule->first()->tahun;
+        break;
+    case "08":
+        $prev_month = 'AUG '.$data_schedule->first()->tahun;
+        break;
+    case "09":
+        $prev_month = 'SEP '.$data_schedule->first()->tahun;
+        break;
+    case "10":
+        $prev_month = 'OCT '.$data_schedule->first()->tahun;
+        break;
+    case "11":
+        $prev_month = 'NOV '.$data_schedule->first()->tahun;
+        break;
+    case "12":
+        $prev_month = 'DES '.$data_schedule->first()->tahun;
+        break;
+    case "00":
+        $prev_month = 'DES '.($data_schedule->first()->tahun - 1);
+        $act_bulan_prev = '12';
+        $act_tahun_prev = ($data_schedule->first()->tahun - 1);
+        break;
+    default:
+        $prev_month = 'Kosong';
+}
+@endphp 
+    <!-- <div class="col-md-8" style="margin-top: 15px;">
+        <a href="{{ route('auditors.schedule', [$act_tahun_next, $act_bulan_next, 'I', 'latest']) }}" class="btn btn-primary" id="prev_month" style="float:right;">{{$next_month}}<span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a>
+        <a href="{{ route('auditors.schedule', [$act_tahun_prev, $act_bulan_prev, 'I', 'latest']) }}" class="btn btn-primary" id="next_month" style="float:right; margin-right: 8px;"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>{{$prev_month}}</a>
+    </div>   -->
+</div>
+<div id="add_sec" style="margin-top: 15px;display:none;">
+        {!! Form::open(['method' => 'post', 'files'=>'true', 'class'=>'form-horizontal', 'role'=>'form', 'id'=>'form_new_schedule', 'autocomplete' => 'off', 'required']) !!}
+    <div class="col-md-6">
+            <div>
+                <label>JENIS SCHEDULE</label>
+                <select id="jenis_schedule" name="jenis_schedule" class="form-control">
+                    <option value="1">NORMAL SCHEDULE</option>
+                    <option value="2">OPENING MEETING</option>
+                    <option value="3">CLOSING MEETING</option>
+                </select>
+            </div>
+            <div style="margin-top: 8px;">
+                <label>TANGGAL</label>
+                <input id="select_date" class="form-control" name="tanggal" style="width: 45px;background-color: white;" readonly autocomplete="off">
+                <input id="bulan" class="form-control" style="width: 60px;margin-top: -34px;margin-left: 50px;" value="{{$nama_bulan}}" readonly autocomplete="off">
+                <input id="tahun_val" class="form-control" name="tahun" style="width: 100px;margin-top: -34px;margin-left: 115px;" value="{{$data_schedule->first()->tahun}}" readonly autocomplete="off">
+                <input id="bulan_val" class="form-control" name="bulan" type="hidden" value="{{$data_schedule->first()->bulan}}">
+                <input id="periode_val" class="form-control" type="hidden" value="{{$data_schedule->first()->periode}}">
+                <input id="rev_no_val" class="form-control" type="hidden" value="{{$data_schedule->first()->rev_no}}">
+            </div>
+            <div id="add_sec_sub">
+            <div style="margin-top: 8px;">
+                    <input id="schedule_id_form" type="hidden" name="schedule_id" value="{{$data_schedule->first()->id}}">
+                    {!! Form::label('div', 'DIVISI') !!}
+                    <select class="form-control select2" id="kd_div" name="kd_div" name="kd_div" style="width:100%;" autocomplete="off">
+                        <option></option>
+                        @foreach ($getdiv as $div)
+                         @if ($div->desc_div != null)
+                            <option value="{{ $div->kd_div }}">{{ $div->desc_div }}</option>
+                        @endif
+                        @endforeach
+                    </select>
+                    {!! $errors->first('kd_dep', '<p class="help-block">:message</p>') !!}
+                </div>
+                <div style="margin-top: 8px;">
+                    {!! Form::label('dept', 'DEPT') !!}
+                    <select class="form-control select2" id="kd_dep" name="kd_dep" name="kd_dep" style="width:100%;" autocomplete="off">
+                        <option></option>
+                        @foreach ($getdep as $dep)
+                        <option value="{{ $dep->kd_dep }}">{{ $dep->desc_dep }}</option>
+                        @endforeach
+                    </select>
+                    {!! $errors->first('kd_dep', '<p class="help-block">:message</p>') !!}
+                </div>
+                <div style="margin-top: 8px;">
+                    {!! Form::label('sect', 'SEKSI') !!}
+                    <select class="form-control select2" id="kd_sie" name="kd_sie" name="kd_sie" style="width:100%;" autocomplete="off">
+                        <option></option>
+                        @foreach ($getsie as $sie)
+                        <option value="{{ $sie->kd_sie }}">{{ $sie->desc_sie }}</option>
+                        @endforeach
+                    </select>
+                    {!! $errors->first('kd_dep', '<p class="help-block">:message</p>') !!}
+                </div>
+                <div style="margin-top: 8px;">
+                    <label>KETERANGAN</label>
+                    <input class="form-control" name="keterangan">
+                </div>
+            <div class="col-md-6">
+                <div style="margin-top: 8px;">
+                    <label>AUDITEE</label>
+                    <table id="tblAuditee" class="table-borderless">
+                        <tr id="row_auditee1">
+                            <td><input id="auditee1" class="form-control" name="auditee[]" onclick="popupAuditee(this.id)" data-toggle="modal" data-target="#karyawanModal"></td>
+                            <td><button type="button" id="tambah_auditee" class="btn btn-success"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button></td>
+                        </tr>
+                    </table>
+                </div>
+                <div style="margin-top: 8px;">
+                    <label>LEAD AUDITOR</label>
+                    <table id="tblLead" class="table-borderless">
+                        <tr>
+                            <td><input type="hidden" id="npklead" name="leadauditor"><input id="leadauditor" class="form-control" onclick="popupKaryawanAuditor(this.id)" data-toggle="modal" data-target="#auditorModal" style="background-color: white;" readonly></td>
+                        </tr>
+                    </table>
+                </div>
+                <div style="margin-top: 8px;">
+                    <label>AUDITOR</label>
+                    <table id="tblAuditor" class="table-borderless">
+                        <tr id="row_auditor1">
+                            <td><input type="hidden" id="npkauditor1" name="auditor[]"><input id="auditor1" class="form-control" onclick="popupKaryawanAuditor2(this.id)" data-toggle="modal" data-target="#auditorModal" style="background-color: white;" readonly></td>
+                            <td><button type="button" id="tambah_auditor" class="btn btn-success"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    <div class="col-md-12" style="margin-top :50px;">
+        <button id="submit_add_schedule" type="submit" class="btn btn-success" style="float:right;display:none;">TAMBAH</button>
+        <button id="back_btn" type="button" class="btn btn-danger" style="float:right;display:none;margin-right: 5px;">KEMBALI</button>        
+    </div>
+</div>
+
+{!! Form::close() !!}
+</div>
+    <div id="table_sec" class="col-md-12" style="margin-top:8px;">
+        <div style="display: inline;font-size: 30px;font-weight: 600;">{{$nama_bulan}} {{$data_schedule->first()->tahun}}</div> 
+        <div style="display: inline;font-size:16px;"> &nbsp;Periode {{$data_schedule->first()->periode}} - Revisi {{$data_schedule->first()->rev_no}}</div>
+        <a href="{{ route('auditors.schedule', [$act_tahun_next, $act_bulan_next, 'I', 'latest']) }}" class="btn btn-primary" id="prev_month" style="float:right;">{{$next_month}}<span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a>
+        <a href="{{ route('auditors.schedule', [$act_tahun_prev, $act_bulan_prev, 'I', 'latest']) }}" class="btn btn-primary" id="next_month" style="float:right; margin-right: 8px;"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>{{$prev_month}}</a>    
+        <div style="overflow-x:auto;" id="item">
+                <input id="schedule_id" type="hidden" value="{{$data_schedule->first()->id}}">
+    <table id="tblSchedule" class="table-bordered " style="width:100%;margin-bottom:0px;">
+        <thead>
+            <tr>
+                <th rowspan="4" width="10px">NO</th>
+                <th rowspan="4" style="width:30%">AREA/PROC</th>
+                <th rowspan="4">AUDITEE</th>
+                <th rowspan="2" colspan="2">AUDITOR</th>
+                <th colspan="{{ count($date2) }}">{{$data_schedule->first()->tahun}}</th>
+                <th rowspan="4">KETERANGAN</th>
+            </tr>
+            <tr style="background-color: white;">
+                <th colspan="{{ count($date2) }}" style="border-right: 1px solid #f4f4f4;">{{ $nama_bulan }}</th>
+            </tr>
+            <tr>
+                <th rowspan="2">LEAD AUDITOR</th>
+                <th rowspan="2">AUDITOR</th>
+                @foreach ($date2 as $tanggal)
+                <th style="border-right: 1px solid #f4f4f4;">{{ $tanggal->tanggal }}</th>
+                @endforeach
+            </tr>
+            <tr style="background-color: white;">
+                @foreach ($date2 as $tanggal)
+                @php
+                $tanggal_each = date("D", strtotime($tanggal->tahun . '-' . $tanggal->bulan . '-' . $tanggal->tanggal));
+                switch ($tanggal_each) {
+                    case "Mon":
+                        $nama_hari = 'SEN';
+                        break;
+                    case "Tue":
+                        $nama_hari = 'SEL';
+                        break;
+                    case "Wed":
+                        $nama_hari = 'RAB';
+                        break;
+                    case "Thu":
+                        $nama_hari = 'KAM';
+                        break;
+                    case "Fri":
+                        $nama_hari = 'JUM';
+                        break;
+                    case "Sat":
+                        $nama_hari = 'SAB';
+                        break;
+                    case "Sun":
+                        $nama_hari = 'MIN';
+                        break;
+                    default:
+                        $nama_hari = 'Kosong';
+                }
+                @endphp
+                <th style="border-right: 1px solid #f4f4f4;">{{ $nama_hari }}</th>
+                @endforeach
+            </tr>
+        </thead>
+        <tbody>
+            @if (count($date) == 0)
+                <tr>
+                    <td style="text-align: center;" colspan="7">Belum ada jadwal bulan ini</td>
+                </tr>
+            @else
+            @foreach ($date as $tanggal)
+            <tr>
+                <td>{{ $loop->iteration }}.</td>
+                <td style="white-space: nowrap;" class="hapus_td">{{ $tanggal->desc_div . ' - ' . $tanggal->desc_dep . ' - ' . $tanggal->desc_sie }} <button class="btn btn-danger btn-xs hapus_btn" id="{{ $tanggal->id2 }}"style="display:none;">Hapus</button></td>
+                <td style="white-space: nowrap;">@php $list_auditee = ""; @endphp @foreach ($auditor as $data_auditee) @if ($data_auditee->role_audit == 'AUDITEE' && $data_auditee->id2 == $tanggal->id2) @if ($tanggal->tanggal == $data_auditee->tanggal) @php $list_auditee .= $data_auditee->init_dep . ', '; @endphp @endif @endif @endforeach {{substr($list_auditee, 0, -2)}} @php $list_auditee = ""; @endphp</td>
+                @php $all_auditor = ""; @endphp
+                @foreach ($auditor as $data_auditee)
+                @if ($tanggal->tanggal == $data_auditee->tanggal)
+                @if ($data_auditee->role_audit == 'LEAD AUDITOR') 
+                @php 
+                $leadauditor = DB::table('v_mas_karyawan')
+                ->select('nama')
+                ->join('ia_schedule3', 'v_mas_karyawan.npk', 'ia_schedule3.npk')
+                ->where('ia_schedule3.npk', '=', $data_auditee->npk)
+                ->where('tanggal', '=', $tanggal->tanggal)
+                ->value('nama');
+
+                $words = explode(" ", $leadauditor);
+                $akronim_leadauditor = "";
+                $count = 1;
+                foreach ($words as $w) {
+                    if ($count == 1){
+                        $akronim_leadauditor .= $w.' ';
+                    } else {    
+                        $akronim_leadauditor .= $w[0];
+                    }
+                    $count++;
+                }            
+                @endphp 
+                @elseif ($data_auditee->role_audit == 'AUDITOR' && $data_auditee->id2 == $tanggal->id2)
+                @php
+                $nama_auditor = DB::table('v_mas_karyawan')
+                ->select('nama')
+                ->join('ia_schedule3', 'v_mas_karyawan.npk', 'ia_schedule3.npk')
+                ->where('ia_schedule3.npk', '=', $data_auditee->npk)
+                ->where('tanggal', '=', $tanggal->tanggal)
+                ->value('nama');
+
+                $words = explode(" ", $nama_auditor);
+                $count = 1;
+                $akronim_auditor = "";
+
+                if (count($words) == 1){
+                    if ($words[0] == '' || $words[0] == null) {
+                        $all_auditor .= $akronim_auditor;                
+                    } else {
+                        $akronim_auditor = $words[0];
+                        $all_auditor .= $akronim_auditor . ', ';
+                    }
+                } else if (count($words) > 1) {
+                    foreach ($words as $w) {
+                        if ($count == 1){
+                            $akronim_auditor .= $w.' ';
+                        } else {    
+                            $akronim_auditor .= $w[0];
+                        }
+                        $count++;
+                    }
+                    $all_auditor .= $akronim_auditor . ', ';
+                }
+                @endphp
+                @endif @endif @endforeach
+                <td style="white-space: nowrap;">{{ $akronim_leadauditor }}</td>
+                <td style="white-space: nowrap;">{{ substr($all_auditor, 0, -2) }}</td>
+                @foreach ($date2 as $ceklis)
+                @if ($ceklis->tanggal == $tanggal->tanggal)
+                <td style="text-align: center;">O</td>
+                @else
+                <td></td>
+                @endif
+                @endforeach
+                <td style="white-space: nowrap;">{{ $tanggal->keterangan }}</td>
+            </tr>
+            @endforeach
+            @endif
+        </tbody>
+    </table>
+            </div>
+    <div class="col-md-12" style="margin-top: 10px;">
+        @if ($data_schedule->first()->status == '0')
+        <button id="submit_btn" type="submit" class="btn btn-primary" style="float:right;">SIMPAN</button>
+        @if ($data_schedule->first()->rev_no != '00')
+        <button id="hapus_draft" type="button" class="btn btn-danger" style="float:right;margin-right: 8px;">HAPUS DRAFT</button>
+        @endif
+        @elseif ($data_schedule->first()->status == '1')
+        <button id="revisi" type="button" class="btn btn-primary" style="float:right; margin-right: 8px;">EDIT (REVISI)</button>
+        @else
+        <a href="{{ route('auditors.schedule', [$data_schedule->first()->tahun, $data_schedule->first()->bulan, $data_schedule->first()->periode, 'latest']) }}" type="button" class="btn btn-primary" style="float:right; margin-right: 8px;">LIHAT REVISI TERBARU</a>
+        @endif
+    </div>
+</div>
+</div>

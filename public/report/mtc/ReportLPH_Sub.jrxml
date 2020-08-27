@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="565" leftMargin="15" rightMargin="15" topMargin="20" bottomMargin="20" uuid="b12e1461-f2c2-4eb5-91b6-f20b18705cbe">
+	<property name="ireport.zoom" value="1.4641000000000006"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="tgl1" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="lok_pt" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="logo" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="shift" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="kd_line" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="kd_mesin" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["/"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="st_pms" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="npk" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT DISTINCT NVL(T1.INFO_KERJA,'-') INFO_KERJA
+FROM TMTCWO1 T1
+WHERE TO_CHAR(T1.TGL_WO,'YYYYMMDD') = TO_CHAR($P{tgl1},'YYYYMMDD')
+AND (T1.SHIFT = $P{shift} OR $P{shift} IS NULL)
+AND T1.LOK_PT = $P{lok_pt}
+AND (T1.KD_LINE = $P{kd_line} OR $P{kd_line} IS NULL)
+AND (T1.KD_MESIN = $P{kd_mesin} OR $P{kd_mesin} IS NULL)
+AND (NVL(T1.INFO_KERJA,'-') = $P{st_pms} OR $P{st_pms} IS NULL)
+AND EXISTS (SELECT 1 FROM MTCM_NPK WHERE MTCM_NPK.NPK = $P{npk} AND MTCM_NPK.KD_PLANT = T1.LOK_PT AND ROWNUM = 1)]]>
+	</queryString>
+	<field name="INFO_KERJA" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="50" splitType="Stretch">
+			<image onErrorType="Icon">
+				<reportElement x="0" y="0" width="100" height="45" uuid="5eeaa4df-3d2b-4475-8eda-7a5c0d5f393a"/>
+				<imageExpression><![CDATA[$P{logo} != null ? (!$P{logo}.equals("") ? $P{logo} : "../../src/images/igp_new.jpg") : "../../src/images/igp_new.jpg"]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement x="151" y="0" width="262" height="45" uuid="248b0a9f-f259-4c36-b5d3-eca5373b8d8d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[LAPORAN PEKERJAAN HARIAN]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="465" y="15" width="100" height="30" uuid="da2bdbda-2e3c-4c84-bee2-aa3bb1db20b4"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[MTC]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="465" y="0" width="100" height="15" uuid="d7e66bf0-e8fd-47a6-bbfc-102b7c2dedfa"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[DEPARTMENT]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="30" splitType="Stretch">
+			<frame>
+				<reportElement x="0" y="0" width="565" height="30" uuid="8f6eabcc-7771-423d-a46b-9f52b2e47f1c"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<staticText>
+					<reportElement x="0" y="0" width="50" height="15" uuid="4c846a30-603e-452b-a462-c3770e423405"/>
+					<box leftPadding="2"/>
+					<textElement verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Plant]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="15" width="50" height="15" uuid="5896c182-b604-4419-8373-ecf5ab38d5fa"/>
+					<box leftPadding="2"/>
+					<textElement verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Tanggal]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement x="55" y="0" width="255" height="15" uuid="bfa4d4d8-bfa2-4fb1-94f8-5cccdc96abbb"/>
+					<box leftPadding="1"/>
+					<textElement verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$P{lok_pt}]]></textFieldExpression>
+				</textField>
+				<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+					<reportElement x="55" y="15" width="255" height="15" uuid="505f6c2e-8a1a-49f3-824a-d20578a34f16"/>
+					<box leftPadding="1"/>
+					<textElement verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$P{tgl1}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="50" y="0" width="5" height="15" uuid="2636ad73-9dcd-4853-990b-de57205760dd"/>
+					<box leftPadding="0"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="50" y="15" width="5" height="15" uuid="38d1c433-6d76-44b0-9d48-ea3ab961b269"/>
+					<box leftPadding="0"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+			</frame>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="50" splitType="Stretch">
+			<frame>
+				<reportElement x="0" y="0" width="565" height="50" uuid="c7f953c9-b338-44d0-b034-9f2a4182dcbb"/>
+				<box>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<subreport>
+					<reportElement x="0" y="15" width="565" height="30" uuid="07c5762a-e2d9-4c0f-af20-d0f82c4f0c9d"/>
+					<subreportParameter name="SUBREPORT_DIR">
+						<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="kd_line">
+						<subreportParameterExpression><![CDATA[$P{kd_line}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="tgl1">
+						<subreportParameterExpression><![CDATA[$P{tgl1}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="kd_mesin">
+						<subreportParameterExpression><![CDATA[$P{kd_mesin}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="npk">
+						<subreportParameterExpression><![CDATA[$P{npk}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="info_kerja">
+						<subreportParameterExpression><![CDATA[$F{INFO_KERJA}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="lok_pt">
+						<subreportParameterExpression><![CDATA[$P{lok_pt}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="shift">
+						<subreportParameterExpression><![CDATA[$P{shift}]]></subreportParameterExpression>
+					</subreportParameter>
+					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "ReportLPH_Sub2.jasper"]]></subreportExpression>
+				</subreport>
+				<textField>
+					<reportElement x="0" y="0" width="150" height="15" uuid="0d3d2184-cdc7-4e28-8c19-9d324cb1ec48"/>
+					<box leftPadding="5"/>
+					<textElement verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{INFO_KERJA}]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+	</detail>
+	<summary>
+		<band height="1">
+			<staticText>
+				<reportElement x="0" y="0" width="565" height="1" uuid="ad27f17e-37ec-460a-b56b-e7b8a0d3f9be"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

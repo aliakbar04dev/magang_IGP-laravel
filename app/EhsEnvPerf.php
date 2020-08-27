@@ -1,0 +1,840 @@
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+use DB;
+use App\Andon;
+use App\MtctDftMslh;
+use App\Tmtcwo1;
+use App\MtctLchForklif1;
+use Carbon\Carbon;
+
+class SmartMtc extends Model
+{
+    public function monitoringlp($plant, $period)
+    {
+        return $xmlines = DB::connection('oracle-usrbrgcorp')
+            ->table("usrigpmfg.xmline")
+            ->select(DB::raw("xkd_line, decode(nvl(inisial,'-'), '-', xnm_line, inisial) xnm_line, xkd_plant, FGET_NOLP_TGLLINE('$period'||'01', xkd_line) satu, FGET_NOLP_TGLLINE('$period'||'02', xkd_line) dua, FGET_NOLP_TGLLINE('$period'||'03', xkd_line) tiga, FGET_NOLP_TGLLINE('$period'||'04', xkd_line) empat, FGET_NOLP_TGLLINE('$period'||'05', xkd_line) lima, FGET_NOLP_TGLLINE('$period'||'06', xkd_line) enam, FGET_NOLP_TGLLINE('$period'||'07', xkd_line) tujuh, FGET_NOLP_TGLLINE('$period'||'08', xkd_line) delapan, FGET_NOLP_TGLLINE('$period'||'09', xkd_line) sembilan, FGET_NOLP_TGLLINE('$period'||'10', xkd_line) sepuluh, FGET_NOLP_TGLLINE('$period'||'11', xkd_line) sebelas, FGET_NOLP_TGLLINE('$period'||'12', xkd_line) duabelas, FGET_NOLP_TGLLINE('$period'||'13', xkd_line) tigabelas, FGET_NOLP_TGLLINE('$period'||'14', xkd_line) empatbelas, FGET_NOLP_TGLLINE('$period'||'15', xkd_line) limabelas, FGET_NOLP_TGLLINE('$period'||'16', xkd_line) enambelas, FGET_NOLP_TGLLINE('$period'||'17', xkd_line) tujuhbelas, FGET_NOLP_TGLLINE('$period'||'18', xkd_line) delapanbelas, FGET_NOLP_TGLLINE('$period'||'19', xkd_line) sembilanbelas, FGET_NOLP_TGLLINE('$period'||'20', xkd_line) duapuluh, FGET_NOLP_TGLLINE('$period'||'21', xkd_line) duasatu, FGET_NOLP_TGLLINE('$period'||'22', xkd_line) duadua, FGET_NOLP_TGLLINE('$period'||'23', xkd_line) duatiga, FGET_NOLP_TGLLINE('$period'||'24', xkd_line) duaempat, FGET_NOLP_TGLLINE('$period'||'25', xkd_line) dualima, FGET_NOLP_TGLLINE('$period'||'26', xkd_line) duaenam, FGET_NOLP_TGLLINE('$period'||'27', xkd_line) duatujuh, FGET_NOLP_TGLLINE('$period'||'28', xkd_line) duadelapan, FGET_NOLP_TGLLINE('$period'||'29', xkd_line) duasembilan, FGET_NOLP_TGLLINE('$period'||'30', xkd_line) tigapuluh, FGET_NOLP_TGLLINE('$period'||'31', xkd_line) tigasatu"))
+            ->whereRaw("nvl(non_aktif,'F') = 'F'")
+            ->where("xkd_plant", $plant)
+            ->whereRaw("exists (select 1 from tmtcwo1 t where t.lok_pt = xmline.xkd_plant and t.kd_line = xmline.xkd_line and to_char(trunc(t.tgl_wo),'yyyymm') = to_char(add_months(trunc(sysdate), -1),'yyyymm'))");
+    }
+
+    public function plant($kd_site)
+    {
+        if ($kd_site === "IGPK") {
+            $plant = DB::connection('oracle-usrbrgcorp')
+                ->table("mtcm_npk")
+                ->selectRaw("distinct kd_plant, decode(kd_plant, '1', 'IGP-1', '2', 'IGP-2', '3', 'IGP-3', '4', 'IGP-4', 'A', 'KIM-1A', 'B', 'KIM-1B') nm_plant")
+                ->whereRaw("kd_plant in ('A', 'B')")
+                ->orderBy("kd_plant");
+        } else {
+            $plant = DB::connection('oracle-usrbrgcorp')
+                ->table("mtcm_npk")
+                ->selectRaw("distinct kd_plant, decode(kd_plant, '1', 'IGP-1', '2', 'IGP-2', '3', 'IGP-3', '4', 'IGP-4', 'A', 'KIM-1A', 'B', 'KIM-1B') nm_plant")
+                ->whereRaw("kd_plant in ('1', '2', '3')")
+                ->orderBy("kd_plant");
+        }
+        return $plant;
+    }
+
+    public function pmsachievement($kd_site, $tahun, $bulan)
+    {
+        if ($kd_site === "IGPK") {
+            $list = DB::connection('oracle-usrbrgcorp')
+                ->table(DB::raw("(select thn_pms, kd_plant, count(no_pms) jml_plan, 0 jml_act
+                from mtct_pms
+                where thn_pms = '$tahun'
+                and bln_pms = '$bulan'
+                and to_date(tgl_pms||'-'||bln_pms||'-'||thn_pms,'dd-mm-yyyy') < trunc(sysdate)
+                and kd_plant in ('A', 'B')
+                and exists (select 1 from mtcm_npk where mtcm_npk.kd_plant = mtct_pms.kd_plant and rownum = 1)
+                and st_cek = 'T'
+                group by thn_pms, kd_plant
+                union all
+                select thn_pms, kd_plant, 0 jml_plan, count(no_pms) jml_act
+                from mtct_pms
+                where thn_pms = '$tahun'
+                and bln_pms = '$bulan'
+                and to_date(tgl_pms||'-'||bln_pms||'-'||thn_pms,'dd-mm-yyyy') < trunc(sysdate) 
+                and kd_plant in ('A', 'B')
+                and exists (select 1 from mtcm_npk where mtcm_npk.kd_plant = mtct_pms.kd_plant and rownum = 1)
+                and st_cek = 'T'
+                and tgl_tarik is not null
+                group by thn_pms, kd_plant) v"))
+                ->select(DB::raw("thn_pms, kd_plant, nvl(sum(jml_plan),0) j_plan, nvl(sum(jml_act),0) j_act"))
+                ->groupBy(DB::raw("thn_pms, kd_plant"));
+        } else {
+            $list = DB::connection('oracle-usrbrgcorp')
+                ->table(DB::raw("(select thn_pms, kd_plant, count(no_pms) jml_plan, 0 jml_act
+                from mtct_pms
+                where thn_pms = '$tahun'
+                and bln_pms = '$bulan'
+                and to_date(tgl_pms||'-'||bln_pms||'-'||thn_pms,'dd-mm-yyyy') < trunc(sysdate)
+                and kd_plant in ('1', '2', '3')
+                and exists (select 1 from mtcm_npk where mtcm_npk.kd_plant = mtct_pms.kd_plant and rownum = 1)
+                and st_cek = 'T'
+                group by thn_pms, kd_plant
+                union all
+                select thn_pms, kd_plant, 0 jml_plan, count(no_pms) jml_act
+                from mtct_pms
+                where thn_pms = '$tahun'
+                and bln_pms = '$bulan'
+                and to_date(tgl_pms||'-'||bln_pms||'-'||thn_pms,'dd-mm-yyyy') < trunc(sysdate) 
+                and kd_plant in ('1', '2', '3')
+                and exists (select 1 from mtcm_npk where mtcm_npk.kd_plant = mtct_pms.kd_plant and rownum = 1)
+                and st_cek = 'T'
+                and tgl_tarik is not null
+                group by thn_pms, kd_plant) v"))
+                ->select(DB::raw("thn_pms, kd_plant, nvl(sum(jml_plan),0) j_plan, nvl(sum(jml_act),0) j_act"))
+                ->groupBy(DB::raw("thn_pms, kd_plant"));
+        }
+        return $list;
+    }
+
+    public function paretobreakdown($kd_site, $tahun, $bulan)
+    {
+        if ($kd_site === "IGPK") {
+            $list = DB::connection('oracle-usrbrgcorp')
+                ->table(DB::raw("tmtcwo1"))
+                ->select(DB::raw("to_char(tgl_wo,'yyyy') thn_wo, lok_pt kd_plant, sum(nvl(line_stop,0)) jml_ls"))
+                ->whereRaw("lok_pt in ('A', 'B')")
+                ->whereRaw("to_char(tgl_wo,'yyyymm') = '$tahun'||'$bulan' and trunc(tgl_wo) < trunc(sysdate) and pt = 'IGP' and exists (select 1 from mtcm_npk where mtcm_npk.kd_plant = tmtcwo1.lok_pt and rownum = 1) and info_kerja = 'ANDON'")
+                ->groupBy(DB::raw("to_char(tgl_wo,'yyyy'), lok_pt"))
+                ->orderByRaw("to_char(tgl_wo,'yyyy'), lok_pt");
+        } else {
+            $list = DB::connection('oracle-usrbrgcorp')
+                ->table(DB::raw("tmtcwo1"))
+                ->select(DB::raw("to_char(tgl_wo,'yyyy') thn_wo, lok_pt kd_plant, sum(nvl(line_stop,0)) jml_ls"))
+                ->whereRaw("lok_pt in ('1', '2', '3')")
+                ->whereRaw("to_char(tgl_wo,'yyyymm') = '$tahun'||'$bulan' and trunc(tgl_wo) < trunc(sysdate) and pt = 'IGP' and exists (select 1 from mtcm_npk where mtcm_npk.kd_plant = tmtcwo1.lok_pt and rownum = 1) and info_kerja = 'ANDON'")
+                ->groupBy(DB::raw("to_char(tgl_wo,'yyyy'), lok_pt"))
+                ->orderByRaw("to_char(tgl_wo,'yyyy'), lok_pt");
+        }
+        return $list;
+    }
+
+    public function ratiobreakdownpreventive($kd_site, $tahun, $bulan)
+    {
+        if ($kd_site === "IGPK") {
+            $list = DB::connection('oracle-usrbrgcorp')
+                ->table(DB::raw("(select to_char(tgl_wo,'yyyy') thn_wo, lok_pt kd_plant, sum(nvl(line_stop,0)) jml_ls, 0 jml_pms
+                from tmtcwo1
+                where to_char(tgl_wo,'yyyymm') = '$tahun'||'$bulan'
+                and trunc(tgl_wo) < trunc(sysdate)
+                and pt = 'IGP'
+                and lok_pt in ('A', 'B')
+                and exists (select 1 from mtcm_npk where mtcm_npk.kd_plant = tmtcwo1.lok_pt and rownum = 1)
+                and info_kerja = 'ANDON'
+                group by to_char(tgl_wo,'yyyy'), lok_pt
+                union all
+                select to_char(tgl_wo,'yyyy') thn_wo, lok_pt kd_plant, 0 jml_ls, sum(nvl(est_durasi,0)) jml_pms
+                from tmtcwo1
+                where to_char(tgl_wo,'yyyymm') = '$tahun'||'$bulan'
+                and trunc(tgl_wo) < trunc(sysdate)
+                and pt = 'IGP'
+                and lok_pt in ('A', 'B')
+                and exists (select 1 from mtcm_npk where mtcm_npk.kd_plant = tmtcwo1.lok_pt and rownum = 1)
+                and info_kerja = 'PMS'
+                group by to_char(tgl_wo,'yyyy'), lok_pt) v"))
+                ->select(DB::raw("thn_wo, kd_plant, sum(jml_ls) j_ls, sum(jml_pms) j_pms"))
+                ->groupBy(DB::raw("thn_wo, kd_plant"))
+                ->orderByRaw("thn_wo, kd_plant");
+        } else {
+            $list = DB::connection('oracle-usrbrgcorp')
+                ->table(DB::raw("(select to_char(tgl_wo,'yyyy') thn_wo, lok_pt kd_plant, sum(nvl(line_stop,0)) jml_ls, 0 jml_pms
+                from tmtcwo1
+                where to_char(tgl_wo,'yyyymm') = '$tahun'||'$bulan'
+                and trunc(tgl_wo) < trunc(sysdate)
+                and pt = 'IGP'
+                and lok_pt in ('1', '2', '3')
+                and exists (select 1 from mtcm_npk where mtcm_npk.kd_plant = tmtcwo1.lok_pt and rownum = 1)
+                and info_kerja = 'ANDON'
+                group by to_char(tgl_wo,'yyyy'), lok_pt
+                union all
+                select to_char(tgl_wo,'yyyy') thn_wo, lok_pt kd_plant, 0 jml_ls, sum(nvl(est_durasi,0)) jml_pms
+                from tmtcwo1
+                where to_char(tgl_wo,'yyyymm') = '$tahun'||'$bulan'
+                and trunc(tgl_wo) < trunc(sysdate)
+                and pt = 'IGP'
+                and lok_pt in ('1', '2', '3')
+                and exists (select 1 from mtcm_npk where mtcm_npk.kd_plant = tmtcwo1.lok_pt and rownum = 1)
+                and info_kerja = 'PMS'
+                group by to_char(tgl_wo,'yyyy'), lok_pt) v"))
+                ->select(DB::raw("thn_wo, kd_plant, sum(jml_ls) j_ls, sum(jml_pms) j_pms"))
+                ->groupBy(DB::raw("thn_wo, kd_plant"))
+                ->orderByRaw("thn_wo, kd_plant");
+        }
+        return $list;
+    }
+
+    public function monitoringlch($tahun, $bulan)
+    {
+        $mtct_lch_forklif_reps = DB::table("mtct_lch_forklif_reps")
+            ->select(DB::raw("bulan, tahun, kd_site, kd_forklif, t01_1, t01_2, t01_3, t02_1, t02_2, t02_3, t03_1, t03_2, t03_3, t04_1, t04_2, t04_3, t05_1, t05_2, t05_3, t06_1, t06_2, t06_3, t07_1, t07_2, t07_3, t08_1, t08_2, t08_3, t09_1, t09_2, t09_3, t10_1, t10_2, t10_3, t11_1, t11_2, t11_3, t12_1, t12_2, t12_3, t13_1, t13_2, t13_3, t14_1, t14_2, t14_3, t15_1, t15_2, t15_3, t16_1, t16_2, t16_3, t17_1, t17_2, t17_3, t18_1, t18_2, t18_3, t19_1, t19_2, t19_3, t20_1, t20_2, t20_3, t21_1, t21_2, t21_3, t22_1, t22_2, t22_3, t23_1, t23_2, t23_3, t24_1, t24_2, t24_3, t25_1, t25_2, t25_3, t26_1, t26_2, t26_3, t27_1, t27_2, t27_3, t28_1, t28_2, t28_3, t29_1, t29_2, t29_3, t30_1, t30_2, t30_3, t31_1, t31_2, t31_3"))
+            ->where("tahun", $tahun)
+            ->where("bulan", $bulan)
+            ->orderByRaw("kd_forklif");
+
+        if ($mtct_lch_forklif_reps->get()->count() < 1) {
+            DB::connection("pgsql")->beginTransaction();
+            try {
+                DB::table("mtct_lch_forklif_reps")
+                    ->where("tahun", $tahun)
+                    ->where("bulan", $bulan)
+                    ->delete();
+
+                $mmtcmesins = DB::connection('oracle-usrbrgcorp')
+                    ->table("mmtcmesin")
+                    ->select(DB::raw("kd_mesin, nm_mesin, maker, mdl_type, mfd_thn"))
+                    ->whereRaw("kd_mesin like 'F%' and st_me = 'E' and nvl(st_aktif,'T') = 'T'");
+
+                $dtcrea = Carbon::now();
+                foreach ($mmtcmesins->get() as $mmtcmesin) {
+                    $kd_mesin = $mmtcmesin->kd_mesin;
+
+
+                    $data_detail = [];
+                    $data_detail["bulan"] = $bulan;
+                    $data_detail["tahun"] = $tahun;
+                    $data_detail["kd_site"] = "IGPJ";
+                    $data_detail["kd_forklif"] = $kd_mesin;
+                    $data_detail["dtcrea"] = $dtcrea;
+                    $data_detail["creaby"] = "14438";
+
+                    for ($shift = 1; $shift <= 3; $shift++) {
+                        $param_shift = $shift . "";
+                        for ($tgl = 1; $tgl <= 31; $tgl++) {
+                            $param_tgl = $tgl;
+                            if ($tgl < 10) {
+                                $param_tgl = "0" . $tgl;
+                            }
+
+                            $yyyymmdd = $tahun . "" . $bulan . "" . $param_tgl;
+
+                            $mtct_lch_forklif1 = DB::table("mtct_lch_forklif1s")
+                                ->select(DB::raw("id, (select 'F' from mtct_lch_forklif2s where mtct_lch_forklif2s.mtct_lch_forklif1_id = mtct_lch_forklif1s.id and st_cek = 'F' limit 1) status"))
+                                ->where(DB::raw("to_char(tgl, 'yyyymmdd')"), $yyyymmdd)
+                                ->where("kd_forklif", $kd_mesin)
+                                ->where("shift", $param_shift)
+                                ->first();
+
+                            if ($mtct_lch_forklif1 != null) {
+                                if ($mtct_lch_forklif1->status != null) {
+                                    $data_detail["t" . $param_tgl . "_" . $param_shift] = "NG";
+                                } else {
+                                    $data_detail["t" . $param_tgl . "_" . $param_shift] = "OK";
+                                }
+                            } else {
+                                $data_detail["t" . $param_tgl . "_" . $param_shift] = NULL;
+                            }
+                        }
+                    }
+
+                    DB::table("mtct_lch_forklif_reps")->insert($data_detail);
+                }
+                DB::connection("pgsql")->commit();
+
+                $mtct_lch_forklif_reps = DB::table("mtct_lch_forklif_reps")
+                    ->select(DB::raw("bulan, tahun, kd_site, kd_forklif, t01_1, t01_2, t01_3, t02_1, t02_2, t02_3, t03_1, t03_2, t03_3, t04_1, t04_2, t04_3, t05_1, t05_2, t05_3, t06_1, t06_2, t06_3, t07_1, t07_2, t07_3, t08_1, t08_2, t08_3, t09_1, t09_2, t09_3, t10_1, t10_2, t10_3, t11_1, t11_2, t11_3, t12_1, t12_2, t12_3, t13_1, t13_2, t13_3, t14_1, t14_2, t14_3, t15_1, t15_2, t15_3, t16_1, t16_2, t16_3, t17_1, t17_2, t17_3, t18_1, t18_2, t18_3, t19_1, t19_2, t19_3, t20_1, t20_2, t20_3, t21_1, t21_2, t21_3, t22_1, t22_2, t22_3, t23_1, t23_2, t23_3, t24_1, t24_2, t24_3, t25_1, t25_2, t25_3, t26_1, t26_2, t26_3, t27_1, t27_2, t27_3, t28_1, t28_2, t28_3, t29_1, t29_2, t29_3, t30_1, t30_2, t30_3, t31_1, t31_2, t31_3"))
+                    ->where("tahun", $tahun)
+                    ->where("bulan", $bulan)
+                    ->orderByRaw("kd_forklif");
+            } catch (Exception $ex) {
+                DB::connection("pgsql")->rollback();
+            }
+        }
+
+        return $mtct_lch_forklif_reps;
+    }
+
+    public function mmtcmesinLch($kd_unit)
+    {
+        return DB::connection('oracle-usrbrgcorp')
+            ->table("mmtcmesin")
+            ->select(DB::raw("kd_mesin, nm_mesin, maker, mdl_type, mfd_thn, (select mtct_dpm.lok_pict from mtct_dpm where mtct_dpm.kd_mesin = mmtcmesin.kd_mesin and mtct_dpm.ket_dpm = 'LCH' and nvl(mtct_dpm.st_aktif,'T') = 'T' and rownum = 1) lok_pict"))
+            ->whereRaw("kd_mesin like 'F%' and st_me = 'E' and nvl(st_aktif,'T') = 'T'")
+            ->where("kd_mesin", "=", $kd_unit)
+            ->first();
+    }
+
+    public function mtct_lch_forklif1($kd_unit, $shift, $tgl)
+    {
+        return MtctLchForklif1::where(DB::raw("to_char(tgl,'yyyymmdd')"), $tgl)
+            ->where(DB::raw("shift"), $shift)
+            ->where(DB::raw("kd_forklif"), $kd_unit)
+            ->first();
+    }
+
+    public function mtct_lch_forklif2s($mtct_lch_forklif1_id)
+    {
+        return DB::table("mtct_lch_forklif2s")
+            ->select(DB::raw("mtct_lch_forklif1_id, no_is, no_urut, nm_is, ketentuan, metode, alat, waktu_menit, st_cek, uraian_masalah, pict_masalah, dtcrea, creaby, dtmodi, modiby"))
+            ->where("mtct_lch_forklif1_id", $mtct_lch_forklif1_id)
+            ->orderByRaw("no_urut");
+    }
+
+    public function mtct_asakai_xmline($kd_plant, $tahun, $bulan)
+    {
+        return DB::connection('oracle-usrbrgcorp')
+            ->table(DB::raw("mtct_asakai ma, usrigpmfg.xmline xl"))
+            ->select(DB::raw("ma.kd_plant, ma.kd_line, decode(nvl(xl.inisial,'-'), '-', xl.xnm_line, xl.inisial) nm_line, nvl(ma.prs_target,0) prs_target, avg(ma.prs_bd_rate) prs_bd"))
+            ->whereRaw("ma.kd_line = xl.xkd_line")
+            ->where("ma.thn", $tahun)
+            ->where("ma.bln", $bulan)
+            ->where("ma.kd_plant", $kd_plant)
+            ->groupBy(DB::raw("ma.kd_plant, ma.kd_line, decode(nvl(xl.inisial,'-'), '-', xl.xnm_line, xl.inisial), nvl(ma.prs_target,0)"))
+            ->orderByRaw("ma.kd_line");
+    }
+
+    public function fnm_linex($kd_line)
+    {
+        return DB::connection('oracle-usrbrgcorp')
+            ->table("dual")
+            ->selectRaw("nvl(usrigpmfg.fnm_linex('$kd_line'),'-') nm_line")
+            ->value("nm_line");
+    }
+
+    public function mtct_asakai($kd_plant, $tahun, $bulan, $kd_line)
+    {
+        return DB::connection('oracle-usrbrgcorp')
+            ->table(DB::raw("(
+    		select ma.bln, ma.kd_plant, ma.kd_line, ma.load_time, ma.prs_bd_rate bd_current, 0 bd_last 
+    		from mtct_asakai ma 
+    		where ma.thn = '$tahun' 
+    		and ma.bln <= '$bulan' 
+    		and ma.kd_plant = '$kd_plant' 
+    		union all 
+    		select ma.bln, ma.kd_plant, ma.kd_line, 0 load_time, 0 bd_current, ma.prs_bd_rate bd_last 
+    		from mtct_asakai ma 
+    		where ma.thn = '$tahun'-1 
+    		and ma.bln <= '$bulan' 
+    		and ma.kd_plant = '$kd_plant' 
+    		) v"))
+            ->select(DB::raw("bln, kd_plant, kd_line, usrigpmfg.fnm_linex(kd_line) nm_line, sum(load_time) load_time, sum(bd_current) bd_current, sum(bd_last) bd_last"))
+            ->where("kd_line", $kd_line)
+            ->groupBy(DB::raw("bln, kd_plant, kd_line"))
+            ->orderByRaw("bln");
+    }
+
+    public function tmtcwo1_mschtgl($kd_plant, $tahun, $bulan, $kd_line)
+    {
+        return DB::connection('oracle-usrbrgcorp')
+            ->table(DB::raw("(
+    		select lpad(ms.tgl,2,'0') tgl, ms.ket, 50 plan_mnt, sum(t1.est_durasi) act_mnt
+    		from tmtcwo1 t1, usrhrcorp.mschtgl ms
+    		where trunc(t1.tgl_wo) = ms.dtgl
+    		and t1.pt = 'IGP'
+    		and t1.lok_pt = '$kd_plant'
+    		and t1.kd_line = '$kd_line'
+    		and to_char(t1.tgl_wo,'yyyymm') = '$tahun'||'$bulan'
+    		and t1.info_kerja = 'ANDON'
+    		group by lpad(ms.tgl,2,'0'), ms.ket
+    		union all
+    		select lpad(tgl,2,'0') tgl, ket, 0 plan_mnt, 0 act_mnt
+    		from usrhrcorp.mschtgl
+    		where bln = '$bulan'
+    		and thn = '$tahun'
+    		) v"))
+            ->select(DB::raw("tgl, ket, sum(plan_mnt) plan_mnt, sum(act_mnt) act_mnt"))
+            ->groupBy(DB::raw("tgl, ket"))
+            ->orderByRaw("tgl");
+    }
+
+    public function mtctdftmslhs($kd_plant, $lok_zona, $status_apr = null)
+    {
+        if ($status_apr == null) {
+            $status_apr = "ALL";
+        }
+        if ($status_apr === "ALL") {
+            $mtctdftmslhs = DB::connection('oracle-usrbrgcorp')
+                ->table(DB::raw("(
+    			select no_dm, tgl_dm, kd_site, kd_line, kd_line||' - '||(select nvl(xm.inisial,'-') from usrigpmfg.xmline xm where xm.xkd_line = mtct_dft_mslh.kd_line and rownum = 1) line, kd_mesin, kd_mesin||' - '||nvl(fnm_mesin(kd_mesin),'-') mesin, ket_prob, ket_cm, ket_sp, ket_eva_hasil, ket_remain, ket_remark, creaby, usrhrcorp.fnm_npk(creaby) nm_creaby, dtcrea, modiby, usrhrcorp.fnm_npk(modiby) nm_modiby, dtmodi, lok_pict, submit_tgl, submit_npk, usrhrcorp.fnm_npk(submit_npk) nm_submit, apr_pic_npk, usrhrcorp.fnm_npk(apr_pic_npk) nm_apr_pic, apr_pic_tgl, apr_fm_npk, usrhrcorp.fnm_npk(apr_fm_npk) nm_apr_fm, apr_fm_tgl, apr_sh_npk, usrhrcorp.fnm_npk(apr_sh_npk) nm_apr_sh, apr_sh_tgl, rjt_tgl, rjt_npk, usrhrcorp.fnm_npk(rjt_npk) nm_rjt, rjt_ket, rjt_st, kd_plant, no_pi, npk_close, tgl_close, tgl_plan_mulai, tgl_plan_selesai, tgl_plan_cms, st_cms, (select no_wo from tmtcwo1 where tmtcwo1.no_dm = mtct_dft_mslh.no_dm and rownum = 1) as no_lp from mtct_dft_mslh where to_char(tgl_dm,'yyyymm') >= to_char(add_months(trunc(sysdate), -6),'yyyymm') and rjt_tgl is null and kd_plant = '$kd_plant' and exists (select 1 from mmtcmesin v where v.kd_mesin = mtct_dft_mslh.kd_mesin and nvl(v.lok_zona,'-') = '$lok_zona' and rownum = 1)
+    			) m"))
+                ->select(DB::raw("no_dm, tgl_dm, kd_site, kd_line, line, kd_mesin, mesin, ket_prob, ket_cm, ket_sp, ket_eva_hasil, ket_remain, ket_remark, creaby, nm_creaby, dtcrea, modiby, nm_modiby, dtmodi, lok_pict, submit_tgl, submit_npk, nm_submit, apr_pic_npk, nm_apr_pic, apr_pic_tgl, apr_fm_npk, nm_apr_fm, apr_fm_tgl, apr_sh_npk, nm_apr_sh, apr_sh_tgl, rjt_tgl, rjt_npk, nm_rjt, rjt_ket, rjt_st, kd_plant, no_pi, npk_close, tgl_close, tgl_plan_mulai, tgl_plan_selesai, tgl_plan_cms, st_cms, no_lp"))
+                ->orderByRaw("tgl_dm desc, kd_mesin, kd_line");
+        } else if ($status_apr === "LP") {
+            $mtctdftmslhs = DB::connection('oracle-usrbrgcorp')
+                ->table(DB::raw("(
+    			select no_dm, tgl_dm, kd_site, kd_line, kd_line||' - '||(select nvl(xm.inisial,'-') from usrigpmfg.xmline xm where xm.xkd_line = mtct_dft_mslh.kd_line and rownum = 1) line, kd_mesin, kd_mesin||' - '||nvl(fnm_mesin(kd_mesin),'-') mesin, ket_prob, ket_cm, ket_sp, ket_eva_hasil, ket_remain, ket_remark, creaby, usrhrcorp.fnm_npk(creaby) nm_creaby, dtcrea, modiby, usrhrcorp.fnm_npk(modiby) nm_modiby, dtmodi, lok_pict, submit_tgl, submit_npk, usrhrcorp.fnm_npk(submit_npk) nm_submit, apr_pic_npk, usrhrcorp.fnm_npk(apr_pic_npk) nm_apr_pic, apr_pic_tgl, apr_fm_npk, usrhrcorp.fnm_npk(apr_fm_npk) nm_apr_fm, apr_fm_tgl, apr_sh_npk, usrhrcorp.fnm_npk(apr_sh_npk) nm_apr_sh, apr_sh_tgl, rjt_tgl, rjt_npk, usrhrcorp.fnm_npk(rjt_npk) nm_rjt, rjt_ket, rjt_st, kd_plant, no_pi, npk_close, tgl_close, tgl_plan_mulai, tgl_plan_selesai, tgl_plan_cms, st_cms, (select no_wo from tmtcwo1 where tmtcwo1.no_dm = mtct_dft_mslh.no_dm and rownum = 1) as no_lp from mtct_dft_mslh where to_char(tgl_dm,'yyyymm') >= to_char(add_months(trunc(sysdate), -6),'yyyymm') and rjt_tgl is null and kd_plant = '$kd_plant' and exists (select 1 from mmtcmesin v where v.kd_mesin = mtct_dft_mslh.kd_mesin and nvl(v.lok_zona,'-') = '$lok_zona' and rownum = 1) and submit_tgl is not null and apr_pic_tgl is not null and apr_fm_tgl is not null
+    			) m"))
+                ->select(DB::raw("no_dm, tgl_dm, kd_site, kd_line, line, kd_mesin, mesin, ket_prob, ket_cm, ket_sp, ket_eva_hasil, ket_remain, ket_remark, creaby, nm_creaby, dtcrea, modiby, nm_modiby, dtmodi, lok_pict, submit_tgl, submit_npk, nm_submit, apr_pic_npk, nm_apr_pic, apr_pic_tgl, apr_fm_npk, nm_apr_fm, apr_fm_tgl, apr_sh_npk, nm_apr_sh, apr_sh_tgl, rjt_tgl, rjt_npk, nm_rjt, rjt_ket, rjt_st, kd_plant, no_pi, npk_close, tgl_close, tgl_plan_mulai, tgl_plan_selesai, tgl_plan_cms, st_cms, no_lp"))
+                ->whereNotNull("no_lp")
+                ->orderByRaw("tgl_dm desc, kd_mesin, kd_line");
+        } else if ($status_apr === "OPEN") {
+            $mtctdftmslhs = DB::connection('oracle-usrbrgcorp')
+                ->table(DB::raw("(
+    			select no_dm, tgl_dm, kd_site, kd_line, kd_line||' - '||(select nvl(xm.inisial,'-') from usrigpmfg.xmline xm where xm.xkd_line = mtct_dft_mslh.kd_line and rownum = 1) line, kd_mesin, kd_mesin||' - '||nvl(fnm_mesin(kd_mesin),'-') mesin, ket_prob, ket_cm, ket_sp, ket_eva_hasil, ket_remain, ket_remark, creaby, usrhrcorp.fnm_npk(creaby) nm_creaby, dtcrea, modiby, usrhrcorp.fnm_npk(modiby) nm_modiby, dtmodi, lok_pict, submit_tgl, submit_npk, usrhrcorp.fnm_npk(submit_npk) nm_submit, apr_pic_npk, usrhrcorp.fnm_npk(apr_pic_npk) nm_apr_pic, apr_pic_tgl, apr_fm_npk, usrhrcorp.fnm_npk(apr_fm_npk) nm_apr_fm, apr_fm_tgl, apr_sh_npk, usrhrcorp.fnm_npk(apr_sh_npk) nm_apr_sh, apr_sh_tgl, rjt_tgl, rjt_npk, usrhrcorp.fnm_npk(rjt_npk) nm_rjt, rjt_ket, rjt_st, kd_plant, no_pi, npk_close, tgl_close, tgl_plan_mulai, tgl_plan_selesai, tgl_plan_cms, st_cms, (select no_wo from tmtcwo1 where tmtcwo1.no_dm = mtct_dft_mslh.no_dm and rownum = 1) as no_lp from mtct_dft_mslh where to_char(tgl_dm,'yyyymm') >= to_char(add_months(trunc(sysdate), -6),'yyyymm') and rjt_tgl is null and kd_plant = '$kd_plant' and exists (select 1 from mmtcmesin v where v.kd_mesin = mtct_dft_mslh.kd_mesin and nvl(v.lok_zona,'-') = '$lok_zona' and rownum = 1)
+    			) m"))
+                ->select(DB::raw("no_dm, tgl_dm, kd_site, kd_line, line, kd_mesin, mesin, ket_prob, ket_cm, ket_sp, ket_eva_hasil, ket_remain, ket_remark, creaby, nm_creaby, dtcrea, modiby, nm_modiby, dtmodi, lok_pict, submit_tgl, submit_npk, nm_submit, apr_pic_npk, nm_apr_pic, apr_pic_tgl, apr_fm_npk, nm_apr_fm, apr_fm_tgl, apr_sh_npk, nm_apr_sh, apr_sh_tgl, rjt_tgl, rjt_npk, nm_rjt, rjt_ket, rjt_st, kd_plant, no_pi, npk_close, tgl_close, tgl_plan_mulai, tgl_plan_selesai, tgl_plan_cms, st_cms, no_lp"))
+                ->whereNull("no_lp")
+                ->orderByRaw("tgl_dm desc, kd_mesin, kd_line");
+        }
+        return $mtctdftmslhs;
+    }
+
+    public function pmsachievementByTahun($kd_plant, $lok_zona, $tahun)
+    {
+        return DB::connection('oracle-usrbrgcorp')
+            ->table(DB::raw("(select bln_pms, kd_plant, count(no_pms) jml_plan, 0 jml_act 
+          from mtct_pms 
+          where thn_pms = '$tahun' 
+          and to_date(tgl_pms||'-'||bln_pms||'-'||thn_pms,'dd-mm-yyyy') < trunc(sysdate) 
+          and kd_plant = '$kd_plant' 
+          and st_cek = 'T' 
+          and exists (select 'T' from mmtcmesin v where v.kd_mesin = mtct_pms.kd_mesin and nvl(v.lok_zona,'-') = '$lok_zona'  and rownum = 1) 
+          group by bln_pms, kd_plant 
+          union all 
+          select bln_pms, kd_plant, 0 jml_plan, count(no_pms) jml_act 
+          from mtct_pms 
+          where thn_pms = '$tahun' 
+          and to_date(tgl_pms||'-'||bln_pms||'-'||thn_pms,'dd-mm-yyyy') < trunc(sysdate) 
+          and kd_plant = '$kd_plant' 
+          and st_cek = 'T' 
+          and exists (select 'T' from mmtcmesin v where v.kd_mesin = mtct_pms.kd_mesin and nvl(v.lok_zona,'-') = '$lok_zona'  and rownum = 1) 
+          and tgl_tarik is not null 
+          group by bln_pms, kd_plant
+        ) v"))
+            ->select(DB::raw("bln_pms, kd_plant, nvl(sum(jml_plan),0) j_plan, nvl(sum(jml_act),0) j_act"))
+            ->groupBy(DB::raw("bln_pms, kd_plant"));
+    }
+
+    public function pmsachievementByBulan($kd_plant, $lok_zona, $tahun, $bulan)
+    {
+        return DB::connection('oracle-usrbrgcorp')
+            ->table(DB::raw("(select thn_pms, bln_pms, kd_plant, count(no_pms) jml_plan, 0 jml_act 
+          from mtct_pms 
+          where thn_pms = '$tahun' 
+          and bln_pms = '$bulan' 
+          and to_date(tgl_pms||'-'||bln_pms||'-'||thn_pms,'dd-mm-yyyy') < trunc(sysdate) 
+          and kd_plant = '$kd_plant' 
+          and st_cek = 'T' 
+          and exists (select 'T' from mmtcmesin v where v.kd_mesin = mtct_pms.kd_mesin and nvl(v.lok_zona,'-') = '$lok_zona'  and rownum = 1) 
+          group by thn_pms, bln_pms, kd_plant 
+          union all 
+          select thn_pms, bln_pms, kd_plant, 0 jml_plan, count(no_pms) jml_act 
+          from mtct_pms 
+          where thn_pms = '$tahun' 
+          and bln_pms = '$bulan' 
+          and to_date(tgl_pms||'-'||bln_pms||'-'||thn_pms,'dd-mm-yyyy') < trunc(sysdate) 
+          and kd_plant = '$kd_plant' 
+          and st_cek = 'T' 
+          and exists (select 'T' from mmtcmesin v where v.kd_mesin = mtct_pms.kd_mesin and nvl(v.lok_zona,'-') = '$lok_zona'  and rownum = 1) 
+          and tgl_tarik is not null 
+          group by thn_pms, bln_pms, kd_plant
+        ) v"))
+            ->select(DB::raw("thn_pms, bln_pms, kd_plant, nvl(sum(jml_plan),0) j_plan, nvl(sum(jml_act),0) j_act"))
+            ->groupBy(DB::raw("thn_pms, bln_pms, kd_plant"));
+    }
+
+    public function pmsachievementLineByBulan($kd_plant, $lok_zona, $tahun, $bulan)
+    {
+        return DB::connection('oracle-usrbrgcorp')
+            ->table(DB::raw("(select thn_pms, bln_pms, kd_plant, kd_line, count(no_pms) jml_plan, 0 jml_act 
+          from mtct_pms 
+          where thn_pms = '$tahun' 
+          and bln_pms = '$bulan' 
+          and to_date(tgl_pms||'-'||bln_pms||'-'||thn_pms,'dd-mm-yyyy') < trunc(sysdate) 
+          and kd_plant = '$kd_plant' 
+          and st_cek = 'T' 
+          and exists (select 'T' from mmtcmesin v where v.kd_mesin = mtct_pms.kd_mesin and nvl(v.lok_zona,'-') = '$lok_zona' and rownum = 1) 
+          group by thn_pms, bln_pms, kd_plant, kd_line 
+          union all 
+          select thn_pms, bln_pms, kd_plant, kd_line, 0 jml_plan, count(no_pms) jml_act 
+          from mtct_pms 
+          where thn_pms = '$tahun' 
+          and bln_pms = '$bulan' 
+          and to_date(tgl_pms||'-'||bln_pms||'-'||thn_pms,'dd-mm-yyyy') < trunc(sysdate) 
+          and kd_plant = '$kd_plant' 
+          and st_cek = 'T' 
+          and exists (select 'T' from mmtcmesin v where v.kd_mesin = mtct_pms.kd_mesin and nvl(v.lok_zona,'-') = '$lok_zona' and rownum = 1) 
+          and tgl_tarik is not null 
+          group by thn_pms, bln_pms, kd_plant, kd_line
+        ) jm, usrigpmfg.xmline xl"))
+            ->select(DB::raw("jm.thn_pms, jm.bln_pms, jm.kd_plant, jm.kd_line, decode(nvl(xl.inisial,'-'), '-', xl.xnm_line, xl.inisial) nm_line, nvl(sum(jm.jml_plan),0) j_plan, nvl(sum(jm.jml_act),0) j_act"))
+            ->whereRaw("jm.kd_line = xl.xkd_line")
+            ->groupBy(DB::raw("jm.thn_pms, jm.bln_pms, jm.kd_plant, jm.kd_line, decode(nvl(xl.inisial,'-'), '-', xl.xnm_line, xl.inisial)"))
+            ->orderByRaw("1,2,4");
+    }
+
+    public function pmsachievementprogressmesin($kd_plant, $lok_zona, $periode)
+    {
+        return DB::connection("oracle-usrbrgcorp")
+            ->table(DB::raw("(select kd_mesin, nm_mesin, sum(plan) plan, sum(actual) actual, round((sum(actual)/sum(plan))*100,2) persen from (select p.kd_mesin, nvl(fnm_mesin(p.kd_mesin),'-') nm_mesin, count(p.no_pms) plan, 0 actual from mtct_pms p, mmtcmesin m where p.kd_mesin = m.kd_mesin and nvl(m.lok_zona,'-') = '$lok_zona' and nvl(p.st_cek,'F') = 'T' and p.thn_pms||p.bln_pms = '$periode' and p.kd_plant = '$kd_plant' group by p.kd_mesin union all select p.kd_mesin, nvl(fnm_mesin(p.kd_mesin),'-') nm_mesin, 0 plan, count(p.no_pms) actual from mtct_pms p, mmtcmesin m where p.kd_mesin = m.kd_mesin and nvl(m.lok_zona,'-') = '$lok_zona' and nvl(p.st_cek,'F') = 'T' and p.thn_pms||p.bln_pms = '$periode' and p.kd_plant = '$kd_plant' and p.tgl_tarik is not null group by p.kd_mesin) group by kd_mesin, nm_mesin) v"))
+            ->select(db::raw("kd_mesin, nm_mesin, plan, actual, persen"));
+    }
+
+    public function baan_whs()
+    {
+        return $baan_whs = DB::connection('oracle-usrbaan')
+            ->table("baan_whs")
+            ->selectRaw("kd_cwar, nm_dsca")
+            ->whereRaw("kd_cwar in ('JWJTS','KWJTS')")
+            ->orderBy("kd_cwar");
+    }
+
+    public function dashboardstockohigp($whs = null, $item = null, $kd_mesin = null)
+    {
+        if ($whs != null) {
+            $lists = DB::table(DB::raw("(select item, item_name, whse, qty, dtcrea from stockohigps where whse in ('JWJTS','KWJTS')) st"))
+                ->select(DB::raw("item, item_name, whse, qty, dtcrea, 
+                (select 'T' from ppcv_pp v where v.kd_site = 'IGP'||substr(st.whse, 1, 1) and v.item_no = st.item limit 1) pp_out, (select 'T' from ppcv_po v where v.kd_site = 'IGP'||substr(st.whse, 1, 1) and v.item_no = st.item limit 1) po_out"));
+            // ->select(DB::raw("item, item_name, whse, qty, dtcrea, 'T' pp_out, 'T' po_out"));
+
+            if ($kd_mesin != null) {
+                if ($item != null) {
+                    $lists->whereRaw("exists (select 1 from vw_dpm_boms where vw_dpm_boms.item_no = st.item and vw_dpm_boms.kd_mesin = '$kd_mesin' and vw_dpm_boms.item_no = '$item')");
+                } else {
+                    $lists->whereRaw("exists (select 1 from vw_dpm_boms where vw_dpm_boms.item_no = st.item and vw_dpm_boms.kd_mesin = '$kd_mesin')");
+                }
+            }
+            if ($whs != null) {
+                if ($whs !== "ALL") {
+                    $lists->where("whse", $whs);
+                }
+            }
+            if ($item != null) {
+                $lists->where("item", $item);
+            }
+            return $lists->orderByRaw("qty, item, whse");
+        } else {
+            $lists = DB::table("users")
+                ->select(DB::raw("*"))
+                ->whereRaw("id = 0");
+            return $lists;
+        }
+    }
+
+    public function dashboardmesinstockohigp($kd_mesin = null)
+    {
+        $lists = DB::connection('oracle-usrbrgcorp')
+            ->table(DB::raw("(select kd_mesin, item_no, nil_qpu from vw_mesin_dpm_bom where length(item_no) <> 17 and substr(item_no,1,3) <> 'P17' order by kd_mesin, nil_qpu) v"))
+            ->select(DB::raw("kd_mesin, item_no, nil_qpu"));
+
+        if ($kd_mesin != null && $kd_mesin !== "") {
+            $lists->where("kd_mesin", $kd_mesin);
+        }
+        return $lists;
+    }
+
+
+    public function dashboardmtctpms($status, $kd_plant, $lok_zona, $tgl, $periode = null)
+    {
+        if ($status === "OUTSTANDING") {
+            if ($periode == null) {
+                $mtctpmss = DB::connection("oracle-usrbrgcorp")
+                    ->table(DB::raw("(SELECT 'OUTSTANDING' ST_OUT_CUR, XM.LOK_ZONA, PMS.KD_PLANT, PMS.KD_LINE, PMS.KD_MESIN, PMS.NO_PMS, MS.NO_MS, DPM.NO_DPM, PMS.THN_PMS, PMS.BLN_PMS, LPAD(PMS.TGL_PMS,2,'0') TGL_PMS, LPAD(PMS.TGL_PMS,2,'0')||'-'||PMS.BLN_PMS||'-'||PMS.THN_PMS NM_TGL, IC.NM_IC, PMS.NPK_PIC, PMS.ST_CEK, PMS.TGL_TARIK, PMS.PIC_TARIK, USRHRCORP.FNM_NPK(PMS.PIC_TARIK) NM_PIC_TARIK, PMS.PENDING_KET, PMS.PENDING_TGL, PMS.PENDING_PIC, USRHRCORP.FNM_NPK(PMS.PENDING_PIC) NM_PENDING_PIC, PMS.THN_PMS||PMS.BLN_PMS||LPAD(PMS.TGL_PMS,2,'0') PERIODE, (SELECT WM_CONCAT(DISTINCT LP.NO_WO) FROM TMTCWO1 LP WHERE LP.NO_PMS = PMS.NO_PMS) NO_LP, (SELECT WM_CONCAT(DISTINCT DM.NO_DM) FROM MTCT_PMS_IS PMIS, MTCT_DFT_MSLH DM WHERE PMIS.NO_PMS = PMS.NO_PMS AND PMIS.NO_PI = DM.NO_PI) NO_DM, DPM.LOK_PICT FROM MTCT_PMS PMS, MTCT_MS MS, MTCT_DPM DPM, MTCT_ITEM_CEK IC, MMTCMESIN XM WHERE PMS.NO_MS = MS.NO_MS AND MS.NO_DPM = DPM.NO_DPM AND DPM.NO_IC = IC.NO_IC AND DPM.KD_MESIN = XM.KD_MESIN AND PMS.ST_CEK = 'T' AND PMS.TGL_TARIK IS NULL) v"))
+                    ->select(DB::raw("PERIODE, ST_OUT_CUR, LOK_ZONA, KD_PLANT, KD_LINE, KD_MESIN, NO_PMS, NO_MS, NO_DPM, THN_PMS, BLN_PMS, TGL_PMS, NM_TGL, NM_IC, NPK_PIC, ST_CEK, TGL_TARIK, PIC_TARIK, NM_PIC_TARIK, PENDING_KET, PENDING_TGL, PENDING_PIC, NM_PENDING_PIC, NO_LP, NO_DM, LOK_PICT"))
+                    ->where("KD_PLANT", "=", $kd_plant)
+                    ->where("LOK_ZONA", "=", $lok_zona)
+                    ->where("PERIODE", "<", $tgl);
+            } else {
+                $mtctpmss = DB::connection("oracle-usrbrgcorp")
+                    ->table(DB::raw("(SELECT 'OUTSTANDING' ST_OUT_CUR, XM.LOK_ZONA, PMS.KD_PLANT, PMS.KD_LINE, PMS.KD_MESIN, PMS.NO_PMS, MS.NO_MS, DPM.NO_DPM, PMS.THN_PMS, PMS.BLN_PMS, LPAD(PMS.TGL_PMS,2,'0') TGL_PMS, LPAD(PMS.TGL_PMS,2,'0')||'-'||PMS.BLN_PMS||'-'||PMS.THN_PMS NM_TGL, IC.NM_IC, PMS.NPK_PIC, PMS.ST_CEK, PMS.TGL_TARIK, PMS.PIC_TARIK, USRHRCORP.FNM_NPK(PMS.PIC_TARIK) NM_PIC_TARIK, PMS.PENDING_KET, PMS.PENDING_TGL, PMS.PENDING_PIC, USRHRCORP.FNM_NPK(PMS.PENDING_PIC) NM_PENDING_PIC, PMS.THN_PMS||PMS.BLN_PMS||LPAD(PMS.TGL_PMS,2,'0') PERIODE, (SELECT WM_CONCAT(DISTINCT LP.NO_WO) FROM TMTCWO1 LP WHERE LP.NO_PMS = PMS.NO_PMS) NO_LP, (SELECT WM_CONCAT(DISTINCT DM.NO_DM) FROM MTCT_PMS_IS PMIS, MTCT_DFT_MSLH DM WHERE PMIS.NO_PMS = PMS.NO_PMS AND PMIS.NO_PI = DM.NO_PI) NO_DM, DPM.LOK_PICT FROM MTCT_PMS PMS, MTCT_MS MS, MTCT_DPM DPM, MTCT_ITEM_CEK IC, MMTCMESIN XM WHERE PMS.NO_MS = MS.NO_MS AND MS.NO_DPM = DPM.NO_DPM AND DPM.NO_IC = IC.NO_IC AND DPM.KD_MESIN = XM.KD_MESIN AND PMS.ST_CEK = 'T' AND PMS.TGL_TARIK IS NULL) v"))
+                    ->select(DB::raw("PERIODE, ST_OUT_CUR, LOK_ZONA, KD_PLANT, KD_LINE, KD_MESIN, NO_PMS, NO_MS, NO_DPM, THN_PMS, BLN_PMS, TGL_PMS, NM_TGL, NM_IC, NPK_PIC, ST_CEK, TGL_TARIK, PIC_TARIK, NM_PIC_TARIK, PENDING_KET, PENDING_TGL, PENDING_PIC, NM_PENDING_PIC, NO_LP, NO_DM, LOK_PICT"))
+                    ->where("KD_PLANT", "=", $kd_plant)
+                    ->where("LOK_ZONA", "=", $lok_zona)
+                    ->where(DB::raw("THN_PMS||BLN_PMS"), "=", $periode)
+                    ->where("PERIODE", "<", $tgl);
+            }
+        } else {
+            $mtctpmss = DB::connection("oracle-usrbrgcorp")
+                ->table(DB::raw("(SELECT 'CURRENT' ST_OUT_CUR, XM.LOK_ZONA, PMS.KD_PLANT, PMS.KD_LINE, PMS.KD_MESIN, PMS.NO_PMS, MS.NO_MS, DPM.NO_DPM, PMS.THN_PMS, PMS.BLN_PMS, LPAD(PMS.TGL_PMS,2,'0') TGL_PMS, LPAD(PMS.TGL_PMS,2,'0')||'-'||PMS.BLN_PMS||'-'||PMS.THN_PMS NM_TGL, IC.NM_IC, PMS.NPK_PIC, PMS.ST_CEK, PMS.TGL_TARIK, PMS.PIC_TARIK, USRHRCORP.FNM_NPK(PMS.PIC_TARIK) NM_PIC_TARIK, PMS.PENDING_KET, PMS.PENDING_TGL, PMS.PENDING_PIC, USRHRCORP.FNM_NPK(PMS.PENDING_PIC) NM_PENDING_PIC, PMS.THN_PMS||PMS.BLN_PMS||LPAD(PMS.TGL_PMS,2,'0') PERIODE, (SELECT WM_CONCAT(DISTINCT LP.NO_WO) FROM TMTCWO1 LP WHERE LP.NO_PMS = PMS.NO_PMS) NO_LP, (SELECT WM_CONCAT(DISTINCT DM.NO_DM) FROM MTCT_PMS_IS PMIS, MTCT_DFT_MSLH DM WHERE PMIS.NO_PMS = PMS.NO_PMS AND PMIS.NO_PI = DM.NO_PI) NO_DM, DPM.LOK_PICT FROM MTCT_PMS PMS, MTCT_MS MS, MTCT_DPM DPM, MTCT_ITEM_CEK IC, MMTCMESIN XM WHERE PMS.NO_MS = MS.NO_MS AND MS.NO_DPM = DPM.NO_DPM AND DPM.NO_IC = IC.NO_IC AND DPM.KD_MESIN = XM.KD_MESIN AND PMS.ST_CEK = 'T') v"))
+                ->select(DB::raw("PERIODE, ST_OUT_CUR, LOK_ZONA, KD_PLANT, KD_LINE, KD_MESIN, NO_PMS, NO_MS, NO_DPM, THN_PMS, BLN_PMS, TGL_PMS, NM_TGL, NM_IC, NPK_PIC, ST_CEK, TGL_TARIK, PIC_TARIK, NM_PIC_TARIK, PENDING_KET, PENDING_TGL, PENDING_PIC, NM_PENDING_PIC, NO_LP, NO_DM, LOK_PICT"))
+                ->where("KD_PLANT", "=", $kd_plant)
+                ->where("LOK_ZONA", "=", $lok_zona)
+                ->where("PERIODE", "=", $tgl);
+        }
+        return $mtctpmss;
+    }
+
+    public function dashboarddmmtctpms($status_cms, $kd_plant, $lok_zona, $tgl)
+    {
+        if ($status_cms === "F") {
+            $mtctdftmslhs = DB::connection('oracle-usrbrgcorp')
+                ->table(DB::raw("(
+    			select no_dm, tgl_dm, kd_site, kd_line, kd_line||' - '||(select nvl(xm.inisial,'-') from usrigpmfg.xmline xm where xm.xkd_line = mtct_dft_mslh.kd_line and rownum = 1) line, kd_mesin, kd_mesin||' - '||nvl(fnm_mesin(kd_mesin),'-') mesin, ket_prob, ket_cm, ket_sp, ket_eva_hasil, ket_remain, ket_remark, creaby, usrhrcorp.fnm_npk(creaby) nm_creaby, dtcrea, modiby, usrhrcorp.fnm_npk(modiby) nm_modiby, dtmodi, lok_pict, submit_tgl, submit_npk, usrhrcorp.fnm_npk(submit_npk) nm_submit, apr_pic_npk, usrhrcorp.fnm_npk(apr_pic_npk) nm_apr_pic, apr_pic_tgl, apr_fm_npk, usrhrcorp.fnm_npk(apr_fm_npk) nm_apr_fm, apr_fm_tgl, apr_sh_npk, usrhrcorp.fnm_npk(apr_sh_npk) nm_apr_sh, apr_sh_tgl, rjt_tgl, rjt_npk, usrhrcorp.fnm_npk(rjt_npk) nm_rjt, rjt_ket, rjt_st, kd_plant, no_pi, npk_close, tgl_close, tgl_plan_mulai, tgl_plan_selesai, tgl_plan_cms, nvl(st_cms,'F') st_cms, (select no_wo from tmtcwo1 where tmtcwo1.no_dm = mtct_dft_mslh.no_dm and rownum = 1) as no_lp 
+    			from mtct_dft_mslh 
+    			where submit_tgl is not null 
+    			and apr_pic_tgl is not null 
+    			and apr_fm_tgl is not null 
+    			and rjt_tgl is null 
+    			and nvl(st_cms,'F') = 'F' 
+    			and kd_plant = '$kd_plant' 
+    			and exists (select 1 from mmtcmesin v where v.kd_mesin = mtct_dft_mslh.kd_mesin and nvl(v.lok_zona,'-') = '$lok_zona' and rownum = 1) 
+    			and tgl_plan_mulai is not null 
+    			and (to_char(tgl_plan_mulai,'yyyymmdd') = '$tgl' or (to_char(tgl_plan_mulai,'yyyymmdd') <= '$tgl' and not exists (select 1 from tmtcwo1 where tmtcwo1.no_dm = mtct_dft_mslh.no_dm and rownum = 1))) 
+    			) m"))
+                ->select(DB::raw("no_dm, tgl_dm, kd_site, kd_line, line, kd_mesin, mesin, ket_prob, ket_cm, ket_sp, ket_eva_hasil, ket_remain, ket_remark, creaby, nm_creaby, dtcrea, modiby, nm_modiby, dtmodi, lok_pict, submit_tgl, submit_npk, nm_submit, apr_pic_npk, nm_apr_pic, apr_pic_tgl, apr_fm_npk, nm_apr_fm, apr_fm_tgl, apr_sh_npk, nm_apr_sh, apr_sh_tgl, rjt_tgl, rjt_npk, nm_rjt, rjt_ket, rjt_st, kd_plant, no_pi, npk_close, tgl_close, tgl_plan_mulai, tgl_plan_selesai, tgl_plan_cms, st_cms, no_lp"));
+        } else {
+            $mtctdftmslhs = DB::connection('oracle-usrbrgcorp')
+                ->table(DB::raw("(
+    			select no_dm, tgl_dm, kd_site, kd_line, kd_line||' - '||(select nvl(xm.inisial,'-') from usrigpmfg.xmline xm where xm.xkd_line = mtct_dft_mslh.kd_line and rownum = 1) line, kd_mesin, kd_mesin||' - '||nvl(fnm_mesin(kd_mesin),'-') mesin, ket_prob, ket_cm, ket_sp, ket_eva_hasil, ket_remain, ket_remark, creaby, usrhrcorp.fnm_npk(creaby) nm_creaby, dtcrea, modiby, usrhrcorp.fnm_npk(modiby) nm_modiby, dtmodi, lok_pict, submit_tgl, submit_npk, usrhrcorp.fnm_npk(submit_npk) nm_submit, apr_pic_npk, usrhrcorp.fnm_npk(apr_pic_npk) nm_apr_pic, apr_pic_tgl, apr_fm_npk, usrhrcorp.fnm_npk(apr_fm_npk) nm_apr_fm, apr_fm_tgl, apr_sh_npk, usrhrcorp.fnm_npk(apr_sh_npk) nm_apr_sh, apr_sh_tgl, rjt_tgl, rjt_npk, usrhrcorp.fnm_npk(rjt_npk) nm_rjt, rjt_ket, rjt_st, kd_plant, no_pi, npk_close, tgl_close, tgl_plan_mulai, tgl_plan_selesai, tgl_plan_cms, nvl(st_cms,'F') st_cms, (select no_wo from tmtcwo1 where tmtcwo1.no_dm = mtct_dft_mslh.no_dm and rownum = 1) as no_lp 
+    			from mtct_dft_mslh 
+    			where submit_tgl is not null 
+    			and apr_pic_tgl is not null 
+    			and apr_fm_tgl is not null 
+    			and rjt_tgl is null 
+    			and nvl(st_cms,'F') = 'T' 
+    			and kd_plant = '$kd_plant' 
+    			and exists (select 1 from mmtcmesin v where v.kd_mesin = mtct_dft_mslh.kd_mesin and nvl(v.lok_zona,'-') = '$lok_zona' and rownum = 1)
+    			and tgl_plan_cms is not null 
+    			and (to_char(tgl_plan_cms,'yyyymmdd') = '$tgl' or (to_char(tgl_plan_cms,'yyyymmdd') <= '$tgl' and not exists (select 1 from tmtcwo1 where tmtcwo1.no_dm = mtct_dft_mslh.no_dm and rownum = 1))) 
+    			) m"))
+                ->select(DB::raw("no_dm, tgl_dm, kd_site, kd_line, line, kd_mesin, mesin, ket_prob, ket_cm, ket_sp, ket_eva_hasil, ket_remain, ket_remark, creaby, nm_creaby, dtcrea, modiby, nm_modiby, dtmodi, lok_pict, submit_tgl, submit_npk, nm_submit, apr_pic_npk, nm_apr_pic, apr_pic_tgl, apr_fm_npk, nm_apr_fm, apr_fm_tgl, apr_sh_npk, nm_apr_sh, apr_sh_tgl, rjt_tgl, rjt_npk, nm_rjt, rjt_ket, rjt_st, kd_plant, no_pi, npk_close, tgl_close, tgl_plan_mulai, tgl_plan_selesai, tgl_plan_cms, st_cms, no_lp"));
+        }
+        return $mtctdftmslhs;
+    }
+
+    public function dpm($mdb, $tanggal)
+    {
+        if ($mdb == "1") {
+            $list = DB::connection('sqlsrv')
+                ->table(DB::raw("Table_1"))
+                ->select(DB::raw("substring(convert(varchar, TGL, 8),1,2) as jam, avg(CurrentAvg1) as currentavg, avg(Volt3PAvg1) as volt3pavg, avg(Power1) as power"))
+                ->where(DB::raw("CONVERT(varchar, TGL, 112)"), $tanggal)
+                ->groupBy(DB::raw("substring(convert(varchar, TGL, 8),1,2)"))
+                ->orderByRaw("substring(convert(varchar, TGL, 8),1,2) asc");
+        } else if ($mdb == "2") {
+            $list = DB::connection('sqlsrv')
+                ->table(DB::raw("Table_1"))
+                ->select(DB::raw("substring(convert(varchar, TGL, 8),1,2) as jam, avg(CurrentAvg2) as currentavg, avg(Vot3PAvg2) as volt3pavg, avg(Power2) as power"))
+                ->where(DB::raw("CONVERT(varchar, TGL, 112)"), $tanggal)
+                ->groupBy(DB::raw("substring(convert(varchar, TGL, 8),1,2)"))
+                ->orderByRaw("substring(convert(varchar, TGL, 8),1,2) asc");
+        } else if ($mdb == "3") {
+            $list = DB::connection('sqlsrv')
+                ->table(DB::raw("Table_1"))
+                ->select(DB::raw("substring(convert(varchar, TGL, 8),1,2) as jam, avg(CurrentAvg3) as currentavg, avg(Volt3PAvg3) as volt3pavg, avg(Power3) as power"))
+                ->where(DB::raw("CONVERT(varchar, TGL, 112)"), $tanggal)
+                ->groupBy(DB::raw("substring(convert(varchar, TGL, 8),1,2)"))
+                ->orderByRaw("substring(convert(varchar, TGL, 8),1,2) asc");
+        } else {
+            $list = DB::connection('sqlsrv')
+                ->table(DB::raw("Table_1"))
+                ->select(DB::raw("substring(convert(varchar, TGL, 8),1,2) as jam, avg(CurrentAvg4) as currentavg, avg(Volt3PAvg4) as volt3pavg, avg(Power4) as power"))
+                ->where(DB::raw("CONVERT(varchar, TGL, 112)"), $tanggal)
+                ->groupBy(DB::raw("substring(convert(varchar, TGL, 8),1,2)"))
+                ->orderByRaw("substring(convert(varchar, TGL, 8),1,2) asc");
+        }
+        return $list;
+    }
+
+    public function resumepengisianoli($tahun, $kd_site, $kd_plant, $jns_oli)
+    {
+        return DB::connection('oracle-usrbrgcorp')
+            ->table(DB::raw("mtct_isi_oli"))
+            ->select(DB::raw("bulan, coalesce(sum(coalesce(TGL_1,0)),0) + coalesce(sum(coalesce(TGL_2,0)),0) + coalesce(sum(coalesce(TGL_3,0)),0) + coalesce(sum(coalesce(TGL_4,0)),0) + coalesce(sum(coalesce(TGL_5,0)),0) + coalesce(sum(coalesce(TGL_6,0)),0) + coalesce(sum(coalesce(TGL_7,0)),0) + coalesce(sum(coalesce(TGL_8,0)),0) + coalesce(sum(coalesce(TGL_9,0)),0) + coalesce(sum(coalesce(TGL_10,0)),0) + coalesce(sum(coalesce(TGL_11,0)),0) + coalesce(sum(coalesce(TGL_12,0)),0) + coalesce(sum(coalesce(TGL_13,0)),0) + coalesce(sum(coalesce(TGL_14,0)),0) + coalesce(sum(coalesce(TGL_15,0)),0) + coalesce(sum(coalesce(TGL_16,0)),0) + coalesce(sum(coalesce(TGL_17,0)),0) + coalesce(sum(coalesce(TGL_18,0)),0) + coalesce(sum(coalesce(TGL_19,0)),0) + coalesce(sum(coalesce(TGL_20,0)),0) + coalesce(sum(coalesce(TGL_21,0)),0) + coalesce(sum(coalesce(TGL_22,0)),0) + coalesce(sum(coalesce(TGL_23,0)),0) + coalesce(sum(coalesce(TGL_24,0)),0) + coalesce(sum(coalesce(TGL_25,0)),0) + coalesce(sum(coalesce(TGL_26,0)),0) + coalesce(sum(coalesce(TGL_27,0)),0) + coalesce(sum(coalesce(TGL_28,0)),0) + coalesce(sum(coalesce(TGL_29,0)),0) + coalesce(sum(coalesce(TGL_30,0)),0) + coalesce(sum(coalesce(TGL_31,0)),0) total"))
+            ->where("tahun", $tahun)
+            ->where("kd_site", $kd_site)
+            ->where("kd_plant", $kd_plant)
+            ->where("jns_oli", $jns_oli)
+            ->groupBy("bulan")
+            ->orderBy("bulan");
+    }
+
+    public function resumepengisianoliBySite($tahun, $kd_site, $jns_oli)
+    {
+        if ($kd_site === "IGPJ") {
+            return DB::connection('oracle-usrbrgcorp')
+                ->table(DB::raw("mtct_isi_oli"))
+                ->select(DB::raw("bulan, coalesce(sum(coalesce(TGL_1,0)),0) + coalesce(sum(coalesce(TGL_2,0)),0) + coalesce(sum(coalesce(TGL_3,0)),0) + coalesce(sum(coalesce(TGL_4,0)),0) + coalesce(sum(coalesce(TGL_5,0)),0) + coalesce(sum(coalesce(TGL_6,0)),0) + coalesce(sum(coalesce(TGL_7,0)),0) + coalesce(sum(coalesce(TGL_8,0)),0) + coalesce(sum(coalesce(TGL_9,0)),0) + coalesce(sum(coalesce(TGL_10,0)),0) + coalesce(sum(coalesce(TGL_11,0)),0) + coalesce(sum(coalesce(TGL_12,0)),0) + coalesce(sum(coalesce(TGL_13,0)),0) + coalesce(sum(coalesce(TGL_14,0)),0) + coalesce(sum(coalesce(TGL_15,0)),0) + coalesce(sum(coalesce(TGL_16,0)),0) + coalesce(sum(coalesce(TGL_17,0)),0) + coalesce(sum(coalesce(TGL_18,0)),0) + coalesce(sum(coalesce(TGL_19,0)),0) + coalesce(sum(coalesce(TGL_20,0)),0) + coalesce(sum(coalesce(TGL_21,0)),0) + coalesce(sum(coalesce(TGL_22,0)),0) + coalesce(sum(coalesce(TGL_23,0)),0) + coalesce(sum(coalesce(TGL_24,0)),0) + coalesce(sum(coalesce(TGL_25,0)),0) + coalesce(sum(coalesce(TGL_26,0)),0) + coalesce(sum(coalesce(TGL_27,0)),0) + coalesce(sum(coalesce(TGL_28,0)),0) + coalesce(sum(coalesce(TGL_29,0)),0) + coalesce(sum(coalesce(TGL_30,0)),0) + coalesce(sum(coalesce(TGL_31,0)),0) total"))
+                ->where("tahun", $tahun)
+                ->where("kd_site", $kd_site)
+                ->whereIn("kd_plant", ["1", "2", "3"])
+                ->where("jns_oli", $jns_oli)
+                ->groupBy("bulan")
+                ->orderBy("bulan");
+        } else if ($kd_site === "IGPK") {
+            return DB::connection('oracle-usrbrgcorp')
+                ->table(DB::raw("mtct_isi_oli"))
+                ->select(DB::raw("bulan, coalesce(sum(coalesce(TGL_1,0)),0) + coalesce(sum(coalesce(TGL_2,0)),0) + coalesce(sum(coalesce(TGL_3,0)),0) + coalesce(sum(coalesce(TGL_4,0)),0) + coalesce(sum(coalesce(TGL_5,0)),0) + coalesce(sum(coalesce(TGL_6,0)),0) + coalesce(sum(coalesce(TGL_7,0)),0) + coalesce(sum(coalesce(TGL_8,0)),0) + coalesce(sum(coalesce(TGL_9,0)),0) + coalesce(sum(coalesce(TGL_10,0)),0) + coalesce(sum(coalesce(TGL_11,0)),0) + coalesce(sum(coalesce(TGL_12,0)),0) + coalesce(sum(coalesce(TGL_13,0)),0) + coalesce(sum(coalesce(TGL_14,0)),0) + coalesce(sum(coalesce(TGL_15,0)),0) + coalesce(sum(coalesce(TGL_16,0)),0) + coalesce(sum(coalesce(TGL_17,0)),0) + coalesce(sum(coalesce(TGL_18,0)),0) + coalesce(sum(coalesce(TGL_19,0)),0) + coalesce(sum(coalesce(TGL_20,0)),0) + coalesce(sum(coalesce(TGL_21,0)),0) + coalesce(sum(coalesce(TGL_22,0)),0) + coalesce(sum(coalesce(TGL_23,0)),0) + coalesce(sum(coalesce(TGL_24,0)),0) + coalesce(sum(coalesce(TGL_25,0)),0) + coalesce(sum(coalesce(TGL_26,0)),0) + coalesce(sum(coalesce(TGL_27,0)),0) + coalesce(sum(coalesce(TGL_28,0)),0) + coalesce(sum(coalesce(TGL_29,0)),0) + coalesce(sum(coalesce(TGL_30,0)),0) + coalesce(sum(coalesce(TGL_31,0)),0) total"))
+                ->where("tahun", $tahun)
+                ->where("kd_site", $kd_site)
+                ->whereIn("kd_plant", ["A", "B"])
+                ->where("jns_oli", $jns_oli)
+                ->groupBy("bulan")
+                ->orderBy("bulan");
+        }
+    }
+
+    public function resumepengisianoliByMesin($tahun, $kd_site, $kd_plant, $kd_line, $kd_mesin, $jns_oli)
+    {
+        return DB::connection('oracle-usrbrgcorp')
+            ->table(DB::raw("mtct_isi_oli"))
+            ->select(DB::raw("bulan, coalesce(sum(coalesce(TGL_1,0)),0) + coalesce(sum(coalesce(TGL_2,0)),0) + coalesce(sum(coalesce(TGL_3,0)),0) + coalesce(sum(coalesce(TGL_4,0)),0) + coalesce(sum(coalesce(TGL_5,0)),0) + coalesce(sum(coalesce(TGL_6,0)),0) + coalesce(sum(coalesce(TGL_7,0)),0) + coalesce(sum(coalesce(TGL_8,0)),0) + coalesce(sum(coalesce(TGL_9,0)),0) + coalesce(sum(coalesce(TGL_10,0)),0) + coalesce(sum(coalesce(TGL_11,0)),0) + coalesce(sum(coalesce(TGL_12,0)),0) + coalesce(sum(coalesce(TGL_13,0)),0) + coalesce(sum(coalesce(TGL_14,0)),0) + coalesce(sum(coalesce(TGL_15,0)),0) + coalesce(sum(coalesce(TGL_16,0)),0) + coalesce(sum(coalesce(TGL_17,0)),0) + coalesce(sum(coalesce(TGL_18,0)),0) + coalesce(sum(coalesce(TGL_19,0)),0) + coalesce(sum(coalesce(TGL_20,0)),0) + coalesce(sum(coalesce(TGL_21,0)),0) + coalesce(sum(coalesce(TGL_22,0)),0) + coalesce(sum(coalesce(TGL_23,0)),0) + coalesce(sum(coalesce(TGL_24,0)),0) + coalesce(sum(coalesce(TGL_25,0)),0) + coalesce(sum(coalesce(TGL_26,0)),0) + coalesce(sum(coalesce(TGL_27,0)),0) + coalesce(sum(coalesce(TGL_28,0)),0) + coalesce(sum(coalesce(TGL_29,0)),0) + coalesce(sum(coalesce(TGL_30,0)),0) + coalesce(sum(coalesce(TGL_31,0)),0) total"))
+            ->where("tahun", $tahun)
+            ->where("kd_site", $kd_site)
+            ->where("kd_plant", $kd_plant)
+            ->where("kd_line", $kd_line)
+            ->where("kd_mesin", $kd_mesin)
+            ->where("jns_oli", $jns_oli)
+            ->groupBy("bulan")
+            ->orderBy("bulan");
+    }
+
+    public function resumepengisianoliHarianByMesin($tahun, $bulan, $kd_site, $kd_plant, $kd_line, $kd_mesin, $jns_oli)
+    {
+        return DB::connection('oracle-usrbrgcorp')
+            ->table(DB::raw("mtct_isi_oli"))
+            ->select(DB::raw("coalesce(sum(coalesce(tgl_1,0)),0) tgl_1, coalesce(sum(coalesce(tgl_2,0)),0) tgl_2, coalesce(sum(coalesce(tgl_3,0)),0) tgl_3, coalesce(sum(coalesce(tgl_4,0)),0) tgl_4, coalesce(sum(coalesce(tgl_5,0)),0) tgl_5, coalesce(sum(coalesce(tgl_6,0)),0) tgl_6, coalesce(sum(coalesce(tgl_7,0)),0) tgl_7, coalesce(sum(coalesce(tgl_8,0)),0) tgl_8, coalesce(sum(coalesce(tgl_9,0)),0) tgl_9, coalesce(sum(coalesce(tgl_10,0)),0) tgl_10, coalesce(sum(coalesce(tgl_11,0)),0) tgl_11, coalesce(sum(coalesce(tgl_12,0)),0) tgl_12, coalesce(sum(coalesce(tgl_13,0)),0) tgl_13, coalesce(sum(coalesce(tgl_14,0)),0) tgl_14, coalesce(sum(coalesce(tgl_15,0)),0) tgl_15, coalesce(sum(coalesce(tgl_16,0)),0) tgl_16, coalesce(sum(coalesce(tgl_17,0)),0) tgl_17, coalesce(sum(coalesce(tgl_18,0)),0) tgl_18, coalesce(sum(coalesce(tgl_19,0)),0) tgl_19, coalesce(sum(coalesce(tgl_20,0)),0) tgl_20, coalesce(sum(coalesce(tgl_21,0)),0) tgl_21, coalesce(sum(coalesce(tgl_22,0)),0) tgl_22, coalesce(sum(coalesce(tgl_23,0)),0) tgl_23, coalesce(sum(coalesce(tgl_24,0)),0) tgl_24, coalesce(sum(coalesce(tgl_25,0)),0) tgl_25, coalesce(sum(coalesce(tgl_26,0)),0) tgl_26, coalesce(sum(coalesce(tgl_27,0)),0) tgl_27, coalesce(sum(coalesce(tgl_28,0)),0) tgl_28, coalesce(sum(coalesce(tgl_29,0)),0) tgl_29, coalesce(sum(coalesce(tgl_30,0)),0) tgl_30, coalesce(sum(coalesce(tgl_31,0)),0) tgl_31"))
+            ->where("tahun", $tahun)
+            ->where("bulan", $bulan)
+            ->where("kd_site", $kd_site)
+            ->where("kd_plant", $kd_plant)
+            ->where("kd_line", $kd_line)
+            ->where("kd_mesin", $kd_mesin)
+            ->where("jns_oli", $jns_oli)
+            ->first();
+    }
+
+    public function mesinresumepengisianoli($kd_plant, $kd_line)
+    {
+        return DB::connection('oracle-usrbrgcorp')
+            ->table(DB::raw("mtct_m_oiling o, mmtcmesin m, usrigpmfg.xmline xm"))
+            ->select(DB::raw("distinct m.kd_mesin, m.nm_mesin"))
+            ->whereRaw("o.kd_mesin = m.kd_mesin and nvl(m.st_aktif,'T') = 'T' and nvl(o.st_aktif,'F') = 'T' and m.kd_line = xm.xkd_line")
+            ->where("xm.xkd_plant", $kd_plant)
+            ->where("m.kd_line", $kd_line)
+            ->orderByRaw("m.kd_mesin, m.nm_mesin");
+    }
+
+    public function toppengisianoli($tahun, $bulan, $kd_site, $kd_plant)
+    {
+        return DB::connection('oracle-usrbrgcorp')
+            ->table(DB::raw("mtct_isi_oli"))
+            ->select(DB::raw("kd_mesin, jns_oli, coalesce(sum(coalesce(TGL_1,0)),0) + coalesce(sum(coalesce(TGL_2,0)),0) + coalesce(sum(coalesce(TGL_3,0)),0) + coalesce(sum(coalesce(TGL_4,0)),0) + coalesce(sum(coalesce(TGL_5,0)),0) + coalesce(sum(coalesce(TGL_6,0)),0) + coalesce(sum(coalesce(TGL_7,0)),0) + coalesce(sum(coalesce(TGL_8,0)),0) + coalesce(sum(coalesce(TGL_9,0)),0) + coalesce(sum(coalesce(TGL_10,0)),0) + coalesce(sum(coalesce(TGL_11,0)),0) + coalesce(sum(coalesce(TGL_12,0)),0) + coalesce(sum(coalesce(TGL_13,0)),0) + coalesce(sum(coalesce(TGL_14,0)),0) + coalesce(sum(coalesce(TGL_15,0)),0) + coalesce(sum(coalesce(TGL_16,0)),0) + coalesce(sum(coalesce(TGL_17,0)),0) + coalesce(sum(coalesce(TGL_18,0)),0) + coalesce(sum(coalesce(TGL_19,0)),0) + coalesce(sum(coalesce(TGL_20,0)),0) + coalesce(sum(coalesce(TGL_21,0)),0) + coalesce(sum(coalesce(TGL_22,0)),0) + coalesce(sum(coalesce(TGL_23,0)),0) + coalesce(sum(coalesce(TGL_24,0)),0) + coalesce(sum(coalesce(TGL_25,0)),0) + coalesce(sum(coalesce(TGL_26,0)),0) + coalesce(sum(coalesce(TGL_27,0)),0) + coalesce(sum(coalesce(TGL_28,0)),0) + coalesce(sum(coalesce(TGL_29,0)),0) + coalesce(sum(coalesce(TGL_30,0)),0) + coalesce(sum(coalesce(TGL_31,0)),0) total"))
+            ->where("tahun", $tahun)
+            ->where("bulan", $bulan)
+            ->where("kd_site", $kd_site)
+            ->where("kd_plant", $kd_plant)
+            ->groupBy(DB::raw("kd_mesin, jns_oli"))
+            ->orderByRaw("total desc");
+    }
+
+    public function toppengisianoliHarianByMesin($tahun, $bulan, $kd_site, $kd_plant, $kd_mesin, $jns_oli)
+    {
+        return DB::connection('oracle-usrbrgcorp')
+            ->table(DB::raw("mtct_isi_oli"))
+            ->select(DB::raw("coalesce(sum(coalesce(tgl_1,0)),0) tgl_1, coalesce(sum(coalesce(tgl_2,0)),0) tgl_2, coalesce(sum(coalesce(tgl_3,0)),0) tgl_3, coalesce(sum(coalesce(tgl_4,0)),0) tgl_4, coalesce(sum(coalesce(tgl_5,0)),0) tgl_5, coalesce(sum(coalesce(tgl_6,0)),0) tgl_6, coalesce(sum(coalesce(tgl_7,0)),0) tgl_7, coalesce(sum(coalesce(tgl_8,0)),0) tgl_8, coalesce(sum(coalesce(tgl_9,0)),0) tgl_9, coalesce(sum(coalesce(tgl_10,0)),0) tgl_10, coalesce(sum(coalesce(tgl_11,0)),0) tgl_11, coalesce(sum(coalesce(tgl_12,0)),0) tgl_12, coalesce(sum(coalesce(tgl_13,0)),0) tgl_13, coalesce(sum(coalesce(tgl_14,0)),0) tgl_14, coalesce(sum(coalesce(tgl_15,0)),0) tgl_15, coalesce(sum(coalesce(tgl_16,0)),0) tgl_16, coalesce(sum(coalesce(tgl_17,0)),0) tgl_17, coalesce(sum(coalesce(tgl_18,0)),0) tgl_18, coalesce(sum(coalesce(tgl_19,0)),0) tgl_19, coalesce(sum(coalesce(tgl_20,0)),0) tgl_20, coalesce(sum(coalesce(tgl_21,0)),0) tgl_21, coalesce(sum(coalesce(tgl_22,0)),0) tgl_22, coalesce(sum(coalesce(tgl_23,0)),0) tgl_23, coalesce(sum(coalesce(tgl_24,0)),0) tgl_24, coalesce(sum(coalesce(tgl_25,0)),0) tgl_25, coalesce(sum(coalesce(tgl_26,0)),0) tgl_26, coalesce(sum(coalesce(tgl_27,0)),0) tgl_27, coalesce(sum(coalesce(tgl_28,0)),0) tgl_28, coalesce(sum(coalesce(tgl_29,0)),0) tgl_29, coalesce(sum(coalesce(tgl_30,0)),0) tgl_30, coalesce(sum(coalesce(tgl_31,0)),0) tgl_31"))
+            ->where("tahun", $tahun)
+            ->where("bulan", $bulan)
+            ->where("kd_site", $kd_site)
+            ->where("kd_plant", $kd_plant)
+            ->where("kd_mesin", $kd_mesin)
+            ->where("jns_oli", $jns_oli)
+            ->first();
+    }
+
+    public function fotokaryawan($npk)
+    {
+        if (config('app.env', 'local') === 'production') {
+            $file_temp = DIRECTORY_SEPARATOR . "serverh" . DIRECTORY_SEPARATOR . "Portal" . DIRECTORY_SEPARATOR . "foto" . DIRECTORY_SEPARATOR . $npk . ".jpg";
+        } else {
+            $file_temp = "\\\\" . config('app.ip_x', '-') . "\\Batch\\Hrms_new\\foto\\" . $npk . ".jpg";
+        }
+        if (file_exists($file_temp)) {
+            $loc_image = file_get_contents('file:///' . str_replace("\\\\", "\\", $file_temp));
+            $image_codes = "data:" . mime_content_type($file_temp) . ";charset=utf-8;base64," . base64_encode($loc_image);
+            return $image_codes;
+        } else {
+            return null;
+        }
+    }
+
+    public function fotokpi($filename)
+    {
+        if (config('app.env', 'local') === 'production') {
+            $file_temp = DIRECTORY_SEPARATOR . "serverh" . DIRECTORY_SEPARATOR . "Portal" . DIRECTORY_SEPARATOR . config('app.kd_pt', 'XXX') . DIRECTORY_SEPARATOR . "mtclp" . DIRECTORY_SEPARATOR . "kpi" . DIRECTORY_SEPARATOR . $filename;
+        } else {
+            $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\" . config('app.kd_pt', 'XXX') . "\\mtclp\\kpi\\" . $filename;
+        }
+        if (file_exists($file_temp)) {
+            $loc_image = file_get_contents('file:///' . str_replace("\\\\", "\\", $file_temp));
+            $image_codes = "data:" . mime_content_type($file_temp) . ";charset=utf-8;base64," . base64_encode($loc_image);
+            return $image_codes;
+        } else {
+            return null;
+        }
+    }
+
+    public function spm($status)
+    {
+        if ($status === "ALL") {
+            $list = DB::table("vw_pp_mtcs")
+                ->select(DB::raw("no_pp, tgl_pp, item_no, nm_item, qty_pp, unit, no_po, refa, no_lpb"))
+                ->whereRaw("substr(item_no,1,3) in ('P17', 'TJF')");
+        } else if ($status === "REGULER") {
+            $list = DB::table("vw_pp_mtcs")
+                ->select(DB::raw("no_pp, tgl_pp, item_no, nm_item, qty_pp, unit, no_po, refa, no_lpb"))
+                ->whereRaw("substr(item_no,1,3) in ('P17', 'TJF')")
+                ->whereRaw("upper(refa) like '%REGULER%'");
+        } else if ($status === "DIRECT") {
+            $list = DB::table("vw_pp_mtcs")
+                ->select(DB::raw("no_pp, tgl_pp, item_no, nm_item, qty_pp, unit, no_po, refa, no_lpb"))
+                ->whereRaw("substr(item_no,1,3) in ('P17', 'TJF')")
+                ->whereRaw("upper(refa) like '%LANGSUNG%'");
+        } else if ($status === "URGENT") {
+            $list = DB::table("vw_pp_mtcs")
+                ->select(DB::raw("no_pp, tgl_pp, item_no, nm_item, qty_pp, unit, no_po, refa, no_lpb"))
+                ->whereRaw("substr(item_no,1,3) in ('P17', 'TJF')")
+                ->whereRaw("upper(refa) like '%URGENT%'");
+        } else if ($status === "OUTSTANDING PO") {
+            $list = DB::table("vw_pp_mtcs")
+                ->select(DB::raw("no_pp, tgl_pp, item_no, nm_item, qty_pp, unit, no_po, refa, no_lpb"))
+                ->whereRaw("substr(item_no,1,3) in ('P17', 'TJF')")
+                ->whereRaw("coalesce(no_po,'-') = '-'");
+        } else if ($status === "OUTSTANDING DELIVERY") {
+            $list = DB::table("vw_pp_mtcs")
+                ->select(DB::raw("no_pp, tgl_pp, item_no, nm_item, qty_pp, unit, no_po, refa, no_lpb"))
+                ->whereRaw("substr(item_no,1,3) in ('P17', 'TJF')")
+                ->whereRaw("coalesce(no_po,'-') <> '-'")
+                ->whereRaw("coalesce(no_lpb,'-') = '-'");
+        } else {
+            $list = DB::table("vw_pp_mtcs")
+                ->select(DB::raw("no_pp, tgl_pp, item_no, nm_item, qty_pp, unit, no_po, refa, no_lpb"))
+                ->whereRaw("substr(item_no,1,3) in ('P17', 'TJF')")
+                ->whereRaw("no_pp = '-'");
+        }
+        return $list;
+    }
+
+    public function spmByMachine($whs = null, $item = null, $kd_mesin = null)
+    {
+        if ($whs != null) {
+            $lists = DB::table(DB::raw("(select distinct s.item, s.item_name, s.whse, s.qty, s.dtcrea
+                from stockohigps s, vw_dpm_boms d 
+                where s.item = d.item_no 
+                and s.whse in ('JWJTS','KWJTS') 
+            ) st"))
+                ->select(DB::raw("st.item, st.item_name, st.whse, st.qty, st.dtcrea, 
+                (select 'T' from ppcv_pp v where v.kd_site = 'IGP'||substr(st.whse, 1, 1) and v.item_no = st.item limit 1) pp_out, (select 'T' from ppcv_po v where v.kd_site = 'IGP'||substr(st.whse, 1, 1) and v.item_no = st.item limit 1) po_out"));
+            // ->select(DB::raw("item, item_name, whse, qty, dtcrea, 'T' pp_out, 'T' po_out"))
+            // ->whereRaw("whse in ('JWJTS','KWJTS')");
+
+            if ($kd_mesin != null) {
+                if ($item != null) {
+                    $lists->whereRaw("exists (select 1 from vw_dpm_boms where vw_dpm_boms.item_no = st.item and vw_dpm_boms.kd_mesin = '$kd_mesin' and vw_dpm_boms.item_no = '$item')");
+                } else {
+                    $lists->whereRaw("exists (select 1 from vw_dpm_boms where vw_dpm_boms.item_no = st.item and vw_dpm_boms.kd_mesin = '$kd_mesin')");
+                }
+            }
+            if ($whs != null) {
+                if ($whs !== "ALL") {
+                    $lists->where("st.whse", $whs);
+                }
+            }
+            if ($item != null) {
+                $lists->where("st.item", $item);
+            }
+            return $lists->orderByRaw("st.qty, st.item, st.whse");
+        } else {
+            $lists = DB::table("users")
+                ->select(DB::raw("*"))
+                ->whereRaw("id = 0");
+            return $lists;
+        }
+    }
+}

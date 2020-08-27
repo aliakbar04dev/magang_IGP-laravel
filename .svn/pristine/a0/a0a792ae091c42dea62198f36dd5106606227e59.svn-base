@@ -1,0 +1,85 @@
+<?php
+
+Route::group(['prefix'=>'budget', 'middleware'=>['auth']], function () {
+	Route::resource('bgttkomite1s', 'BgttKomite1sController');
+	Route::get('dashboard/bgttkomite1s', [
+		'as' => 'dashboard.bgttkomite1s',
+		'uses'=>'BgttKomite1sController@dashboard'
+	]);
+	Route::get('bgttkomite1s/delete/{param}', [
+		'as' => 'bgttkomite1s.delete',
+		'uses' => 'BgttKomite1sController@delete'
+	]);
+	Route::get('bgttkomite1sall', [
+		'as' => 'bgttkomite1s.all',
+		'uses'=>'BgttKomite1sController@indexAll'
+	]);
+	Route::get('bgttkomite1s/dashboard/all', [
+		'as' => 'dashboardall.bgttkomite1s',
+		'uses'=>'BgttKomite1sController@dashboardAll'
+	]);
+	Route::get('bgttkomite1s/detail/{param}', [
+		'as'=>'bgttkomite1s.detail',
+		'uses'=>'BgttKomite1sController@detail'
+	]);
+	Route::get('bgttkomite1sallnotulen', [
+		'as' => 'bgttkomite1s.allnotulen',
+		'uses'=>'BgttKomite1sController@indexNotulen'
+	]);
+	Route::get('bgttkomite1s/dashboard/allnotulen', [
+		'as' => 'dashboardallnotulen.bgttkomite1s',
+		'uses'=>'BgttKomite1sController@dashboardNotulen'
+	]);
+	Route::get('bgttkomite1s/showall/{param}', [
+		'as' => 'bgttkomite1s.showall',
+		'uses'=>'BgttKomite1sController@showall'
+	]);
+	Route::get('bgttkomite1s/shownotulen/{param}', [
+		'as' => 'bgttkomite1s.shownotulen',
+		'uses'=>'BgttKomite1sController@shownotulen'
+	]);
+	Route::get('bgttkomite1s/{param}/mapping', [
+		'as' => 'bgttkomite1s.mapping',
+		'uses'=>'BgttKomite1sController@mapping'
+	]);
+	Route::post('bgttkomite1s/updatemapping/{param}', [
+		'as' => 'bgttkomite1s.updatemapping',
+		'uses' => 'BgttKomite1sController@updatemapping'
+	]);
+	Route::get('bgttkomite1s/{param}/notulen', [
+		'as' => 'bgttkomite1s.notulen',
+		'uses'=>'BgttKomite1sController@notulen'
+	]);
+	Route::post('bgttkomite1s/updatenotulen/{param}', [
+		'as' => 'bgttkomite1s.updatenotulen',
+		'uses' => 'BgttKomite1sController@updatenotulen'
+	]);
+	Route::delete('bgttkomite1s/deletedetail/{param}/{param2}', [
+		'as' => 'bgttkomite1s.deletedetail',
+		'uses'=>'BgttKomite1sController@deletedetail'
+	]);
+	Route::post('sendemail/notifikasi', [
+		'as' => 'bgttkomite1s.sendemail',
+		'uses' => 'BgttKomite1sController@sendemail'
+	]);
+	Route::get('bgttkomite1s/showrevisi/{param}/{param2}', [
+		'as' => 'bgttkomite1s.showrevisi',
+		'uses'=>'BgttKomite1sController@showrevisi'
+	]);
+	Route::post('bgttkomite1s/approve', [
+		'as' => 'bgttkomite1s.approve',
+		'uses' => 'BgttKomite1sController@approve'
+	]);
+	Route::get('bgttkomite1s/downloadfile/{param}', [
+		'as' => 'bgttkomite1s.downloadfile',
+		'uses' => 'BgttKomite1sController@downloadfile'
+	]);
+	Route::get('bgttkomite1s/deletefile/{param}', [
+		'as' => 'bgttkomite1s.deletefile',
+		'uses' => 'BgttKomite1sController@deletefile'
+	]);
+	Route::get('bgttkomite1s/print/{param}/{param2}', [
+		'as' => 'bgttkomite1s.print',
+		'uses' => 'BgttKomite1sController@print'
+	]);
+});

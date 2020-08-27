@@ -1,0 +1,249 @@
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Session;
+use DB;
+use App\Qpr;
+use Illuminate\Support\Facades\Auth;
+
+class Pica extends Model
+{
+	const CREATED_AT = 'dtcrea';
+    const UPDATED_AT = 'dtmodi';
+
+	protected $fillable = [
+        'no_pica', 'no_revisi', 'tgl_pica', 'issue_no', 'kd_supp', 'fp_pict_general', 'fp_pict_detail', 'sa_pict', 'iop_tools_subject', 'iop_tools_pc', 'iop_tools_std', 'iop_tools_act', 'iop_tools_status', 'iop_mat_subject', 'iop_mat_pc', 'iop_mat_std', 'iop_mat_act', 'iop_mat_status', 'iop_man_subject', 'iop_man_pc', 'iop_man_std', 'iop_man_act', 'iop_man_status', 'iop_met_subject', 'iop_met_pc', 'iop_met_std', 'iop_met_act', 'iop_met_status', 'iop_env_subject', 'iop_env_pc', 'iop_env_std', 'iop_env_act', 'iop_env_status', 'ioptm_pict', 'ioptm_pk', 'ioptm_pk_status', 'ioptm_qk', 'ioptm_qk_status', 'ioptm_kp', 'ioptm_kp_status', 'ioptm_sr', 'ioptm_sr_status', 'ioptm_it', 'ioptm_it_status', 'ioptm_jd', 'ioptm_jd_status', 'hp_pict', 'rca_why_occured', 'rca_pict_occured', 'rca_why_outflow', 'rca_pict_outflow', 'rca_root1', 'rca_root2', 'cop_temp_action1', 'cop_temp_action1_pict', 'cop_temp_action1_date', 'cop_temp_action1_pic', 'cop_temp_action2', 'cop_temp_action2_pict', 'cop_temp_action2_date', 'cop_temp_action2_pic', 'cop_temp_action3', 'cop_temp_action3_pict', 'cop_temp_action3_date', 'cop_temp_action3_pic', 'cop_temp_action4', 'cop_temp_action4_pict', 'cop_temp_action4_date', 'cop_temp_action4_pic', 'cop_temp_action5', 'cop_temp_action5_pict', 'cop_temp_action5_date', 'cop_temp_action5_pic', 'cop_fix_action1', 'cop_fix_action1_pict', 'cop_fix_action1_date', 'cop_fix_action1_pic', 'cop_fix_action2', 'cop_fix_action2_pict', 'cop_fix_action2_date', 'cop_fix_action2_pic', 'cop_fix_action3', 'cop_fix_action3_pict', 'cop_fix_action3_date', 'cop_fix_action3_pic', 'cop_fix_action4', 'cop_fix_action4_pict', 'cop_fix_action4_date', 'cop_fix_action4_pic', 'cop_fix_action5', 'cop_fix_action5_pict', 'cop_fix_action5_date', 'cop_fix_action5_pic', 'fp_improve_pict', 'evaluation', 'evaluation_pict', 'std_sop', 'std_wi', 'std_qcpc', 'std_fmea', 'std_point', 'std_warning', 'std_check_sheet', 'std_others', 'yokotenkai', 'submit_tgl', 'submit_pic', 'approve_tgl', 'approve_pic', 'reject_tgl', 'reject_pic', 'reject_ket', 'reject_st', 'status', 'dtcrea', 'creaby', 'dtmodi', 'modiby', 'close_tgl', 'close_pic', 
+    ];
+
+    public static function boot()
+	{
+		parent::boot();
+
+		self::deleting(function($pica) {
+            if(strtoupper($pica->status) !== 'DRAFT') {
+                Session::flash("flash_notification", [
+                    "level"=>"danger",
+                    "message"=>"No. PICA: $pica->no_pica gagal dihapus karena sudah di-$pica->status."
+                ]);
+                // membatalkan proses penghapusan
+                return false;
+            }
+		});
+	}
+
+    public function setNoPicaAttribute($value)
+    {
+        $this->attributes['no_pica'] = trim($value) !== '' ? strtoupper($value) : null;
+    }
+
+    public function setIssueNoAttribute($value)
+    {
+        $this->attributes['issue_no'] = trim($value) !== '' ? strtoupper($value) : null;
+    }
+
+    public function setStatusAttribute($value)
+    {
+        $this->attributes['status'] = trim($value) !== '' ? strtoupper($value) : "DRAFT";
+    }
+
+    public function getStatusRejectAttribute()
+    {
+        $status_reject = "Others";
+        if($this->reject_st != null) {
+            if($this->reject_st === "S") {
+                $status_reject = "Request Supplier";
+            }
+        }
+        return $status_reject;
+    }
+
+    public function qpr() {
+		return Qpr::where('issue_no', $this->issue_no)->first();
+	}
+
+    public function picaRejects() {
+        $lists = DB::table("pica_rejects")
+        ->select(DB::raw("*"))
+        ->where("no_pica", $this->no_pica)
+        ->orderBy("no_revisi", "desc");
+        return $lists;
+    }
+
+    public function nama($username)
+    {
+        $name = DB::table("users")
+        ->select("name")
+        ->where("username", "=", $username)
+        ->value("name");
+        return $name;
+    }
+
+    public function namaSupp($kd_supp)
+    {
+        $nmSupp = DB::table("b_suppliers")
+        ->select(DB::raw("nama"))
+        ->where(DB::raw("kd_supp"), "=", $kd_supp)
+        ->value("nama");
+        return $nmSupp;
+    }
+
+    public function picaByStatus($status)
+    {   
+        if(strlen(Auth::user()->username) > 5) {
+            $picas = Pica::where("kd_supp", "=", auth()->user()->kd_supp);
+        } else {
+            $npk = Auth::user()->username;
+            $picas = Pica::whereRaw("exists (select 1 from qcm_npks where qcm_npks.npk = '$npk' and qcm_npks.kd_plant = (select qprs.plant from qprs where qprs.issue_no = picas.issue_no))");
+        }
+
+        if($status === 'D') {
+            $picas->whereRaw("to_char(tgl_pica,'yyyymm') >= '201902'")->where('status', "DRAFT")->get();
+        } else if($status === 'S') {
+            $picas->whereRaw("to_char(tgl_pica,'yyyymm') >= '201902'")->where('status', "SUBMIT")->get();
+        } else if($status === 'A') {
+            $picas->whereRaw("to_char(tgl_pica,'yyyymm') >= '201902'")->where('status', "APPROVE")->get();
+        } else if($status === 'R') {
+            $picas->whereRaw("to_char(tgl_pica,'yyyymm') >= '201902'")->where('status', "REJECT")->get();
+        } else if($status === 'C') {
+            $picas->whereRaw("to_char(tgl_pica,'yyyymm') >= '201902'")->where('status', "CLOSE")->get();
+        } else if($status === 'FS') {
+            $picas->whereRaw("to_char(tgl_pica,'yyyymm') >= '201902'")->where('status', "SUBMIT")->where('no_revisi', '=', 0)->get();
+        } else if($status === 'RS') {
+            $picas->whereRaw("to_char(tgl_pica,'yyyymm') >= '201902'")->where('status', "SUBMIT")->where('no_revisi', '>', 0)->get();
+        }
+        return $picas;
+    }
+
+    public function pict($status) {
+        $file_temp = "";
+        if($status === "fp_pict_general") {
+            if(config('app.env', 'local') === 'production') {
+                $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pica".DIRECTORY_SEPARATOR.$this->fp_pict_general;
+            } else {
+                $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pica\\".$this->fp_pict_general;
+            }
+        } else if($status === "fp_pict_detail") {
+            if(config('app.env', 'local') === 'production') {
+                $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pica".DIRECTORY_SEPARATOR.$this->fp_pict_detail;
+            } else {
+                $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pica\\".$this->fp_pict_detail;
+            }
+        } else if($status === "sa_pict") {
+            if(config('app.env', 'local') === 'production') {
+                $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pica".DIRECTORY_SEPARATOR.$this->sa_pict;
+            } else {
+                $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pica\\".$this->sa_pict;
+            }
+        } else if($status === "ioptm_pict") {
+            if(config('app.env', 'local') === 'production') {
+                $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pica".DIRECTORY_SEPARATOR.$this->ioptm_pict;
+            } else {
+                $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pica\\".$this->ioptm_pict;
+            }
+        } else if($status === "hp_pict") {
+            if(config('app.env', 'local') === 'production') {
+                $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pica".DIRECTORY_SEPARATOR.$this->hp_pict;
+            } else {
+                $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pica\\".$this->hp_pict;
+            }
+        } else if($status === "rca_pict_occured") {
+            if(config('app.env', 'local') === 'production') {
+                $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pica".DIRECTORY_SEPARATOR.$this->rca_pict_occured;
+            } else {
+                $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pica\\".$this->rca_pict_occured;
+            }
+        } else if($status === "rca_pict_outflow") {
+            if(config('app.env', 'local') === 'production') {
+                $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pica".DIRECTORY_SEPARATOR.$this->rca_pict_outflow;
+            } else {
+                $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pica\\".$this->rca_pict_outflow;
+            }
+        } else if($status === "cop_temp_action1_pict") {
+            if(config('app.env', 'local') === 'production') {
+                $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pica".DIRECTORY_SEPARATOR.$this->cop_temp_action1_pict;
+            } else {
+                $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pica\\".$this->cop_temp_action1_pict;
+            }
+        } else if($status === "cop_temp_action2_pict") {
+            if(config('app.env', 'local') === 'production') {
+                $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pica".DIRECTORY_SEPARATOR.$this->cop_temp_action2_pict;
+            } else {
+                $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pica\\".$this->cop_temp_action2_pict;
+            }
+        } else if($status === "cop_temp_action3_pict") {
+            if(config('app.env', 'local') === 'production') {
+                $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pica".DIRECTORY_SEPARATOR.$this->cop_temp_action3_pict;
+            } else {
+                $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pica\\".$this->cop_temp_action3_pict;
+            }
+        } else if($status === "cop_temp_action4_pict") {
+            if(config('app.env', 'local') === 'production') {
+                $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pica".DIRECTORY_SEPARATOR.$this->cop_temp_action4_pict;
+            } else {
+                $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pica\\".$this->cop_temp_action4_pict;
+            }
+        } else if($status === "cop_temp_action5_pict") {
+            if(config('app.env', 'local') === 'production') {
+                $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pica".DIRECTORY_SEPARATOR.$this->cop_temp_action5_pict;
+            } else {
+                $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pica\\".$this->cop_temp_action5_pict;
+            }
+        } else if($status === "cop_fix_action1_pict") {
+            if(config('app.env', 'local') === 'production') {
+                $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pica".DIRECTORY_SEPARATOR.$this->cop_fix_action1_pict;
+            } else {
+                $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pica\\".$this->cop_fix_action1_pict;
+            }
+        } else if($status === "cop_fix_action2_pict") {
+            if(config('app.env', 'local') === 'production') {
+                $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pica".DIRECTORY_SEPARATOR.$this->cop_fix_action2_pict;
+            } else {
+                $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pica\\".$this->cop_fix_action2_pict;
+            }
+        } else if($status === "cop_fix_action3_pict") {
+            if(config('app.env', 'local') === 'production') {
+                $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pica".DIRECTORY_SEPARATOR.$this->cop_fix_action3_pict;
+            } else {
+                $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pica\\".$this->cop_fix_action3_pict;
+            }
+        } else if($status === "cop_fix_action4_pict") {
+            if(config('app.env', 'local') === 'production') {
+                $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pica".DIRECTORY_SEPARATOR.$this->cop_fix_action4_pict;
+            } else {
+                $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pica\\".$this->cop_fix_action4_pict;
+            }
+        } else if($status === "cop_fix_action5_pict") {
+            if(config('app.env', 'local') === 'production') {
+                $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pica".DIRECTORY_SEPARATOR.$this->cop_fix_action5_pict;
+            } else {
+                $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pica\\".$this->cop_fix_action5_pict;
+            }
+        } else if($status === "fp_improve_pict") {
+            if(config('app.env', 'local') === 'production') {
+                $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pica".DIRECTORY_SEPARATOR.$this->fp_improve_pict;
+            } else {
+                $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pica\\".$this->fp_improve_pict;
+            }
+        } else if($status === "evaluation_pict") {
+            if(config('app.env', 'local') === 'production') {
+                $file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."pica".DIRECTORY_SEPARATOR.$this->evaluation_pict;
+            } else {
+                $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\pica\\".$this->evaluation_pict;
+            }
+        }
+        if($file_temp != "") {
+            if (file_exists($file_temp)) {
+                $loc_image = file_get_contents('file:///'.str_replace("\\\\","\\",$file_temp));
+                $image_codes = "data:".mime_content_type($file_temp).";charset=utf-8;base64,".base64_encode($loc_image);
+                return $image_codes;
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+}

@@ -1,0 +1,666 @@
+@extends('layouts.app')
+@section('content')
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <h1>
+        Digital Power Meter Monitoring
+        <small>Digital Power Meter Monitoring</small>
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="{{ url('/home') }}"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li><i class="fa fa-files-o"></i> Laporan</li>
+        <li class="active"><i class="fa fa-files-o"></i> Digital Power Meter</li>
+      </ol>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      @include('layouts._flash')
+      <div class="row" id="field_filter">
+        <div class="col-md-12">
+          <div class="box box-primary">
+            <div class="box-body form-horizontal">
+              <div class="form-group">
+                <div class="col-sm-2">
+                  {!! Form::label('filter_tanggal', 'Tanggal') !!}
+                  @if (isset($tanggal))
+                    {!! Form::date('filter_tanggal', $tanggal, ['class'=>'form-control','placeholder' => 'Tanggal', 'id' => 'filter_tanggal']) !!}
+                  @else 
+                    {!! Form::date('filter_tanggal', \Carbon\Carbon::now(), ['class'=>'form-control','placeholder' => 'Tanggal', 'id' => 'filter_tanggal']) !!}
+                  @endif
+                </div>
+                <div class="col-sm-2">
+                  {!! Form::label('filter_mdb', 'MDB') !!}
+                  <select id="filter_mdb" name="filter_mdb" aria-controls="filter_status" 
+                  class="form-control select2">
+                    @if (isset($mdb))
+                      <option value="1" @if ("1" == $mdb) selected="selected" @endif>1</option>
+                      <option value="2" @if ("2" == $mdb) selected="selected" @endif>2</option>
+                      <option value="3" @if ("3" == $mdb) selected="selected" @endif>3</option>
+                      <option value="4" @if ("4" == $mdb) selected="selected" @endif>4</option>
+                    @else 
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                    @endif
+                  </select>
+                </div>
+                <div class="col-sm-2">
+                  {!! Form::label('lblusername2', 'Action') !!}
+                  <button id="btn-display" name="btn-display" type="button" class="form-control btn btn-primary" data-toggle="tooltip" data-placement="top" title="Display">Display</button>
+                </div>
+              </div>
+              <!-- /.form-group -->
+            </div>
+            <!-- /.box-body -->
+            
+            @if(isset($data))
+              @if($data != null)
+                <div class="box-body">
+                  <table class="table table-striped" cellspacing="0" width="100%">
+                    <thead>
+                      <tr>
+                        <th colspan="4" style='text-align: center'><h4>Tanggal: {{ $tanggal->format('d M Y') }} & MDB: {{ $mdb }}</h4></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td style="width: 13%;"><b>V Avg (3 Phasa)</b></td>
+                        <td style="width: 1%;"><b>:</b></td>
+                        <td style="width: 15%;text-align: right;">{{ numberFormatter(0, 5)->format($data->volt3pavg) }}</td>
+                        <td>Volt</td>
+                      </tr>
+                      <tr>
+                        <td style="width: 13%;"><b>I Avg</b></td>
+                        <td style="width: 1%;"><b>:</b></td>
+                        <td style="width: 15%;text-align: right;">{{ numberFormatter(0, 5)->format($data->currentavg) }}</td>
+                        <td>Ampere</td>
+                      </tr>
+                      <tr>
+                        <td style="width: 13%;"><b>Total Power</b></td>
+                        <td style="width: 1%;"><b>:</b></td>
+                        <td style="width: 15%;text-align: right;">{{ numberFormatter(0, 5)->format($data->power) }}</td>
+                        <td>Kw</td>
+                      </tr>
+                      <tr>
+                        <td style="width: 13%;"><b>V Avg (1 Phasa)</b></td>
+                        <td style="width: 1%;"><b>:</b></td>
+                        <td style="width: 15%;text-align: right;">{{ numberFormatter(0, 5)->format($data->volt2pavg) }}</td>
+                        <td>Volt</td>
+                      </tr>
+                      <tr>
+                        <td style="width: 13%;"><b>Frek</b></td>
+                        <td style="width: 1%;"><b>:</b></td>
+                        <td style="width: 15%;text-align: right;">{{ numberFormatter(0, 5)->format($data->freq) }}</td>
+                        <td>Hz</td>
+                      </tr>
+                      <tr>
+                        <td style="width: 13%;"><b>Power Faktor</b></td>
+                        <td style="width: 1%;"><b>:</b></td>
+                        <td style="width: 15%;text-align: right;">{{ numberFormatter(0, 5)->format($data->cospi) }}</td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <td style="width: 13%;"><b>Total Energi Del</b></td>
+                        <td style="width: 1%;"><b>:</b></td>
+                        <td style="width: 15%;text-align: right;">{{ numberFormatter(0, 5)->format($data->energi) }}</td>
+                        <td>KwH</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <!-- /.box-body -->
+              @endif
+            @endif
+          </div>
+          <!-- /.box -->
+        </div>
+        <!-- /.col -->
+      </div>
+      <!-- /.row -->
+      @if(isset($data))
+        @if($data != null)
+          {{-- <div class="box-body">
+            <table class="table table-striped" cellspacing="0" width="100%">
+              <tbody>
+                <tr>
+                  <td style="width: 13%;"><b>V Avg (3 Phasa)</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td style="width: 15%;text-align: right;">{{ numberFormatter(0, 5)->format($data->volt3pavg) }}</td>
+                  <td>Volt</td>
+                </tr>
+                <tr>
+                  <td style="width: 13%;"><b>I Avg</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td style="width: 15%;text-align: right;">{{ numberFormatter(0, 5)->format($data->currentavg) }}</td>
+                  <td>Ampere</td>
+                </tr>
+                <tr>
+                  <td style="width: 13%;"><b>Total Power</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td style="width: 15%;text-align: right;">{{ numberFormatter(0, 5)->format($data->power) }}</td>
+                  <td>Kw</td>
+                </tr>
+                <tr>
+                  <td style="width: 13%;"><b>V Avg (1 Phasa)</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td style="width: 15%;text-align: right;">{{ numberFormatter(0, 5)->format($data->volt2pavg) }}</td>
+                  <td>Volt</td>
+                </tr>
+                <tr>
+                  <td style="width: 13%;"><b>Frek</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td style="width: 15%;text-align: right;">{{ numberFormatter(0, 5)->format($data->freq) }}</td>
+                  <td>Hz</td>
+                </tr>
+                <tr>
+                  <td style="width: 13%;"><b>Power Faktor</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td style="width: 15%;text-align: right;">{{ numberFormatter(0, 5)->format($data->cospi) }}</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td style="width: 13%;"><b>Total Energi Del</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td style="width: 15%;text-align: right;">{{ numberFormatter(0, 5)->format($data->energi) }}</td>
+                  <td>KwH</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- /.box-body --> --}}
+
+          <div class="row" id="field_grafik">
+            <div class="col-md-12">
+              <div class="box box-primary">
+                <div class="box-header with-border">
+                  <h3 class="box-title" id="box-grafik">Grafik V Avg</h3>
+                  <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                      <i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove">
+                      <i class="fa fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                  <canvas id="canvas" width="1100" height="400"></canvas>
+                </div>
+                <!-- /.box-body -->
+              </div>
+              <!-- /.box -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+
+          <div class="row" id="field_grafik">
+            <div class="col-md-12">
+              <div class="box box-primary">
+                <div class="box-header with-border">
+                  <h3 class="box-title" id="box-grafik">Grafik I Avg</h3>
+                  <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                      <i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove">
+                      <i class="fa fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                  <canvas id="canvas-2" width="1100" height="400"></canvas>
+                </div>
+                <!-- /.box-body -->
+              </div>
+              <!-- /.box -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+
+          <div class="row" id="field_grafik">
+            <div class="col-md-12">
+              <div class="box box-primary">
+                <div class="box-header with-border">
+                  <h3 class="box-title" id="box-grafik">Grafik Power Total</h3>
+                  <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                      <i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove">
+                      <i class="fa fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                  <canvas id="canvas-3" width="1100" height="400"></canvas>
+                </div>
+                <!-- /.box-body -->
+              </div>
+              <!-- /.box -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+        @endif
+      @endif
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+@endsection
+
+@section('scripts')
+@if (isset($value_x_1) && isset($value_y_1) && isset($value_x_2) && isset($value_y_2) && isset($value_x_3) && isset($value_y_3))
+  <script src="{{ asset('chartjs/Chart.bundle.js') }}"></script>
+  <script src="{{ asset('chartjs/utils.js') }}"></script>
+@endif
+<script type="text/javascript">
+  document.getElementById("filter_tanggal").focus();
+
+  //Initialize Select2 Elements
+  $(".select2").select2();
+
+  $(document).ready(function(){
+
+    $('#btn-display').click( function () {
+      var tanggal = $('input[name="filter_tanggal"]').val();
+      var mdb = $('select[name="filter_mdb"]').val();
+      if(tanggal != null) {
+        var urlRedirect = "{{ route('sqlservers.dpm', ['param','param2']) }}";
+        urlRedirect = urlRedirect.replace('param2', window.btoa(mdb));
+        urlRedirect = urlRedirect.replace('param', window.btoa(tanggal));
+        window.location.href = urlRedirect;
+      } else {
+        document.getElementById("filter_tanggal").focus();
+        swal("Tanggal tidak boleh kosong!", "Perhatikan inputan anda!", "warning");
+      }
+    });
+  });
+
+  @if (isset($value_x_1) && isset($value_y_1) && isset($value_x_2) && isset($value_y_2) && isset($value_x_3) && isset($value_y_3))
+
+    var chartData = {
+      labels: {!! json_encode($value_x_1) !!}, 
+      datasets: 
+      [
+        {
+          type: 'line',
+          label: 'Jam',
+          borderColor: window.chartColors.blue,
+          borderWidth: 2,
+          fill: false, //[false, 'origin', 'start', 'end']
+          data: {!! json_encode($value_y_1) !!}
+        }
+      ]
+    };
+
+    var chartData2 = {
+      labels: {!! json_encode($value_x_2) !!}, 
+      datasets: 
+      [
+        {
+          type: 'line',
+          label: 'Jam',
+          borderColor: window.chartColors.blue,
+          borderWidth: 2,
+          fill: false, //[false, 'origin', 'start', 'end']
+          data: {!! json_encode($value_y_2) !!}
+        }
+      ]
+    };
+
+    var chartData3 = {
+      labels: {!! json_encode($value_x_3) !!}, 
+      datasets: 
+      [
+        {
+          type: 'line',
+          label: 'Jam',
+          borderColor: window.chartColors.blue,
+          borderWidth: 2,
+          fill: false, //[false, 'origin', 'start', 'end']
+          data: {!! json_encode($value_y_3) !!}
+        }
+      ]
+    };
+
+    window.onload = function() {
+      var ctx = document.getElementById('canvas').getContext('2d');
+      window.myMixedChart = new Chart(ctx, {
+        type: 'bar',
+        data: chartData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero:true,
+                // max: 100, 
+                // stepSize: 10, 
+                callback: function(value, index, values) {
+                  // Remove the formatting to get integer data for summation
+                  var intVal = function (i) {
+                    return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                    i : 0;
+                  };
+                  value = intVal(value);
+
+                  var format = function formatNumber(num) {
+                    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                  };
+
+                  return format(value) + ' Volt';
+                }
+              },
+              gridLines: {
+                display:true
+              }
+            }],
+            xAxes: [{
+              ticks: {
+                callback: function(t) {
+                  var maxLabelLength = 20;
+                  if (t.length > maxLabelLength) return t.substr(0, maxLabelLength) + '...';
+                  else return t;
+                }, 
+                autoSkip: false,
+                maxRotation: 30,
+                // minRotation: 30
+              },
+              gridLines: {
+                display:true
+              }   
+            }]
+          },
+          "hover": {
+            "animationDuration": 0
+          },
+          "animation": {
+            // "duration": 1,
+            "onComplete": function() {
+              var chartInstance = this.chart,
+              ctx = chartInstance.ctx;
+
+              ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+              ctx.fillStyle = 'black';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'bottom';
+
+              this.data.datasets.forEach(function(dataset, i) {
+                var meta = chartInstance.controller.getDatasetMeta(i);
+                meta.data.forEach(function(bar, index) {
+                  // var data = dataset.data[index];
+                  var data = "";
+                  ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                });
+              });
+            }
+          },
+          title: {
+            display: true,
+            position: 'top', 
+            text: 'V Avg',
+            fontSize: 14,
+          },
+          legend: {
+            position: 'top', 
+            "display": true,
+            labels: {
+              // This more specific font property overrides the global property
+              fontColor: 'black',
+              //fontSize: 12,
+            }
+          },
+          tooltips: {
+            callbacks: {
+              title: function(t, d) {
+                return d.labels[t[0].index];
+              }
+            }, 
+            mode: 'index',
+            intersect: true, 
+            callbacks: {
+              title: function(tooltipItem, data) {
+                return data['labels'][tooltipItem[0].index];
+              },
+              label: function(tooltipItem, data) {
+                return data.datasets[tooltipItem.datasetIndex].label + ": " + tooltipItem.yLabel + " Volt";
+              },
+            },
+          }
+        }
+      });
+
+      ctx = document.getElementById('canvas-2').getContext('2d');
+      window.myMixedChart2 = new Chart(ctx, {
+        type: 'bar',
+        data: chartData2,
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero:true,
+                // max: 100, 
+                // stepSize: 10, 
+                callback: function(value, index, values) {
+                  // Remove the formatting to get integer data for summation
+                  var intVal = function (i) {
+                    return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                    i : 0;
+                  };
+                  value = intVal(value);
+
+                  var format = function formatNumber(num) {
+                    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                  };
+
+                  return format(value) + ' Ampere';
+                }
+              },
+              gridLines: {
+                display:true
+              }
+            }],
+            xAxes: [{
+              ticks: {
+                callback: function(t) {
+                  var maxLabelLength = 20;
+                  if (t.length > maxLabelLength) return t.substr(0, maxLabelLength) + '...';
+                  else return t;
+                }, 
+                autoSkip: false,
+                maxRotation: 30,
+                // minRotation: 30
+              },
+              gridLines: {
+                display:true
+              }   
+            }]
+          },
+          "hover": {
+            "animationDuration": 0
+          },
+          "animation": {
+            // "duration": 1,
+            "onComplete": function() {
+              var chartInstance = this.chart,
+              ctx = chartInstance.ctx;
+
+              ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+              ctx.fillStyle = 'black';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'bottom';
+
+              this.data.datasets.forEach(function(dataset, i) {
+                var meta = chartInstance.controller.getDatasetMeta(i);
+                meta.data.forEach(function(bar, index) {
+                  // var data = dataset.data[index];
+                  var data = "";
+                  ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                });
+              });
+            }
+          },
+          title: {
+            display: true,
+            position: 'top', 
+            text: 'I Avg',
+            fontSize: 14,
+          },
+          legend: {
+            position: 'top', 
+            "display": true,
+            labels: {
+              // This more specific font property overrides the global property
+              fontColor: 'black',
+              //fontSize: 12,
+            }
+          },
+          tooltips: {
+            callbacks: {
+              title: function(t, d) {
+                return d.labels[t[0].index];
+              }
+            }, 
+            mode: 'index',
+            intersect: true, 
+            callbacks: {
+              title: function(tooltipItem, data) {
+                return data['labels'][tooltipItem[0].index];
+              },
+              label: function(tooltipItem, data) {
+                return data.datasets[tooltipItem.datasetIndex].label + ": " + tooltipItem.yLabel + " Ampere";
+              },
+            },
+          }
+        }
+      });
+
+      ctx = document.getElementById('canvas-3').getContext('2d');
+      window.myMixedChart3 = new Chart(ctx, {
+        type: 'bar',
+        data: chartData3,
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero:true,
+                // max: 100, 
+                // stepSize: 10, 
+                callback: function(value, index, values) {
+                  // Remove the formatting to get integer data for summation
+                  var intVal = function (i) {
+                    return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                    i : 0;
+                  };
+                  value = intVal(value);
+
+                  var format = function formatNumber(num) {
+                    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                  };
+
+                  return format(value) + ' Kw';
+                }
+              },
+              gridLines: {
+                display:true
+              }
+            }],
+            xAxes: [{
+              ticks: {
+                callback: function(t) {
+                  var maxLabelLength = 20;
+                  if (t.length > maxLabelLength) return t.substr(0, maxLabelLength) + '...';
+                  else return t;
+                }, 
+                autoSkip: false,
+                maxRotation: 30,
+                // minRotation: 30
+              },
+              gridLines: {
+                display:true
+              }   
+            }]
+          },
+          "hover": {
+            "animationDuration": 0
+          },
+          "animation": {
+            // "duration": 1,
+            "onComplete": function() {
+              var chartInstance = this.chart,
+              ctx = chartInstance.ctx;
+
+              ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+              ctx.fillStyle = 'black';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'bottom';
+
+              this.data.datasets.forEach(function(dataset, i) {
+                var meta = chartInstance.controller.getDatasetMeta(i);
+                meta.data.forEach(function(bar, index) {
+                  // var data = dataset.data[index];
+                  var data = "";
+                  ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                });
+              });
+            }
+          },
+          title: {
+            display: true,
+            position: 'top', 
+            text: 'POWER TOTAL',
+            fontSize: 14,
+          },
+          legend: {
+            position: 'top', 
+            "display": true,
+            labels: {
+              // This more specific font property overrides the global property
+              fontColor: 'black',
+              //fontSize: 12,
+            }
+          },
+          tooltips: {
+            callbacks: {
+              title: function(t, d) {
+                return d.labels[t[0].index];
+              }
+            }, 
+            mode: 'index',
+            intersect: true, 
+            callbacks: {
+              title: function(tooltipItem, data) {
+                return data['labels'][tooltipItem[0].index];
+              },
+              label: function(tooltipItem, data) {
+                return data.datasets[tooltipItem.datasetIndex].label + ": " + tooltipItem.yLabel + " Kw";
+              },
+            },
+          }
+        }
+      });
+    };
+  @endif
+</script>
+@endsection

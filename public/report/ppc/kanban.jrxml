@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="ee48f9ba-7a52-4afb-b712-3c2b3a83f143">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="no_dn" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="barcode" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["/"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select no_dn, item, qty_kanban
+from baan_dn_supps
+where no_dn = $P{no_dn}]]>
+	</queryString>
+	<field name="no_dn" class="java.lang.String"/>
+	<field name="item" class="java.lang.String"/>
+	<field name="qty_kanban" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="200" splitType="Stretch">
+			<subreport>
+				<reportElement x="0" y="0" width="555" height="200" uuid="1a75a668-a36c-4b2d-ac87-fdfef2af2403"/>
+				<subreportParameter name="limit">
+					<subreportParameterExpression><![CDATA[$F{qty_kanban}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="item">
+					<subreportParameterExpression><![CDATA[$F{item}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="barcode">
+					<subreportParameterExpression><![CDATA[$P{barcode}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="no_dn">
+					<subreportParameterExpression><![CDATA[$F{no_dn}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "kanban_detail.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+</jasperReport>

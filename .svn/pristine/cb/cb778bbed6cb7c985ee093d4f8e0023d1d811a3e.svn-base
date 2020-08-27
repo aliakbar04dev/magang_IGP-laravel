@@ -1,0 +1,469 @@
+@extends('monitoring.mtc.layouts.app3')
+
+@section('content')
+  <div class="container3">
+    <div class="row" id="box-body" name="box-body">
+      <div class="col-md-12">
+        <div class="box">
+          <div class="box-header with-border">
+            <center>
+              <h3 class="box-title" id="box-title" name="box-title" style="font-family:serif;font-size: 30px;">
+                <a href="{{ route('smartmtcs.spm') }}" style="color: black"><strong>SPARE PART MANAGEMENT</strong></a>
+              </h3>
+            </center>
+            <div class="box-tools pull-right">
+              <button id="btn-close" name="btn-close" class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="Close" onclick="window.open('', '_self', ''); window.close();">
+                <span class="glyphicon glyphicon-remove"></span>
+              </button>
+            </div>
+          </div>
+          <!-- /.box-header -->
+
+          <div class="box-body">
+            <table id="tblButton" width="100%">
+              <tr>
+                <td style="width: 10%">
+                  <button class="info-button btn-warning" id="btn-reguler" style="width: 90%">
+                    REGULER<br>SPARE PART
+                  </button>
+                </td>
+                <td style="width: 10%">
+                  <button class="info-button btn-info" id="btn-direct" style="width: 90%">
+                    DIRECT<br>SPARE PART
+                  </button>
+                </td>
+                <td style="width: 10%">
+                  <button class="info-button btn-danger" id="btn-urgent" style="width: 90%">
+                    URGENT<br>SPARE PART
+                  </button>
+                </td>
+                <td style="width: 10%">
+                  <button class="info-button btn-success" id="btn-po" style="width: 90%">
+                    OUT STANDING<br>PO
+                  </button>
+                </td>
+                <td style="width: 10%">
+                  <button class="info-button btn-primary" id="btn-delivery" style="width: 90%">
+                    OUT STANDING<br>DELIVERY
+                  </button>
+                </td>
+                <td style="width: 10%">
+                  <button class="info-button" id="btn-search" style="width: 90%">
+                    SEARCHING<br>SPARE PART
+                  </button>
+                </td>
+                <td style="width: 10%">
+                  @if (isset($st_filter_mesin))
+                    <button class="info-button bg-black" id="btn-searchbymesin" style="width: 90%">
+                      SEARCHING<br>SPARE PART BY MACHINE
+                    </button>
+                  @else 
+                    <button class="info-button bg-purple" id="btn-searchbymesin" style="width: 90%">
+                      SEARCHING<br>SPARE PART BY MACHINE
+                    </button>
+                  @endif
+                </td>
+              </tr>
+            </table>
+          </div>
+          <!-- ./box-body -->
+          @if (isset($st_filter_mesin))
+            <div class="box-body">
+              <div class="col-md-12">
+                <div class="box box-primary">
+                  <div class="box-header with-border">
+                    <h3 class="box-title" id="box-filter">FILTER MESIN</h3>
+                    <div class="box-tools pull-right">
+                      <button type="button" class="btn btn-success btn-sm" data-widget="collapse">
+                        <i class="fa fa-minus"></i>
+                      </button>
+                      <button type="button" class="btn btn-danger btn-sm" data-widget="remove">
+                        <i class="fa fa-times"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="box-body" id="box-mesin" name="box-mesin">
+                    <div class="form-group">
+                      <div class="col-sm-3">
+                        {!! Form::label('lblmesin', 'Mesin (F9)') !!}
+                        <div class="input-group">
+                          <input type="text" id="kd_mesin" name="kd_mesin" class="form-control" placeholder="Mesin" onkeydown="keyPressedKdMesin(event)" onchange="validateKdMesin()">
+                          <span class="input-group-btn">
+                            <button id="btnpopupmesin" name="btnpopupmesin" type="button" class="btn btn-info" onclick="popupKdMesin()" data-toggle="modal" data-target="#mesinModal">
+                              <span class="glyphicon glyphicon-search"></span>
+                            </button>
+                          </span>
+                        </div>
+                      </div>
+                      <div class="col-sm-5">
+                        <label name="lblnmmesin">Nama Mesin</label>
+                        <input type="text" id="nm_mesin" name="nm_mesin" class="form-control" placeholder="Nama Mesin" disabled="">
+                      </div>
+                      <div class="col-sm-2">
+                        {!! Form::label('lblusername2', 'Action') !!}
+                        <button id="btn-display" name="btn-display" type="button" class="form-control btn btn-primary" data-toggle="tooltip" data-placement="top" title="Search">Search</button>
+                      </div>
+                    </div>
+                    <!-- /.form-group -->
+                  </div>
+                  <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+          @endif
+          <div class="box-body">
+            <div class="col-md-12">
+              <div class="box box-primary">
+                <div class="box-header with-border">
+                  <h3 class="box-title" id="box-table">LIST OF ALL SPARE PARTS ORDERED</h3>
+                  <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-success btn-sm" data-widget="collapse">
+                      <i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-danger btn-sm" data-widget="remove">
+                      <i class="fa fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="box-body" id="box-table" name="box-table">
+                  <input type="hidden" id="filter_status" name="filter_status" class="form-control" readonly="readonly" value="ALL">
+                  <table id="tblMaster" class="table table-bordered table-striped" cellspacing="0" width="100%">
+                    <thead>
+                      <tr>
+                        <th style="width: 1%;">No</th>
+                        <th style="width: 15%;">Item</th>
+                        <th>Deskripsi</th>
+                        <th style="width: 5%;">QTY</th>
+                        <th style="width: 5%;">Satuan</th>
+                        <th style="width: 8%;">No. PP</th>
+                        <th style="width: 8%;">Tgl. PP</th>
+                        <th>Ref A</th>
+                        <th style="width: 8%;">No. PO</th>
+                        <th style="width: 8%;">No. LPB</th>
+                      </tr>
+                    </thead>
+                  </table>
+                </div>
+                <!-- /.box-body -->
+              </div>
+              <!-- /.box -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+        </div>
+        <!-- /.box -->
+      </div>
+      <!-- /.col -->
+    </div>
+    <!-- /.row -->
+  </div>
+  <!-- Modal Mesin -->
+  @include('mtc.stockwhs.popup.mesinModal')
+@endsection
+
+@section('scripts')
+<script type="text/javascript">
+
+  // document.getElementById("filter_status").value = "URGENT";
+  // document.getElementById("box-table").innerHTML = "LIST OF URGENT SPARE PARTS ORDERED";
+  // $('#btn-urgent').removeAttr('class');
+  // $('#btn-urgent').attr('class', 'info-button bg-black');
+
+  function keyPressedKdMesin(e) {
+    if(e.keyCode == 120) { //F9
+      $('#btnpopupmesin').click();
+    } else if(e.keyCode == 9) { //TAB
+      e.preventDefault();
+      document.getElementById("btn-display").focus();
+    }
+  }
+
+  function popupKdMesin() {
+    var myHeading = "<p>Popup Mesin</p>";
+    $("#mesinModalLabel").html(myHeading);
+    var url = '{{ route('datatables.popupMesinAlls') }}';
+    var lookupMesin = $('#lookupMesin').DataTable({
+      processing: true,  
+      "oLanguage": {
+        'sProcessing': '<div id="processing" style="margin: 0px; padding: 0px; position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; background-color: rgb(102, 102, 102); z-index: 30001; opacity: 0.8;"><p style="position: absolute; color: White; top: 50%; left: 45%;"><img src="{{ asset('images/ajax-loader.gif') }}"></p></div>Processing...'
+      }, 
+      serverSide: true,
+      "pagingType": "numbers",
+      ajax: url,
+      "aLengthMenu": [[5, 10, 25, 50, 75, 100, -1], [5, 10, 25, 50, 75, 100, "All"]],
+      responsive: true,
+      "order": [[1, 'asc']],
+      columns: [
+        { data: 'kd_mesin', name: 'kd_mesin'},
+        { data: 'nm_mesin', name: 'nm_mesin'},
+        { data: 'kd_line', name: 'kd_line'},
+        { data: 'nm_line', name: 'nm_line'}
+      ],
+      "bDestroy": true,
+      "initComplete": function(settings, json) {
+        // $('div.dataTables_filter input').focus();
+        $('#lookupMesin tbody').on( 'dblclick', 'tr', function () {
+          var dataArr = [];
+          var rows = $(this);
+          var rowData = lookupMesin.rows(rows).data();
+          $.each($(rowData),function(key,value){
+            document.getElementById("kd_mesin").value = value["kd_mesin"];
+            document.getElementById("nm_mesin").value = value["nm_mesin"];
+            $('#mesinModal').modal('hide');
+          });
+        });
+        $('#mesinModal').on('hidden.bs.modal', function () {
+          var kd_mesin = document.getElementById("kd_mesin").value.trim();
+          if(kd_mesin === '') {
+            document.getElementById("nm_mesin").value = "";
+            document.getElementById("kd_mesin").focus();
+          } else {
+            document.getElementById("btn-display").focus();
+          }
+        });
+      },
+    });
+  }
+
+  function validateKdMesin() {
+    var kd_mesin = document.getElementById("kd_mesin").value.trim();
+    if(kd_mesin !== '') {
+      var url = '{{ route('datatables.validasiMesinAlls', 'param') }}';
+      url = url.replace('param', window.btoa(kd_mesin));
+      //use ajax to run the check
+      $.get(url, function(result){  
+        if(result !== 'null'){
+          result = JSON.parse(result);
+          document.getElementById("kd_mesin").value = result["kd_mesin"];
+          document.getElementById("nm_mesin").value = result["nm_mesin"];
+          document.getElementById("btn-display").focus();
+        } else {
+          document.getElementById("kd_mesin").value = "";
+          document.getElementById("nm_mesin").value = "";
+          document.getElementById("kd_mesin").focus();
+          swal("Mesin tidak valid!", "Perhatikan inputan anda! tekan F9 untuk tampilkan data.", "error");
+        }
+      });
+    } else {
+      document.getElementById("kd_mesin").value = "";
+      document.getElementById("nm_mesin").value = "";
+    }
+  }
+
+  var calcDataTableHeight = function() {
+    return $(window).height() * 55 / 100;
+  };
+
+  $(document).ready(function(){
+    @if (isset($st_filter_mesin))
+      var url = '{{ route('smartmtcs.dashboardspm', 'T') }}';
+      document.getElementById("filter_status").value = "ALL";
+      document.getElementById("box-table").innerHTML = "LIST OF ALL SPARE PARTS ORDERED BY MACHINE";
+    @else 
+      var url = '{{ route('smartmtcs.dashboardspm') }}';
+    @endif
+    var tableMaster = $('#tblMaster').DataTable({
+      "columnDefs": [{
+        "searchable": false,
+        // "orderable": false,
+        "targets": 0,
+        render: function (data, type, row, meta) {
+          return meta.row + meta.settings._iDisplayStart + 1;
+        }
+      }],
+      "aLengthMenu": [[5, 10, 25, 50, 75, 100, -1], [5, 10, 25, 50, 75, 100, "All"]],
+      "iDisplayLength": 50,
+      responsive: true,
+      "scrollY": calcDataTableHeight(),
+      "scrollCollapse": true,
+      // "order": [[1, 'desc'],[2, 'asc'],[3, 'asc']],
+      "order": [],
+      processing: true, 
+      "oLanguage": {
+        'sProcessing': '<div id="processing" style="margin: 0px; padding: 0px; position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; background-color: rgb(102, 102, 102); z-index: 30001; opacity: 0.8;"><p style="position: absolute; color: White; top: 50%; left: 45%;"><img src="{{ asset('images/ajax-loader.gif') }}"></p></div>Processing...'
+      }, 
+      "dom": '<"top"fli>rt<"bottom"p><"clear">', 
+      // "dom": '<"top"fli>rt<"clear">', 
+      // serverSide: true,
+      ajax: url,
+      columns: [
+        {data: null, name: null},
+        {data: 'item_no', name: 'item_no'},
+        {data: 'nm_item', name: 'nm_item'},
+        {data: 'qty_pp', name: 'qty_pp', className: "dt-right"}, 
+        {data: 'unit', name: 'unit', className: "dt-center"},
+        {data: 'no_pp', name: 'no_pp', className: "dt-center"},
+        {data: 'tgl_pp', name: 'tgl_pp', className: "dt-center"},
+        {data: 'refa', name: 'refa', className: "none"},
+        {data: 'no_po', name: 'no_po', className: "dt-center"},
+        {data: 'no_lpb', name: 'no_lpb', className: "dt-center"}
+      ]
+    });
+
+    $("#tblMaster").on('preXhr.dt', function(e, settings, data) {
+      @if (isset($st_filter_mesin))
+        data.kd_mesin = $('input[name="kd_mesin"]').val();
+        data.status = document.getElementById("filter_status").value;
+      @else 
+        data.status = document.getElementById("filter_status").value;
+      @endif
+    });
+
+    $("#btn-reguler").click(function(){
+      document.getElementById("filter_status").value = "REGULER";
+      @if (isset($st_filter_mesin))
+        document.getElementById("box-table").innerHTML = "LIST OF REGULER SPARE PARTS ORDERED BY MACHINE";
+      @else 
+        document.getElementById("box-table").innerHTML = "LIST OF REGULER SPARE PARTS ORDERED";
+      @endif
+      $('#btn-reguler').removeAttr('class');
+      $('#btn-reguler').attr('class', 'info-button bg-black');
+      $('#btn-direct').removeAttr('class');
+      $('#btn-direct').attr('class', 'info-button btn-info');
+      $('#btn-urgent').removeAttr('class');
+      $('#btn-urgent').attr('class', 'info-button btn-danger');
+      $('#btn-po').removeAttr('class');
+      $('#btn-po').attr('class', 'info-button btn-success');
+      $('#btn-delivery').removeAttr('class');
+      $('#btn-delivery').attr('class', 'info-button btn-primary');
+      $('#btn-search').removeAttr('class');
+      $('#btn-search').attr('class', 'info-button');
+      $('#btn-searchbymesin').removeAttr('class');
+      $('#btn-searchbymesin').attr('class', 'info-button bg-purple');
+      tableMaster.ajax.reload();
+    });
+
+    $("#btn-direct").click(function(){
+      document.getElementById("filter_status").value = "DIRECT";
+      @if (isset($st_filter_mesin))
+        document.getElementById("box-table").innerHTML = "LIST OF DIRECT SPARE PARTS ORDERED BY MACHINE";
+      @else 
+        document.getElementById("box-table").innerHTML = "LIST OF DIRECT SPARE PARTS ORDERED";
+      @endif
+      $('#btn-reguler').removeAttr('class');
+      $('#btn-reguler').attr('class', 'info-button btn-warning');
+      $('#btn-direct').removeAttr('class');
+      $('#btn-direct').attr('class', 'info-button bg-black');
+      $('#btn-urgent').removeAttr('class');
+      $('#btn-urgent').attr('class', 'info-button btn-danger');
+      $('#btn-po').removeAttr('class');
+      $('#btn-po').attr('class', 'info-button btn-success');
+      $('#btn-delivery').removeAttr('class');
+      $('#btn-delivery').attr('class', 'info-button btn-primary');
+      $('#btn-search').removeAttr('class');
+      $('#btn-search').attr('class', 'info-button');
+      $('#btn-searchbymesin').removeAttr('class');
+      $('#btn-searchbymesin').attr('class', 'info-button bg-purple');
+      tableMaster.ajax.reload();
+    });
+
+    $("#btn-urgent").click(function(){
+      document.getElementById("filter_status").value = "URGENT";
+      @if (isset($st_filter_mesin))
+        document.getElementById("box-table").innerHTML = "LIST OF URGENT SPARE PARTS ORDERED BY MACHINE";
+      @else 
+        document.getElementById("box-table").innerHTML = "LIST OF URGENT SPARE PARTS ORDERED";
+      @endif
+      $('#btn-reguler').removeAttr('class');
+      $('#btn-reguler').attr('class', 'info-button btn-warning');
+      $('#btn-direct').removeAttr('class');
+      $('#btn-direct').attr('class', 'info-button btn-info');
+      $('#btn-urgent').removeAttr('class');
+      $('#btn-urgent').attr('class', 'info-button bg-black');
+      $('#btn-po').removeAttr('class');
+      $('#btn-po').attr('class', 'info-button btn-success');
+      $('#btn-delivery').removeAttr('class');
+      $('#btn-delivery').attr('class', 'info-button btn-primary');
+      $('#btn-search').removeAttr('class');
+      $('#btn-search').attr('class', 'info-button');
+      $('#btn-searchbymesin').removeAttr('class');
+      $('#btn-searchbymesin').attr('class', 'info-button bg-purple');
+      tableMaster.ajax.reload();
+    });
+
+    $("#btn-po").click(function(){
+      document.getElementById("filter_status").value = "OUTSTANDING PO";
+      @if (isset($st_filter_mesin))
+        document.getElementById("box-table").innerHTML = "LIST OF OUT STANDING PO SPARE PARTS ORDERED BY MACHINE";
+      @else 
+        document.getElementById("box-table").innerHTML = "LIST OF OUT STANDING PO SPARE PARTS ORDERED";
+      @endif
+      $('#btn-reguler').removeAttr('class');
+      $('#btn-reguler').attr('class', 'info-button btn-warning');
+      $('#btn-direct').removeAttr('class');
+      $('#btn-direct').attr('class', 'info-button btn-info');
+      $('#btn-urgent').removeAttr('class');
+      $('#btn-urgent').attr('class', 'info-button btn-danger');
+      $('#btn-po').removeAttr('class');
+      $('#btn-po').attr('class', 'info-button bg-black');
+      $('#btn-delivery').removeAttr('class');
+      $('#btn-delivery').attr('class', 'info-button btn-primary');
+      $('#btn-search').removeAttr('class');
+      $('#btn-search').attr('class', 'info-button');
+      $('#btn-searchbymesin').removeAttr('class');
+      $('#btn-searchbymesin').attr('class', 'info-button bg-purple');
+      tableMaster.ajax.reload();
+    });
+
+    $("#btn-delivery").click(function(){
+      document.getElementById("filter_status").value = "OUTSTANDING DELIVERY";
+      @if (isset($st_filter_mesin))
+        document.getElementById("box-table").innerHTML = "LIST OF OUT STANDING DELIVERY SPARE PARTS ORDERED BY MACHINE";
+      @else 
+        document.getElementById("box-table").innerHTML = "LIST OF OUT STANDING DELIVERY SPARE PARTS ORDERED";
+      @endif
+      $('#btn-reguler').removeAttr('class');
+      $('#btn-reguler').attr('class', 'info-button btn-warning');
+      $('#btn-direct').removeAttr('class');
+      $('#btn-direct').attr('class', 'info-button btn-info');
+      $('#btn-urgent').removeAttr('class');
+      $('#btn-urgent').attr('class', 'info-button btn-danger');
+      $('#btn-po').removeAttr('class');
+      $('#btn-po').attr('class', 'info-button btn-success');
+      $('#btn-delivery').removeAttr('class');
+      $('#btn-delivery').attr('class', 'info-button bg-black');
+      $('#btn-search').removeAttr('class');
+      $('#btn-search').attr('class', 'info-button');
+      $('#btn-searchbymesin').removeAttr('class');
+      $('#btn-searchbymesin').attr('class', 'info-button bg-purple');
+      tableMaster.ajax.reload();
+    });
+
+    $("#btn-search").click(function(){
+      var urlRedirect = "{{ route('smartmtcs.indexstockohigp') }}";
+      // window.location.href = urlRedirect;
+      window.open(urlRedirect, '_blank');
+    });
+
+    $("#btn-searchbymesin").click(function(){
+      var urlRedirect = "{{ route('smartmtcs.spm', 'param') }}";
+      urlRedirect = urlRedirect.replace('param', "T");
+      window.location.href = urlRedirect;
+    });
+
+    $("#btn-display").click(function(){
+      document.getElementById("filter_status").value = "ALL";
+      document.getElementById("box-table").innerHTML = "LIST OF ALL SPARE PARTS ORDERED BY MACHINE";
+      $('#btn-reguler').removeAttr('class');
+      $('#btn-reguler').attr('class', 'info-button btn-warning');
+      $('#btn-direct').removeAttr('class');
+      $('#btn-direct').attr('class', 'info-button btn-info');
+      $('#btn-urgent').removeAttr('class');
+      $('#btn-urgent').attr('class', 'info-button btn-danger');
+      $('#btn-po').removeAttr('class');
+      $('#btn-po').attr('class', 'info-button btn-success');
+      $('#btn-delivery').removeAttr('class');
+      $('#btn-delivery').attr('class', 'info-button btn-primary');
+      $('#btn-search').removeAttr('class');
+      $('#btn-search').attr('class', 'info-button');
+      $('#btn-searchbymesin').removeAttr('class');
+      $('#btn-searchbymesin').attr('class', 'info-button bg-black');
+      tableMaster.ajax.reload();
+    });
+  });
+</script>
+@endsection

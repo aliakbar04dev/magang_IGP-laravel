@@ -1,0 +1,35 @@
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+use DB;
+
+class Andon extends Model
+{
+
+	public function mtcAndons($plant, $dtcrea)
+    {
+    	$mtc_andons = DB::connection('sqlsrv')
+    	->table(DB::raw("mtc_andon"))
+    	->select(DB::raw("distinct plant, line"))
+    	->where("plant", $plant)
+    	->where(DB::raw("CONVERT(varchar, dtcrea, 112)"), $dtcrea)
+    	->orderByRaw("line")
+    	->get();
+    	return $mtc_andons;
+    }
+
+    public function mtcAndon($plant, $line, $dtcrea)
+    {
+    	$mtc_andon = DB::connection('sqlsrv')
+    	->table(DB::raw("mtc_andon"))
+    	->select(DB::raw("dtcrea, status_mc, status_supply, status_qc, linestop_mc, linestop_supply, linestop_qc, freq_mc, freq_supply, freq_qc"))
+    	->where("plant", $plant)
+    	->where(DB::raw("CONVERT(varchar, dtcrea, 112)"), $dtcrea)
+    	->where("line", $line)
+    	->orderByRaw("dtcrea desc")
+    	->first();
+    	return $mtc_andon;
+    }
+}

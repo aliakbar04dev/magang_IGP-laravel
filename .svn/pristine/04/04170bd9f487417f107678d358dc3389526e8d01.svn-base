@@ -1,0 +1,539 @@
+@extends('monitoring.mtc.layouts.app3')
+<style type="text/css">
+  body {
+    background-image: url("{{ asset('images/warehouse_bg.jpg') }}");
+    position:relative;
+    height: 490px !important;
+  }
+
+  .atasdashboard{
+    width: 100%; 
+    height:100px; 
+    padding:0px; 
+    margin-left:-10px;
+  }
+
+  .box{
+    position: relative;
+  text-align: center;
+  background:none;
+        /* Make the width of box same as image */
+}
+.centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.garistengah{ 
+  
+  border:         none;
+  border-left:    2px solid white;
+  height:         150px;
+  width:          1px;     
+}
+
+.container4{
+    margin:10px 0px 0px 0px !important; 
+    padding:0px !important;
+  }
+
+  .tampilbawah{
+    padding:0px !important;
+  }
+
+  @media only screen and (min-width: 600px) {
+
+  .atasdashboard{
+    width: 100%; 
+    height:100px; 
+    padding:0px; 
+    margin-left:-50px;
+  }
+
+  #footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 2.5rem;            /* Footer height */
+}
+
+  
+  
+
+  .garisinfo{
+    margin-left:10px;
+  }
+
+  .menu{
+    font-size: 30px;
+    color:white;
+  }
+
+  .imagelogo{
+    margin-top:-10px;
+    margin-left:30px;
+    height:100px; 
+    width:100px;
+  }
+
+
+  .huruf{
+    font-size: 25px;
+    text-transform: uppercase;
+  }
+
+ .backbutton{
+    font-size: 30px;
+    text-transform: uppercase;
+    float:right;
+    height:40px;
+    margin-top:-40px;
+  }
+  
+}
+
+@media only screen and (max-width: 599px) {
+  #footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 2.5rem;            /* Footer height */
+}
+
+.menu{
+  font-size: 14px;
+  color:white;
+}
+
+.imagelogo{
+    margin-top:15px;
+    margin-left:30px;
+    height:50px; 
+    width:50px;
+  }
+
+  .huruf{
+    font-size: 14px;
+    margin-top:10px;
+    text-transform: uppercase;
+  }
+
+  .backbutton{
+    font-size: 30px;
+    text-transform: uppercase;
+    float:right;
+    height:40px;
+    margin-top:-35px;
+  }
+
+}
+
+
+
+  
+</style>
+@section('content')
+        <div class="container4">
+          <!-- /.box-header -->
+
+          <div class="box-body tampilbawah" >
+                <div class="row">
+                    <div class="col-xl-12" >
+                        <img src="{{ asset('images/logosmart.png') }}" class="imagelogo" align="left">
+                        <br>
+                            <div class="alert alert-danger alert-dismissible" style="height:40px; width:100% ;  padding:0px 10px; background-color:#ff7701 !important;">
+                                    <p class="huruf" >PROBLEM LIST</p>
+                                    
+                                    <div class="backbutton" onclick="onBack()">
+                                        <button type="button" class="btn bg-navy margin" style="width:70px;"><i class="fa fa-chevron-circle-left"></i></button>
+                                    </div>
+                            </div>
+                    </div>
+                </div>
+                <center>
+                  <table id="tblMaster" width="85%"> 
+                      {{-- <tr>
+                          <td></td>
+                          <td colspan="2" style="color:white; padding-bottom:10px; font-size:20px; font-weight:bold;"><center>IGP 1</center></td>
+                          <td></td>
+                          <td colspan="2" style="color:white; padding-bottom:10px; font-size:20px; font-weight:bold;"><center>IGP 2</center></td>
+                          <td></td>
+                          <td colspan="2" style="color:white; padding-bottom:10px; font-size:20px; font-weight:bold;"><center>IGP 3</center></td>
+                          <td></td>
+                      </tr> --}}
+                    <tr >
+                      <td style="width: 10%;text-align: center;">
+                        <img  src="{{ asset('images/igp1zona1.png') }}" style="filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.8)); margin-bottom:20px; width: 100%;" id="btn-dm-igp1-zona1">
+                        <img  src="{{ asset('images/igp1zona2.png') }}" style="filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.8)); margin-bottom:20px; width: 100%;" id="btn-dm-igp2-zona1">
+                      </td>
+                      <td  style="width: 2%;"></td>
+                      <td style="width: 10%;text-align: center; margin-left:50px;">
+                          <img src="{{ asset('images/igp2zona1.png') }}" style=" filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.8)); margin-bottom:20px; width: 100%; " id="btn-dm-igp2-zona1">
+                          <img src="{{ asset('images/igp2zona2.png') }}" style=" filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.8)); margin-bottom:20px; width: 100%;" id="btn-dm-igp2-zona2">
+                      </td>
+                      <td style="width: 10%;text-align: center">
+                        <img src="{{ asset('images/igp2zona3.png') }}" style="filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.8)); width: 100%; margin-bottom:20px; width: 100%; " id="btn-dm-igp2-zona3">
+                      </td>
+                        <td style="width: 10%;text-align: center">
+                        <img src="{{ asset('images/igp3zona1.png') }}" style="filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.8)); margin-bottom:20px; width: 100%; " id="btn-dm-igp3-zona1">
+                        <img src="{{ asset('images/igp3zona2.png') }}" style="filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.8)); margin-bottom:20px; width: 100%;" id="btn-dm-igp3-zona2">
+                      </td>
+                      <td style="width: 10%;text-align: center">
+                          <img src="{{ asset('images/igp3zona3.png') }}" style="filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.8)); width: 100%; margin-bottom:20px; width: 100%; " id="btn-dm-igp3-zona3">
+                      </td>
+                    </tr>
+                  </table>
+          </center>
+            
+        
+      </div>
+     
+        {{-- <div style="background-color: white; min-height:312px">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="col-md-4 col-sm-4" align="center">
+                    <div class="chart">
+                      <canvas id="barChart1" style="height: 290px; width: 30%;" ></canvas>
+                    </div>
+                </div>
+              <div class="col-md-4 col-sm-4" align="center">
+                    <div class="chart">
+                      <canvas id="barChart2" style="height: 290px; width: 30%;" ></canvas>
+                    </div>
+              </div>
+              <div class="col-md-4 col-sm-4" align="center">
+                  <div class="chart">
+                    <canvas id="barChart3" style=" height: 290px; width: 30%;" ></canvas>
+                  </div>
+              </div>
+          </div>
+      </div> --}}
+</div>
+<footer id="footer">
+    <div class="row" style="height: 40px;">
+        <div class="col-xl-12">
+            <div class="alert alert-danger alert-dismissible" style="height:40px; margin-bottom:0; padding:0px 20px; background-color:red !important;">
+                    <p class="huruf" >SUMMARY OPEN LIST PROBLEM</p>
+            </div>
+        </div>
+    </div>
+    <div style="background-color: white; margin-bottom:0;">
+      <div class="row" style="min-height:350px;">
+        <div class="col-md-12 col-sm-12" >
+                  <div class="chart">
+                      <center>
+                          <button type="button" style="width:5px; height:5px; background-color:#FF3D67;" class="form-control  btn"
+                          data-toggle="tooltip" data-placement="top" title="Close"></button>
+                         Zona 1 &nbsp;&nbsp;
+                         <button type="button" style="width:5px; height:5px; background-color:#36A2EB;" class="form-control btn"
+                           data-toggle="tooltip" data-placement="top" title="Close"></button> Zona 2 &nbsp;&nbsp;
+                           &nbsp;&nbsp;
+                         <button type="button" style="width:5px; height:5px; background-color:#00A65A;" class="form-control btn"
+                           data-toggle="tooltip" data-placement="top" title="Close"></button> Zona 3 &nbsp;&nbsp;
+                           &nbsp;&nbsp;
+                      </center>
+                  <canvas id="barChart1s" style="height:auto; min-height:320px;" ></canvas>
+                  
+                  </div>
+        </div>
+      </div>
+    </div>
+</footer>
+@endsection
+
+@section('scripts')
+<script src="{{ asset('chartjs/Chart.bundle.js') }}"></script>
+  <script src="{{ asset('chartjs/utils.js') }}"></script>
+<script type="text/javascript">
+
+  document.title = "PROBLEM LIST";
+
+  
+  $(document).ready(function(){
+
+    $("#btn-dm-igp1-zona1").click(function(){
+    var kd_plant = "1";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.indexdm', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-dm-igp1-zona2").click(function(){
+    var kd_plant = "1";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.indexdm', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-dm-igp2-zona1").click(function(){
+    var kd_plant = "2";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.indexdm', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-dm-igp2-zona2").click(function(){
+    var kd_plant = "2";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.indexdm', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-dm-igp2-zona3").click(function(){
+    var kd_plant = "2";
+    var lok_zona = "3";
+    var urlRedirect = "{{ route('smartmtcs.indexdm', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-dm-igp3-zona1").click(function(){
+    var kd_plant = "3";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.indexdm', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-dm-igp3-zona2").click(function(){
+    var kd_plant = "3";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.indexdm', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-dm-igp3-zona3").click(function(){
+    var kd_plant = "3";
+    var lok_zona = "3";
+    var urlRedirect = "{{ route('smartmtcs.indexdm', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  var chartData1s = {
+      labels: [
+        @foreach($datajadi as $key => $value)
+          @if(substr($key,0, 3) == 'red')
+            @if($key == 'red1')
+            'IGP 1',
+            @elseif($key == 'red2')
+            'IGP 2',
+            @elseif($key == 'red3')
+            'IGP 3',
+            @endif
+          @elseif(substr($key,0, 4) == 'blue')
+            @if($key == 'blue1')
+              'IGP 1',
+              @elseif($key == 'blue2')
+              'IGP 2',
+              @elseif($key == 'blue3')
+              'IGP 3',
+            @endif
+          @elseif(substr($key,0, 5) == 'green')
+          @if($key == 'green1')
+            'IGP 1',
+            @elseif($key == 'green2')
+            'IGP 2',
+            @elseif($key == 'green3')
+            'IGP 3',
+            @endif
+          @endif()
+            
+        @endforeach
+      ],
+      fontSize:'36px',
+      datasets: 
+      [
+       
+        {
+          type: 'bar',
+          label:['Data'] ,
+          backgroundColor:[
+            @foreach($datajadi as $key => $value)
+            @if(substr($key,0, 3) == 'red')
+            window.chartColors.red,
+            @elseif(substr($key,0, 4) == 'blue')
+            window.chartColors.blue,
+            @elseif(substr($key,0, 5) == 'green')
+            'rgba(0, 166, 90, 1)',
+            @endif()
+            @endforeach
+          ],
+         
+          
+          data: [
+            @foreach($datajadi as $key => $value)
+            '{{ $value }}',
+            @endforeach
+          ],  
+          borderColor: 'white',
+          borderWidth: 2
+        }, 
+        
+        
+      ]
+    };
+
+    
+    var ctx = document.getElementById('barChart1s').getContext('2d');
+      window.myMixedChart = new Chart(ctx, {
+        type: 'bar',
+        data: chartData1s,
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero:true,
+                // max: 100, 
+                stepSize: 60,
+                callback: function(value, index, values) {
+                  // Remove the formatting to get integer data for summation
+                  var intVal = function (i) {
+                    return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                    i : 0;
+                  };
+                  value = intVal(value);
+
+                  var format = function formatNumber(num) {
+                    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                  };
+
+                  return format(value);
+                }
+              },
+              gridLines: {
+                display:true
+              }
+            }],
+            xAxes: [{
+              ticks: {
+                fontSize: 18
+              },
+              gridLines: {
+                display:true
+              }   
+            }]
+          },
+          "hover": {
+            "animationDuration": 0
+          },
+          "animation": {
+            // "duration": 1,
+            "onComplete": function() {
+              var chartInstance = this.chart,
+              ctx = chartInstance.ctx;
+
+              ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+              ctx.fillStyle = 'black';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'bottom';
+
+              this.data.datasets.forEach(function(dataset, i) {
+                var meta = chartInstance.controller.getDatasetMeta(i);
+                meta.data.forEach(function(bar, index) {
+                  var data = dataset.data[index];
+                  // Remove the formatting to get integer data for summation
+                  var intVal = function (i) {
+                    return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                    i : 0;
+                  };
+                  data = intVal(data);
+
+                  var format = function formatNumber(num) {
+                    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                  };
+
+                  data = format(data);
+                  ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                });
+              });
+            }
+          },
+          title: {
+            display: true,
+            position: 'top', 
+            text: '',
+            fontSize: 14,
+          },
+          legend: {
+            
+            position: 'bottom', 
+            "display": false,
+            labels: {
+              // This more specific font property overrides the global property
+              fontColor: 'black',
+              boxWidth: 10,
+              text:'halo'
+              //fontSize: 12,
+            }
+          },
+          
+          tooltips: {
+            mode: 'index',
+            intersect: true, 
+            callbacks: {
+              title: function(tooltipItem, data) {
+                return data['labels'][tooltipItem[0].index];
+              },
+              label: function(tooltipItem, data) {
+                var label = tooltipItem.yLabel;
+                // Remove the formatting to get integer data for summation
+                var intVal = function (i) {
+                  return typeof i === 'string' ?
+                  i.replace(/[\$,]/g, '')*1 :
+                  typeof i === 'number' ?
+                  i : 0;
+                };
+                label = intVal(label);
+
+                var format = function formatNumber(num) {
+                  return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                };
+
+                label = format(label);
+                return data.datasets[tooltipItem.datasetIndex].label + ": " + label;
+              },
+            },
+          }
+        }
+      });
+    
+  })
+
+  
+  
+  function onBack() {
+
+window.location.href = "{{ route('smartmtcs.dashboardmtc2') }}";
+}
+</script>
+@endsection

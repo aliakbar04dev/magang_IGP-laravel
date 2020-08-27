@@ -1,0 +1,208 @@
+@extends('monitoring.mtc.layouts.app3')
+
+@section('content')
+  <div class="container3">
+    <div class="row" id="box-body" name="box-body">
+      <div class="col-md-12">
+        <div class="box">
+          <div class="box-header with-border">
+            <center><h3 class="box-title" id="box-title" name="box-title" style="font-family:serif;font-size: 30px;"><strong>DETAIL LAPORAN PEKERJAAN: {{ $tmtcwo1->no_wo }}</strong></h3></center>
+            <div class="box-tools pull-right">
+              <button id="btn-close" name="btn-close" class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="Close" onclick="window.open('', '_self', ''); window.close();">
+                <span class="glyphicon glyphicon-remove"></span>
+              </button>
+            </div>
+          </div>
+          <!-- /.box-header -->
+          
+          <div class="box-body">
+            <table class="table table-striped" cellspacing="0" width="100%">
+              <tbody>
+                <tr>
+                  <td style="width: 12%;"><b>No. LP</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td style="width: 25%;">{{ $tmtcwo1->no_wo }}</td>
+                  <td style="width: 10%;"><b>Tgl LP</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td>{{ \Carbon\Carbon::parse($tmtcwo1->tgl_wo)->format('d/m/Y') }}</td>
+                </tr>
+                <tr>
+                  <td style="width: 12%;"><b>Info Kerja</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td style="width: 25%;">{{ $tmtcwo1->info_kerja }}</td>
+                  <td style="width: 10%;"><b>Status</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td>{{ $tmtcwo1->st_close_desc }}</td>
+                </tr>
+                <tr>
+                  <td style="width: 12%;"><b>Site</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td style="width: 25%;">{{ $tmtcwo1->kd_site }}</td>
+                  <td style="width: 10%;"><b>Plant</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td>{{ $tmtcwo1->lok_pt }}</td>
+                </tr>
+                <tr>
+                  <td style="width: 12%;"><b>Shift</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td colspan="4">{{ $tmtcwo1->shift }}</td>
+                </tr>
+                <tr>
+                  <td style="width: 12%;"><b>Line</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td style="width: 25%;">{{ $tmtcwo1->kd_line }} - {{ $tmtcwo1->nm_line }}</td>
+                  <td style="width: 10%;"><b>Mesin</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td>{{ $tmtcwo1->kd_mesin }} - {{ $tmtcwo1->nm_mesin }}</td>
+                </tr>
+                <tr>
+                  <td style="width: 12%;"><b>Problem</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td colspan="4" style="white-space:pre;">{{ $tmtcwo1->uraian_prob }}</td>
+                </tr>
+                <tr>
+                  <td style="width: 12%;"><b>Penyebab</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td colspan="4" style="white-space:pre;">{{ $tmtcwo1->uraian_penyebab }}</td>
+                </tr>
+                <tr>
+                  <td style="width: 12%;"><b>Counter Measure</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td colspan="4" style="white-space:pre;">{{ $tmtcwo1->langkah_kerja }}</td>
+                </tr>
+                <tr>
+                  <td style="width: 12%;"><b>Est.Pengerjaan (Mulai)</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td style="width: 25%;">{{ \Carbon\Carbon::parse($tmtcwo1->est_jamstart)->format('d/m/Y H:i:s') }}</td>
+                  <td style="width: 10%;"><b>Est.Pengerjaan (Selesai)</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td>{{ \Carbon\Carbon::parse($tmtcwo1->est_jamend)->format('d/m/Y H:i:s') }}</td>
+                </tr>
+                <tr>
+                  <td style="width: 12%;"><b>Jumlah Menit</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td style="width: 25%;">{{ numberFormatter(0, 2)->format($tmtcwo1->est_durasi) }}</td>
+                  <td style="width: 10%;"><b>Line Stop</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td>{{ numberFormatter(0, 2)->format($tmtcwo1->line_stop) }}</td>
+                </tr>
+                <tr>
+                  <td style="width: 12%;"><b>Pelaksana</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td colspan="4" style="white-space:pre;">{{ $tmtcwo1->nm_pelaksana }}</td>
+                </tr>
+                <tr>
+                  <td style="width: 12%;"><b>Keterangan</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td colspan="4" style="white-space:pre;">{{ $tmtcwo1->catatan }}</td>
+                </tr>
+                <tr>
+                  <td style="width: 12%;"><b>Main Item</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td style="width: 25%;">
+                    @if($tmtcwo1->st_main_item === "T") 
+                      YA
+                    @else 
+                      TIDAK
+                    @endif
+                  </td>
+                  <td style="width: 10%;"><b>IC</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td>
+                    @if (!empty($tmtcwo1->no_ic))
+                      {{ $tmtcwo1->no_ic }} - {{ $tmtcwo1->nm_ic }}
+                    @endif
+                  </td>
+                </tr>
+                @if (!empty($tmtcwo1->no_lhp))
+                  <td style="width: 12%;"><b>No. LHP</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td style="width: 25%;">{{ $tmtcwo1->no_lhp }}</td>
+                  <td style="width: 10%;"><b>LS Mulai</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td>{{ \Carbon\Carbon::parse($tmtcwo1->ls_mulai)->format('d/m/Y H:i:s') }}</td>
+                @endif
+                <tr>
+                  <td style="width: 12%;"><b>Picture</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td colspan="4">
+                    @if (!empty($tmtcwo1->lok_pict))
+                      <p>
+                        <img src="{{ $tmtcwo1->lokPict() }}" alt="File Not Found" class="img-rounded img-responsive">
+                      </p>
+                    @endif
+                  </td>
+                </tr>
+                <tr>
+                  <td style="width: 12%;"><b>No. PMS</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td style="width: 25%;">{{ $tmtcwo1->no_pms }}</td>
+                  <td style="width: 10%;"><b>No. DM</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td>
+                    @if (!empty($tmtcwo1->no_dm))
+                      <a href="{{ route('smartmtcs.showdetaildm', base64_encode($tmtcwo1->no_dm)) }}" data-toggle="tooltip" data-placement="top" title="Show Detail DM {{ $tmtcwo1->no_dm }}">{{ $tmtcwo1->no_dm }}</a>
+                    @endif
+                  </td>
+                </tr>
+                <tr>
+                  <td style="width: 12%;"><b>Creaby</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td colspan="4">
+                    @if (!empty($tmtcwo1->dtcrea))
+                      {{ $tmtcwo1->creaby }} - {{ $tmtcwo1->nama($tmtcwo1->creaby) }} - {{ \Carbon\Carbon::parse($tmtcwo1->dtcrea)->format('d/m/Y H:i') }}
+                    @else
+                      {{ $tmtcwo1->creaby }} - {{ $tmtcwo1->nama($tmtcwo1->creaby) }}
+                    @endif
+                  </td>
+                </tr>
+                <tr>
+                  <td style="width: 12%;"><b>Modiby</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td colspan="4">
+                    @if (!empty($tmtcwo1->dtmodi))
+                      {{ $tmtcwo1->modiby }} - {{ $tmtcwo1->nama($tmtcwo1->modiby) }} - {{ \Carbon\Carbon::parse($tmtcwo1->dtmodi)->format('d/m/Y H:i') }}
+                    @else
+                      {{ $tmtcwo1->modiby }} - {{ $tmtcwo1->nama($tmtcwo1->modiby) }}
+                    @endif
+                  </td>
+                </tr>
+                @if (!empty($tmtcwo1->apr_pic_tgl))
+                  <tr>
+                    <td style="width: 12%;"><b>Approve PIC</b></td>
+                    <td style="width: 1%;"><b>:</b></td>
+                    <td colspan="4">
+                      {{ $tmtcwo1->apr_pic_npk }} - {{ $tmtcwo1->nama($tmtcwo1->apr_pic_npk) }} - {{ \Carbon\Carbon::parse($tmtcwo1->apr_pic_tgl)->format('d/m/Y H:i') }}
+                    </td>
+                  </tr>
+                @endif
+                @if (!empty($tmtcwo1->apr_sh_tgl))
+                  <tr>
+                    <td style="width: 12%;"><b>Approve Section</b></td>
+                    <td style="width: 1%;"><b>:</b></td>
+                    <td colspan="4">
+                      {{ $tmtcwo1->apr_sh_npk }} - {{ $tmtcwo1->nama($tmtcwo1->apr_sh_npk) }} - {{ \Carbon\Carbon::parse($tmtcwo1->apr_sh_tgl)->format('d/m/Y H:i') }}
+                    </td>
+                  </tr>
+                @endif
+                @if (!empty($tmtcwo1->rjt_tgl))
+                  <tr>
+                    <td style="width: 13%;"><b>Reject</b></td>
+                    <td style="width: 1%;"><b>:</b></td>
+                    <td colspan="4">
+                      {{ $tmtcwo1->rjt_npk }} - {{ $tmtcwo1->nama($tmtcwo1->rjt_npk) }} - {{ \Carbon\Carbon::parse($tmtcwo1->rjt_tgl)->format('d/m/Y H:i') }} - {{ $tmtcwo1->rjt_st }} - {{ $tmtcwo1->rjt_ket }}
+                    </td>
+                  </tr>
+                @endif
+              </tbody>
+            </table>
+          </div>
+          <!-- /.box-body -->
+        </div>
+        <!-- /.box -->
+      </div>
+      <!-- /.col -->
+    </div>
+    <!-- /.row -->
+  </div>
+@endsection

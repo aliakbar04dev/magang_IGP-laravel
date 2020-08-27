@@ -1,0 +1,1496 @@
+@extends('monitoring.mtc.layouts.app2')
+
+@section('content')
+	<div class="container3">
+		<div class="row">
+			<div class="col-md-12">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<table width="100%">
+							<tr>
+								<th style='width: 10%;text-align: center'>&nbsp;</th>
+								<th style='text-align: center'>
+									{{-- <center> --}}
+										<a href="{{ route('smartmtcs.monitoringlch') }}"><h4>Monitoring LCH Alat Angkut {{ \Carbon\Carbon::parse($tahun."".$bulan)->format('F Y') }}</h4></a>
+									{{-- </center> --}}
+								</th>
+								<th style='width: 10%;text-align: right;'>
+									<button id="btn-close" name="btn-close" class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="Close" onclick="window.open('', '_self', ''); window.close();">
+										<span class="glyphicon glyphicon-remove"></span>
+									</button>
+								</th>
+							</tr>
+						</table>
+					</div>
+					<div class="panel-body">
+						<table id="tblMaster" class="table-bordered" cellspacing="0" width="100%">
+	    			    	<thead>
+		  			            <tr>
+					                <th rowspan="2" style='width: 1%;text-align: center'>No</th>
+					                <th rowspan="2" style='text-align: center'>Kode</th>
+					                @for ($i = 1; $i <= 31; $i++)
+		  			            		<th colspan="3" style='width: 3%;text-align: center'>{{ $i }}</th>
+		  			            	@endfor
+		  			            </tr>
+		  			            <tr>
+					                @for ($i = 1; $i <= 31; $i++)
+					                	@for ($x = 1; $x <= 3; $x++)
+		  			            			<th style='width: 1%;text-align: center'>{{ $x }}</th>
+		  			            		@endfor
+		  			            	@endfor
+		  			            </tr>
+	    			        </thead>
+	    			        <tbody>
+	  			            	@foreach ($mtct_lch_forklif_reps->get() as $data)
+	  			            		<tr>
+		    			        		<td style='width: 1%;text-align: center'>{{ $loop->iteration }}</td>
+		    			        		<td style='text-align: center'>{{ $data->kd_forklif }}</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t01_1 != null)
+		    			        				@if ($data->t01_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."01" < $tgl)
+						                    		<img src="{{ asset("images/red_16.png") }}">
+						                    	@else
+						                    		<img src="{{ asset("images/white_16.png") }}">
+						                    	@endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t01_2 != null)
+		    			        				@if ($data->t01_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+							                    @if ($tahun."".$bulan."01" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t01_3 != null)
+		    			        				@if ($data->t01_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."01" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t02_1 != null)
+		    			        				@if ($data->t02_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."02" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t02_2 != null)
+		    			        				@if ($data->t02_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."02" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t02_3 != null)
+		    			        				@if ($data->t02_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."02" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t03_1 != null)
+		    			        				@if ($data->t03_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."03" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t03_2 != null)
+		    			        				@if ($data->t03_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."03" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t03_3 != null)
+		    			        				@if ($data->t03_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."03" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t04_1 != null)
+		    			        				@if ($data->t04_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."04" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t04_2 != null)
+		    			        				@if ($data->t04_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."04" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t04_3 != null)
+		    			        				@if ($data->t04_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."04" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t05_1 != null)
+		    			        				@if ($data->t05_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."05" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t05_2 != null)
+		    			        				@if ($data->t05_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."05" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t05_3 != null)
+		    			        				@if ($data->t05_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."05" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t06_1 != null)
+		    			        				@if ($data->t06_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."06" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t06_2 != null)
+		    			        				@if ($data->t06_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."06" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t06_3 != null)
+		    			        				@if ($data->t06_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."06" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t07_1 != null)
+		    			        				@if ($data->t07_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."07" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t07_2 != null)
+		    			        				@if ($data->t07_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."07" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t07_3 != null)
+		    			        				@if ($data->t07_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."07" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t08_1 != null)
+		    			        				@if ($data->t08_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."08" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t08_2 != null)
+		    			        				@if ($data->t08_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."08" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t08_3 != null)
+		    			        				@if ($data->t08_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."08" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t09_1 != null)
+		    			        				@if ($data->t09_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."09" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t09_2 != null)
+		    			        				@if ($data->t09_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."09" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t09_3 != null)
+		    			        				@if ($data->t09_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."09" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t10_1 != null)
+		    			        				@if ($data->t10_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."10" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t10_2 != null)
+		    			        				@if ($data->t10_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."10" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t10_3 != null)
+		    			        				@if ($data->t10_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."10" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t11_1 != null)
+		    			        				@if ($data->t11_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."11" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t11_2 != null)
+		    			        				@if ($data->t11_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."11" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t11_3 != null)
+		    			        				@if ($data->t11_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."11" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t12_1 != null)
+		    			        				@if ($data->t12_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."12" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t12_2 != null)
+		    			        				@if ($data->t12_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."12" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t12_3 != null)
+		    			        				@if ($data->t12_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."12" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t13_1 != null)
+		    			        				@if ($data->t13_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."13" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t13_2 != null)
+		    			        				@if ($data->t13_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."13" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t13_3 != null)
+		    			        				@if ($data->t13_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."13" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t14_1 != null)
+		    			        				@if ($data->t14_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."14" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t14_2 != null)
+		    			        				@if ($data->t14_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."14" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t14_3 != null)
+		    			        				@if ($data->t14_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."14" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t15_1 != null)
+		    			        				@if ($data->t15_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."15" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t15_2 != null)
+		    			        				@if ($data->t15_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."15" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t15_3 != null)
+		    			        				@if ($data->t15_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."15" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t16_1 != null)
+		    			        				@if ($data->t16_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."16" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t16_2 != null)
+		    			        				@if ($data->t16_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."16" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t16_3 != null)
+		    			        				@if ($data->t16_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."16" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t17_1 != null)
+		    			        				@if ($data->t17_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."17" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t17_2 != null)
+		    			        				@if ($data->t17_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."17" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t17_3 != null)
+		    			        				@if ($data->t17_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."17" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t18_1 != null)
+		    			        				@if ($data->t18_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."18" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t18_2 != null)
+		    			        				@if ($data->t18_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."18" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t18_3 != null)
+		    			        				@if ($data->t18_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."18" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t19_1 != null)
+		    			        				@if ($data->t19_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."19" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t19_2 != null)
+		    			        				@if ($data->t19_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."19" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t19_3 != null)
+		    			        				@if ($data->t19_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."19" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t20_1 != null)
+		    			        				@if ($data->t20_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."20" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t20_2 != null)
+		    			        				@if ($data->t20_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."20" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t20_3 != null)
+		    			        				@if ($data->t20_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."20" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t21_1 != null)
+		    			        				@if ($data->t21_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."21" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t21_2 != null)
+		    			        				@if ($data->t21_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."21" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t21_3 != null)
+		    			        				@if ($data->t11_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."21" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t22_1 != null)
+		    			        				@if ($data->t22_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."22" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t22_2 != null)
+		    			        				@if ($data->t22_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."22" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t22_3 != null)
+		    			        				@if ($data->t22_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."22" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t23_1 != null)
+		    			        				@if ($data->t23_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."23" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t23_2 != null)
+		    			        				@if ($data->t23_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."23" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t23_3 != null)
+		    			        				@if ($data->t23_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."23" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t24_1 != null)
+		    			        				@if ($data->t24_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."24" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t24_2 != null)
+		    			        				@if ($data->t24_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."24" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t24_3 != null)
+		    			        				@if ($data->t24_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."24" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t25_1 != null)
+		    			        				@if ($data->t25_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."25" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t25_2 != null)
+		    			        				@if ($data->t25_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."25" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t25_3 != null)
+		    			        				@if ($data->t25_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."25" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t26_1 != null)
+		    			        				@if ($data->t26_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."26" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t26_2 != null)
+		    			        				@if ($data->t26_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."26" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t26_3 != null)
+		    			        				@if ($data->t26_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."26" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t27_1 != null)
+		    			        				@if ($data->t27_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."27" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t27_2 != null)
+		    			        				@if ($data->t27_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."27" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t27_3 != null)
+		    			        				@if ($data->t27_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."27" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t28_1 != null)
+		    			        				@if ($data->t28_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."28" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t28_2 != null)
+		    			        				@if ($data->t28_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."28" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t28_3 != null)
+		    			        				@if ($data->t28_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."28" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t29_1 != null)
+		    			        				@if ($data->t29_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."29" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t29_2 != null)
+		    			        				@if ($data->t29_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."29" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t29_3 != null)
+		    			        				@if ($data->t29_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."29" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t30_1 != null)
+		    			        				@if ($data->t30_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."30" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t30_2 != null)
+		    			        				@if ($data->t30_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."30" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t30_3 != null)
+		    			        				@if ($data->t30_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."30" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t31_1 != null)
+		    			        				@if ($data->t31_1 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."31" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t31_2 != null)
+		    			        				@if ($data->t31_2 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."31" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+		    			        		<td style='text-align: center'>
+		    			        			@if ($data->t31_3 != null)
+		    			        				@if ($data->t31_3 == "OK")
+		    			        					<img src="{{ asset("images/green_16.png") }}">
+		    			        				@else 
+		    			        					<img src="{{ asset("images/yellow_16.png") }}">
+		    			        				@endif
+						                    @else
+						                    	@if ($tahun."".$bulan."31" < $tgl)
+							                    	<img src="{{ asset("images/red_16.png") }}">
+							                    @else
+							                    	<img src="{{ asset("images/white_16.png") }}">
+							                    @endif
+						                    @endif
+		    			        		</td>
+			  			            </tr>
+	    			        	@endforeach
+	    			        </tbody>
+	    			    </table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+@endsection
+
+@section('scripts')
+<script>
+	$(document).ready(function(){
+		var tableMaster = $('#tblMaster').DataTable({
+		    "aLengthMenu": [[5, 10, 20, 25, 50, 75, 100, -1], [5, 10, 20, 25, 50, 75, 100, "All"]],
+		    "iDisplayLength": 20,
+		    // "responsive": true,
+		    //"searching": false,
+		    "scrollX": true,
+		    //"scrollY": "300px",
+		    //"scrollCollapse": true,
+		    "paging": false,
+		    //"lengthChange": false,
+		    //"ordering": true,
+		    "order": [[1, 'asc']],
+		    //"info": true,
+		    //"autoWidth": false,
+		    columns: [
+		    	{orderable: false, searchable: false},
+		    	{orderable: true, searchable: true},
+	        	@for ($x = 1; $x <= 93; $x++)
+	        		@if($x == 93)
+	        			{orderable: false, searchable: false}
+	        		@else
+	        			{orderable: false, searchable: false},
+	        		@endif
+        		@endfor
+		    ],
+	  	});
+	});
+
+	//auto refresh
+	setTimeout(function() {
+	  // location.reload();
+	  var tahun = "{{ $tahun }}";
+	  var bulan = "{{ $bulan }}";
+	  var urlRedirect = "{{ route('smartmtcs.monitoringlch', ['param','param2']) }}";
+	  urlRedirect = urlRedirect.replace('param2', bulan);
+	  urlRedirect = urlRedirect.replace('param', tahun);
+	  window.location.href = urlRedirect;
+	}, 300000); //1000 = 1 second
+</script>
+@endsection

@@ -1,0 +1,28 @@
+<?php
+
+Route::group(['prefix'=>'hr', 'middleware'=>['auth']], function () {
+	Route::get('persetujuancuti/daftarpersetujuancuti', [
+		'as' => 'persetujuancuti.daftarpersetujuancuti',
+		'uses'=>'PersetujuanCuti\PersetujuanCutiController@indexPersetujuanCuti'
+	]);
+	Route::get('persetujuancuti/listpersetujuancuti', [
+		'as' => 'persetujuancuti.listpersetujuancuti',
+		'uses'=>'PersetujuanCuti\PersetujuanCutiController@listpersetujuancuti'
+	]); 
+	Route::get('persetujuancuti/viewdetails/{params}/{params2}', [
+		'as' => 'persetujuancuti.viewdetails',
+		'uses'=>'PersetujuanCuti\PersetujuanCutiController@viewdetails'
+	]);
+	Route::get('persetujuancuti/listpengajuancuti/{params}', [
+		'as' => 'persetujuancuti.listpengajuancuti',
+		'uses'=>'PersetujuanCuti\PersetujuanCutiController@listpengajuancuti'
+	]); 
+	Route::get('persetujuancuti/approval/{params}/{params2} ', [
+		'as' => 'persetujuancuti.approval',
+		'uses'=>'PersetujuanCuti\PersetujuanCutiController@approval'
+	]);
+	Route::get('persetujuancuti/reject/{params}/{params2} ', [
+		'as' => 'persetujuancuti.reject',
+		'uses'=>'PersetujuanCuti\PersetujuanCutiController@reject'
+	]);
+});

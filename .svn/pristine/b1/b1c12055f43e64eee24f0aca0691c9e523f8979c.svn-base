@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <title>PART INSPECTION STANDARD</title>
+
+  <style>
+    @page { 
+      size: A4; 
+      margin-left: 1cm;
+      margin-right: 1cm;
+      margin-top: 3cm;
+      margin-bottom: 0.5cm;
+    }
+
+    thead {display: table-header-group;}
+
+    h1 {
+      font-weight: bold;
+      font-size: 20pt;
+      text-align: center;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      word-break:break-all; 
+      word-wrap:break-word;
+    }
+
+    .table th {
+      padding: 8px 8px;
+      border:1px solid #000000;
+      text-align: center;
+    }
+
+    .table td {
+      padding: 2px 2px;
+      border:1px solid #000000;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <!-- form start -->
+  <div class="box-body">
+    <div class="form-group">
+      <div >
+       {{ csrf_field() }}
+       <br>
+       <table class="table" width="100%"  style="table-layout:fixed;">
+
+        <thead >
+          <tr> 
+           <th width="10%" colspan="2" height="5%">
+             <img src="{{ $logo_supplier }}" alt="File Not Found" class="img-rounded img-responsive"  width="100%" height="80">
+           </th>
+           <th width="20%" colspan="5">MODEL:&nbsp;&nbsp;{{ $pistandards->model }} </th>
+           <th width="4px" colspan="5"> <font size="12px" ><font size="12px" >DATE OF ISSUED:&nbsp; {{ $pistandards->date_issue }}<br>REFF NO:&nbsp;{{ $pistandards->reff_no }}  </font> </font> </th>
+           <tr>
+             <td width="4px" colspan="3"><font size="12px">SUPPLIER:<br>{{ $pistandards->nama_supplier }}</font></td>
+             <td width="4px" colspan="3"><font size="12px">MATERIAL:<br>{{ $pistandards->material }}</font></td>
+             <td width="4px" colspan="3">
+               <font size="12px">GENERAL TOL:<br>
+               @foreach(json_decode($pistandards->general_tol) as $key => $value)
+                 {{$value}}<br>
+                 @endforeach
+               </font>
+             </td>
+             <td width="4px" colspan="3"><font size="12px">WEIGHT:<br>{{ $pistandards->weight }}</font></td>
+           </tr>
+         </thead>
+         <tbody>
+           <tr>
+             <td colspan="12" height="300px">
+               <center> 
+                 <h3>
+                   <b>
+                    PART INSPECTION STANDARD
+                  </b>
+                </h3>
+                (FOR PURCHASED PART)
+              </center>
+              <br>
+              <table  cellspacing="0" cellpadding="5" height="80" >
+                <center> 
+                  <font size="13px"> 
+                    <b>PART NO&nbsp;&nbsp;:</b>&nbsp;&nbsp;{{ $pistandards->part_no }}<br>
+                    <b> PART NAME&nbsp;&nbsp;:</b>&nbsp;&nbsp;{{ $pistandards->part_name }}<br>
+                    <b>DOC.NO&nbsp;&nbsp;:</b>&nbsp;&nbsp;{{ $pistandards->no_pis }}
+                  </font>
+                </center>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="3" ><center><font size="14px" ><b>PT. INTI GANDA PERDANA</b></font></center></td>
+            <td height="10px" width="20%" colspan="6" rowspan="3"></td>
+            <td colspan="3" ><center><font size="14px"> <b>{{ $pistandards->nama_supplier }}</b></font></center> </td>
+          </tr>
+          <tr>
+            <td width="10%" height="7%"><center><img src="{{$approve_dept }}"  width="60"></center></td>
+            <td width="10%" height="7%"><center><img src="{{$approve_sect }}"  width="60"></center></td>
+            <td width="10%" height="7%"><center><img src="{{$approve_staff }}"  width="60"></center></td>
+            <td width="10%" height="7%"><center><img src="{{$manager_spy}}"  width="60"></center></td>
+            <td width="10%" height="7%"><center><img src="{{$supervisor_spy }}"  width="60"></center></td>
+            <td width="10%" height="7%"><center><img src="{{$staff_spy}}"  width="60"></center></td>
+          </tr>
+          <tr>
+            <td width="10%"><center> <font size="12px"><b>QA Div.</b></font></center></td>
+            <td width="10%"><center><font size="12px"><b>SQE Sect</b></font></center></td>
+            <td width="10%"><center><font size="12px"><b>Staff</b></font></center></td>
+            <td width="10%"><center><font size="12px"><b>Division</b></font></center></td>
+            <td width="10%"><center><font size="12px"><b>Supervisor</b></font></center></td>
+            <td width="10%"><center><font size="12px"><b>Staff</b></font></center></td>
+          </tr>
+          <tr>
+            <td  colspan="12"><b>REVISION COLUMN</b></td>
+          </tr>
+          <tr>
+            <td width="10%" colspan="3" ><center> <font size="12px">REVISION <br> IGP-SQE</font></center></td>
+            <td width="10%"><center><font size="12px">REVISE MARK</font></center></td>
+            <td width="10%"><center><font size="12px">DATE</font></center></td>
+            <td width="10%" colspan="3"><center><font size="12px">REVISION RECORD</font></center></td>
+            <td width="10%"><center><font size="12px">ECI/ECR NO.</font></center></td>
+            <td width="10%" colspan="3"><center><font size="12px">REVISION REQUEST <br>SUPPLIER-QA</font></center></td>  
+          </tr>
+
+          <tr> 
+            <td height="30px"></td>
+            <td height="20px"></td>
+            <td height="30px"></td>
+            <td height="30px">
+              <font size="10px">
+                <center>
+                 @if($pistandards->norev==0)
+                {{--  <img src="images/Delta 0.png" width="45%"> --}}
+
+                 @elseif($pistandards->norev==1)
+                 <img src="images/Delta 1.png" width="45%">
+
+                 @elseif($pistandards->norev==2)
+                 <img src="images/Delta 2.png" width="45%">
+
+                 @elseif($pistandards->norev==3)
+                 <img src="images/Delta 3.png" width="45%">
+
+                 @elseif($pistandards->norev==4)
+                 <img src="images/Delta 4.png" width="45%">
+
+                 @elseif($pistandards->norev==5)
+                 <img src="images/Delta 5.png" width="45%">
+
+                 @elseif($pistandards->norev==6)
+                 <img src="images/Delta 5.png" width="45%">
+
+                 @elseif($pistandards->norev==7)
+                 <img src="images/Delta 5.png" width="45%">
+
+                 @elseif($pistandards->norev==8)
+                 <img src="images/Delta 5.png" width="45%">
+
+                 @elseif($pistandards->norev==9)
+                 <img src="images/Delta 5.png" width="45%">
+
+                  @elseif($pistandards->norev==10)
+                 <img src="images/Delta 5.png" width="45%">
+
+                 @else
+                 {{$pistandards->norev}}
+                 @endif
+                 
+               </center>
+              </font>
+            </td>
+            <td height="30px"></td>
+            <td height="30px" colspan="3" ></td>
+            <td height="30px"></td>
+            <td height="30px"></td>
+            <td height="30px"></td>
+            <td height="30px"></td>
+          </tr>
+          <tr>
+            <td height="30px"></td>
+            <td height="30px"></td>
+            <td height="30px"></td>
+            <td height="30px"></td>
+            <td height="30px"></td>
+            <td height="30px" colspan="3" ></td>
+            <td height="30px"></td>
+            <td height="30px"></td>
+            <td height="30px"></td>
+            <td height="30px"></td>
+          </tr>
+          <tr>
+           <td width="10%"><center> <font size="12px"><b>QA Div.</b></font></center></td>
+           <td width="10%"><center><font size="12px"><b>SQE Sect</b></font></center></td>
+           <td width="10%"><center><font size="12px"><b>Staff</b></font></center></td>
+           <td colspan="6" ></td>
+           <td width="10%"><center><font size="12px"><b>Division</b></font></center></td>
+           <td width="10%"><center><font size="12px"><b>Supervisor</b></font></center></td>
+           <td width="10%"><center><font size="12px"><b>Staff</b></font></center></td>
+         </tr>
+         <tr>
+          <td colspan="3" rowspan="2" height="90"></td>
+          <td colspan="2"><font size="12px"><center>  <b>PT.IGP</b></center></font></td>
+          <td colspan="7"><center>QUALITY ASSURANCE DIVISION</center></td>
+        </tr>
+        <tr>
+          <td colspan="2"><font size="12px"><center><b>SUPPLIER</b></center></font></td>
+          <td colspan="7"><font size="12px"><center>{{ $pistandards->nama_supplier }}</center></font></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- /.content-wrapper -->
+</body>
+
+<body>
+  <!-- form start -->
+  <div class="box-body">
+    <div class="form-group">
+      <div >
+       {{ csrf_field() }}
+       <br>
+       <table class="table" width="100%" style="table-layout:fixed;">
+        <thead >
+          <tr> 
+           <th width="10%" colspan="2" height="5%">
+             <img src="{{ $logo_supplier }}" alt="File Not Found" class="img-rounded img-responsive"  width="100%" height="80">
+           </th>
+           <th width="20%" colspan="5">MODEL:&nbsp;&nbsp;{{ $pistandards->model }} </th>
+           <th width="20%" colspan="5"> <font size="12px" >PART INSPECTION STANDARD </font> </th>
+           <tr>
+             <td width="20%" colspan="3"><font size="12px">SUPPLIER:<br>{{ $pistandards->nama_supplier }}</font></td>
+             <td width="20%" colspan="3"><font size="12px">MATERIAL:<br>{{ $pistandards->material }}</font></td>
+             <td width="20%" colspan="3">
+               <font size="12px">GENERAL TOL:<br>
+               @foreach(json_decode($pistandards->general_tol) as $key => $value)
+                 {{$value}}<br>
+                 @endforeach
+               </font>
+             </td>
+             <td width="20%" colspan="3"><font size="12px">WEIGHT:<br>{{ $pistandards->weight }}</font></td>
+           </tr>
+         </thead>
+       </table>
+       <table class="table" width="100%" style="table-layout:fixed;">
+         <tbody>
+
+          <tr>
+            <th width="4%" rowspan="2" ><font size="10px">NO</th>
+            <th width="10%"  rowspan="2" colspan="2"><font size="10px">INSPECTION ITEM</th>
+            <th width="10%"  colspan="2"><font size="10px">STANDARD VALUE</th>
+            <th width="10%"  rowspan="2" colspan="2"><font size="10px">INPECTION INSTRUMENT</th>
+            <th width="4%"  rowspan="2" colspan="2"><font size="10px">RANK</th>
+            <th width="10%"  colspan="2"><font size="10px">SAMPLING PLAN</th>
+            <th width="8%"  rowspan="2" ><font size="10px">REMARKS</th>
+          </tr>
+          <tr>
+            <th width="7%" ><font size="10px">NOMINAL</th>
+            <th width="9%" ><font size="10px">TOLERANCE</th>
+            <th width="8%" ><font size="10px">IN PROSES</th>
+            <th width="8%" ><font size="10px">AT DELIVERY</th>
+          </tr> 
+          <tr>
+            <td height="30px" colspan="12">1. MATERIAL PERFORMANCE</td>
+          </tr>
+          <tr>
+            <td height="30px" colspan="12"><font size="12px">A. CHEMICAH PROPERTIES</font></td>
+          </tr>
+          @if (!empty($composition->no_pisigp))
+          @foreach ($entity->getLines($composition->no_pisigp)->get() as $model)
+          <tr id="line_field1_{{ $loop->iteration }}">
+            <td  width="3%" height="20px"><center> <font size="12px">{{ $model->no }}</font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px">{{ $model->item }}</font></center></td>
+            <td width="7%" height="20px"><center><font size="12px">{{ $model->nominal }}</font></center></td>
+            <td width="7%" height="20px"><center><font size="12px">{{ $model->tolerance }}</font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px">{{ $model->instrument }}</font></center></td>
+            <td width="5%"  height="20px" colspan="2"><center><font size="12px">{{ $model->rank }}</font></center></td>
+            <td width="5%"  height="20px"><center><font size="12px">{{ $model->proses }}</font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px">{{ $model->delivery }} </font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px">{{ $model->remarks }}</font></center></td>
+          </tr>
+          @endforeach
+          @endif
+          <tr >
+            <td  width="3%" height="20px"><center> <font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+          </tr>
+          <tr >
+            <td  width="3%" height="20px"><center> <font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+          </tr>
+
+          <tr>
+            <td height="30px" colspan="12"><font size="12px">B. MECHANICAL PROPERTIES</font></td>
+          </tr>
+          @if (!empty($properties->no_pisigp))
+          @foreach ($entity->getLines1($properties->no_pisigp)->get() as $model)
+          <tr id="line_field1_{{ $loop->iteration }}">
+            <td  width="3%" height="20px"><center> <font size="12px">{{ $model->no }}</font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px">{{ $model->item }}</font></center></td>
+            <td width="7%" height="20px"><center><font size="12px">{{ $model->nominal }}</font></center></td>
+            <td width="7%" height="20px"><center><font size="12px">{{ $model->tolerance }}</font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px">{{ $model->instrument }}</font></center></td>
+            <td width="5%"  height="20px" colspan="2"><center><font size="12px">{{ $model->rank }}</font></center></td>
+            <td width="5%"  height="20px"><center><font size="12px">{{ $model->proses }}</font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px">{{ $model->delivery }} </font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px">{{ $model->remarks }}</font></center></td>
+          </tr>
+          @endforeach
+          @endif
+          <tr >
+            <td  width="3%" height="20px"><center> <font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+          </tr>
+          <tr >
+            <td  width="3%" height="20px"><center> <font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+          </tr>
+
+
+          <tr>
+            <td height="30px" colspan="12"><font size="12px">C. WELDING PERFORMANCE (IF ANY)</font></td>
+          </tr>
+          @if (!empty($performances->no_pisigp))
+          @foreach ($entity->getLines2($performances ->no_pisigp)->get() as $model)
+          <tr id="line_field1_{{ $loop->iteration }}">
+            <td  width="3%" height="20px"><center> <font size="12px">{{ $model->no }}</font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px">{{ $model->item }}</font></center></td>
+            <td width="7%" height="20px"><center><font size="12px">{{ $model->nominal }}</font></center></td>
+            <td width="7%" height="20px"><center><font size="12px">{{ $model->tolerance }}</font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px">{{ $model->instrument }}</font></center></td>
+            <td width="5%"  height="20px" colspan="2"><center><font size="12px">{{ $model->rank }}</font></center></td>
+            <td width="5%"  height="20px"><center><font size="12px">{{ $model->proses }}</font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px">{{ $model->delivery }} </font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px">{{ $model->remarks }}</font></center></td>
+          </tr>
+          @endforeach
+          @endif
+          <tr >
+            <td  width="3%" height="20px"><center> <font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+          </tr>
+          <tr >
+            <td  width="3%" height="20px"><center> <font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+          </tr>
+
+          
+          <tr>
+            <td height="30px" colspan="12"><font size="12px">D. SURFACE TREATMENT (IF ANY)</font></td>
+          </tr>
+          @if (!empty($treatements->no_pisigp))
+          @foreach ($entity->getLines3($treatements->no_pisigp)->get() as $model)
+          <tr id="line_field1_{{ $loop->iteration }}">
+            <td  width="3%" height="20px"><center> <font size="12px">{{ $model->no }}</font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px">{{ $model->item }}</font></center></td>
+            <td width="7%" height="20px"><center><font size="12px">{{ $model->nominal }}</font></center></td>
+            <td width="7%" height="20px"><center><font size="12px">{{ $model->tolerance }}</font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px">{{ $model->instrument }}</font></center></td>
+            <td width="5%"  height="20px" colspan="2"><center><font size="12px">{{ $model->rank }}</font></center></td>
+            <td width="5%"  height="20px"><center><font size="12px">{{ $model->proses }}</font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px">{{ $model->delivery }} </font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px">{{ $model->remarks }}</font></center></td>
+          </tr>
+          @endforeach
+          @endif
+          <tr >
+            <td  width="3%" height="20px"><center> <font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+          </tr>
+          <tr >
+            <td  width="3%" height="20px"><center> <font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+          </tr>
+          
+          <tr>
+            <td width="3%" height="30px"><center> <font size="12px"><b>NO.</b></font></center></td>
+            <td width="10%"  height="30px" colspan="3"><center><font size="12px"><b>REVISION RECORD</b></font></center></td>
+            <td width="10%" height="30px" colspan="2"><center><font size="12px"><b>ITEM NO</b></font></center></td>
+            <td width="10%" height="30px" colspan="2" ><center><font size="12px"><b>DATE</b></font></td>
+            <td width="10%" height="30px" colspan="2"><center><font size="12px"><b>PT.IGP</b></font></center></td>
+            <td width="10%" height="30px" colspan="2"><center><font size="12px"><b>SUPPLIER</b></font></center></td>
+          </tr>
+          <tr>
+            <td width="3%"  height="20px"><center> <font size="12px"><b></b></font></center></td>
+            <td width="10%"  height="20px" colspan="3"><center><font size="12px"><b></b></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+            <td width="10%" height="20px" colspan="2" ><center><font size="12px"><b></b></font></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+          </tr>
+          <tr>
+            <td width="3%" height="20px"><center> <font size="12px"><b></b></font></center></td>
+            <td width="10%" height="20px" colspan="3"><center><font size="12px"><b></b></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+            <td width="10%" height="20px" colspan="2" ><center><font size="12px"><b></b></font></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+          </tr>
+          
+        </tbody>
+
+      </table>
+      <table class="table" width="100%" style="table-layout:fixed;">
+        <tbody>        
+          <tr>
+            <td width="30%" colspan="3" ><center><font size="12px" ><b>APPROVED BY PT.IGP</b></font></center></td>
+            <td width="30%" height="5px" colspan="6" rowspan="3"></td>
+            <td width="30%" colspan="3" ><center><font size="12px"> <b>PREPARED BY{{ $pistandards->nama_supplier }}</b></font></center> </td>
+          </tr>
+          <tr>
+            <td width="10%" height="7%"><center><img src="{{$approve_dept }}"  width="60"></center></td>
+            <td width="10%" height="7%"><center><img src="{{$approve_sect }}"  width="60"></center></td>
+            <td width="10%" height="7%"><center><img src="{{$approve_staff }}"  width="60"></center></td>
+            <td width="10%" height="7%"><center><img src="{{$manager_spy}}"  width="60"></center></td>
+            <td width="10%" height="7%"><center><img src="{{$supervisor_spy }}"  width="60"></center></td>
+            <td width="10%" height="7%"><center><img src="{{$staff_spy}}"  width="60"></center></td>
+
+          </tr>
+          <tr>
+            <td width="10%"><center> <font size="12px"><b>QA Div.</b></font></center></td>
+            <td width="10%"><center><font size="12px"><b>SQE Sect</b></font></center></td>
+            <td width="10%"><center><font size="12px"><b>Staff</b></font></center></td>
+            <td width="10%"><center><font size="12px"><b>Division</b></font></center></td>
+            <td width="10%"><center><font size="12px"><b>Supervisor</b></font></center></td>
+            <td width="10%"><center><font size="12px"><b>Staff</b></font></center></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- /.content-wrapper -->
+</body>
+{{-- //////////////////////////////////////////// --}}
+<body>
+  <!-- form start -->
+  <div class="box-body">
+    <div class="form-group">
+      <div >
+       {{ csrf_field() }}
+       <br>
+       <table class="table" width="100%" style="table-layout:fixed;">
+        <thead >
+          <tr> 
+           <th width="10%" colspan="2" height="5%">
+             <img src="{{ $logo_supplier }}" alt="File Not Found" class="img-rounded img-responsive"  width="100%" height="80">
+           </th>
+           <th width="20%" colspan="5">MODEL:&nbsp;&nbsp;{{ $pistandards->model }} </th>
+           <th width="20%" colspan="5"> <font size="12px" >PART INSPECTION STANDARD </font> </th>
+           <tr>
+             <td width="20%" colspan="3"><font size="12px">SUPPLIER:<br>{{ $pistandards->nama_supplier }}</font></td>
+             <td width="20%" colspan="3"><font size="12px">MATERIAL:<br>{{ $pistandards->material }}</font></td>
+             <td width="20%" colspan="3">
+               <font size="12px">GENERAL TOL:<br>
+               @foreach(json_decode($pistandards->general_tol) as $key => $value)
+                 {{$value}}<br>
+                 @endforeach
+               </font>
+             </td>
+             <td width="20%" colspan="3"><font size="12px">WEIGHT:<br>{{ $pistandards->weight }}</font></td>
+           </tr>
+         </thead>
+       </table>
+       <table class="table" width="100%" style="table-layout:fixed;">
+         <tbody>
+
+          <tr>
+            <th width="4%" rowspan="2" ><font size="10px">NO</th>
+            <th width="10%"  rowspan="2" colspan="2"><font size="10px">INSPECTION ITEM</th>
+            <th width="10%"  colspan="2"><font size="10px">STANDARD VALUE</th>
+            <th width="10%"  rowspan="2" colspan="2"><font size="10px">INPECTION INSTRUMENT</th>
+            <th width="4%"  rowspan="2" colspan="2"><font size="10px">RANK</th>
+            <th width="10%"  colspan="2"><font size="10px">SAMPLING PLAN</th>
+            <th width="8%"  rowspan="2" ><font size="10px">REMARKS</th>
+          </tr>
+          <tr>
+            <th width="7%" ><font size="10px">NOMINAL</th>
+            <th width="9%" ><font size="10px">TOLERANCE</th>
+            <th width="8%" ><font size="10px">IN PROSES</th>
+            <th width="8%" ><font size="10px">AT DELIVERY</th>
+          </tr> 
+          
+          <tr>
+            <td height="30px" colspan="12"><font size="12px">E. HEAT TREATMENT (IF ANY)</font></td>
+          </tr>
+          @if (!empty($htreatements->no_pisigp))
+          @foreach ($entity->getLines4($htreatements->no_pisigp)->get() as $model)
+          <tr id="line_field1_{{ $loop->iteration }}">
+            <td  width="3%" height="20px"><center> <font size="12px">{{ $model->no }}</font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px">{{ $model->item }}</font></center></td>
+            <td width="7%" height="20px"><center><font size="12px">{{ $model->nominal }}</font></center></td>
+            <td width="7%" height="20px"><center><font size="12px">{{ $model->tolerance }}</font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px">{{ $model->instrument }}</font></center></td>
+            <td width="5%"  height="20px" colspan="2"><center><font size="12px">{{ $model->rank }}</font></center></td>
+            <td width="5%"  height="20px"><center><font size="12px">{{ $model->proses }}</font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px">{{ $model->delivery }} </font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px">{{ $model->remarks }}</font></center></td>
+          </tr>
+          @endforeach
+          @endif
+
+
+          <tr >
+            <td  width="3%" height="20px"><center> <font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+          </tr>
+
+          <tr >
+            <td  width="3%" height="20px"><center> <font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+          </tr>
+          <tr>
+            <td height="30px" colspan="12"><font size="12px">II. APPEARENCE</font></td>
+          </tr>
+          @if (!empty($appearences->no_pisigp))
+          @foreach ($entity->getLines5($appearences->no_pisigp)->get() as $model)
+          <tr id="line_field1_{{ $loop->iteration }}">
+            <td  width="3%" height="20px"><center> <font size="12px">{{ $model->no }}</font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px">{{ $model->item }}</font></center></td>
+            <td width="7%" height="20px"><center><font size="12px">{{ $model->nominal }}</font></center></td>
+            <td width="7%" height="20px"><center><font size="12px">{{ $model->tolerance }}</font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px">{{ $model->instrument }}</font></center></td>
+            <td width="5%"  height="20px" colspan="2"><center><font size="12px">{{ $model->rank }}</font></center></td>
+            <td width="5%"  height="20px"><center><font size="12px">{{ $model->proses }}</font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px">{{ $model->delivery }} </font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px">{{ $model->remarks }}</font></center></td>
+          </tr>
+          @endforeach
+          @endif
+
+          <tr >
+            <td  width="3%" height="20px"><center> <font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+          </tr>
+          <tr >
+            <td  width="3%" height="20px"><center> <font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+          </tr>
+
+
+          <tr>
+            <td height="30px" colspan="12"><font size="12px">III. DIMENSION</font></td>
+          </tr>
+          @if (!empty($dimentions->no_pisigp))
+          @foreach ($entity->getLines6($dimentions->no_pisigp)->get() as $model)
+          <tr id="line_field1_{{ $loop->iteration }}">
+            <td  width="3%" height="20px"><center> <font size="12px">{{ $model->no }}</font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px">{{ $model->item }}</font></center></td>
+            <td width="7%" height="20px"><center><font size="12px">{{ $model->nominal }}</font></center></td>
+            <td width="7%" height="20px"><center><font size="12px">{{ $model->tolerance }}</font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px">{{ $model->instrument }}</font></center></td>
+            <td width="5%"  height="20px" colspan="2"><center><font size="12px">{{ $model->rank }}</font></center></td>
+            <td width="5%"  height="20px"><center><font size="12px">{{ $model->proses }}</font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px">{{ $model->delivery }} </font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px">{{ $model->remarks }}</font></center></td>
+          </tr>
+          @endforeach
+          @endif
+
+          <tr >
+            <td  width="3%" height="20px"><center> <font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+          </tr>
+          <tr >
+            <td  width="3%" height="20px"><center> <font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px" colspan="2"><center><font size="12px"></font></center></td>
+            <td width="5%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+            <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+          </tr>
+          
+          <tr>
+            <td width="3%" height="30px"><center> <font size="12px"><b>NO.</b></font></center></td>
+            <td width="10%"  height="30px" colspan="3"><center><font size="12px"><b>REVISION RECORD</b></font></center></td>
+            <td width="10%" height="30px" colspan="2"><center><font size="12px"><b>ITEM NO</b></font></center></td>
+            <td width="10%" height="30px" colspan="2" ><center><font size="12px"><b>DATE</b></font></td>
+            <td width="10%" height="30px" colspan="2"><center><font size="12px"><b>PT.IGP</b></font></center></td>
+            <td width="10%" height="30px" colspan="2"><center><font size="12px"><b>SUPPLIER</b></font></center></td>
+          </tr>
+          <tr>
+            <td width="3%"  height="20px"><center> <font size="12px"><b></b></font></center></td>
+            <td width="10%"  height="20px" colspan="3"><center><font size="12px"><b></b></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+            <td width="10%" height="20px" colspan="2" ><center><font size="12px"><b></b></font></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+          </tr>
+          <tr>
+            <td width="3%" height="20px"><center> <font size="12px"><b></b></font></center></td>
+            <td width="10%" height="20px" colspan="3"><center><font size="12px"><b></b></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+            <td width="10%" height="20px" colspan="2" ><center><font size="12px"><b></b></font></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+            <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+          </tr>
+        </tbody>
+
+      </table>
+      <table class="table" width="100%" style="table-layout:fixed;">
+        <tbody>        
+          <tr>
+            <td width="30%" colspan="3" ><center><font size="12px" ><b>APPROVED BY PT.IGP</b></font></center></td>
+            <td width="30%" height="5px" colspan="6" rowspan="3"></td>
+            <td width="30%" colspan="3" ><center><font size="12px"> <b>PREPARED BY{{ $pistandards->nama_supplier }}</b></font></center> </td>
+          </tr>
+          <tr>
+            <td width="10%" height="7%"><center><img src="{{$approve_dept }}"  width="60"></center></td>
+            <td width="10%" height="7%"><center><img src="{{$approve_sect }}"  width="60"></center></td>
+            <td width="10%" height="7%"><center><img src="{{$approve_staff }}"  width="60"></center></td>
+            <td width="10%" height="7%"><center><img src="{{$manager_spy}}"  width="60"></center></td>
+            <td width="10%" height="7%"><center><img src="{{$supervisor_spy }}"  width="60"></center></td>
+            <td width="10%" height="7%"><center><img src="{{$staff_spy}}"  width="60"></center></td>
+          </tr>
+          <tr>
+            <td width="10%"><center> <font size="12px"><b>QA Div.</b></font></center></td>
+            <td width="10%"><center><font size="12px"><b>SQE Sect</b></font></center></td>
+            <td width="10%"><center><font size="12px"><b>Staff</b></font></center></td>
+            <td width="10%"><center><font size="12px"><b>Division</b></font></center></td>
+            <td width="10%"><center><font size="12px"><b>Supervisor</b></font></center></td>
+            <td width="10%"><center><font size="12px"><b>Staff</b></font></center></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- /.content-wrapper -->
+</body>
+
+{{-- SKETCH1 --}}
+<body>
+  <!-- form start -->
+  <div class="box-body">
+    <div class="form-group">
+      <div >
+       {{ csrf_field() }}
+       <br>
+       <table class="table" width="100%" style="table-layout:fixed;">
+        <thead >
+          <tr> 
+           <th width="10%" colspan="2" height="5%">
+             <img src="{{ $logo_supplier }}" alt="File Not Found" class="img-rounded img-responsive"  width="100%" height="80">
+           </th>
+           <th width="20%" colspan="5">MODEL:&nbsp;&nbsp;{{ $pistandards->model }} </th>
+           <th width="20%" colspan="5"> <font size="12px" >PART INSPECTION STANDARD </font> </th>
+           <tr>
+             <td width="20%" colspan="3"><font size="12px">SUPPLIER:<br>{{ $pistandards->nama_supplier }}</font></td>
+             <td width="20%" colspan="3"><font size="12px">MATERIAL:<br>{{ $pistandards->material }}</font></td>
+             <td width="20%" colspan="3">
+               <font size="12px">GENERAL TOL:<br>
+               @foreach(json_decode($pistandards->general_tol) as $key => $value)
+                 {{$value}}<br>
+                 @endforeach
+               </font>
+             </td>
+             <td width="20%" colspan="3"><font size="12px">WEIGHT:<br>{{ $pistandards->weight }}</font></td>
+           </tr>
+         </thead>
+       </table>
+       <table class="table" width="100%" style="table-layout:fixed;">
+         <tbody>
+          <tr>
+            <td colspan="12">SKETCH
+              <table  cellspacing="0" cellpadding="0" width="100%" >
+                <tr>
+                  <td colspan="12" height="350" >
+                    <center><img src="{{$sketchdrawing }}"  height="380" width="4300%">
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td width="3%" height="30px"><center> <font size="12px"><b>NO.</b></font></center></td>
+              <td width="10%"  height="30px" colspan="3"><center><font size="12px"><b>REVISION RECORD</b></font></center></td>
+              <td width="10%" height="30px" colspan="2"><center><font size="12px"><b>ITEM NO</b></font></center></td>
+              <td width="10%" height="30px" colspan="2" ><center><font size="12px"><b>DATE</b></font></td>
+              <td width="10%" height="30px" colspan="2"><center><font size="12px"><b>PT.IGP</b></font></center></td>
+              <td width="10%" height="30px" colspan="2"><center><font size="12px"><b>SUPPLIER</b></font></center></td>
+            </tr>
+            <tr>
+              <td width="3%"  height="20px"><center> <font size="12px"><b></b></font></center></td>
+              <td width="10%"  height="20px" colspan="3"><center><font size="12px"><b></b></font></center></td>
+              <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+              <td width="10%" height="20px" colspan="2" ><center><font size="12px"><b></b></font></td>
+              <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+              <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+            </tr>
+            <tr>
+              <td width="3%" height="20px"><center> <font size="12px"><b></b></font></center></td>
+              <td width="10%" height="20px" colspan="3"><center><font size="12px"><b></b></font></center></td>
+              <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+              <td width="10%" height="20px" colspan="2" ><center><font size="12px"><b></b></font></td>
+              <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+              <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+            </tr>
+          </table>
+          <table class="table" width="100%" style="table-layout:fixed;">
+            <tbody>        
+              <tr>
+                <td width="30%" colspan="3" ><center><font size="12px" ><b>APPROVED BY PT.IGP</b></font></center></td>
+                <td width="30%" height="5px" colspan="6" rowspan="3"></td>
+                <td width="30%" colspan="3" ><center><font size="12px"> <b>PREPARED BY{{ $pistandards->nama_supplier }}</b></font></center> </td>
+              </tr>
+              <tr>
+               <td width="10%" height="7%"><center><img src="{{$approve_dept }}"  width="60"></center></td>
+               <td width="10%" height="7%"><center><img src="{{$approve_sect }}"  width="60"></center></td>
+               <td width="10%" height="7%"><center><img src="{{$approve_staff }}"  width="60"></center></td>
+               <td width="10%" height="7%"><center><img src="{{$manager_spy}}"  width="60"></center></td>
+               <td width="10%" height="7%"><center><img src="{{$supervisor_spy }}"  width="60"></center></td>
+               <td width="10%" height="7%"><center><img src="{{$staff_spy}}"  width="60"></center></td>
+             </tr>
+              <tr>
+                <td width="10%"><center> <font size="12px"><b>QA Div.</b></font></center></td>
+                <td width="10%"><center><font size="12px"><b>SQE Sect</b></font></center></td>
+                <td width="10%"><center><font size="12px"><b>Staff</b></font></center></td>
+                <td width="10%"><center><font size="12px"><b>Division</b></font></center></td>
+                <td width="10%"><center><font size="12px"><b>Supervisor</b></font></center></td>
+                <td width="10%"><center><font size="12px"><b>Staff</b></font></center></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </body>
+
+  {{-- /////////SKETCH2/////////// --}}
+  <body>
+    <!-- form start -->
+    <div class="box-body">
+      <div class="form-group">
+        <div >
+         {{ csrf_field() }}
+         <br>
+         <table class="table" width="100%" style="table-layout:fixed;">
+          <thead >
+           <tr> 
+           <th width="10%" colspan="2" height="5%"><img src="{{$logo_supplier }}" width="100%" height="80"></th>
+           <th width="20%" colspan="5">MODEL:&nbsp;&nbsp;{{ $pistandards->model }} </th>
+           <th width="20%" colspan="5"> <font size="12px" >PART INSPECTION STANDARD </font> </th>
+           <tr>
+             <td width="20%" colspan="3"><font size="12px">SUPPLIER:<br>{{ $pistandards->nama_supplier }}</font></td>
+             <td width="20%" colspan="3"><font size="12px">MATERIAL:<br>{{ $pistandards->material }}</font></td>
+             <td width="20%" colspan="3">
+               <font size="12px">GENERAL TOL:<br>
+               @foreach(json_decode($pistandards->general_tol) as $key => $value)
+                 {{$value}}<br>
+                 @endforeach
+               </font>
+             </td>
+             <td width="20%" colspan="3"><font size="12px">WEIGHT:<br>{{ $pistandards->weight }}</font></td>
+           </tr>
+           </thead>
+         </table>
+         <table class="table" width="100%" style="table-layout:fixed;">
+           <tbody>
+            <tr>
+              <td colspan="12">SKETCH
+                <table  cellspacing="0" cellpadding="0" width="100%" >
+                  <tr>
+                    <td colspan="12" height="350" >
+                      <center><img src="{{$sketchmmethode }}"  height="380" width="4300%">
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td width="3%" height="30px"><center> <font size="12px"><b>NO.</b></font></center></td>
+                <td width="10%"  height="30px" colspan="3"><center><font size="12px"><b>REVISION RECORD</b></font></center></td>
+                <td width="10%" height="30px" colspan="2"><center><font size="12px"><b>ITEM NO</b></font></center></td>
+                <td width="10%" height="30px" colspan="2" ><center><font size="12px"><b>DATE</b></font></td>
+                <td width="10%" height="30px" colspan="2"><center><font size="12px"><b>PT.IGP</b></font></center></td>
+                <td width="10%" height="30px" colspan="2"><center><font size="12px"><b>SUPPLIER</b></font></center></td>
+              </tr>
+              <tr>
+                <td width="3%"  height="20px"><center> <font size="12px"><b></b></font></center></td>
+                <td width="10%"  height="20px" colspan="3"><center><font size="12px"><b></b></font></center></td>
+                <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+                <td width="10%" height="20px" colspan="2" ><center><font size="12px"><b></b></font></td>
+                <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+                <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+              </tr>
+              <tr>
+                <td width="3%" height="20px"><center> <font size="12px"><b></b></font></center></td>
+                <td width="10%" height="20px" colspan="3"><center><font size="12px"><b></b></font></center></td>
+                <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+                <td width="10%" height="20px" colspan="2" ><center><font size="12px"><b></b></font></td>
+                <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+                <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+              </tr>
+            </table>
+            <table class="table" width="100%" style="table-layout:fixed;">
+              <tbody>        
+                <tr>
+                  <td width="30%" colspan="3" ><center><font size="12px" ><b>APPROVED BY PT.IGP</b></font></center></td>
+                  <td width="30%" height="5px" colspan="6" rowspan="3"></td>
+                  <td width="30%" colspan="3" ><center><font size="12px"> <b>PREPARED BY{{ $pistandards->nama_supplier }}</b></font></center> </td>
+                </tr>
+                <tr>
+                  <td width="10%" height="7%"><center><img src="{{$approve_dept }}"  width="60"></center></td>
+                  <td width="10%" height="7%"><center><img src="{{$approve_sect }}"  width="60"></center></td>
+                  <td width="10%" height="7%"><center><img src="{{$approve_staff }}"  width="60"></center></td>
+                  <td width="10%" height="7%"><center><img src="{{$manager_spy}}"  width="60"></center></td>
+                  <td width="10%" height="7%"><center><img src="{{$supervisor_spy }}"  width="60"></center></td>
+                  <td width="10%" height="7%"><center><img src="{{$staff_spy}}"  width="60"></center></td>
+                </tr>
+                <tr>
+                  <td width="10%"><center> <font size="12px"><b>QA Div.</b></font></center></td>
+                  <td width="10%"><center><font size="12px"><b>SQE Sect</b></font></center></td>
+                  <td width="10%"><center><font size="12px"><b>Staff</b></font></center></td>
+                  <td width="10%"><center><font size="12px"><b>Division</b></font></center></td>
+                  <td width="10%"><center><font size="12px"><b>Supervisor</b></font></center></td>
+                  <td width="10%"><center><font size="12px"><b>Staff</b></font></center></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </body>
+    {{-- //////////////////SKECT3/////////// --}}
+    <body>
+      <!-- form start -->
+      <div class="box-body">
+        <div class="form-group">
+          <div >
+           {{ csrf_field() }}
+           <br>
+           <table class="table" width="100%" style="table-layout:fixed;">
+            <thead >
+             <tr> 
+          <th width="10%" colspan="2" height="5%">
+             <img src="{{ $logo_supplier }}" alt="File Not Found" class="img-rounded img-responsive"  width="100%" height="80">
+           </th>
+           <th width="20%" colspan="5">MODEL:&nbsp;&nbsp;{{ $pistandards->model }} </th>
+           <th width="20%" colspan="5"> <font size="12px" >PART INSPECTION STANDARD </font> </th>
+           <tr>
+             <td width="20%" colspan="3"><font size="12px">SUPPLIER:<br>{{ $pistandards->nama_supplier }}</font></td>
+             <td width="20%" colspan="3"><font size="12px">MATERIAL:<br>{{ $pistandards->material }}</font></td>
+             <td width="20%" colspan="3">
+               <font size="12px">GENERAL TOL:<br>
+               @foreach(json_decode($pistandards->general_tol) as $key => $value)
+                 {{$value}}<br>
+                 @endforeach
+               </font>
+             </td>
+             <td width="20%" colspan="3"><font size="12px">WEIGHT:<br>{{ $pistandards->weight }}</font></td>
+           </tr>
+             </thead>
+           </table>
+           <table class="table" width="100%" style="table-layout:fixed;">
+             <tbody>
+              <tr>
+                <td colspan="12">SKETCH
+                  <table  cellspacing="0" cellpadding="0" width="100%" >
+                    <tr>
+                      <td colspan="12" height="350" >
+                        <center><img src="{{$sketchappearance }}"  height="380" width="4300%">
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td width="3%" height="30px"><center> <font size="12px"><b>NO.</b></font></center></td>
+                  <td width="10%"  height="30px" colspan="3"><center><font size="12px"><b>REVISION RECORD</b></font></center></td>
+                  <td width="10%" height="30px" colspan="2"><center><font size="12px"><b>ITEM NO</b></font></center></td>
+                  <td width="10%" height="30px" colspan="2" ><center><font size="12px"><b>DATE</b></font></td>
+                  <td width="10%" height="30px" colspan="2"><center><font size="12px"><b>PT.IGP</b></font></center></td>
+                  <td width="10%" height="30px" colspan="2"><center><font size="12px"><b>SUPPLIER</b></font></center></td>
+                </tr>
+                <tr>
+                  <td width="3%"  height="20px"><center> <font size="12px"><b></b></font></center></td>
+                  <td width="10%"  height="20px" colspan="3"><center><font size="12px"><b></b></font></center></td>
+                  <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+                  <td width="10%" height="20px" colspan="2" ><center><font size="12px"><b></b></font></td>
+                  <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+                  <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+                </tr>
+                <tr>
+                  <td width="3%" height="20px"><center> <font size="12px"><b></b></font></center></td>
+                  <td width="10%" height="20px" colspan="3"><center><font size="12px"><b></b></font></center></td>
+                  <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+                  <td width="10%" height="20px" colspan="2" ><center><font size="12px"><b></b></font></td>
+                  <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+                  <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+                </tr>
+              </table>
+              <table class="table" width="100%" style="table-layout:fixed;">
+                <tbody>        
+                  <tr>
+                    <td width="30%" colspan="3" ><center><font size="12px" ><b>APPROVED BY PT.IGP</b></font></center></td>
+                    <td width="30%" height="5px" colspan="6" rowspan="3"></td>
+                    <td width="30%" colspan="3" ><center><font size="12px"> <b>PREPARED BY{{ $pistandards->nama_supplier }}</b></font></center> </td>
+                  </tr>
+                  <tr>
+                   <td width="10%" height="7%"><center><img src="{{$approve_dept }}"  width="60"></center></td>
+                   <td width="10%" height="7%"><center><img src="{{$approve_sect }}"  width="60"></center></td>
+                   <td width="10%" height="7%"><center><img src="{{$approve_staff }}"  width="60"></center></td>
+                   <td width="10%" height="7%"><center><img src="{{$manager_spy}}"  width="60"></center></td>
+                   <td width="10%" height="7%"><center><img src="{{$supervisor_spy }}"  width="60"></center></td>
+                   <td width="10%" height="7%"><center><img src="{{$staff_spy}}"  width="60"></center></td>
+                 </tr>
+                  <tr>
+                    <td width="10%"><center> <font size="12px"><b>QA Div.</b></font></center></td>
+                    <td width="10%"><center><font size="12px"><b>SQE Sect</b></font></center></td>
+                    <td width="10%"><center><font size="12px"><b>Staff</b></font></center></td>
+                    <td width="10%"><center><font size="12px"><b>Division</b></font></center></td>
+                    <td width="10%"><center><font size="12px"><b>Supervisor</b></font></center></td>
+                    <td width="10%"><center><font size="12px"><b>Staff</b></font></center></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </body>
+
+      {{-- //////////////////////////////////////IV. SoC FREE////// --}}
+      <body>
+        <!-- form start -->
+        <div class="box-body">
+          <div class="form-group">
+            <div >
+             {{ csrf_field() }}
+             <br>
+             <table class="table" width="100%" style="table-layout:fixed;">
+              <thead >
+                <tr> 
+                 <th width="10%" colspan="2" height="5%">
+                   <img src="{{ $logo_supplier }}" alt="File Not Found" class="img-rounded img-responsive"  width="100%" height="80">
+                 </th>
+                 <th width="20%" colspan="5">MODEL:&nbsp;&nbsp;{{ $pistandards->model }} </th>
+                 <th width="20%" colspan="5"> <font size="12px" >PART INSPECTION STANDARD </font> </th>
+                 <tr>
+                   <td width="20%" colspan="3"><font size="12px">SUPPLIER:<br>{{ $pistandards->nama_supplier }}</font></td>
+                   <td width="20%" colspan="3"><font size="12px">MATERIAL:<br>{{ $pistandards->material }}</font></td>
+                   <td width="20%" colspan="3">
+                     <font size="12px">GENERAL TOL:<br>
+                       @foreach(json_decode($pistandards->general_tol) as $key => $value)
+                       {{$value}}<br>
+                       @endforeach
+                     </font>
+                   </td>
+                   <td width="20%" colspan="3"><font size="12px">WEIGHT:<br>{{ $pistandards->weight }}</font></td>
+                 </tr>
+               </thead>
+             </table>
+             <table class="table" width="100%" style="table-layout:fixed;">
+               <tbody>
+
+                <tr>
+                  <th width="4%" rowspan="2" ><font size="10px">NO</th>
+                  <th width="10%"  rowspan="2" colspan="2"><font size="10px">INSPECTION ITEM</th>
+                  <th width="10%"  colspan="2"><font size="10px">STANDARD VALUE</th>
+                  <th width="10%"  rowspan="2" colspan="2"><font size="10px">INPECTION INSTRUMENT</th>
+                  <th width="4%"  rowspan="2" colspan="2"><font size="10px">RANK</th>
+                  <th width="10%"  colspan="2"><font size="10px">SAMPLING PLAN</th>
+                  <th width="8%"  rowspan="2" ><font size="10px">REMARKS</th>
+                </tr>
+                <tr>
+                  <th width="7%" ><font size="10px">NOMINAL</th>
+                  <th width="9%" ><font size="10px">TOLERANCE</th>
+                  <th width="8%" ><font size="10px">IN PROSES</th>
+                  <th width="8%" ><font size="10px">AT DELIVERY</th>
+                </tr> 
+
+                <tr>
+                  <td height="30px" colspan="12"><font size="12px">IV. SoC FREE</font></td>
+                </tr>
+                @if (!empty($socfs->no_pisigp))
+                @foreach ($entity->getLines7($socfs->no_pisigp)->get() as $model)
+                <tr id="line_field1_{{ $loop->iteration }}">
+                  <td  width="3%" height="20px"><center> <font size="12px">{{ $model->no }}</font></center></td>
+                  <td width="10%" height="20px" colspan="2"><center><font size="12px">{{ $model->item }}</font></center></td>
+                  <td width="7%" height="20px"><center><font size="12px">{{ $model->nominal }}</font></center></td>
+                  <td width="7%" height="20px"><center><font size="12px">{{ $model->tolerance }}</font></center></td>
+                  <td width="10%" height="20px" colspan="2"><center><font size="12px">{{ $model->instrument }}</font></center></td>
+                  <td width="5%"  height="20px" colspan="2"><center><font size="12px">{{ $model->rank }}</font></center></td>
+                  <td width="5%"  height="20px"><center><font size="12px">{{ $model->proses }}</font></center></td>
+                  <td width="6%"  height="20px"><center><font size="12px">{{ $model->delivery }} </font></center></td>
+                  <td width="6%"  height="20px"><center><font size="12px">{{ $model->remarks }}</font></center></td>
+                </tr>
+                @endforeach
+                @endif
+
+                <tr >
+                  <td  width="3%" height="20px"><center> <font size="12px"></font></center></td>
+                  <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+                  <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+                  <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+                  <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+                  <td width="5%"  height="20px" colspan="2"><center><font size="12px"></font></center></td>
+                  <td width="5%"  height="20px"><center><font size="12px"></font></center></td>
+                  <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+                  <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+                </tr>
+
+                <tr >
+                  <td  width="3%" height="20px"><center> <font size="12px"></font></center></td>
+                  <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+                  <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+                  <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+                  <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+                  <td width="5%"  height="20px" colspan="2"><center><font size="12px"></font></center></td>
+                  <td width="5%"  height="20px"><center><font size="12px"></font></center></td>
+                  <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+                  <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+                </tr>
+
+                <tr >
+                  <td  width="3%" height="20px"><center> <font size="12px"></font></center></td>
+                  <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+                  <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+                  <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+                  <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+                  <td width="5%"  height="20px" colspan="2"><center><font size="12px"></font></center></td>
+                  <td width="5%"  height="20px"><center><font size="12px"></font></center></td>
+                  <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+                  <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+                </tr>
+                <tr >
+                  <td  width="3%" height="20px"><center> <font size="12px"></font></center></td>
+                  <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+                  <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+                  <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+                  <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+                  <td width="5%"  height="20px" colspan="2"><center><font size="12px"></font></center></td>
+                  <td width="5%"  height="20px"><center><font size="12px"></font></center></td>
+                  <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+                  <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+                </tr>
+                <tr >
+                  <td  width="3%" height="20px"><center> <font size="12px"></font></center></td>
+                  <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+                  <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+                  <td width="7%" height="20px"><center><font size="12px"></font></center></td>
+                  <td width="10%" height="20px" colspan="2"><center><font size="12px"></font></center></td>
+                  <td width="5%"  height="20px" colspan="2"><center><font size="12px"></font></center></td>
+                  <td width="5%"  height="20px"><center><font size="12px"></font></center></td>
+                  <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+                  <td width="6%"  height="20px"><center><font size="12px"></font></center></td>
+                </tr>
+
+
+                <tr>
+                  <td width="3%" height="30px"><center> <font size="12px"><b>NO.</b></font></center></td>
+                  <td width="10%"  height="30px" colspan="3"><center><font size="12px"><b>REVISION RECORD</b></font></center></td>
+                  <td width="10%" height="30px" colspan="2"><center><font size="12px"><b>ITEM NO</b></font></center></td>
+                  <td width="10%" height="30px" colspan="2" ><center><font size="12px"><b>DATE</b></font></td>
+                  <td width="10%" height="30px" colspan="2"><center><font size="12px"><b>PT.IGP</b></font></center></td>
+                  <td width="10%" height="30px" colspan="2"><center><font size="12px"><b>SUPPLIER</b></font></center></td>
+                </tr>
+                <tr>
+                  <td width="3%"  height="20px"><center> <font size="12px"><b></b></font></center></td>
+                  <td width="10%"  height="20px" colspan="3"><center><font size="12px"><b></b></font></center></td>
+                  <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+                  <td width="10%" height="20px" colspan="2" ><center><font size="12px"><b></b></font></td>
+                  <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+                  <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+                </tr>
+                <tr>
+                  <td width="3%" height="20px"><center> <font size="12px"><b></b></font></center></td>
+                  <td width="10%" height="20px" colspan="3"><center><font size="12px"><b></b></font></center></td>
+                  <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+                  <td width="10%" height="20px" colspan="2" ><center><font size="12px"><b></b></font></td>
+                  <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+                  <td width="10%" height="20px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+                </tr>
+
+              </tbody>
+
+            </table>
+            <table class="table" width="100%" style="table-layout:fixed;">
+              <tbody>        
+                <tr>
+                  <td width="30%" colspan="3" ><center><font size="12px" ><b>APPROVED BY PT.IGP</b></font></center></td>
+                  <td width="30%" height="5px" colspan="6" rowspan="3"></td>
+                  <td width="30%" colspan="3" ><center><font size="12px"> <b>PREPARED BY{{ $pistandards->nama_supplier }}</b></font></center> </td>
+                </tr>
+                <tr>
+                 <td width="10%" height="7%"><center><img src="{{$approve_dept }}"  width="60"></center></td>
+                 <td width="10%" height="7%"><center><img src="{{$approve_sect }}"  width="60"></center></td>
+                 <td width="10%" height="7%"><center><img src="{{$approve_staff }}"  width="60"></center></td>
+                 <td width="10%" height="7%"><center><img src="{{$manager_spy}}"  width="60"></center></td>
+                 <td width="10%" height="7%"><center><img src="{{$supervisor_spy }}"  width="60"></center></td>
+                 <td width="10%" height="7%"><center><img src="{{$staff_spy}}"  width="60"></center></td>
+               </tr>
+                <tr>
+                  <td width="10%"><center> <font size="12px"><b>QA Div.</b></font></center></td>
+                  <td width="10%"><center><font size="12px"><b>SQE Sect</b></font></center></td>
+                  <td width="10%"><center><font size="12px"><b>Staff</b></font></center></td>
+                  <td width="10%"><center><font size="12px"><b>Division</b></font></center></td>
+                  <td width="10%"><center><font size="12px"><b>Supervisor</b></font></center></td>
+                  <td width="10%"><center><font size="12px"><b>Staff</b></font></center></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- /.content-wrapper -->
+    </body>
+
+    <body>
+      <!-- form start -->
+      <div class="box-body col-md-12">
+        <div class="form-group">
+          <div >
+           {{ csrf_field() }}
+           <br>
+           <table class="table" width="100%"  style="table-layout:fixed;">
+            <thead >
+              <tr> 
+               <th width="10%" colspan="2" height="5%">
+                 <img src="{{ $logo_supplier }}" alt="File Not Found" class="img-rounded img-responsive"  width="100%" height="80">
+               </th>
+               <th width="20%" colspan="5">MODEL:&nbsp;&nbsp;{{ $pistandards->model }} </th>
+               <th width="20%" colspan="5"> <font size="12px" >PART INSPECTION STANDARD </font> </th>
+               <tr>
+                 <td width="20%" colspan="3"><font size="12px">SUPPLIER:<br>{{ $pistandards->nama_supplier }}</font></td>
+                 <td width="20%" colspan="3"><font size="12px">MATERIAL:<br>{{ $pistandards->material }}</font></td>
+                 <td width="20%" colspan="3">
+                   <font size="12px">GENERAL TOL:<br>
+                     @foreach(json_decode($pistandards->general_tol) as $key => $value)
+                     {{$value}}<br>
+                     @endforeach
+                   </font>
+                 </td>
+                 <td width="20%" colspan="3"><font size="12px">WEIGHT:<br>{{ $pistandards->weight }}</font></td>
+               </tr>
+             </thead>
+             <tbody>
+              <tr>
+                <td colspan="12">V. PART ROUTING</td>
+              </tr>
+              <tr>
+
+                <td colspan="12">
+                 <div class="box-body">
+                   <div class="form-group">
+                    <table   width="100%" >
+                      <tr>
+                        <td colspan="12" height="300" >
+                          <div class="table" >
+                            <div class="box-body col-md-12">
+
+                             {{-- ////// --}}
+                        
+                            <br>
+                            <br>
+                             <table  cellspacing="0" cellpadding="0" width="20%" >
+                              <tr>
+                                <body>
+                                  <td colspan="3" height="10" >
+                                    <table  cellspacing="0" cellpadding="0" width="30%" >
+
+                                    </table>
+
+                                  </td>
+                                </body>
+                              </tr>
+                            </table>
+                              <br>
+                                <br>
+
+                            <table  cellspacing="0" cellpadding="0" width="100%" >
+                              <tr>
+                                <body>
+                                  <td colspan="12" height="30" >
+                                    <table  cellspacing="0" cellpadding="0" width="100%" >
+                                      <tr>
+                                        <td height="10" width="100%" ><font size="10px">Part Name</font></td>
+                                        <td height="10" width="100%" ><font size="10px"></font></td>
+                                      </tr>
+                                      <tr>
+                                        <td height="10" width="100%" ><font size="10px"> Part Number</font></td>
+                                        <td height="10" width="100%" ><font size="10px"></font></td>
+                                      </tr>
+                                      <tr>
+                                        <td height="10" width="100%" ><font size="10px">Proses</font></td>
+                                        <td height="10" width="100%" ><font size="10px"></font></td>
+                                      </tr>
+                                      <tr>
+                                        <td height="10" width="100%" ><font size="10px">Supplier</font></td>
+                                        <td height="10" width="100%" ><font size="10px"></font></td>
+                                      </tr>
+
+                                    </table>
+                                  </td>
+                                </body>
+                                &nbsp;&nbsp;<br>
+                                <body>
+                                  <td colspan="12" height="30" >
+                                    <table  cellspacing="0" cellpadding="0" width="100%" >
+                                     <tr>
+                                      <td height="10" width="100%" ><font size="10px">Part Name</font></td>
+                                      <td height="10" width="100%" ><font size="10px"></font></td>
+                                    </tr>
+                                    <tr>
+                                      <td height="10" width="100%" ><font size="10px"> Part Number</font></td>
+                                      <td height="10" width="100%" ><font size="10px"></font></td>
+                                    </tr>
+                                    <tr>
+                                      <td height="10" width="100%" ><font size="10px">Proses</font></td>
+                                      <td height="10" width="100%" ><font size="10px"></font></td>
+                                    </tr>
+                                    <tr>
+                                      <td height="10" width="100%" ><font size="10px">Supplier</font></td>
+                                      <td height="10" width="100%" ><font size="10px"></font></td>
+                                    </tr>
+                                  </table>
+                                </td>
+                              </body>
+                              &nbsp;&nbsp;
+                              <body>
+                                <td colspan="12" height="30" >
+                                  <table  cellspacing="0" cellpadding="0" width="100%" >
+                                   <tr>
+                                    <td height="10" width="100%" ><font size="10px">Part Name</font></td>
+                                    <td height="10" width="100%" ><font size="10px"></font></td>
+                                  </tr>
+                                  <tr>
+                                    <td height="10" width="100%" ><font size="10px"> Part Number</font></td>
+                                    <td height="10" width="100%" ><font size="10px"></font></td>
+                                  </tr>
+                                  <tr>
+                                    <td height="10" width="100%" ><font size="10px">Proses</font></td>
+                                    <td height="10" width="100%" ><font size="10px"></font></td>
+                                  </tr>
+                                  <tr>
+                                    <td height="10" width="100%" ><font size="10px">Supplier</font></td>
+                                    <td height="10" width="100%" ><font size="10px"></font></td>
+                                  </tr>
+
+                                </table>
+                              </td>
+                            </body>
+                          </tr>
+                        </table>
+                        {{-- ///// --}}
+                        <br>
+                        <br>
+
+                        <table  cellspacing="0" cellpadding="0" width="100%" >
+                          <tr>
+                            <body>
+                              <td colspan="12" height="30" >
+                                <table  cellspacing="0" cellpadding="0" width="100%" >
+                                  <tr>
+                                    <td height="10" width="100%" ><font size="10px">Part Name</font></td>
+                                    <td height="10" width="100%" ><font size="10px"></font></td>
+                                  </tr>
+                                  <tr>
+                                    <td height="10" width="100%" ><font size="10px"> Part Number</font></td>
+                                    <td height="10" width="100%" ><font size="10px"></font></td>
+                                  </tr>
+                                  <tr>
+                                    <td height="10" width="100%" ><font size="10px">Proses</font></td>
+                                    <td height="10" width="100%" ><font size="10px"></font></td>
+                                  </tr>
+                                  <tr>
+                                    <td height="10" width="100%" ><font size="10px">Supplier</font></td>
+                                    <td height="10" width="100%" ><font size="10px"></font></td>
+                                  </tr>
+
+                                </table>
+                              </td>
+                            </body>
+                            &nbsp;&nbsp;<br>
+                            <body>
+                              <td colspan="12" height="30" >
+                                <table  cellspacing="0" cellpadding="0" width="100%" >
+                                 <tr>
+                                  <td height="10" width="100%" ><font size="10px">Part Name</font></td>
+                                  <td height="10" width="100%" ><font size="10px"></font></td>
+                                </tr>
+                                <tr>
+                                  <td height="10" width="100%" ><font size="10px"> Part Number</font></td>
+                                  <td height="10" width="100%" ><font size="10px"></font></td>
+                                </tr>
+                                <tr>
+                                  <td height="10" width="100%" ><font size="10px">Proses</font></td>
+                                  <td height="10" width="100%" ><font size="10px"></font></td>
+                                </tr>
+                                <tr>
+                                  <td height="10" width="100%" ><font size="10px">Supplier</font></td>
+                                  <td height="10" width="100%" ><font size="10px"></font></td>
+                                </tr>
+                              </table>
+                            </td>
+                          </body>
+                          &nbsp;&nbsp;
+                          <body>
+                            <td colspan="12" height="30" >
+                              <table  cellspacing="0" cellpadding="0" width="100%" >
+                               <tr>
+                                <td height="10" width="100%" ><font size="10px">Part Name</font></td>
+                                <td height="10" width="100%" ><font size="10px"></font></td>
+                              </tr>
+                              <tr>
+                                <td height="10" width="100%" ><font size="10px"> Part Number</font></td>
+                                <td height="10" width="100%" ><font size="10px"></font></td>
+                              </tr>
+                              <tr>
+                                <td height="10" width="100%" ><font size="10px">Proses</font></td>
+                                <td height="10" width="100%" ><font size="10px"></font></td>
+                              </tr>
+                              <tr>
+                                <td height="10" width="100%" ><font size="10px">Supplier</font></td>
+                                <td height="10" width="100%" ><font size="10px"></font></td>
+                              </tr>
+
+                            </table>
+                          </td>
+                        </body>
+                      </tr>
+                    </table>
+                    {{-- ////// --}}
+                    <br>
+                    <br>
+
+                    <table  cellspacing="0" cellpadding="0" width="30%" >
+                      <tr>
+                        <body>
+                          <td colspan="3" height="30" >
+                            <table  cellspacing="0" cellpadding="0" width="100%" >
+                             <tr>
+                              <td height="10" width="100%" ><font size="10px">Part Name</font></td>
+                              <td height="10" width="100%" ><font size="10px"></font></td>
+                            </tr>
+                            <tr>
+                              <td height="10" width="100%" ><font size="10px"> Part Number</font></td>
+                              <td height="10" width="100%" ><font size="10px"></font></td>
+                            </tr>
+                            <tr>
+                              <td height="10" width="100%" ><font size="10px">Proses</font></td>
+                              <td height="10" width="100%" ><font size="10px"></font></td>
+                            </tr>
+                            <tr>
+                              <td height="10" width="100%" ><font size="10px">Supplier</font></td>
+                              <td height="10" width="100%" ><font size="10px"></font></td>
+                            </tr>
+                          </table>
+
+                        </td>
+                      </body>
+
+
+                    </tr>
+                  </table>
+                  {{-- ////// --}}
+                  <br>
+                  <br>
+
+                  <table  cellspacing="0" cellpadding="0" width="30%" >
+                    <tr>
+                      <body>
+                        <td colspan="3" height="30" >
+                          <table  cellspacing="0" cellpadding="0" width="100%" >
+                           <tr>
+                            <td height="10" width="100%" ><font size="10px">Part Name</font></td>
+                            <td height="10" width="100%" ><font size="10px"></font></td>
+                          </tr>
+                          <tr>
+                            <td height="10" width="100%" ><font size="10px"> Part Number</font></td>
+                            <td height="10" width="100%" ><font size="10px"></font></td>
+                          </tr>
+                          <tr>
+                            <td height="10" width="100%" ><font size="10px">Proses</font></td>
+                            <td height="10" width="100%" ><font size="10px"></font></td>
+                          </tr>
+                          <tr>
+                            <td height="10" width="100%" ><font size="10px">Supplier</font></td>
+                            <td height="10" width="100%" ><font size="10px"></font></td>
+                          </tr>
+                        </table>
+
+                      </td>
+                      <
+                    </body>
+
+
+                  </tr>
+                </table>
+
+              </div>    
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</td>
+</tr>
+
+
+
+<tr>
+  <td width="3%"><center> <font size="12px"><b>NO.</b></font></center></td>
+  <td  width="5px" colspan="3"><center><font size="12px"><b>REVISION RECORD</b></font></center></td>
+  <td  width="30px" colspan="2"><center><font size="12px"><b>ITEM NO</b></font></center></td>
+  <td  width="5px" colspan="2" ><center><font size="12px"><b>DATE</b></font></td>
+  <td  width="5px" colspan="2"><center><font size="12px"><b>PT.IGP</b></font></center></td>
+  <td  width="5px" colspan="2"><center><font size="12px"><b>SUPPLIER</b></font></center></td>
+</tr>
+<tr>
+  <td  width="1px" height="10"><center> <font size="12px"><b></b></font></center></td>
+  <td  width="5px" colspan="3"><center><font size="12px"><b></b></font></center></td>
+  <td  width="5px"  colspan="2"><center><font size="12px"><b></b></font></center></td>
+  <td  width="5px" colspan="2" ><center><font size="12px"><b></b></font></td>
+  <td  width="5px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+  <td  width="5px" colspan="2"><center><font size="12px"><b></b></font></center></td>
+</tr>
+
+</tbody>
+
+</table>
+<table class="table" width="100%" style="table-layout:fixed;">
+  <tbody>        
+    <tr>
+      <td width="30%" colspan="3" ><center><font size="12px" ><b>APPROVED BY PT.IGP</b></font></center></td>
+      <td width="30%" height="5px" colspan="6" rowspan="3"></td>
+      <td width="30%" colspan="3" ><center><font size="12px"> <b>PREPARED BY{{ $pistandards->nama_supplier }}</b></font></center> </td>
+    </tr>
+    <tr>
+     <td width="10%" height="7%"><center><img src="{{$approve_dept }}"  width="60"></center></td>
+     <td width="10%" height="7%"><center><img src="{{$approve_sect }}"  width="60"></center></td>
+     <td width="10%" height="7%"><center><img src="{{$approve_staff }}"  width="60"></center></td>
+     <td width="10%" height="7%"><center><img src="{{$manager_spy}}"  width="60"></center></td>
+     <td width="10%" height="7%"><center><img src="{{$supervisor_spy }}"  width="60"></center></td>
+     <td width="10%" height="7%"><center><img src="{{$staff_spy}}"  width="60"></center></td>
+   </tr>
+    <tr>
+      <td width="10%"><center> <font size="12px"><b>QA Div.</b></font></center></td>
+      <td width="10%"><center><font size="12px"><b>SQE Sect</b></font></center></td>
+      <td width="10%"><center><font size="12px"><b>Staff</b></font></center></td>
+      <td width="10%"><center><font size="12px"><b>Division</b></font></center></td>
+      <td width="10%"><center><font size="12px"><b>Supervisor</b></font></center></td>
+      <td width="10%"><center><font size="12px"><b>Staff</b></font></center></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+</body>
+
+<body>
+<br>
+<br>
+<br>
+<br>
+  <!-- form start -->
+  <div class="box-body">
+    <div class="form-group">
+      <div >
+       {{ csrf_field() }}
+       <br>
+       <table class="table" width="100%">
+        <thead >
+          <tr> 
+            <th width="4px" colspan="12" height="1%">CATATAN</th>
+
+          </tr>
+        </thead>
+        <tbody>
+         <tr>
+           <td colspan="12">STAFF
+            <table  cellspacing="0" cellpadding="0" width="100%" >
+              <tr>
+                <td colspan="12" height="150" >
+                  <font size="12px">{{ $pistandards->notestaff }}</font>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="12">SECT. HEAD. SQE
+            <table  cellspacing="0" cellpadding="0" width="100%" >
+              <tr>
+                <td colspan="12" height="150" >
+                  <font size="12px">{{ $pistandards->notesect }}</font>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="12">DEPT. HEAD. SQE
+            <table  cellspacing="0" cellpadding="0" width="100%" >
+              <tr>
+                <td colspan="12" height="150" >
+                  <font size="12px">{{ $pistandards->notedept }}</font>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="812" pageHeight="555" orientation="Landscape" columnWidth="812" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="b12e1461-f2c2-4eb5-91b6-f20b18705cbe">
+	<property name="ireport.zoom" value="1.2100000000000006"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="tgl" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="kdSite" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="npkPic" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="dep_gemba" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select inisial, sum(total) total, sum(total_open) total_open, sum(total_close) total_close
+from (
+	select coalesce(npk_pic,'-')||' - '||coalesce((select coalesce(v.initial, split_part(v.nama,' ',1)) from v_mas_karyawan v where v.npk = mgmt_gembas.npk_pic limit 1),'-') inisial, 
+	count(no_gemba) total, 0 total_open, 0 total_close
+	from mgmt_gembas
+	where dep_gemba = $P{dep_gemba} 
+	and kd_site = $P{kdSite}
+	and to_char(tgl_gemba,'dd/mm/yyyy') = $P{tgl}
+	and (npk_pic = $P{npkPic} or $P{npkPic} = '')
+	group by coalesce(npk_pic,'-')||' - '||coalesce((select coalesce(v.initial, split_part(v.nama,' ',1)) from v_mas_karyawan v where v.npk = mgmt_gembas.npk_pic limit 1),'-')
+	union all 
+	select coalesce(npk_pic,'-')||' - '||coalesce((select coalesce(v.initial, split_part(v.nama,' ',1)) from v_mas_karyawan v where v.npk = mgmt_gembas.npk_pic limit 1),'-') inisial, 
+	0 total, count(no_gemba) total_open, 0 total_close
+	from mgmt_gembas
+	where dep_gemba = $P{dep_gemba} 
+	and kd_site = $P{kdSite}
+	and to_char(tgl_gemba,'dd/mm/yyyy') = $P{tgl}
+	and (npk_pic = $P{npkPic} or $P{npkPic} = '')
+	and coalesce(st_gemba,'F') = 'F'
+	group by coalesce(npk_pic,'-')||' - '||coalesce((select coalesce(v.initial, split_part(v.nama,' ',1)) from v_mas_karyawan v where v.npk = mgmt_gembas.npk_pic limit 1),'-')
+	union all 
+	select coalesce(npk_pic,'-')||' - '||coalesce((select coalesce(v.initial, split_part(v.nama,' ',1)) from v_mas_karyawan v where v.npk = mgmt_gembas.npk_pic limit 1),'-') inisial, 
+	0 total, 0 total_open, count(no_gemba) total_close
+	from mgmt_gembas
+	where dep_gemba = $P{dep_gemba} 
+	and kd_site = $P{kdSite}
+	and to_char(tgl_gemba,'dd/mm/yyyy') = $P{tgl}
+	and (npk_pic = $P{npkPic} or $P{npkPic} = '')
+	and coalesce(st_gemba,'F') = 'T'
+	group by coalesce(npk_pic,'-')||' - '||coalesce((select coalesce(v.initial, split_part(v.nama,' ',1)) from v_mas_karyawan v where v.npk = mgmt_gembas.npk_pic limit 1),'-')
+) v group by inisial]]>
+	</queryString>
+	<field name="inisial" class="java.lang.String"/>
+	<field name="total" class="java.math.BigDecimal"/>
+	<field name="total_open" class="java.math.BigDecimal"/>
+	<field name="total_close" class="java.math.BigDecimal"/>
+	<variable name="gt_total" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{total}]]></variableExpression>
+	</variable>
+	<variable name="gt_total_open" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{total_open}]]></variableExpression>
+	</variable>
+	<variable name="gt_total_close" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{total_close}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="30">
+			<staticText>
+				<reportElement x="164" y="0" width="185" height="30" uuid="fa6d2674-6a29-45d8-9bea-7c4aeded917d"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[PIC]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="349" y="0" width="300" height="15" uuid="09ee53d8-df6b-4097-b7cc-f00660f6b762"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="349" y="15" width="100" height="15" uuid="a2395894-2ab2-4653-9f6a-5c0a39dc2055"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Temuan]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="449" y="15" width="100" height="15" uuid="5c06a5c0-b2de-4be3-bb4d-6c93f0618a24"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Open]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="549" y="15" width="100" height="15" uuid="ad2255da-92e4-461e-9efc-7369a4986c9d"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Close]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="15">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="164" y="0" width="185" height="15" uuid="027c4bf8-4a3a-49a1-a25d-f81fbdd6e891"/>
+				<box leftPadding="2">
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{inisial}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="349" y="0" width="100" height="15" uuid="2e994945-f132-4e6f-be78-5079c99612df"/>
+				<box rightPadding="2">
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{total}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="449" y="0" width="100" height="15" uuid="7144c28c-028e-4c99-a79b-764b95facecd"/>
+				<box rightPadding="2">
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{total_open}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="549" y="0" width="100" height="15" uuid="818f56aa-dc48-4ec2-8124-176cf7e7a327"/>
+				<box rightPadding="2">
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{total_close}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="15">
+			<staticText>
+				<reportElement x="164" y="0" width="185" height="15" uuid="6735e250-df48-48d5-97e6-4738cd47f475"/>
+				<box rightPadding="2">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Grand Total]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="349" y="0" width="100" height="15" uuid="3b436aa4-b358-4059-9928-562138789d71"/>
+				<box rightPadding="2">
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{gt_total}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="449" y="0" width="100" height="15" uuid="5d96ccde-fcd4-4ac4-90d6-7df4c63e7b9c"/>
+				<box rightPadding="2">
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{gt_total_open}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="549" y="0" width="100" height="15" uuid="83558131-0a8e-4070-9a23-42e7842a5cc4"/>
+				<box rightPadding="2">
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{gt_total_close}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

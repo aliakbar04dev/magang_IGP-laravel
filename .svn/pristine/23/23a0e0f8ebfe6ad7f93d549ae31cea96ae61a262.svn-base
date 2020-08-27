@@ -1,0 +1,182 @@
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+use DB;
+use Illuminate\Support\Facades\Auth;
+
+class BgttCrRegis extends Model
+{
+    protected $fillable = [
+    	'id', 'kd_dep', 'thn', 'no_rev', 'no_urut', 'nm_aktivitas', 'nm_klasifikasi', 'nm_kategori', 'jml01', 'amt01', 'jml02', 'amt02', 'jml03', 'amt03', 'jml04', 'amt04', 'jml05', 'amt05', 'jml06', 'amt06', 'jml07', 'amt07', 'jml08', 'amt08', 'jml09', 'amt09', 'jml10', 'amt10', 'jml11', 'amt11', 'jml12', 'amt12', 'dtcrea', 'creaby', 'submit_dt', 'submit_by', 'rjt_dep_dt', 'rjt_dep_by', 'rjt_dep_ket', 'apr_dep_dt', 'apr_dep_by', 'rjt_div_dt', 'rjt_div_by', 'rjt_div_ket', 'apr_div_dt', 'apr_div_by', 'rjt_bgt_dt', 'rjt_bgt_by', 'rjt_bgt_ket', 'apr_bgt_dt', 'apr_bgt_by', 'dtmodi', 'modiby', 
+    ];
+
+    public static function boot()
+    {
+        parent::boot();
+
+        self::deleting(function($bgttcrregis) {
+            $msg = "";
+            $level = "danger";
+            if($msg !== "") {
+                Session::flash("flash_notification", [
+                    "level"=>$level,
+                    "message"=>$msg
+                ]);
+                // membatalkan proses penghapusan
+                return false;
+            }
+        });
+    }
+
+    public function masKaryawan($username)
+    {
+    	$mas_karyawan = DB::table("v_mas_karyawan")
+    	->select(DB::raw("npk, nama, kd_pt, desc_dep, desc_div, email, kode_dep, tgl_lahir, tgl_masuk_gkd, coalesce(substr(foto,18),'-.jpg') foto"))
+    	->where("npk", "=", $username)
+    	->first();
+
+    	if($mas_karyawan == null) {
+    		$mas_karyawan = DB::connection('pgsql-mobile')
+    		->table("v_mas_karyawan")
+    		->select(DB::raw("npk, nama, kd_pt, desc_dep, desc_div, email, kode_dep, tgl_lahir, tgl_masuk_gkd, coalesce(substr(foto,18),'-.jpg') foto"))
+    		->where("npk", "=", $username)
+    		->first();
+    	}
+    	return $mas_karyawan;
+    }
+
+    public function namaByNpk($npk)
+    {
+    	$nama = DB::table("v_mas_karyawan")
+    	->select("nama")
+    	->where("npk", "=", $npk)
+    	->value("nama");
+
+    	if($nama == null) {
+    		$nama = DB::connection('pgsql-mobile')
+    		->table("v_mas_karyawan")
+    		->select("nama")
+    		->where("npk", "=", $npk)
+    		->value("nama");
+    	}
+    	return $nama;
+    }
+
+    public function inisial($npk)
+    {
+        $inisial = DB::connection('oracle-usrbrgcorp')
+        ->table("dual")
+        ->selectRaw("nvl(usrhrcorp.f_inisial('$npk'), usrhrcorp.finit_nama('$npk')) as inisial")
+        ->value("inisial");
+        return $inisial;
+    }
+
+    public function namaDivisi($kode_div)
+    {
+    	$nama = DB::table("divisi")
+    	->select("desc_div")
+    	->where("kd_div", "=", $kode_div)
+    	->value("desc_div");
+
+    	if($nama == null) {
+    		$nama = DB::connection('pgsql-mobile')
+    		->table("v_mas_karyawan")
+    		->select("desc_div")
+    		->where("kode_div", "=", $kode_div)
+    		->value("desc_div");
+    	}
+    	return $nama;
+    }
+
+    public function namaDepartemen($kode_dep)
+    {
+    	$nama = DB::table("departement")
+    	->select("desc_dep")
+    	->where("kd_dep", "=", $kode_dep)
+    	->value("desc_dep");
+
+    	if($nama == null) {
+    		$nama = DB::connection('pgsql-mobile')
+    		->table("v_mas_karyawan")
+    		->select("desc_dep")
+    		->where("kode_dep", "=", $kode_dep)
+    		->value("desc_dep");
+    	}
+    	return $nama;
+    }
+
+    public function checkEdit() {
+        $valid = "T";
+        if($this->kd_dep !== Auth::user()->masKaryawan()->kode_dep) {
+        	$valid = "F";
+        } else if($this->submit_dt != null) {
+        	$valid = "F";
+        }
+        return $valid;
+    }
+
+    public function checkKdDept() {
+    	$valid = "F";
+        if($this->kd_dep === Auth::user()->masKaryawan()->kode_dep) {
+        	$valid = "T";
+        }
+        return $valid;
+    }
+
+    public function getKdDivAttribute()
+    {
+    	return substr($this->kd_dep,0,1);
+    }
+
+    public function getStatusAttribute()
+    {
+    	if($this->apr_bgt_dt != null) {
+            return "APPROVE BUDGET";
+        } else if($this->rjt_bgt_dt != null) { 
+        	return "REJECT BUDGET";
+        } else if($this->apr_div_dt != null) {
+            return "APPROVE DIV";
+        } else if($this->rjt_div_dt != null) { 
+        	return "REJECT DIV";
+        } else if($this->apr_dep_dt != null) {
+            return "APPROVE DEPT";
+        } else if($this->rjt_dep_dt != null) { 
+        	return "REJECT DEPT";
+        } else if($this->submit_dt != null) { 
+        	return "SUBMIT";
+        } else {
+            return "DRAFT";
+        }
+    }
+
+    public function scopeStatus($query, $status)
+    {
+        //1 DRAFT
+        //2 SUBMIT
+        //3 BELUM KOMITE
+        //4 SUDAH KOMITE
+        //5 APPROVE
+        //6 REVISI
+        //7 CANCEL
+        
+        // if($status == "1") {
+        //     return $query->whereNull("b.tgl_submit");
+        // } else if($status == "2") {
+        //     return $query->whereNotNull("b.tgl_submit")->whereNull("b.tgl_komite_act")->whereNull("b.notulen");
+        // } else if($status == "3") {
+        //     return $query->whereNotNull("b.tgl_submit")->whereNotNull("b.tgl_komite_act")->whereNull("b.notulen");
+        // } else if($status == "4") {
+        //     return $query->whereNotNull("b.tgl_submit")->whereNotNull("b.tgl_komite_act")->whereNotNull("b.notulen");
+        // } else if($status == "5") {
+        //     return $query->whereNotNull("b.tgl_submit")->whereNotNull("b.tgl_komite_act")->whereNotNull("b.notulen")->where("b.hasil_komite", "APPROVE");
+        // } else if($status == "6") {
+        //     return $query->whereRaw("no_rev > 0");
+        // } else if($status == "7") {
+        //     return $query->whereNotNull("b.tgl_submit")->whereNotNull("b.tgl_komite_act")->whereNotNull("b.notulen")->where("b.hasil_komite", "CANCEL");
+        // } else {
+            return $query;
+        // }
+    }
+}

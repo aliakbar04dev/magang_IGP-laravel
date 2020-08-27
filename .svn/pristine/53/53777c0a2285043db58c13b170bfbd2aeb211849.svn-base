@@ -1,0 +1,153 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\StoreProdParamHardensRequest;
+use App\Http\Requests\UpdateProdParamHardensRequest;
+// use App\EngtMdlLines;
+use Carbon\Carbon;
+use DB;
+use Exception;
+use App\User;
+use Illuminate\Support\Facades\Input;
+
+class ProdParamHardensController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        //
+        if(Auth::user()->can(['prod-param-hardening'])) {
+            return view('prod.paramharden.index');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function dashboard(Request $request)
+    {
+        if(Auth::user()->can('prod-param-hardening')) {
+            if ($request->ajax()) {
+
+                $list = DB::table("qct_par_harden01")
+                ->select(DB::raw("*"));
+
+                return Datatables::of($list)
+                ->addColumn('action', function($ProdParamHarden){
+                    return view('datatable._action', [
+                        'model' => $ProdParamHarden,
+                        'form_url' => route('ProdParamHarden.destroy', base64_encode($ProdParamHarden->no_doc)),
+                        'edit_url' => route('ProdParamHarden.edit', base64_encode($ProdParamHarden->no_doc)),
+                        'class' => 'form-inline js-ajax-delete',
+                        'form_id' => 'form-'.$ProdParamHarden->no_doc,
+                        'id_table' => 'tblMaster',
+                        'confirm_message' => 'Anda yakin menghapus model: ' . $ProdParamHarden->no_doc . '?'
+                    ]);
+                })
+                ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+    public function getDataSqlServ(Request $request){
+
+        $data = DB::connection("sqlsrv")
+            ->table("Harden_3A")
+            ->select(DB::raw("Date_Time, (CAST(T_Q_LOWER_LIM as char(2)) + ' - ' + CAST(T_Q_UPPER_LIM as char(2))) qw_temp_std, Q_LIQUID_TANK qw_temp_act, (CAST(T_C_LOWER_LIM as char(2)) + ' - ' + CAST(T_C_UPPER_LIM as char(2))) cw_temp_std, C_WATER_TANK cw_temp_act, CYCLE_TIME ct_act, OVER_TIME ct_std, Q_FLOW qfr_act, Q_ALLOWENCE qfr_std, HOME_POSITION home_pos, START_POSITION start_pos, STROKE_UPPER_LIM upper_lim, STROKE_LOWER_LIM lower_lim"))
+            ->where("DANDORY", '=', 1)
+            ->orderBy("Date_Time")->get()->first();
+      $dataret['master'] = $data;
+
+        $data = DB::connection("sqlsrv")
+            ->table("view_detail_harden_3A")
+            ->select(DB::raw("*"))
+            ->get();
+      $dataret['detail'] = $data->toArray();
+
+      return json_encode($dataret);
+    }
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        //
+        if(Auth::user()->can('prod-param-hardening')) {
+            return view('prod.paramharden.create');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        //
+    }
+}

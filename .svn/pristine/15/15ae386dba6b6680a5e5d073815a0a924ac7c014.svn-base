@@ -1,0 +1,126 @@
+<?php
+
+Route::group(['prefix'=>'qa', 'middleware'=>['auth']], function () {	
+	Route::resource('kalibrasi', 'Tcalorder1Controller');
+	Route::get('dashboard/kalibrasi', [
+		'as'=>'kalibrasi.dashboard',
+		'uses'=>'Tcalorder1Controller@dashboard'
+	]);
+	Route::get('kalibrasi/delete/{param}', [
+		'as' => 'kalibrasi.delete',
+		'uses' => 'Tcalorder1Controller@delete'
+	]);
+	Route::resource('kalibrasidet', 'Tcalorder2Controller');
+	Route::get('dashboard/kalibrasidet', [
+		'as'=>'kalibrasidet.dashboard',
+		'uses'=>'Tcalorder2Controller@dashboard'
+	]);
+	Route::get('kalibrasidet/hapus/{param}/{param1}/{param2}', [
+		'as' => 'kalibrasidet.hapus',
+		'uses' => 'Tcalorder2Controller@hapus'
+	]);
+	Route::resource('serahkalibrasi', 'Tsrhalat1Controller');
+	Route::get('dashboard/serahkalibrasi', [
+		'as'=>'serahkalibrasi.dashboard',
+		'uses'=>'Tsrhalat1Controller@dashboard'
+	]);
+	Route::get('serahkalibrasi/delete/{param}', [
+		'as' => 'serahkalibrasi.delete',
+		'uses' => 'Tsrhalat1Controller@delete'
+	]);
+	Route::resource('serahkalibrasidet', 'Tsrhalat2Controller');
+	Route::get('serahkalibrasidet/hapus/{param}/{param1}/{param2}/{param3}', [
+		'as' => 'serahkalibrasidet.hapus',
+		'uses' => 'Tsrhalat2Controller@hapus'
+	]);
+	Route::resource('mstalatukurkal', 'Tclbr005mKalController');
+	Route::get('dashboard/mstalatukurkal', [
+		'as'=>'mstalatukurkal.dashboard',
+		'uses'=>'Tclbr005mKalController@dashboard'
+	]);
+	Route::get('edit/mstalatukurkal/{param}/{param1}/{param2}', [
+		'as'=>'mstalatukurkal.edit',
+		'uses'=>'Tclbr005mKalController@edit'
+	]);
+	Route::get('destroy/mstalatukurkal/{param}/{param1}/{param2}', [
+		'as'=>'mstalatukurkal.destroy',
+		'uses'=>'Tclbr005mKalController@destroy'
+	]);	
+	Route::get('mstalatukurkal/deleteimage/{param}/{param1}/{param2}', [
+		'as' => 'mstalatukurkal.deleteimage',
+		'uses' => 'Tclbr005mKalController@deleteimage'
+	]);
+	Route::get('showImage/mstalatukurkal/{param}', [
+		'as'=>'mstalatukurkal.showImage',
+		'uses'=>'Tclbr005mKalController@showImage'
+	]);
+	Route::get('mstalatukurkal/hapus/{param}/{param1}', [
+		'as' => 'mstalatukurkal.hapus',
+		'uses' => 'Tclbr005mKalController@hapus'
+	]);
+	Route::resource('kalibrator', 'McalkalibratorController');
+	Route::get('dashboard/kalibrator', [
+		'as'=>'kalibrator.dashboard',
+		'uses'=>'McalkalibratorController@dashboard'
+	]);
+	Route::get('kalibrator/destroy/{param}', [
+		'as' => 'kalibrator.destroy',
+		'uses' => 'McalkalibratorController@destroy'
+	]);
+	Route::get('kalibrator/hapus/{param}/{param1}', [
+		'as' => 'kalibrator.hapus',
+		'uses' => 'McalkalibratorController@hapus'
+	]);
+	Route::resource('klbrtemp', 'McaltemphumiController');
+	Route::get('dashboard/klbrtemp', [
+		'as'=>'klbrtemp.dashboard',
+		'uses'=>'McaltemphumiController@dashboard'
+	]);
+	Route::get('klbrtemp/destroy/{param}', [
+		'as' => 'klbrtemp.destroy',
+		'uses' => 'McaltemphumiController@destroy'
+	]);
+	Route::get('klbrtemp/hapus/{param}/{param1}', [
+		'as' => 'klbrtemp.hapus',
+		'uses' => 'McaltemphumiController@hapus'
+	]);
+	Route::get('klbrtemp/hapusdet/{param}/{param1}', [
+		'as' => 'klbrtemp.hapusdet',
+		'uses' => 'McaltemphumiController@hapusdet'
+	]);
+	Route::resource('kalserti', 'McalsertiController');
+	Route::get('dashboard/kalserti', [
+		'as'=>'kalserti.dashboard',
+		'uses'=>'McalsertiController@dashboard'
+	]);
+	Route::get('kalserti/destroy/{param}', [
+		'as' => 'kalserti.destroy',
+		'uses' => 'McalsertiController@destroy'
+	]);
+	Route::get('kalserti/print/{param}/{param1}', [
+		'as' => 'kalserti.print',
+		'uses'=>'McalsertiController@print'
+	]);
+	Route::resource('kalsertihal', 'Mcalsertihal2Controller');
+	Route::get('dashboard/kalsertihal', [
+		'as'=>'kalsertihal.dashboard',
+		'uses'=>'Mcalsertihal2Controller@dashboard'
+	]);
+	Route::get('kalsertihal/destroy/{param}', [
+		'as' => 'kalsertihal.destroy',
+		'uses' => 'Mcalsertihal2Controller@destroy'
+	]);
+	Route::resource('kalworksheet', 'McalworksheetController');
+	Route::get('dashboard/kalworksheet', [
+		'as'=>'kalworksheet.dashboard',
+		'uses'=>'McalworksheetController@dashboard'
+	]);
+	Route::get('kalworksheet/destroy/{param}', [
+		'as' => 'kalworksheet.destroy',
+		'uses' => 'McalworksheetController@destroy'
+	]);
+	Route::get('kalworksheet/showdetail/{param}/{param1}', [
+		'as' => 'kalworksheet.showdetail',
+		'uses' => 'McalworksheetController@showDetail'
+	]);
+});

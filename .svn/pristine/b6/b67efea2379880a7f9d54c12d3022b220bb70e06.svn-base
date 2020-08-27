@@ -1,0 +1,24 @@
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Session;
+use DB;
+use Illuminate\Support\Facades\Auth;
+
+class wo_it extends Model
+{
+    public function Koneksi()
+    {
+        $konek = DB::connection('pgsql-mobile')
+            ->table("wo_it")
+            ->select('wo_it.*','wo_kode.*','v_mas_karyawan.*')
+            ->join('wo_kode', 'wo_it.kodewo', '=', 'wo_kode.kodewo')
+            ->join('v_mas_karyawan', 'wo_it.npk', '=', 'v_mas_karyawan.npk')
+            ->orderBy('wo_it.nowo', 'desc')
+            ->get();
+        return $konek;
+    }
+}

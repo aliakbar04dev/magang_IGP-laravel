@@ -1,0 +1,1965 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use App\BgttCrRegis;
+use App\BgttCrSubmit;
+use App\BgttCrSubmitReject;
+use App\BgttCrRate;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use App\Http\Requests\StoreBgttCrRegisRequest;
+use Illuminate\Support\Facades\Session;
+use App\Http\Requests\UpdateBgttCrRegisRequest;
+use Illuminate\Support\Facades\Auth;
+use DB;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\File;
+use PDF;
+use JasperPHP\JasperPHP;
+
+class BgttCrSubmitsController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        if(Auth::user()->can(['budget-cr-activities-view', 'budget-cr-activities-create', 'budget-cr-activities-delete'])) {
+            return view('budget.activityprogress.index');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function dashboard(Request $request)
+    {
+        if ($request->ajax()) {
+            if(Auth::user()->can(['budget-cr-activities-view', 'budget-cr-activities-create', 'budget-cr-activities-delete'])) {
+
+                $tahun = "-";
+                if(!empty($request->get('tahun'))) {
+                    $tahun = $request->get('tahun');
+                }
+
+                $bulan = "-";
+                if(!empty($request->get('bulan'))) {
+                    $bulan = $request->get('bulan');
+                }
+
+                $bgttcrsubmits = BgttCrSubmit::where(DB::raw("kd_dep"), "=", Auth::user()->masKaryawan()->kode_dep)
+                ->where("thn", $tahun)
+                ->where("bln", $bulan);
+
+                if(!empty($request->get('status'))) {
+                    if($request->get('status') !== 'ALL') {
+                        $bgttcrsubmits->status($request->get('status'));
+                    }
+                }
+
+                return Datatables::of($bgttcrsubmits)
+                ->editColumn('nm_aktivitas', function($data) {
+                    $info = "Show Detail Activity: ".$data->nm_aktivitas.", Tahun: ".$data->thn.", Classification: ".$data->nm_klasifikasi.", CR Categories: ".$data->nm_kategori;
+                    return '<a href="'.route('bgttcrsubmits.show', base64_encode($data->id)).'" data-toggle="tooltip" data-placement="top" title="'.$info.'">'.$data->nm_aktivitas.'</a>';
+                })
+                ->editColumn('id_regis', function($data) {
+                    $info = "Show Detail Register Activity: ".$data->nm_aktivitas.", Tahun: ".$data->thn.", Classification: ".$data->nm_klasifikasi.", CR Categories: ".$data->nm_kategori;
+                    return '<a href="'.route('bgttcrregiss.show', base64_encode($data->id_regis)).'" data-toggle="tooltip" data-placement="top" title="'.$info.'">'.$data->id_regis.'</a>';
+                })
+                ->editColumn('jml', function($data){
+                  return numberFormatter(0, 0)->format($data->jml);
+                })
+                ->filterColumn('jml', function ($query, $keyword) {
+                  $query->whereRaw("trim(to_char(jml,'999999999999999999')) like ?", ["%$keyword%"]);
+                })
+                ->editColumn('amt', function($data){
+                  return numberFormatter(0, 5)->format($data->amt);
+                })
+                ->filterColumn('amt', function ($query, $keyword) {
+                  $query->whereRaw("trim(to_char(amt,'999999999999999999.999999')) like ?", ["%$keyword%"]);
+                })
+                ->addColumn('persen', function($data){
+                    if($data->amt_plan > 0) {
+                        $persen = ($data->amt / $data->amt_plan) * 100;
+                        return numberFormatter(0, 2)->format($persen)."%";
+                    } else {
+                        return numberFormatter(0, 2)->format(0)."%";
+                    }
+                })
+                ->editColumn('kd_dep', function($data){
+                    return $data->kd_dep.' - '.$data->namaDepartemen($data->kd_dep);
+                })
+                ->addColumn('kd_div', function($data){
+                    return $data->kd_div.' - '.$data->namaDivisi($data->kd_div);
+                })
+                ->editColumn('creaby', function($data){
+                    if(!empty($data->creaby)) {
+                        $name = $data->namaByNpk($data->creaby);
+                        if(!empty($data->dtcrea)) {
+                            $tgl = Carbon::parse($data->dtcrea)->format('d/m/Y H:i');
+                            return $data->creaby.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->creaby.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('creaby', function ($query, $keyword) {
+                    $query->whereRaw("(creaby||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.creaby = v.npk limit 1)||' - '||to_char(dtcrea,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('creaby', 'creaby $1')
+                ->editColumn('modiby', function($data){
+                    if(!empty($data->modiby)) {
+                        $name = $data->namaByNpk($data->modiby);
+                        if(!empty($data->dtmodi)) {
+                            $tgl = Carbon::parse($data->dtmodi)->format('d/m/Y H:i');
+                            return $data->modiby.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->modiby.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('modiby', function ($query, $keyword) {
+                    $query->whereRaw("(modiby||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.modiby = v.npk limit 1)||' - '||to_char(dtmodi,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('modiby', 'modiby $1')
+                ->editColumn('submit_by', function($data){
+                    if(!empty($data->submit_by)) {
+                        $name = $data->namaByNpk($data->submit_by);
+                        if(!empty($data->submit_dt)) {
+                            $tgl = Carbon::parse($data->submit_dt)->format('d/m/Y H:i');
+                            return $data->submit_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->submit_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('submit_by', function ($query, $keyword) {
+                    $query->whereRaw("(submit_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.submit_by = v.npk limit 1)||' - '||to_char(submit_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('submit_by', 'submit_by $1')
+                ->editColumn('apr_dep_by', function($data){
+                    if(!empty($data->apr_dep_by)) {
+                        $name = $data->namaByNpk($data->apr_dep_by);
+                        if(!empty($data->apr_dep_dt)) {
+                            $tgl = Carbon::parse($data->apr_dep_dt)->format('d/m/Y H:i');
+                            return $data->apr_dep_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->apr_dep_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('apr_dep_by', function ($query, $keyword) {
+                    $query->whereRaw("(apr_dep_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.apr_dep_by = v.npk limit 1)||' - '||to_char(apr_dep_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('apr_dep_by', 'apr_dep_by $1')
+                ->editColumn('apr_div_by', function($data){
+                    if(!empty($data->apr_div_by)) {
+                        $name = $data->namaByNpk($data->apr_div_by);
+                        if(!empty($data->apr_div_dt)) {
+                            $tgl = Carbon::parse($data->apr_div_dt)->format('d/m/Y H:i');
+                            return $data->apr_div_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->apr_div_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('apr_div_by', function ($query, $keyword) {
+                    $query->whereRaw("(apr_div_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.apr_div_by = v.npk limit 1)||' - '||to_char(apr_div_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('apr_div_by', 'apr_div_by $1')
+                ->editColumn('apr_bgt_by', function($data){
+                    if(!empty($data->apr_bgt_by)) {
+                        $name = $data->namaByNpk($data->apr_bgt_by);
+                        if(!empty($data->apr_bgt_dt)) {
+                            $tgl = Carbon::parse($data->apr_bgt_dt)->format('d/m/Y H:i');
+                            return $data->apr_bgt_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->apr_bgt_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('apr_bgt_by', function ($query, $keyword) {
+                    $query->whereRaw("(apr_bgt_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.apr_bgt_by = v.npk limit 1)||' - '||to_char(apr_bgt_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('apr_bgt_by', 'apr_bgt_by $1')
+                ->editColumn('rjt_dep_by', function($data){
+                    if(!empty($data->rjt_dep_by)) {
+                        $name = $data->namaByNpk($data->rjt_dep_by);
+                        if(!empty($data->rjt_dep_dt)) {
+                            $tgl = Carbon::parse($data->rjt_dep_dt)->format('d/m/Y H:i');
+                            return $data->rjt_dep_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->rjt_dep_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('rjt_dep_by', function ($query, $keyword) {
+                    $query->whereRaw("(rjt_dep_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.rjt_dep_by = v.npk limit 1)||' - '||to_char(rjt_dep_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('rjt_dep_by', 'rjt_dep_by $1')
+                ->editColumn('rjt_div_by', function($data){
+                    if(!empty($data->rjt_div_by)) {
+                        $name = $data->namaByNpk($data->rjt_div_by);
+                        if(!empty($data->rjt_div_dt)) {
+                            $tgl = Carbon::parse($data->rjt_div_dt)->format('d/m/Y H:i');
+                            return $data->rjt_div_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->rjt_div_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('rjt_div_by', function ($query, $keyword) {
+                    $query->whereRaw("(rjt_div_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.rjt_div_by = v.npk limit 1)||' - '||to_char(rjt_div_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('rjt_div_by', 'rjt_div_by $1')
+                ->editColumn('rjt_bgt_by', function($data){
+                    if(!empty($data->rjt_bgt_by)) {
+                        $name = $data->namaByNpk($data->rjt_bgt_by);
+                        if(!empty($data->rjt_bgt_dt)) {
+                            $tgl = Carbon::parse($data->rjt_bgt_dt)->format('d/m/Y H:i');
+                            return $data->rjt_bgt_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->rjt_bgt_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('rjt_bgt_by', function ($query, $keyword) {
+                    $query->whereRaw("(rjt_bgt_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.rjt_bgt_by = v.npk limit 1)||' - '||to_char(rjt_bgt_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('rjt_bgt_by', 'rjt_bgt_by $1')
+                ->addColumn('status', function($data){
+                    return $data->status;
+                })
+                ->addColumn('action', function($data){
+                    if($data->checkEdit() === "T") {
+                        if(Auth::user()->can(['budget-cr-activities-create', 'budget-cr-activities-delete'])) {
+                            $info = "Anda yakin menghapus Activity: ".$data->nm_aktivitas.", Tahun: ".$data->thn.", Classification: ".$data->nm_klasifikasi.", CR Categories: ".$data->nm_kategori.'?';
+                            return view('datatable._action-budget-cr-activity', [
+                                'model' => $data,
+                                'form_url' => route('bgttcrsubmits.destroy', base64_encode($data->id)),
+                                'edit_url' => route('bgttcrsubmits.edit', base64_encode($data->id)),
+                                'disable_delete' => "T",
+                                'class' => 'form-inline js-ajax-delete',
+                                'form_id' => 'form-'.$data->id,
+                                'id_table' => 'tblMaster',
+                                'confirm_message' => $info
+                                ]);
+                        } else {
+                            return "";
+                        }
+                    } else {
+                        return "";
+                    }
+                })->make(true);
+            } else {
+                return view('errors.403');
+            }
+        } else {
+            return redirect('home');
+        }
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexdep()
+    {
+        if(Auth::user()->can('budget-cr-activities-approve-dep')) {
+            return view('budget.activityprogress.indexdep');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function dashboarddep(Request $request)
+    {
+        if ($request->ajax()) {
+            if(Auth::user()->can('budget-cr-activities-approve-dep')) {
+
+                $tahun = "-";
+                if(!empty($request->get('tahun'))) {
+                    $tahun = $request->get('tahun');
+                }
+
+                $bulan = "-";
+                if(!empty($request->get('bulan'))) {
+                    $bulan = $request->get('bulan');
+                }
+
+                $bgttcrsubmits = BgttCrSubmit::where(DB::raw("kd_dep"), "=", Auth::user()->masKaryawan()->kode_dep)
+                ->where("thn", $tahun)
+                ->where("bln", $bulan);
+
+                if(!empty($request->get('status'))) {
+                    if($request->get('status') !== 'ALL') {
+                        $bgttcrsubmits->status($request->get('status'));
+                    }
+                }
+
+                return Datatables::of($bgttcrsubmits)
+                ->editColumn('nm_aktivitas', function($data) {
+                    $info = "Show Detail Activity: ".$data->nm_aktivitas.", Tahun: ".$data->thn.", Classification: ".$data->nm_klasifikasi.", CR Categories: ".$data->nm_kategori;
+                    return '<a href="'.route('bgttcrsubmits.showdep', base64_encode($data->id)).'" data-toggle="tooltip" data-placement="top" title="'.$info.'">'.$data->nm_aktivitas.'</a>';
+                })
+                ->editColumn('id_regis', function($data) {
+                    $info = "Show Detail Register Activity: ".$data->nm_aktivitas.", Tahun: ".$data->thn.", Classification: ".$data->nm_klasifikasi.", CR Categories: ".$data->nm_kategori;
+                    return '<a href="'.route('bgttcrregiss.showdep', base64_encode($data->id_regis)).'" data-toggle="tooltip" data-placement="top" title="'.$info.'">'.$data->id_regis.'</a>';
+                })
+                ->editColumn('jml', function($data){
+                  return numberFormatter(0, 0)->format($data->jml);
+                })
+                ->filterColumn('jml', function ($query, $keyword) {
+                  $query->whereRaw("trim(to_char(jml,'999999999999999999')) like ?", ["%$keyword%"]);
+                })
+                ->editColumn('amt', function($data){
+                  return numberFormatter(0, 5)->format($data->amt);
+                })
+                ->filterColumn('amt', function ($query, $keyword) {
+                  $query->whereRaw("trim(to_char(amt,'999999999999999999.999999')) like ?", ["%$keyword%"]);
+                })
+                ->addColumn('persen', function($data){
+                    if($data->amt_plan > 0) {
+                        $persen = ($data->amt / $data->amt_plan) * 100;
+                        return numberFormatter(0, 2)->format($persen)."%";
+                    } else {
+                        return numberFormatter(0, 2)->format(0)."%";
+                    }
+                })
+                ->editColumn('kd_dep', function($data){
+                    return $data->kd_dep.' - '.$data->namaDepartemen($data->kd_dep);
+                })
+                ->addColumn('kd_div', function($data){
+                    return $data->kd_div.' - '.$data->namaDivisi($data->kd_div);
+                })
+                ->editColumn('creaby', function($data){
+                    if(!empty($data->creaby)) {
+                        $name = $data->namaByNpk($data->creaby);
+                        if(!empty($data->dtcrea)) {
+                            $tgl = Carbon::parse($data->dtcrea)->format('d/m/Y H:i');
+                            return $data->creaby.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->creaby.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('creaby', function ($query, $keyword) {
+                    $query->whereRaw("(creaby||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.creaby = v.npk limit 1)||' - '||to_char(dtcrea,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('creaby', 'creaby $1')
+                ->editColumn('modiby', function($data){
+                    if(!empty($data->modiby)) {
+                        $name = $data->namaByNpk($data->modiby);
+                        if(!empty($data->dtmodi)) {
+                            $tgl = Carbon::parse($data->dtmodi)->format('d/m/Y H:i');
+                            return $data->modiby.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->modiby.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('modiby', function ($query, $keyword) {
+                    $query->whereRaw("(modiby||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.modiby = v.npk limit 1)||' - '||to_char(dtmodi,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('modiby', 'modiby $1')
+                ->editColumn('submit_by', function($data){
+                    if(!empty($data->submit_by)) {
+                        $name = $data->namaByNpk($data->submit_by);
+                        if(!empty($data->submit_dt)) {
+                            $tgl = Carbon::parse($data->submit_dt)->format('d/m/Y H:i');
+                            return $data->submit_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->submit_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('submit_by', function ($query, $keyword) {
+                    $query->whereRaw("(submit_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.submit_by = v.npk limit 1)||' - '||to_char(submit_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('submit_by', 'submit_by $1')
+                ->editColumn('apr_dep_by', function($data){
+                    if(!empty($data->apr_dep_by)) {
+                        $name = $data->namaByNpk($data->apr_dep_by);
+                        if(!empty($data->apr_dep_dt)) {
+                            $tgl = Carbon::parse($data->apr_dep_dt)->format('d/m/Y H:i');
+                            return $data->apr_dep_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->apr_dep_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('apr_dep_by', function ($query, $keyword) {
+                    $query->whereRaw("(apr_dep_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.apr_dep_by = v.npk limit 1)||' - '||to_char(apr_dep_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('apr_dep_by', 'apr_dep_by $1')
+                ->editColumn('apr_div_by', function($data){
+                    if(!empty($data->apr_div_by)) {
+                        $name = $data->namaByNpk($data->apr_div_by);
+                        if(!empty($data->apr_div_dt)) {
+                            $tgl = Carbon::parse($data->apr_div_dt)->format('d/m/Y H:i');
+                            return $data->apr_div_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->apr_div_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('apr_div_by', function ($query, $keyword) {
+                    $query->whereRaw("(apr_div_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.apr_div_by = v.npk limit 1)||' - '||to_char(apr_div_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('apr_div_by', 'apr_div_by $1')
+                ->editColumn('apr_bgt_by', function($data){
+                    if(!empty($data->apr_bgt_by)) {
+                        $name = $data->namaByNpk($data->apr_bgt_by);
+                        if(!empty($data->apr_bgt_dt)) {
+                            $tgl = Carbon::parse($data->apr_bgt_dt)->format('d/m/Y H:i');
+                            return $data->apr_bgt_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->apr_bgt_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('apr_bgt_by', function ($query, $keyword) {
+                    $query->whereRaw("(apr_bgt_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.apr_bgt_by = v.npk limit 1)||' - '||to_char(apr_bgt_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('apr_bgt_by', 'apr_bgt_by $1')
+                ->editColumn('rjt_dep_by', function($data){
+                    if(!empty($data->rjt_dep_by)) {
+                        $name = $data->namaByNpk($data->rjt_dep_by);
+                        if(!empty($data->rjt_dep_dt)) {
+                            $tgl = Carbon::parse($data->rjt_dep_dt)->format('d/m/Y H:i');
+                            return $data->rjt_dep_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->rjt_dep_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('rjt_dep_by', function ($query, $keyword) {
+                    $query->whereRaw("(rjt_dep_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.rjt_dep_by = v.npk limit 1)||' - '||to_char(rjt_dep_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('rjt_dep_by', 'rjt_dep_by $1')
+                ->editColumn('rjt_div_by', function($data){
+                    if(!empty($data->rjt_div_by)) {
+                        $name = $data->namaByNpk($data->rjt_div_by);
+                        if(!empty($data->rjt_div_dt)) {
+                            $tgl = Carbon::parse($data->rjt_div_dt)->format('d/m/Y H:i');
+                            return $data->rjt_div_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->rjt_div_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('rjt_div_by', function ($query, $keyword) {
+                    $query->whereRaw("(rjt_div_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.rjt_div_by = v.npk limit 1)||' - '||to_char(rjt_div_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('rjt_div_by', 'rjt_div_by $1')
+                ->editColumn('rjt_bgt_by', function($data){
+                    if(!empty($data->rjt_bgt_by)) {
+                        $name = $data->namaByNpk($data->rjt_bgt_by);
+                        if(!empty($data->rjt_bgt_dt)) {
+                            $tgl = Carbon::parse($data->rjt_bgt_dt)->format('d/m/Y H:i');
+                            return $data->rjt_bgt_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->rjt_bgt_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('rjt_bgt_by', function ($query, $keyword) {
+                    $query->whereRaw("(rjt_bgt_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.rjt_bgt_by = v.npk limit 1)||' - '||to_char(rjt_bgt_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('rjt_bgt_by', 'rjt_bgt_by $1')
+                ->addColumn('status', function($data){
+                    return $data->status;
+                })
+                ->addColumn('action', function($data){
+                    if($data->status === "SUBMIT") {
+                        if(Auth::user()->can('budget-cr-activities-approve-dep')) {
+                            $key = base64_encode($data->id);
+                            $key = str_replace('/', '', $key);
+                            $key = str_replace('-', '', $key);
+                            return '<input type="checkbox" name="row-'. $key .'-chk" id="row-'. $key .'-chk" value="'. $data->id .'" class="icheckbox_square-blue">';
+                        } else {
+                            return "";
+                        }
+                    } else {
+                        return "";
+                    }
+                })->make(true);
+            } else {
+                return view('errors.403');
+            }
+        } else {
+            return redirect('home');
+        }
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexdiv()
+    {
+        if(Auth::user()->can('budget-cr-activities-approve-div')) {
+            return view('budget.activityprogress.indexdiv');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function dashboarddiv(Request $request)
+    {
+        if ($request->ajax()) {
+            if(Auth::user()->can('budget-cr-activities-approve-div')) {
+
+                $tahun = "-";
+                if(!empty($request->get('tahun'))) {
+                    $tahun = $request->get('tahun');
+                }
+
+                $bulan = "-";
+                if(!empty($request->get('bulan'))) {
+                    $bulan = $request->get('bulan');
+                }
+
+                $bgttcrsubmits = BgttCrSubmit::where(DB::raw("substr(kd_dep,1,1)"), "=", Auth::user()->masKaryawan()->kode_div)
+                ->where("thn", $tahun)
+                ->where("bln", $bulan);
+
+                if(!empty($request->get('status'))) {
+                    if($request->get('status') !== 'ALL') {
+                        $bgttcrsubmits->status($request->get('status'));
+                    }
+                }
+
+                return Datatables::of($bgttcrsubmits)
+                ->editColumn('nm_aktivitas', function($data) {
+                    $info = "Show Detail Activity: ".$data->nm_aktivitas.", Tahun: ".$data->thn.", Classification: ".$data->nm_klasifikasi.", CR Categories: ".$data->nm_kategori;
+                    return '<a href="'.route('bgttcrsubmits.showdiv', base64_encode($data->id)).'" data-toggle="tooltip" data-placement="top" title="'.$info.'">'.$data->nm_aktivitas.'</a>';
+                })
+                ->editColumn('id_regis', function($data) {
+                    $info = "Show Detail Register Activity: ".$data->nm_aktivitas.", Tahun: ".$data->thn.", Classification: ".$data->nm_klasifikasi.", CR Categories: ".$data->nm_kategori;
+                    return '<a href="'.route('bgttcrregiss.showdiv', base64_encode($data->id_regis)).'" data-toggle="tooltip" data-placement="top" title="'.$info.'">'.$data->id_regis.'</a>';
+                })
+                ->editColumn('jml', function($data){
+                  return numberFormatter(0, 0)->format($data->jml);
+                })
+                ->filterColumn('jml', function ($query, $keyword) {
+                  $query->whereRaw("trim(to_char(jml,'999999999999999999')) like ?", ["%$keyword%"]);
+                })
+                ->editColumn('amt', function($data){
+                  return numberFormatter(0, 5)->format($data->amt);
+                })
+                ->filterColumn('amt', function ($query, $keyword) {
+                  $query->whereRaw("trim(to_char(amt,'999999999999999999.999999')) like ?", ["%$keyword%"]);
+                })
+                ->addColumn('persen', function($data){
+                    if($data->amt_plan > 0) {
+                        $persen = ($data->amt / $data->amt_plan) * 100;
+                        return numberFormatter(0, 2)->format($persen)."%";
+                    } else {
+                        return numberFormatter(0, 2)->format(0)."%";
+                    }
+                })
+                ->editColumn('kd_dep', function($data){
+                    return $data->kd_dep.' - '.$data->namaDepartemen($data->kd_dep);
+                })
+                ->addColumn('kd_div', function($data){
+                    return $data->kd_div.' - '.$data->namaDivisi($data->kd_div);
+                })
+                ->editColumn('creaby', function($data){
+                    if(!empty($data->creaby)) {
+                        $name = $data->namaByNpk($data->creaby);
+                        if(!empty($data->dtcrea)) {
+                            $tgl = Carbon::parse($data->dtcrea)->format('d/m/Y H:i');
+                            return $data->creaby.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->creaby.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('creaby', function ($query, $keyword) {
+                    $query->whereRaw("(creaby||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.creaby = v.npk limit 1)||' - '||to_char(dtcrea,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('creaby', 'creaby $1')
+                ->editColumn('modiby', function($data){
+                    if(!empty($data->modiby)) {
+                        $name = $data->namaByNpk($data->modiby);
+                        if(!empty($data->dtmodi)) {
+                            $tgl = Carbon::parse($data->dtmodi)->format('d/m/Y H:i');
+                            return $data->modiby.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->modiby.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('modiby', function ($query, $keyword) {
+                    $query->whereRaw("(modiby||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.modiby = v.npk limit 1)||' - '||to_char(dtmodi,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('modiby', 'modiby $1')
+                ->editColumn('submit_by', function($data){
+                    if(!empty($data->submit_by)) {
+                        $name = $data->namaByNpk($data->submit_by);
+                        if(!empty($data->submit_dt)) {
+                            $tgl = Carbon::parse($data->submit_dt)->format('d/m/Y H:i');
+                            return $data->submit_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->submit_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('submit_by', function ($query, $keyword) {
+                    $query->whereRaw("(submit_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.submit_by = v.npk limit 1)||' - '||to_char(submit_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('submit_by', 'submit_by $1')
+                ->editColumn('apr_dep_by', function($data){
+                    if(!empty($data->apr_dep_by)) {
+                        $name = $data->namaByNpk($data->apr_dep_by);
+                        if(!empty($data->apr_dep_dt)) {
+                            $tgl = Carbon::parse($data->apr_dep_dt)->format('d/m/Y H:i');
+                            return $data->apr_dep_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->apr_dep_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('apr_dep_by', function ($query, $keyword) {
+                    $query->whereRaw("(apr_dep_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.apr_dep_by = v.npk limit 1)||' - '||to_char(apr_dep_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('apr_dep_by', 'apr_dep_by $1')
+                ->editColumn('apr_div_by', function($data){
+                    if(!empty($data->apr_div_by)) {
+                        $name = $data->namaByNpk($data->apr_div_by);
+                        if(!empty($data->apr_div_dt)) {
+                            $tgl = Carbon::parse($data->apr_div_dt)->format('d/m/Y H:i');
+                            return $data->apr_div_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->apr_div_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('apr_div_by', function ($query, $keyword) {
+                    $query->whereRaw("(apr_div_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.apr_div_by = v.npk limit 1)||' - '||to_char(apr_div_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('apr_div_by', 'apr_div_by $1')
+                ->editColumn('apr_bgt_by', function($data){
+                    if(!empty($data->apr_bgt_by)) {
+                        $name = $data->namaByNpk($data->apr_bgt_by);
+                        if(!empty($data->apr_bgt_dt)) {
+                            $tgl = Carbon::parse($data->apr_bgt_dt)->format('d/m/Y H:i');
+                            return $data->apr_bgt_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->apr_bgt_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('apr_bgt_by', function ($query, $keyword) {
+                    $query->whereRaw("(apr_bgt_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.apr_bgt_by = v.npk limit 1)||' - '||to_char(apr_bgt_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('apr_bgt_by', 'apr_bgt_by $1')
+                ->editColumn('rjt_dep_by', function($data){
+                    if(!empty($data->rjt_dep_by)) {
+                        $name = $data->namaByNpk($data->rjt_dep_by);
+                        if(!empty($data->rjt_dep_dt)) {
+                            $tgl = Carbon::parse($data->rjt_dep_dt)->format('d/m/Y H:i');
+                            return $data->rjt_dep_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->rjt_dep_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('rjt_dep_by', function ($query, $keyword) {
+                    $query->whereRaw("(rjt_dep_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.rjt_dep_by = v.npk limit 1)||' - '||to_char(rjt_dep_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('rjt_dep_by', 'rjt_dep_by $1')
+                ->editColumn('rjt_div_by', function($data){
+                    if(!empty($data->rjt_div_by)) {
+                        $name = $data->namaByNpk($data->rjt_div_by);
+                        if(!empty($data->rjt_div_dt)) {
+                            $tgl = Carbon::parse($data->rjt_div_dt)->format('d/m/Y H:i');
+                            return $data->rjt_div_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->rjt_div_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('rjt_div_by', function ($query, $keyword) {
+                    $query->whereRaw("(rjt_div_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.rjt_div_by = v.npk limit 1)||' - '||to_char(rjt_div_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('rjt_div_by', 'rjt_div_by $1')
+                ->editColumn('rjt_bgt_by', function($data){
+                    if(!empty($data->rjt_bgt_by)) {
+                        $name = $data->namaByNpk($data->rjt_bgt_by);
+                        if(!empty($data->rjt_bgt_dt)) {
+                            $tgl = Carbon::parse($data->rjt_bgt_dt)->format('d/m/Y H:i');
+                            return $data->rjt_bgt_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->rjt_bgt_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('rjt_bgt_by', function ($query, $keyword) {
+                    $query->whereRaw("(rjt_bgt_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.rjt_bgt_by = v.npk limit 1)||' - '||to_char(rjt_bgt_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('rjt_bgt_by', 'rjt_bgt_by $1')
+                ->addColumn('status', function($data){
+                    return $data->status;
+                })
+                ->addColumn('action', function($data){
+                    if($data->status === "APPROVE DEPT") {
+                        if(Auth::user()->can('budget-cr-activities-approve-div')) {
+                            $key = base64_encode($data->id);
+                            $key = str_replace('/', '', $key);
+                            $key = str_replace('-', '', $key);
+                            return '<input type="checkbox" name="row-'. $key .'-chk" id="row-'. $key .'-chk" value="'. $data->id .'" class="icheckbox_square-blue">';
+                        } else {
+                            return "";
+                        }
+                    } else {
+                        return "";
+                    }
+                })->make(true);
+            } else {
+                return view('errors.403');
+            }
+        } else {
+            return redirect('home');
+        }
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexbudget()
+    {
+        if(Auth::user()->can('budget-cr-activities-approve-budget')) {
+            $departement = DB::table("departement")
+            ->selectRaw("kd_dep, desc_dep")
+            ->whereRaw("coalesce(flag_hide,'F') = 'F' and coalesce(desc_dep,'-') <> '-'")
+            ->orderBy("desc_dep");
+            return view('budget.activityprogress.indexbudget', compact('departement'));
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function dashboardbudget(Request $request)
+    {
+        if ($request->ajax()) {
+            if(Auth::user()->can('budget-cr-activities-approve-budget')) {
+
+                $tahun = "-";
+                if(!empty($request->get('tahun'))) {
+                    $tahun = $request->get('tahun');
+                }
+
+                $bulan = "-";
+                if(!empty($request->get('bulan'))) {
+                    $bulan = $request->get('bulan');
+                }
+
+                $bgttcrsubmits = BgttCrSubmit::where("thn", $tahun)->where("bln", $bulan);
+
+                if(!empty($request->get('kd_dep'))) {
+                    if($request->get('kd_dep') !== 'ALL') {
+                        $bgttcrsubmits->where("kd_dep", $request->get('kd_dep'));
+                    }
+                }
+
+                if(!empty($request->get('status'))) {
+                    if($request->get('status') !== 'ALL') {
+                        $bgttcrsubmits->status($request->get('status'));
+                    }
+                }
+
+                return Datatables::of($bgttcrsubmits)
+                ->editColumn('nm_aktivitas', function($data) {
+                    $info = "Show Detail Activity: ".$data->nm_aktivitas.", Tahun: ".$data->thn.", Classification: ".$data->nm_klasifikasi.", CR Categories: ".$data->nm_kategori;
+                    return '<a href="'.route('bgttcrsubmits.showbudget', base64_encode($data->id)).'" data-toggle="tooltip" data-placement="top" title="'.$info.'">'.$data->nm_aktivitas.'</a>';
+                })
+                ->editColumn('id_regis', function($data) {
+                    $info = "Show Detail Register Activity: ".$data->nm_aktivitas.", Tahun: ".$data->thn.", Classification: ".$data->nm_klasifikasi.", CR Categories: ".$data->nm_kategori;
+                    return '<a href="'.route('bgttcrregiss.showbudget', base64_encode($data->id_regis)).'" data-toggle="tooltip" data-placement="top" title="'.$info.'">'.$data->id_regis.'</a>';
+                })
+                ->editColumn('jml', function($data){
+                  return numberFormatter(0, 0)->format($data->jml);
+                })
+                ->filterColumn('jml', function ($query, $keyword) {
+                  $query->whereRaw("trim(to_char(jml,'999999999999999999')) like ?", ["%$keyword%"]);
+                })
+                ->editColumn('amt', function($data){
+                  return numberFormatter(0, 5)->format($data->amt);
+                })
+                ->filterColumn('amt', function ($query, $keyword) {
+                  $query->whereRaw("trim(to_char(amt,'999999999999999999.999999')) like ?", ["%$keyword%"]);
+                })
+                ->addColumn('persen', function($data){
+                    if($data->amt_plan > 0) {
+                        $persen = ($data->amt / $data->amt_plan) * 100;
+                        return numberFormatter(0, 2)->format($persen)."%";
+                    } else {
+                        return numberFormatter(0, 2)->format(0)."%";
+                    }
+                })
+                ->editColumn('kd_dep', function($data){
+                    return $data->kd_dep.' - '.$data->namaDepartemen($data->kd_dep);
+                })
+                ->addColumn('kd_div', function($data){
+                    return $data->kd_div.' - '.$data->namaDivisi($data->kd_div);
+                })
+                ->editColumn('creaby', function($data){
+                    if(!empty($data->creaby)) {
+                        $name = $data->namaByNpk($data->creaby);
+                        if(!empty($data->dtcrea)) {
+                            $tgl = Carbon::parse($data->dtcrea)->format('d/m/Y H:i');
+                            return $data->creaby.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->creaby.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('creaby', function ($query, $keyword) {
+                    $query->whereRaw("(creaby||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.creaby = v.npk limit 1)||' - '||to_char(dtcrea,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('creaby', 'creaby $1')
+                ->editColumn('modiby', function($data){
+                    if(!empty($data->modiby)) {
+                        $name = $data->namaByNpk($data->modiby);
+                        if(!empty($data->dtmodi)) {
+                            $tgl = Carbon::parse($data->dtmodi)->format('d/m/Y H:i');
+                            return $data->modiby.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->modiby.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('modiby', function ($query, $keyword) {
+                    $query->whereRaw("(modiby||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.modiby = v.npk limit 1)||' - '||to_char(dtmodi,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('modiby', 'modiby $1')
+                ->editColumn('submit_by', function($data){
+                    if(!empty($data->submit_by)) {
+                        $name = $data->namaByNpk($data->submit_by);
+                        if(!empty($data->submit_dt)) {
+                            $tgl = Carbon::parse($data->submit_dt)->format('d/m/Y H:i');
+                            return $data->submit_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->submit_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('submit_by', function ($query, $keyword) {
+                    $query->whereRaw("(submit_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.submit_by = v.npk limit 1)||' - '||to_char(submit_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('submit_by', 'submit_by $1')
+                ->editColumn('apr_dep_by', function($data){
+                    if(!empty($data->apr_dep_by)) {
+                        $name = $data->namaByNpk($data->apr_dep_by);
+                        if(!empty($data->apr_dep_dt)) {
+                            $tgl = Carbon::parse($data->apr_dep_dt)->format('d/m/Y H:i');
+                            return $data->apr_dep_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->apr_dep_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('apr_dep_by', function ($query, $keyword) {
+                    $query->whereRaw("(apr_dep_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.apr_dep_by = v.npk limit 1)||' - '||to_char(apr_dep_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('apr_dep_by', 'apr_dep_by $1')
+                ->editColumn('apr_div_by', function($data){
+                    if(!empty($data->apr_div_by)) {
+                        $name = $data->namaByNpk($data->apr_div_by);
+                        if(!empty($data->apr_div_dt)) {
+                            $tgl = Carbon::parse($data->apr_div_dt)->format('d/m/Y H:i');
+                            return $data->apr_div_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->apr_div_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('apr_div_by', function ($query, $keyword) {
+                    $query->whereRaw("(apr_div_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.apr_div_by = v.npk limit 1)||' - '||to_char(apr_div_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('apr_div_by', 'apr_div_by $1')
+                ->editColumn('apr_bgt_by', function($data){
+                    if(!empty($data->apr_bgt_by)) {
+                        $name = $data->namaByNpk($data->apr_bgt_by);
+                        if(!empty($data->apr_bgt_dt)) {
+                            $tgl = Carbon::parse($data->apr_bgt_dt)->format('d/m/Y H:i');
+                            return $data->apr_bgt_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->apr_bgt_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('apr_bgt_by', function ($query, $keyword) {
+                    $query->whereRaw("(apr_bgt_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.apr_bgt_by = v.npk limit 1)||' - '||to_char(apr_bgt_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('apr_bgt_by', 'apr_bgt_by $1')
+                ->editColumn('rjt_dep_by', function($data){
+                    if(!empty($data->rjt_dep_by)) {
+                        $name = $data->namaByNpk($data->rjt_dep_by);
+                        if(!empty($data->rjt_dep_dt)) {
+                            $tgl = Carbon::parse($data->rjt_dep_dt)->format('d/m/Y H:i');
+                            return $data->rjt_dep_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->rjt_dep_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('rjt_dep_by', function ($query, $keyword) {
+                    $query->whereRaw("(rjt_dep_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.rjt_dep_by = v.npk limit 1)||' - '||to_char(rjt_dep_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('rjt_dep_by', 'rjt_dep_by $1')
+                ->editColumn('rjt_div_by', function($data){
+                    if(!empty($data->rjt_div_by)) {
+                        $name = $data->namaByNpk($data->rjt_div_by);
+                        if(!empty($data->rjt_div_dt)) {
+                            $tgl = Carbon::parse($data->rjt_div_dt)->format('d/m/Y H:i');
+                            return $data->rjt_div_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->rjt_div_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('rjt_div_by', function ($query, $keyword) {
+                    $query->whereRaw("(rjt_div_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.rjt_div_by = v.npk limit 1)||' - '||to_char(rjt_div_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('rjt_div_by', 'rjt_div_by $1')
+                ->editColumn('rjt_bgt_by', function($data){
+                    if(!empty($data->rjt_bgt_by)) {
+                        $name = $data->namaByNpk($data->rjt_bgt_by);
+                        if(!empty($data->rjt_bgt_dt)) {
+                            $tgl = Carbon::parse($data->rjt_bgt_dt)->format('d/m/Y H:i');
+                            return $data->rjt_bgt_by.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->rjt_bgt_by.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('rjt_bgt_by', function ($query, $keyword) {
+                    $query->whereRaw("(rjt_bgt_by||' - '||(select v.nama from v_mas_karyawan v where bgtt_cr_submits.rjt_bgt_by = v.npk limit 1)||' - '||to_char(rjt_bgt_dt,'dd/mm/yyyy hh24:mi')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('rjt_bgt_by', 'rjt_bgt_by $1')
+                ->addColumn('status', function($data){
+                    return $data->status;
+                })
+                ->addColumn('action', function($data){
+                    if($data->status === "APPROVE DIV") {
+                        if(Auth::user()->can('budget-cr-activities-approve-budget')) {
+                            $key = base64_encode($data->id);
+                            $key = str_replace('/', '', $key);
+                            $key = str_replace('-', '', $key);
+                            return '<input type="checkbox" name="row-'. $key .'-chk" id="row-'. $key .'-chk" value="'. $data->id .'" class="icheckbox_square-blue">';
+                        } else {
+                            return "";
+                        }
+                    } else {
+                        return "";
+                    }
+                })->make(true);
+            } else {
+                return view('errors.403');
+            }
+        } else {
+            return redirect('home');
+        }
+    }
+
+    public function detail(Request $request, $id_regis)
+    {
+        if(Auth::user()->can(['budget-cr-activities-*'])) {
+            if ($request->ajax()) {
+                $id_regis = base64_decode($id_regis);
+                $vw_bgtt_cr_regiss_details = DB::table(DB::raw("(
+                    select v.id id_regis, v.kd_dep, v.thn, v.bulan, v.jml_mp, v.amount, b.nm_aktivitas, b.nm_klasifikasi, b.nm_kategori, b.jml jml_mp_act, b.amt amount_act, b.id id_submit, b.no_rev_submit, b.submit_dt, b.submit_by, b.rjt_dep_dt, b.rjt_dep_by, b.rjt_dep_ket, b.apr_dep_dt, b.apr_dep_by, b.rjt_div_dt, b.rjt_div_by, b.rjt_div_ket, b.apr_div_dt, b.apr_div_by, b.rjt_bgt_dt, b.rjt_bgt_by, b.rjt_bgt_ket, b.apr_bgt_dt, b.apr_bgt_by, b.dtmodi, b.modiby 
+                    from vw_bgtt_cr_regiss_detail v, bgtt_cr_submits b 
+                    where v.id = b.id_regis and v.thn = b.thn and v.bulan = b.bln 
+                ) s"))
+                ->selectRaw("id_regis, kd_dep, thn, bulan, jml_mp, amount, nm_aktivitas, nm_klasifikasi, nm_kategori, jml_mp_act, amount_act, id_submit, no_rev_submit, submit_dt, submit_by, rjt_dep_dt, rjt_dep_by, rjt_dep_ket, apr_dep_dt, apr_dep_by, rjt_div_dt, rjt_div_by, rjt_div_ket, apr_div_dt, apr_div_by, rjt_bgt_dt, rjt_bgt_by, rjt_bgt_ket, apr_bgt_dt, apr_bgt_by, dtmodi, modiby")
+                ->where("id_regis", "=", $id_regis)
+                ->orderBy("bulan");
+
+                return Datatables::of($vw_bgtt_cr_regiss_details)
+                ->editColumn('bulan', function($data){
+                    $bulan = $data->bulan;
+                    $bulan = strtoupper(namaBulan((int) $bulan));
+                    return $bulan;
+                    // $user = Auth::user();
+                    // $info = "Show Detail Activity: ".$data->nm_aktivitas.", Tahun: ".$data->thn.", Bulan: ".$bulan.", Classification: ".$data->nm_klasifikasi.", CR Categories: ".$data->nm_kategori;
+                    // if($user->can('budget-cr-activities-approve-budget')) {
+                    //     return '<a href="'.route('bgttcrsubmits.showbudget', base64_encode($data->id_submit)).'" data-toggle="tooltip" data-placement="top" title="'.$info.'">'.$bulan.'</a>';
+                    // } else if($user->can('budget-cr-activities-approve-div')) {
+                    //     return '<a href="'.route('bgttcrsubmits.showdiv', base64_encode($data->id_submit)).'" data-toggle="tooltip" data-placement="top" title="'.$info.'">'.$bulan.'</a>';
+                    // } else if($user->can('budget-cr-activities-approve-dep')) {
+                    //     return '<a href="'.route('bgttcrsubmits.showdep', base64_encode($data->id_submit)).'" data-toggle="tooltip" data-placement="top" title="'.$info.'">'.$bulan.'</a>';
+                    // } else {
+                    //     return '<a href="'.route('bgttcrsubmits.show', base64_encode($data->id_submit)).'" data-toggle="tooltip" data-placement="top" title="'.$info.'">'.$bulan.'</a>';
+                    // }
+                })
+                ->editColumn('jml_mp', function($data){
+                  return numberFormatter(0, 0)->format($data->jml_mp);
+                })
+                // ->filterColumn('jml_mp', function ($query, $keyword) {
+                //   $query->whereRaw("trim(to_char(jml_mp,'999999999999999999')) like ?", ["%$keyword%"]);
+                // })
+                ->editColumn('amount', function($data){
+                  return numberFormatter(0, 5)->format($data->amount);
+                })
+                // ->filterColumn('amount', function ($query, $keyword) {
+                //   $query->whereRaw("trim(to_char(amount,'999999999999999999.999999')) like ?", ["%$keyword%"]);
+                // })
+                ->editColumn('jml_mp_act', function($data){
+                  return numberFormatter(0, 0)->format($data->jml_mp_act);
+                })
+                // ->filterColumn('jml_mp_act', function ($query, $keyword) {
+                //   $query->whereRaw("trim(to_char(jml_mp_act,'999999999999999999')) like ?", ["%$keyword%"]);
+                // })
+                ->editColumn('amount_act', function($data){
+                  return numberFormatter(0, 5)->format($data->amount_act);
+                })
+                // ->filterColumn('amount_act', function ($query, $keyword) {
+                //   $query->whereRaw("trim(to_char(amount_act,'999999999999999999.999999')) like ?", ["%$keyword%"]);
+                // })
+                ->addColumn('persen', function($data){
+                    if($data->amount > 0) {
+                        $persen = ($data->amount_act / $data->amount) * 100;
+                        return numberFormatter(0, 2)->format($persen)."%";
+                    } else {
+                        return numberFormatter(0, 2)->format(0)."%";
+                    }
+                })
+                ->addColumn('status', function($data){
+                    if($data->apr_bgt_dt != null) {
+                        return "APPROVE BUDGET";
+                    } else if($data->rjt_bgt_dt != null) { 
+                        return "REJECT BUDGET";
+                    } else if($data->apr_div_dt != null) {
+                        return "APPROVE DIV";
+                    } else if($data->rjt_div_dt != null) { 
+                        return "REJECT DIV";
+                    } else if($data->apr_dep_dt != null) {
+                        return "APPROVE DEPT";
+                    } else if($data->rjt_dep_dt != null) { 
+                        return "REJECT DEPT";
+                    } else if($data->submit_dt != null) { 
+                        return "SUBMIT";
+                    } else {
+                        return "DRAFT";
+                    }
+                })->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        if(Auth::user()->can(['budget-cr-activities-view', 'budget-cr-activities-create', 'budget-cr-activities-delete'])) {
+            $bgttcrsubmit = BgttCrSubmit::find(base64_decode($id));
+            if($bgttcrsubmit != null) {
+                if ($bgttcrsubmit->checkKdDept() === "T") {
+                    return view('budget.activityprogress.show', compact('bgttcrsubmit'));
+                } else {
+                    return view('errors.403');
+                }
+            } else {
+                return view('errors.404');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function showdep($id)
+    {
+        if(Auth::user()->can('budget-cr-activities-approve-dep')) {
+            $bgttcrsubmit = BgttCrSubmit::find(base64_decode($id));
+            if($bgttcrsubmit != null) {
+                if ($bgttcrsubmit->checkKdDept() === "T") {
+                    return view('budget.activityprogress.showdep', compact('bgttcrsubmit'));
+                } else {
+                    return view('errors.403');
+                }
+            } else {
+                return view('errors.404');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function showdiv($id)
+    {
+        if(Auth::user()->can('budget-cr-activities-approve-div')) {
+            $bgttcrsubmit = BgttCrSubmit::find(base64_decode($id));
+            if($bgttcrsubmit != null) {
+                if (substr($bgttcrsubmit->kd_dep,0,1) === Auth::user()->masKaryawan()->kode_div) {
+                    return view('budget.activityprogress.showdiv', compact('bgttcrsubmit'));
+                } else {
+                    return view('errors.403');
+                }
+            } else {
+                return view('errors.404');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function showbudget($id)
+    {
+        if(Auth::user()->can('budget-cr-activities-approve-budget')) {
+            $bgttcrsubmit = BgttCrSubmit::find(base64_decode($id));
+            if($bgttcrsubmit != null) {
+                return view('budget.activityprogress.showbudget', compact('bgttcrsubmit'));
+            } else {
+                return view('errors.404');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function showrevisi($id)
+    {
+        if(Auth::user()->can(['budget-cr-activities-*'])) {
+            $bgttcrsubmit = BgttCrSubmitReject::find(base64_decode($id));
+            if($bgttcrsubmit != null) {
+                return view('budget.activityprogress.showrevisi', compact('bgttcrsubmit'));
+            } else {
+                return view('errors.404');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        if(Auth::user()->can('budget-cr-activities-create')) {
+            $bgttcrsubmit = BgttCrSubmit::find(base64_decode($id));
+            if($bgttcrsubmit != null) {
+                if ($bgttcrsubmit->checkKdDept() === "T") {
+                    if($bgttcrsubmit->submit_dt != null) {
+                        Session::flash("flash_notification", [
+                            "level"=>"danger",
+                            "message"=>"Maaf, data yang sudah di-SUBMIT tidak dapat diubah."
+                            ]);
+                        return redirect()->route('bgttcrsubmits.index');
+                    } else if($bgttcrsubmit->mcbgt000t($bgttcrsubmit->thn, $bgttcrsubmit->bln)->st_budget !== "T") {
+                        Session::flash("flash_notification", [
+                            "level"=>"danger",
+                            "message"=>"Maaf, periode untuk Tahun: ".$bgttcrsubmit->thn." Bulan: ".$bgttcrsubmit->bln."belum dibuka!"
+                            ]);
+                        return redirect()->route('bgttcrsubmits.index');
+                    } else {
+                        return view('budget.activityprogress.progress')->with(compact('bgttcrsubmit'));
+                    }
+                } else {
+                    Session::flash("flash_notification", [
+                        "level"=>"danger",
+                        "message"=>"Maaf, Anda tidak berhak mengubah data ini."
+                        ]);
+                    return redirect()->route('bgttcrsubmits.index');
+                }
+            } else {
+                return view('errors.404');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        if(Auth::user()->can('budget-cr-activities-create')) {
+            $bgttcrsubmit = BgttCrSubmit::find(base64_decode($id));
+            if($bgttcrsubmit != null) {
+                if ($bgttcrsubmit->checkKdDept() === "T") {
+                    if($bgttcrsubmit->submit_dt != null) {
+                        Session::flash("flash_notification", [
+                            "level"=>"danger",
+                            "message"=>"Maaf, data yang sudah di-SUBMIT tidak dapat diubah."
+                            ]);
+                        return redirect()->route('bgttcrsubmits.index');
+                    } else if($bgttcrsubmit->mcbgt000t($bgttcrsubmit->thn, $bgttcrsubmit->bln)->st_budget !== "T") {
+                        Session::flash("flash_notification", [
+                            "level"=>"danger",
+                            "message"=>"Maaf, periode untuk Tahun: ".$bgttcrsubmit->thn." Bulan: ".$bgttcrsubmit->bln."belum dibuka!"
+                            ]);
+                        return redirect()->route('bgttcrsubmits.index');
+                    } else {
+                        $data = $request->only('st_submit', 'jml', 'amt');
+                        $data['jml'] = trim($data['jml']) !== '' ? trim($data['jml']) : 0;
+                        $data['amt'] = trim($data['amt']) !== '' ? trim($data['amt']) : 0;
+                        $data['modiby'] = Auth::user()->username;
+                        $data['dtmodi'] = Carbon::now();
+                        $submit = trim($data['st_submit']) !== '' ? trim($data['st_submit']) : 'F';
+
+                        $valid = "T";
+                        $level = "warning";
+                        $msg = "";
+                        if($valid === "F") {
+                            Session::flash("flash_notification", [
+                                "level"=>$level,
+                                "message"=>$msg
+                                ]);
+                            return redirect()->route('bgttcrsubmits.index');
+                        } else {          
+                            try {
+                                $rate = 0;
+                                $bgttcrrate = BgttCrRate::find($bgttcrsubmit->thn);
+                                if($bgttcrrate != null) {
+                                    $rate = $bgttcrrate->rate_mp;
+                                }
+                                if($data['jml'] > 0) {
+                                    $amount = $data['jml']*$rate;
+                                    $data['amt'] = $amount;
+                                }
+
+                                if($submit === "T") {
+                                    $data['submit_by'] = Auth::user()->username;
+                                    $data['submit_dt'] = Carbon::now();
+                                }
+
+                                $bgttcrsubmit->update($data);
+                                $id = $bgttcrsubmit->id;
+                                $thn = $bgttcrsubmit->thn;
+                                $bln = $bgttcrsubmit->bln;
+                                $nm_aktivitas = $bgttcrsubmit->nm_aktivitas;
+                                $nm_klasifikasi = $bgttcrsubmit->nm_klasifikasi;
+                                $nm_kategori = $bgttcrsubmit->nm_kategori;
+                                $submit_dt = $bgttcrsubmit->submit_dt;
+
+                                //insert logs
+                                if($submit_dt != null) {
+                                    $log_keterangan = "BgttCrSubmitsController.submit: Update CR Activities Progress Berhasil. ".$id." - ".$thn." - ".$bln." - ".$nm_aktivitas." - ".$nm_klasifikasi." - ".$nm_kategori;
+                                } else {
+                                    $log_keterangan = "BgttCrSubmitsController.update: Update CR Activities Progress Berhasil. ".$id." - ".$thn." - ".$bln." - ".$nm_aktivitas." - ".$nm_klasifikasi." - ".$nm_kategori;
+                                }
+                                $log_ip = \Request::session()->get('client_ip');
+                                $created_at = Carbon::now();
+                                $updated_at = Carbon::now();
+                                DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                                $level = "success";
+                                if($submit_dt != null) {
+                                    $msg = "Data berhasil di-SUBMIT. Activity: ".$nm_aktivitas.", Tahun: ".$thn.", Bulan: ".$bln.", Classification: ".$nm_klasifikasi.", CR Categories: ".$nm_kategori;
+                                    Session::flash("flash_notification", [
+                                        "level"=>$level,
+                                        "message"=>$msg
+                                        ]);
+                                    return redirect()->route('bgttcrsubmits.index');
+                                } else {
+                                    $msg = "Data berhasil diubah. Activity: ".$nm_aktivitas.", Tahun: ".$thn.", Bulan: ".$bln.", Classification: ".$nm_klasifikasi.", CR Categories: ".$nm_kategori;
+                                    Session::flash("flash_notification", [
+                                        "level"=>$level,
+                                        "message"=>$msg
+                                        ]);
+                                    return redirect()->route('bgttcrsubmits.edit', base64_encode($bgttcrsubmit->id));
+                                }
+                            } catch (Exception $ex) {
+                                $level = "danger";
+                                if($submit === "T") {
+                                    $msg = "Data gagal di-SUBMIT!";
+                                } else {
+                                    $msg = "Data gagal diubah!";
+                                }
+
+                                Session::flash("flash_notification", [
+                                    "level"=>$level,
+                                    "message"=>$msg
+                                    ]);
+                                return redirect()->back()->withInput(Input::all());
+                            }
+                        }
+                    }
+                } else {
+                    Session::flash("flash_notification", [
+                        "level"=>"danger",
+                        "message"=>"Maaf, Anda tidak berhak mengubah data ini."
+                        ]);
+                    return redirect()->route('bgttcrsubmits.index');
+                }
+            } else {
+                return view('errors.404');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        //
+    }
+
+    public function approvedep(Request $request) 
+    {
+        if ($request->ajax()) {
+
+            $data = $request->all();
+            $status_approve = trim($data['status_approve']) !== '' ? trim($data['status_approve']) : null;
+            $status_approve = base64_decode($status_approve);
+            $status = "OK";
+            $msg = "CR Activities Progress Berhasil di-Approve.";
+            $action_new = "";
+
+            if($status_approve != null) {
+                if($status_approve === "DEP") {
+                    $akses = "F";
+                    if(Auth::user()->can('budget-cr-activities-approve-dep')) {
+                        $msg = "CR Activities Progress Berhasil di-Approve Dept. Head.";
+                        $akses = "T";
+                    } else {
+                        $status = "NG";
+                        $msg = "Maaf, Anda tidak memiliki akses untuk Approve Dept. Head!";
+                    }
+                    if($akses === "T" && $status === "OK") {
+                        $ids = trim($data['ids']) !== '' ? trim($data['ids']) : null;
+                        if($ids != null) {
+
+                            $status = "OK";
+                            $msg = "CR Activities Progress Berhasil di-Approve Dept. Head.";
+                            $npk = Auth::user()->username;
+
+                            $daftar_id = "";
+                            $list_id = explode("#quinza#", $ids);
+                            $id_all = [];
+                            foreach ($list_id as $id) {
+                                array_push($id_all, $id);
+                                if($daftar_id === "") {
+                                    $daftar_id = $id;
+                                } else {
+                                    $daftar_id .= ",".$id;
+                                }
+                            }
+                            DB::connection("pgsql")->beginTransaction();
+                            try {
+
+                                DB::table("bgtt_cr_submits")
+                                ->whereNotNull('submit_dt')
+                                ->whereNull("rjt_dep_dt")
+                                ->whereNull("rjt_div_dt")
+                                ->whereNull("rjt_bgt_dt")
+                                ->whereNull('apr_dep_dt')
+                                ->whereNull('apr_div_dt')
+                                ->whereNull('apr_bgt_dt')
+                                ->whereIn("id", $id_all)
+                                ->update(["apr_dep_by" => Auth::user()->username, "apr_dep_dt" => Carbon::now()]);
+
+                                //insert logs
+                                $log_keterangan = "BgttCrSubmitsController.approvedep: ".$msg.": ".$daftar_id;
+                                $log_ip = \Request::session()->get('client_ip');
+                                $created_at = Carbon::now();
+                                $updated_at = Carbon::now();
+                                DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                                DB::connection("pgsql")->commit();
+                            } catch (Exception $ex) {
+                                DB::connection("pgsql")->rollback();
+                                $status = "NG";
+                                $msg = "CR Activities Progress Gagal di-Approve Dept. Head.";
+                            }
+                        } else {
+                            $status = "NG";
+                            $msg = "CR Activities Progress Gagal di-Approve Dept. Head.";
+                        }
+                    }
+                } else {
+                    $status = "NG";
+                    $msg = "CR Activities Progress Gagal di-Approve.";
+                }
+            } else {
+                $status = "NG";
+                $msg = "CR Activities Progress Gagal di-Approve.";
+            }
+            return response()->json(['status' => $status, 'message' => $msg, 'action_new' => $action_new]);
+        } else {
+            return redirect('home');
+        }
+    }
+
+    public function rejectdep(Request $request)
+    {
+        if ($request->ajax()) {
+
+            $data = $request->all();
+            $status_reject = trim($data['status_reject']) !== '' ? trim($data['status_reject']) : null;
+            $status_reject = base64_decode($status_reject);
+            $status = "OK";
+            $msg = "CR Activities Progress Berhasil di-Reject.";
+            $action_new = "";
+
+            if($status_reject != null) {
+                if($status_reject === "DEP") {
+                    $akses = "F";
+                    if(Auth::user()->can('budget-cr-activities-approve-dep')) {
+                        $msg = "CR Activities Progress Berhasil di-Reject Dept. Head.";
+                        $akses = "T";
+                    } else {
+                        $status = "NG";
+                        $msg = "Maaf, Anda tidak memiliki akses untuk Reject Dept. Head!";
+                    }
+                    if($akses === "T" && $status === "OK") {
+                        $keterangan = trim($data['keterangan_reject']) !== '' ? trim($data['keterangan_reject']) : "-";
+                        $ids = trim($data['ids']) !== '' ? trim($data['ids']) : null;
+                        if($ids != null) {
+
+                            $status = "OK";
+                            $msg = "CR Activities Progress Berhasil di-Reject Dept. Head.";
+                            $npk = Auth::user()->username;
+
+                            $daftar_id = "";
+                            $list_id = explode("#quinza#", $ids);
+                            $id_all = [];
+                            foreach ($list_id as $id) {
+                                array_push($id_all, $id);
+                                if($daftar_id === "") {
+                                    $daftar_id = $id;
+                                } else {
+                                    $daftar_id .= ",".$id;
+                                }
+                            }
+                            DB::connection("pgsql")->beginTransaction();
+                            try {
+                                $username = Auth::user()->username;
+                                foreach ($id_all as $id) {
+                                    DB::unprepared("insert into bgtt_cr_submit_rejects (id_submit, no_rev_submit, id_regis, kd_dep, thn, bln, no_rev_regis, no_urut, nm_aktivitas, nm_klasifikasi, nm_kategori, jml, amt, dtcrea, creaby, submit_dt, submit_by, rjt_dep_dt, rjt_dep_by, rjt_dep_ket, apr_dep_dt, apr_dep_by, rjt_div_dt, rjt_div_by, rjt_div_ket, apr_div_dt, apr_div_by, rjt_bgt_dt, rjt_bgt_by, rjt_bgt_ket, apr_bgt_dt, apr_bgt_by, dtmodi, modiby) 
+                                        select id, no_rev_submit, id_regis, kd_dep, thn, bln, no_rev_regis, no_urut, nm_aktivitas, nm_klasifikasi, nm_kategori, jml, amt, dtcrea, creaby, submit_dt, submit_by, now(), '$username', '$keterangan', apr_dep_dt, apr_dep_by, rjt_div_dt, rjt_div_by, rjt_div_ket, apr_div_dt, apr_div_by, rjt_bgt_dt, rjt_bgt_by, rjt_bgt_ket, apr_bgt_dt, apr_bgt_by, dtmodi, modiby
+                                        from bgtt_cr_submits 
+                                        where id = '$id' and submit_dt is not null and rjt_dep_dt is null and rjt_div_dt is null and rjt_bgt_dt is null and apr_dep_dt is null and apr_div_dt is null and apr_bgt_dt is null");
+
+                                    DB::unprepared("update bgtt_cr_submits 
+                                        set no_rev_submit = no_rev_submit+1, submit_dt = NULL, submit_by = NULL, rjt_dep_dt = NULL, rjt_dep_by = NULL, rjt_dep_ket = NULL, apr_dep_dt = NULL, apr_dep_by = NULL, rjt_div_dt = NULL, rjt_div_by = NULL, rjt_div_ket = NULL, apr_div_dt = NULL, apr_div_by = NULL, rjt_bgt_dt = NULL, rjt_bgt_by = NULL, rjt_bgt_ket = NULL, apr_bgt_dt = NULL, apr_bgt_by = NULL
+                                        where id = '$id' and submit_dt is not null and rjt_dep_dt is null and rjt_div_dt is null and rjt_bgt_dt is null and apr_dep_dt is null and apr_div_dt is null and apr_bgt_dt is null");
+                                }
+
+                                //insert logs
+                                $log_keterangan = "BgttCrSubmitsController.rejectdep: ".$msg.": ".$daftar_id;
+                                $log_ip = \Request::session()->get('client_ip');
+                                $created_at = Carbon::now();
+                                $updated_at = Carbon::now();
+                                DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                                DB::connection("pgsql")->commit();
+                            } catch (Exception $ex) {
+                                DB::connection("pgsql")->rollback();
+                                $status = "NG";
+                                $msg = "CR Activities Progress Gagal di-Reject Dept. Head.";
+                            }
+                        } else {
+                            $status = "NG";
+                            $msg = "CR Activities Progress Gagal di-Reject Dept. Head.";
+                        }
+                    }
+                } else {
+                    $status = "NG";
+                    $msg = "CR Activities Progress Gagal di-Reject.";
+                }
+            } else {
+                $status = "NG";
+                $msg = "CR Activities Progress Gagal di-Reject.";
+            }
+            return response()->json(['status' => $status, 'message' => $msg, 'action_new' => $action_new]);
+        } else {
+            return redirect('home');
+        }
+    }
+
+    public function approvediv(Request $request) 
+    {
+        if ($request->ajax()) {
+
+            $data = $request->all();
+            $status_approve = trim($data['status_approve']) !== '' ? trim($data['status_approve']) : null;
+            $status_approve = base64_decode($status_approve);
+            $status = "OK";
+            $msg = "CR Activities Progress Berhasil di-Approve.";
+            $action_new = "";
+
+            if($status_approve != null) {
+                if($status_approve === "DIV") {
+                    $akses = "F";
+                    if(Auth::user()->can('budget-cr-activities-approve-div')) {
+                        $msg = "CR Activities Progress Berhasil di-Approve Div. Head.";
+                        $akses = "T";
+                    } else {
+                        $status = "NG";
+                        $msg = "Maaf, Anda tidak memiliki akses untuk Approve Div. Head!";
+                    }
+                    if($akses === "T" && $status === "OK") {
+                        $ids = trim($data['ids']) !== '' ? trim($data['ids']) : null;
+                        if($ids != null) {
+
+                            $status = "OK";
+                            $msg = "CR Activities Progress Berhasil di-Approve Div. Head.";
+                            $npk = Auth::user()->username;
+
+                            $daftar_id = "";
+                            $list_id = explode("#quinza#", $ids);
+                            $id_all = [];
+                            foreach ($list_id as $id) {
+                                array_push($id_all, $id);
+                                if($daftar_id === "") {
+                                    $daftar_id = $id;
+                                } else {
+                                    $daftar_id .= ",".$id;
+                                }
+                            }
+                            DB::connection("pgsql")->beginTransaction();
+                            try {
+
+                                DB::table("bgtt_cr_submits")
+                                ->whereNotNull('submit_dt')
+                                ->whereNull("rjt_dep_dt")
+                                ->whereNull("rjt_div_dt")
+                                ->whereNull("rjt_bgt_dt")
+                                ->whereNotNull('apr_dep_dt')
+                                ->whereNull('apr_div_dt')
+                                ->whereNull('apr_bgt_dt')
+                                ->whereIn("id", $id_all)
+                                ->update(["apr_div_by" => Auth::user()->username, "apr_div_dt" => Carbon::now()]);
+
+                                //insert logs
+                                $log_keterangan = "BgttCrSubmitsController.approvediv: ".$msg.": ".$daftar_id;
+                                $log_ip = \Request::session()->get('client_ip');
+                                $created_at = Carbon::now();
+                                $updated_at = Carbon::now();
+                                DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                                DB::connection("pgsql")->commit();
+                            } catch (Exception $ex) {
+                                DB::connection("pgsql")->rollback();
+                                $status = "NG";
+                                $msg = "CR Activities Progress Gagal di-Approve Div. Head.";
+                            }
+                        } else {
+                            $status = "NG";
+                            $msg = "CR Activities Progress Gagal di-Approve Div. Head.";
+                        }
+                    }
+                } else {
+                    $status = "NG";
+                    $msg = "CR Activities Progress Gagal di-Approve.";
+                }
+            } else {
+                $status = "NG";
+                $msg = "CR Activities Progress Gagal di-Approve.";
+            }
+            return response()->json(['status' => $status, 'message' => $msg, 'action_new' => $action_new]);
+        } else {
+            return redirect('home');
+        }
+    }
+
+    public function rejectdiv(Request $request)
+    {
+        if ($request->ajax()) {
+
+            $data = $request->all();
+            $status_reject = trim($data['status_reject']) !== '' ? trim($data['status_reject']) : null;
+            $status_reject = base64_decode($status_reject);
+            $status = "OK";
+            $msg = "CR Activities Progress Berhasil di-Reject.";
+            $action_new = "";
+
+            if($status_reject != null) {
+                if($status_reject === "DIV") {
+                    $akses = "F";
+                    if(Auth::user()->can('budget-cr-activities-approve-div')) {
+                        $msg = "CR Activities Progress Berhasil di-Reject Div. Head.";
+                        $akses = "T";
+                    } else {
+                        $status = "NG";
+                        $msg = "Maaf, Anda tidak memiliki akses untuk Reject Div. Head!";
+                    }
+                    if($akses === "T" && $status === "OK") {
+                        $keterangan = trim($data['keterangan_reject']) !== '' ? trim($data['keterangan_reject']) : "-";
+                        $ids = trim($data['ids']) !== '' ? trim($data['ids']) : null;
+                        if($ids != null) {
+
+                            $status = "OK";
+                            $msg = "CR Activities Progress Berhasil di-Reject Div. Head.";
+                            $npk = Auth::user()->username;
+
+                            $daftar_id = "";
+                            $list_id = explode("#quinza#", $ids);
+                            $id_all = [];
+                            foreach ($list_id as $id) {
+                                array_push($id_all, $id);
+                                if($daftar_id === "") {
+                                    $daftar_id = $id;
+                                } else {
+                                    $daftar_id .= ",".$id;
+                                }
+                            }
+                            DB::connection("pgsql")->beginTransaction();
+                            try {
+                                $username = Auth::user()->username;
+                                foreach ($id_all as $id) {
+                                    DB::unprepared("insert into bgtt_cr_submit_rejects (id_submit, no_rev_submit, id_regis, kd_dep, thn, bln, no_rev_regis, no_urut, nm_aktivitas, nm_klasifikasi, nm_kategori, jml, amt, dtcrea, creaby, submit_dt, submit_by, rjt_dep_dt, rjt_dep_by, rjt_dep_ket, apr_dep_dt, apr_dep_by, rjt_div_dt, rjt_div_by, rjt_div_ket, apr_div_dt, apr_div_by, rjt_bgt_dt, rjt_bgt_by, rjt_bgt_ket, apr_bgt_dt, apr_bgt_by, dtmodi, modiby) 
+                                        select id, no_rev_submit, id_regis, kd_dep, thn, bln, no_rev_regis, no_urut, nm_aktivitas, nm_klasifikasi, nm_kategori, jml, amt, dtcrea, creaby, submit_dt, submit_by, rjt_dep_dt, rjt_dep_by, rjt_dep_ket, apr_dep_dt, apr_dep_by, now(), '$username', '$keterangan', apr_div_dt, apr_div_by, rjt_bgt_dt, rjt_bgt_by, rjt_bgt_ket, apr_bgt_dt, apr_bgt_by, dtmodi, modiby
+                                        from bgtt_cr_submits 
+                                        where id = '$id' and submit_dt is not null and rjt_dep_dt is null and rjt_div_dt is null and rjt_bgt_dt is null and apr_dep_dt is not null and apr_div_dt is null and apr_bgt_dt is null");
+
+                                    DB::unprepared("update bgtt_cr_submits 
+                                        set no_rev_submit = no_rev_submit+1, submit_dt = NULL, submit_by = NULL, rjt_dep_dt = NULL, rjt_dep_by = NULL, rjt_dep_ket = NULL, apr_dep_dt = NULL, apr_dep_by = NULL, rjt_div_dt = NULL, rjt_div_by = NULL, rjt_div_ket = NULL, apr_div_dt = NULL, apr_div_by = NULL, rjt_bgt_dt = NULL, rjt_bgt_by = NULL, rjt_bgt_ket = NULL, apr_bgt_dt = NULL, apr_bgt_by = NULL
+                                        where id = '$id' and submit_dt is not null and rjt_dep_dt is null and rjt_div_dt is null and rjt_bgt_dt is null and apr_dep_dt is not null and apr_div_dt is null and apr_bgt_dt is null");
+                                }
+
+                                //insert logs
+                                $log_keterangan = "BgttCrSubmitsController.rejectdiv: ".$msg.": ".$daftar_id;
+                                $log_ip = \Request::session()->get('client_ip');
+                                $created_at = Carbon::now();
+                                $updated_at = Carbon::now();
+                                DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                                DB::connection("pgsql")->commit();
+                            } catch (Exception $ex) {
+                                DB::connection("pgsql")->rollback();
+                                $status = "NG";
+                                $msg = "CR Activities Progress Gagal di-Reject Div. Head.";
+                            }
+                        } else {
+                            $status = "NG";
+                            $msg = "CR Activities Progress Gagal di-Reject Div. Head.";
+                        }
+                    }
+                } else {
+                    $status = "NG";
+                    $msg = "CR Activities Progress Gagal di-Reject.";
+                }
+            } else {
+                $status = "NG";
+                $msg = "CR Activities Progress Gagal di-Reject.";
+            }
+            return response()->json(['status' => $status, 'message' => $msg, 'action_new' => $action_new]);
+        } else {
+            return redirect('home');
+        }
+    }
+
+    public function approvebudget(Request $request) 
+    {
+        if ($request->ajax()) {
+
+            $data = $request->all();
+            $status_approve = trim($data['status_approve']) !== '' ? trim($data['status_approve']) : null;
+            $status_approve = base64_decode($status_approve);
+            $status = "OK";
+            $msg = "CR Activities Progress Berhasil di-Approve.";
+            $action_new = "";
+
+            if($status_approve != null) {
+                if($status_approve === "BUDGET") {
+                    $akses = "F";
+                    if(Auth::user()->can('budget-cr-activities-approve-budget')) {
+                        $msg = "CR Activities Progress Berhasil di-Approve Team Budget.";
+                        $akses = "T";
+                    } else {
+                        $status = "NG";
+                        $msg = "Maaf, Anda tidak memiliki akses untuk Approve Team Budget!";
+                    }
+                    if($akses === "T" && $status === "OK") {
+                        $ids = trim($data['ids']) !== '' ? trim($data['ids']) : null;
+                        if($ids != null) {
+
+                            $status = "OK";
+                            $msg = "CR Activities Progress Berhasil di-Approve Team Budget";
+                            $npk = Auth::user()->username;
+
+                            $daftar_id = "";
+                            $list_id = explode("#quinza#", $ids);
+                            $id_all = [];
+                            foreach ($list_id as $id) {
+                                array_push($id_all, $id);
+                                if($daftar_id === "") {
+                                    $daftar_id = $id;
+                                } else {
+                                    $daftar_id .= ",".$id;
+                                }
+                            }
+                            DB::connection("pgsql")->beginTransaction();
+                            try {
+
+                                DB::table("bgtt_cr_submits")
+                                ->whereNotNull('submit_dt')
+                                ->whereNull("rjt_dep_dt")
+                                ->whereNull("rjt_div_dt")
+                                ->whereNull("rjt_bgt_dt")
+                                ->whereNotNull('apr_dep_dt')
+                                ->whereNotNull('apr_div_dt')
+                                ->whereNull('apr_bgt_dt')
+                                ->whereIn("id", $id_all)
+                                ->update(["apr_bgt_by" => Auth::user()->username, "apr_bgt_dt" => Carbon::now()]);
+
+                                //insert logs
+                                $log_keterangan = "BgttCrSubmitsController.approvebudget: ".$msg.": ".$daftar_id;
+                                $log_ip = \Request::session()->get('client_ip');
+                                $created_at = Carbon::now();
+                                $updated_at = Carbon::now();
+                                DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                                DB::connection("pgsql")->commit();
+                            } catch (Exception $ex) {
+                                DB::connection("pgsql")->rollback();
+                                $status = "NG";
+                                $msg = "CR Activities Progress Gagal di-Approve Team Budget.";
+                            }
+                        } else {
+                            $status = "NG";
+                            $msg = "CR Activities Progress Gagal di-Approve Team Budget.";
+                        }
+                    }
+                } else {
+                    $status = "NG";
+                    $msg = "CR Activities Progress Gagal di-Approve.";
+                }
+            } else {
+                $status = "NG";
+                $msg = "CR Activities Progress Gagal di-Approve.";
+            }
+            return response()->json(['status' => $status, 'message' => $msg, 'action_new' => $action_new]);
+        } else {
+            return redirect('home');
+        }
+    }
+
+    public function rejectbudget(Request $request)
+    {
+        if ($request->ajax()) {
+
+            $data = $request->all();
+            $status_reject = trim($data['status_reject']) !== '' ? trim($data['status_reject']) : null;
+            $status_reject = base64_decode($status_reject);
+            $status = "OK";
+            $msg = "CR Activities Progress Berhasil di-Reject.";
+            $action_new = "";
+
+            if($status_reject != null) {
+                if($status_reject === "BUDGET") {
+                    $akses = "F";
+                    if(Auth::user()->can('budget-cr-activities-approve-budget')) {
+                        $msg = "CR Activities Progress Berhasil di-Reject Team Budget.";
+                        $akses = "T";
+                    } else {
+                        $status = "NG";
+                        $msg = "Maaf, Anda tidak memiliki akses untuk Reject Team Budget!";
+                    }
+                    if($akses === "T" && $status === "OK") {
+                        $keterangan = trim($data['keterangan_reject']) !== '' ? trim($data['keterangan_reject']) : "-";
+                        $ids = trim($data['ids']) !== '' ? trim($data['ids']) : null;
+                        if($ids != null) {
+
+                            $status = "OK";
+                            $msg = "CR Activities Progress Berhasil di-Reject Team Budget.";
+                            $npk = Auth::user()->username;
+
+                            $daftar_id = "";
+                            $list_id = explode("#quinza#", $ids);
+                            $id_all = [];
+                            foreach ($list_id as $id) {
+                                array_push($id_all, $id);
+                                if($daftar_id === "") {
+                                    $daftar_id = $id;
+                                } else {
+                                    $daftar_id .= ",".$id;
+                                }
+                            }
+                            DB::connection("pgsql")->beginTransaction();
+                            try {
+                                $username = Auth::user()->username;
+                                foreach ($id_all as $id) {
+                                    DB::unprepared("insert into bgtt_cr_submit_rejects (id_submit, no_rev_submit, id_regis, kd_dep, thn, bln, no_rev_regis, no_urut, nm_aktivitas, nm_klasifikasi, nm_kategori, jml, amt, dtcrea, creaby, submit_dt, submit_by, rjt_dep_dt, rjt_dep_by, rjt_dep_ket, apr_dep_dt, apr_dep_by, rjt_div_dt, rjt_div_by, rjt_div_ket, apr_div_dt, apr_div_by, rjt_bgt_dt, rjt_bgt_by, rjt_bgt_ket, apr_bgt_dt, apr_bgt_by, dtmodi, modiby) 
+                                        select id, no_rev_submit, id_regis, kd_dep, thn, bln, no_rev_regis, no_urut, nm_aktivitas, nm_klasifikasi, nm_kategori, jml, amt, dtcrea, creaby, submit_dt, submit_by, rjt_dep_dt, rjt_dep_by, rjt_dep_ket, apr_dep_dt, apr_dep_by, rjt_div_dt, rjt_div_by, rjt_div_ket, apr_div_dt, apr_div_by, now(), '$username', '$keterangan', apr_bgt_dt, apr_bgt_by, dtmodi, modiby
+                                        from bgtt_cr_submits 
+                                        where id = '$id' and submit_dt is not null and rjt_dep_dt is null and rjt_div_dt is null and rjt_bgt_dt is null and apr_dep_dt is not null and apr_div_dt is not null and apr_bgt_dt is null");
+
+                                    DB::unprepared("update bgtt_cr_submits 
+                                        set no_rev_submit = no_rev_submit+1, submit_dt = NULL, submit_by = NULL, rjt_dep_dt = NULL, rjt_dep_by = NULL, rjt_dep_ket = NULL, apr_dep_dt = NULL, apr_dep_by = NULL, rjt_div_dt = NULL, rjt_div_by = NULL, rjt_div_ket = NULL, apr_div_dt = NULL, apr_div_by = NULL, rjt_bgt_dt = NULL, rjt_bgt_by = NULL, rjt_bgt_ket = NULL, apr_bgt_dt = NULL, apr_bgt_by = NULL
+                                        where id = '$id' and submit_dt is not null and rjt_dep_dt is null and rjt_div_dt is null and rjt_bgt_dt is null and apr_dep_dt is not null and apr_div_dt is not null and apr_bgt_dt is null");
+                                }
+
+                                //insert logs
+                                $log_keterangan = "BgttCrSubmitsController.rejectbudget: ".$msg.": ".$daftar_id;
+                                $log_ip = \Request::session()->get('client_ip');
+                                $created_at = Carbon::now();
+                                $updated_at = Carbon::now();
+                                DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                                DB::connection("pgsql")->commit();
+                            } catch (Exception $ex) {
+                                DB::connection("pgsql")->rollback();
+                                $status = "NG";
+                                $msg = "CR Activities Progress Gagal di-Reject Team Budget.";
+                            }
+                        } else {
+                            $status = "NG";
+                            $msg = "CR Activities Progress Gagal di-Reject Team Budget.";
+                        }
+                    }
+                } else {
+                    $status = "NG";
+                    $msg = "CR Activities Progress Gagal di-Reject.";
+                }
+            } else {
+                $status = "NG";
+                $msg = "CR Activities Progress Gagal di-Reject.";
+            }
+            return response()->json(['status' => $status, 'message' => $msg, 'action_new' => $action_new]);
+        } else {
+            return redirect('home');
+        }
+    }
+}

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="b12e1461-f2c2-4eb5-91b6-f20b18705cbe">
+	<property name="ireport.zoom" value="1.4641000000000006"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="tgl1" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="tgl2" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="logo" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["/"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="lok_pt" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="kd_line" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="kd_mesin" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="npk" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT DISTINCT M1.KD_PLANT
+FROM MTCT_DFT_MSLH M1
+WHERE (TO_CHAR(M1.TGL_DM,'YYYYMMDD') >= TO_CHAR($P{tgl1},'YYYYMMDD') 
+AND TO_CHAR(M1.TGL_DM,'YYYYMMDD') <= TO_CHAR($P{tgl2},'YYYYMMDD'))
+AND (M1.KD_PLANT = $P{lok_pt} OR $P{lok_pt} IS NULL)
+AND (M1.KD_LINE = $P{kd_line} OR $P{kd_line} IS NULL)
+AND (M1.KD_MESIN = $P{kd_mesin} OR $P{kd_mesin} IS NULL)
+ORDER BY 1]]>
+	</queryString>
+	<field name="KD_PLANT" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="820" splitType="Stretch">
+			<subreport>
+				<reportElement x="0" y="0" width="595" height="820" uuid="e9086c45-a003-4a85-a24c-b8de2dc25479"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="logo">
+					<subreportParameterExpression><![CDATA[$P{logo}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="tgl2">
+					<subreportParameterExpression><![CDATA[$P{tgl2}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="kd_line">
+					<subreportParameterExpression><![CDATA[$P{kd_line}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="tgl1">
+					<subreportParameterExpression><![CDATA[$P{tgl1}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="kd_mesin">
+					<subreportParameterExpression><![CDATA[$P{kd_mesin}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="npk">
+					<subreportParameterExpression><![CDATA[$P{npk}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="lok_pt">
+					<subreportParameterExpression><![CDATA[$F{KD_PLANT}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "ReportDM_Sub.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="22" splitType="Stretch">
+			<textField pattern="dd/MM/yyyy HH:mm:ss">
+				<reportElement x="15" y="0" width="223" height="12" uuid="c9075fc9-e935-4a9c-87e9-00d834e808e6"/>
+				<box leftPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="460" y="0" width="80" height="12" uuid="70f15471-273e-4369-9b61-55d668f532eb"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="540" y="0" width="40" height="12" uuid="8da8e2ca-f485-4b9c-b430-adc76c8e12d1"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

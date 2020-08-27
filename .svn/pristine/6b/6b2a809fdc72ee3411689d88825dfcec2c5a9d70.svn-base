@@ -1,0 +1,497 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use DB;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\User;
+use App\InternalAudit;
+use Excel;
+use Illuminate\Support\Str;
+
+class InternalAuditController extends Controller
+{
+    function auditor_form(){
+        $ia = new InternalAudit;
+        $data_training2 = $ia->getTrainingData();
+        $list_training = $ia->getRequiredTraining();
+        $get_latest = $ia->getTahunNow();
+        $data_nama = $ia->getNamaData(Auth::user()->username, $get_latest->tahun, $get_latest->rev_no);
+        // $get_info = $ia->getTrainingDataByNpk("05770");
+
+        
+        // return $data_training2;
+        return view('audit._form-auditor', ['get_latest' => $get_latest, 'data_training2' => $data_training2, 'data_nama' => $data_nama, 'list_training' => $list_training]);
+    }
+
+    function add_row_draft(Request $request){
+    
+            // return $getTrainingData;
+            if ($request->ajax()) {
+                try {
+                    DB::beginTransaction();
+                    $msg = "Berhasil disubmit.";
+                    $indicator = "1";
+
+                    DB::table('ia_pic2')
+                    ->insert([
+                        'tahun' => $request->tahun,
+                        'rev_no' => $request->rev,
+                        'npk' => $request->npk,
+                        'remark' => $request->remark
+                    ]);
+
+                    $info_npk = new InternalAudit;
+                    $get_info = $info_npk->getTrainingDataByNpk($request->npk);
+                    
+                    DB::commit();
+
+
+                    return response()->json(['npk_data' => $getTrainingData, 'msg' => $msg, 'indicator' => $indicator]);
+
+                } catch (Exception $ex) {
+                    DB::rollback();
+                    $msg = "Gagal submit! Hubungi Admin.";
+                    $indicator = "0";
+                    $info_npk = new InternalAudit;
+                    $get_info = $info_npk->getTrainingDataByNpk($request->npk);
+                
+                    return response()->json(['test'=>$get_info ,'msg' => $msg, 'indicator' => $indicator]);
+            }
+        } else {
+            return view('errors.403');
+        }
+        
+    }
+
+    function delete_row_draft(Request $request){
+    
+        // return $getTrainingData;
+        if ($request->ajax()) {
+            try {
+                DB::beginTransaction();
+                $msg = "Berhasil disubmit.";
+                $indicator = "1";
+
+                DB::table('ia_pic2')
+                ->where([
+                    ['npk', 'like', $request->npk],
+                    ['tahun', 'like', $request->tahun],
+                    ['rev_no', 'like', $request->rev],
+                    ])
+                ->delete();
+                
+                DB::commit();
+
+                return response()->json(['msg' => $msg, 'indicator' => $indicator]);
+
+            } catch (Exception $ex) {
+                DB::rollback();
+                $msg = "Gagal submit! Hubungi Admin.";
+                $indicator = "0";
+            
+                return response()->json(['msg' => $msg, 'indicator' => $indicator]);
+        }
+    } else {
+        return view('errors.403');
+    }
+    
+}
+
+public function edit_remark(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+            $msg = "Berhasil disubmit.";
+            $indicator = "1";
+            
+            DB::table('ia_pic2')
+            ->where([
+                ['npk', 'like', $request->npk],
+                ['tahun', 'like', $request->tahun],
+                ['rev_no', 'like', $request->rev],
+                ])           
+            ->update(['remark' => $request->remark]);
+            
+            DB::commit();
+
+            return response()->json(['msg' => $msg, 'indicator' => $indicator]);
+
+        } catch (Exception $ex) {
+            DB::rollback();
+            $msg = $ex;
+            $indctr = "0";
+            return response()->json(['msg' => $msg, 'indicator' => $indicator]);
+        }       
+
+    }
+
+public function save_not_draft(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+            $msg = "Berhasil disubmit.";
+            $indicator = "1";
+            
+            DB::table('ia_pic1')
+            ->where([
+                ['tahun', 'like', $request->tahun],
+                ['rev_no', 'like', $request->rev],
+                ])           
+            ->update(['rev_no' => substr($request->rev, 0, 2)]);
+            
+            DB::table('ia_pic2')
+            ->where([
+                ['tahun', 'like', $request->tahun],
+                ['rev_no', 'like', $request->rev],
+                ])           
+            ->update(['rev_no' => substr($request->rev, 0, 2)]);
+            
+            DB::commit();
+
+            return response()->json(['msg' => $msg, 'indicator' => $indicator]);
+
+        } catch (Exception $ex) {
+            DB::rollback();
+            $msg = $ex;
+            $indctr = "0";
+            return response()->json(['msg' => $msg, 'indicator' => $indicator]);
+    }
+
+    }
+
+    public function edit_new_rev(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+            $msg = "Berhasil disubmit.";
+            $indicator = "1";
+
+            $eachdata_training = DB::table('ia_pic2')
+            ->where([
+                ['tahun', 'like', $request->tahun],
+                ['rev_no', 'like', $request->rev],
+                ])
+            ->orderBy('rev_no', 'desc')                   
+            ->get();
+
+            $get_latest = DB::table('ia_pic1')
+            ->where([
+                ['tahun', 'like', $request->tahun],
+                ['rev_no', 'like', $request->rev],
+                ])
+            ->orderBy('rev_no', 'desc')        
+            ->first();
+
+            $tahun1 = Carbon::now()->format('Y');
+            $rev_no1 = str_pad($get_latest->rev_no + 1, 2, 0, STR_PAD_LEFT);
+
+            DB::table('ia_pic1')
+            ->insert([
+            'tahun' => $tahun1,
+            'rev_no' => $rev_no1.'_D',
+            'npk_prepared'  => Auth::user()->username,
+            'date'  => Carbon::now(),
+            ]);
+            
+            $eachdata = DB::table('ia_pic2')
+            ->where([
+                ['tahun', 'like', $request->tahun],
+                ['rev_no', 'like', $request->rev],
+                ])           
+            ->get();
+            
+            foreach ($eachdata as $data){
+                $tahun2 = Carbon::now()->format('Y');
+                $rev_no2 = str_pad($data->rev_no + 1, 2, 0, STR_PAD_LEFT);
+                DB::table('ia_pic2')
+                ->insert([
+                'tahun' => $tahun2,
+                'rev_no' => $rev_no2.'_D',
+                'npk'  => $data->npk,
+                'remark'  => $data->remark,
+                ]);
+            }
+            
+            DB::commit();
+
+            return response()->json(['msg' => $msg, 'indicator' => $indicator]);
+
+        } catch (Exception $ex) {
+            DB::rollback();
+            $msg = $ex;
+            $indctr = "0";
+            return response()->json(['msg' => $msg, 'indicator' => $indicator]);
+    }
+
+    }
+
+    public function daftar_auditor(){
+        $ia = new InternalAudit;
+        $data_training2 = $ia->getTrainingData2();
+        $list_training = $ia->getRequiredTraining();
+        $get_latest = $ia->getTahunNow2();
+        $data_nama = $ia->getNamaData2(Auth::user()->username, $get_latest->tahun, $get_latest->rev_no);
+        $get_info = $ia->getTrainingDataByNpk("05770");
+
+        
+        // return $data_training2;
+        return view('audit.report.daftar-auditor', ['get_latest' => $get_latest, 'data_training2' => $data_training2, 'data_nama' => $data_nama, 'list_training' => $list_training]);
+    
+    }
+
+    public function turtle_form(){
+        
+        $ia = new InternalAudit;
+        $get_last_td = $ia->getLastTD();
+        
+        if($get_last_td == null){
+            DB::table('ia_mas_tdiagram')       
+            ->insert([
+                'kd_td' => 'TURTLE01',
+                'date' => Carbon::now(),
+                'npk_prepared' => Auth::user()->username,
+                'td_name' => 'TURTLE DIAGRAM DEFAULT',
+                ]);
+
+            DB::table('ia_tdiagram_content')       
+            ->insert([
+                'kd_td' => 'TURTLE01',
+                ]);
+            
+            $get_last_td = $ia->getLastTD();
+            $get_all_td = $ia->getAllListTD();
+            $get_npk_reviewed = $ia->getNPKReviewed($get_last_td->kd_td);
+        } else {
+            $get_last_td = $ia->getLastTD();
+            $get_all_td = $ia->getAllListTD();
+            $get_npk_reviewed = $ia->getNPKReviewed($get_last_td->kd_td);
+
+        }
+
+
+        // return $get_last_td;
+        return view('audit.turtlediagram._form-turtle', ['last_td' => $get_last_td, 'all_td' => $get_all_td, 'all_review' => $get_npk_reviewed]);
+
+    }
+
+    public function turtle_form_load($kd){
+        $ia = new InternalAudit;
+        $get_selected_td = $ia->getSelectedData($kd);
+        $get_all_td = $ia->getAllListTD();
+
+        // return $get_last_td;
+
+        return view('audit.turtlediagram._form-turtle', ['last_td' => $get_selected_td, 'all_td' => $get_all_td]);
+    }
+
+    public function create_turtle(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+            $msg = "Berhasil disubmit.";
+            $indicator = "1";
+
+            $latest_kd = DB::table('ia_mas_tdiagram')
+            ->select('kd_td')
+            ->orderBy('kd_td', 'desc')
+            ->first();
+
+            $lastincrement = substr($latest_kd->kd_td, -2);
+            $latest_kds = 'TURTLE' . str_pad($lastincrement + 1, 2, 0, STR_PAD_LEFT);
+            
+            DB::table('ia_mas_tdiagram')       
+            ->insert([
+                'kd_td' => $latest_kds.'_D',
+                'date' => Carbon::now(),
+                'npk_prepared' => Auth::user()->username,
+                'td_name' => $request->nama,
+                ]);
+
+            DB::table('ia_tdiagram_content')       
+            ->insert([
+                'kd_td' => $latest_kds.'_D',
+                ]);
+            
+            DB::commit();
+
+            return response()->json(['msg' => $msg, 'indicator' => $indicator]);
+
+        } catch (Exception $ex) {
+            DB::rollback();
+            $msg = $ex;
+            $indctr = "0";
+            return response()->json(['msg' => $msg, 'indicator' => $indicator]);
+        }       
+
+    }
+
+    public function edit_turtle(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+            $msg = "Berhasil disubmit.";
+            $indicator = "1";
+            
+            DB::table('ia_tdiagram_content')
+            ->where([
+                ['kd_td', 'like', $request->kd_td],
+                ])           
+            ->update([$request->column => $request->content]);
+            
+            DB::commit();
+
+            return response()->json(['msg' => $msg, 'indicator' => $indicator]);
+
+        } catch (Exception $ex) {
+            DB::rollback();
+            $msg = $ex;
+            $indctr = "0";
+            return response()->json(['msg' => $msg, 'indicator' => $indicator]);
+        }       
+
+    }
+
+    public function save_turtle(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+            $msg = "Berhasil disubmit.";
+            $indicator = "1";
+            
+            DB::table('ia_tdiagram_content')
+            ->where([
+                ['kd_td', 'like', $request->kd_td],
+                ])           
+            ->update([
+                'kd_td' => substr($request->kd_td, 0, 8),
+                'what_content' => $request->c_what,
+                'risk_content' => $request->c_risk,
+                'who_content' => $request->c_who,
+                'input_content' => $request->c_input,
+                'process_content' => $request->c_process,
+                'output_content' => $request->c_output,
+                'how_content' => $request->c_how,
+                'supporting_content' => $request->c_supporting,
+                'result_content' => $request->c_result,
+            ]);
+
+            DB::table('ia_mas_tdiagram')
+            ->where([
+                ['kd_td', 'like', $request->kd_td],
+                ])           
+            ->update([
+                'kd_td' => substr($request->kd_td, 0, 8)
+            ]);
+            
+            DB::commit();
+
+            return response()->json(['msg' => $msg, 'indicator' => $indicator]);
+
+        } catch (Exception $ex) {
+            DB::rollback();
+            $msg = $ex;
+            $indctr = "0";
+            return response()->json(['msg' => $msg, 'indicator' => $indicator]);
+        }
+    }
+
+    public function delete_turtle(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+            $msg = "Berhasil disubmit.";
+            $indicator = "1";
+            
+            DB::table('ia_tdiagram_content')
+            ->where([
+                ['kd_td', 'like', $request->kd_td],
+                ])           
+            ->delete();
+
+            DB::table('ia_mas_tdiagram')
+            ->where([
+                ['kd_td', 'like', $request->kd_td],
+                ])           
+            ->delete();
+
+            DB::table('ia_tdiagram_content')
+            ->where([
+                ['kd_td', 'like', $request->kd_td],
+                ])           
+            ->delete();
+            
+            DB::commit();
+
+            return response()->json(['msg' => $msg, 'indicator' => $indicator]);
+
+        } catch (Exception $ex) {
+            DB::rollback();
+            $msg = $ex;
+            $indctr = "0";
+            return response()->json(['msg' => $msg, 'indicator' => $indicator]);
+        }
+    }
+
+    public function rename_turtle(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+            $msg = "Berhasil disubmit.";
+            $indicator = "1";
+            
+            DB::table('ia_mas_tdiagram')
+            ->where([
+                ['kd_td', 'like', $request->kd_td],
+                ])           
+            ->update(['td_name' => $request->nama]);
+            
+            DB::commit();
+
+            return response()->json(['msg' => $msg, 'indicator' => $indicator]);
+
+        } catch (Exception $ex) {
+            DB::rollback();
+            $msg = $ex;
+            $indctr = "0";
+            return response()->json(['msg' => $msg, 'indicator' => $indicator]);
+        }       
+
+    }
+
+    public function add_review_turtle(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+            $msg = "Berhasil disubmit.";
+            $indicator = "1";
+
+            DB::table('ia_tdiagram_review')       
+            ->insert([
+                'kd_td' => $request->kd_td,
+                'npk_reviewed' => $request->npk,
+                ]);
+            
+            DB::commit();
+
+            return response()->json(['msg' => $msg, 'indicator' => $indicator]);
+
+        } catch (Exception $ex) {
+            DB::rollback();
+            $msg = $ex;
+            $indctr = "0";
+            return response()->json(['msg' => $msg, 'indicator' => $indicator]);
+        }       
+
+    }
+    
+}

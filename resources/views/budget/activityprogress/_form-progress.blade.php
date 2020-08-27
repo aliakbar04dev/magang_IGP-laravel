@@ -1,0 +1,218 @@
+{!! Form::hidden('st_submit', null, ['class' => 'form-control', 'readonly' => 'readonly', 'id' => 'st_submit']) !!}
+<div class="box-body">
+  <div class="form-group">
+    <div class="col-sm-2 {{ $errors->has('thn') ? ' has-error' : '' }}">
+      {!! Form::label('thn', 'Year (*)') !!}
+      {!! Form::text('thn', null, ['class'=>'form-control','placeholder' => 'Year', 'disabled'=>'']) !!}
+      {!! $errors->first('thn', '<p class="help-block">:message</p>') !!}
+    </div>
+    <div class="col-sm-2 {{ $errors->has('bln') ? ' has-error' : '' }}">
+      {!! Form::label('bln', 'Month (*)') !!}
+      {!! Form::text('bln', null, ['class'=>'form-control','placeholder' => 'Month', 'disabled'=>'']) !!}
+      {!! $errors->first('bln', '<p class="help-block">:message</p>') !!}
+    </div>
+    <div class="col-sm-4 {{ $errors->has('kd_div') ? ' has-error' : '' }}">
+      {!! Form::label('kd_div', 'Division') !!}
+      {!! Form::text('kd_div', $bgttcrsubmit->kd_div." - ".$bgttcrsubmit->namaDivisi($bgttcrsubmit->kd_div), ['class'=>'form-control','placeholder' => 'Division', 'disabled'=>'']) !!}
+      {!! $errors->first('kd_div', '<p class="help-block">:message</p>') !!}
+    </div>
+    <div class="col-sm-4 {{ $errors->has('kd_dep') ? ' has-error' : '' }}">
+      {!! Form::label('kd_dep', 'Department') !!}
+      {!! Form::text('kd_dep', $bgttcrsubmit->kd_dep." - ".$bgttcrsubmit->namaDepartemen($bgttcrsubmit->kd_dep), ['class'=>'form-control','placeholder' => 'Department', 'disabled'=>'']) !!}
+      {!! $errors->first('kd_dep', '<p class="help-block">:message</p>') !!}
+    </div>
+  </div>
+  <!-- /.form-group -->
+	<div class="form-group">
+		<div class="col-sm-12 {{ $errors->has('nm_aktivitas') ? ' has-error' : '' }}">
+      {!! Form::label('nm_aktivitas', 'Activities Name (*)') !!}
+      {!! Form::text('nm_aktivitas', null, ['class'=>'form-control','placeholder' => 'Activities Name', 'maxlength'=>'200', 'id' => 'nm_aktivitas', 'style' => 'text-transform:uppercase', 'disabled'=>'']) !!}
+      {!! $errors->first('nm_aktivitas', '<p class="help-block">:message</p>') !!}
+    </div>
+	</div>
+	<!-- /.form-group -->
+	<div class="form-group">
+    <div class="col-sm-6 {{ $errors->has('nm_klasifikasi') ? ' has-error' : '' }}">
+      {!! Form::label('nm_klasifikasi', 'Classification (*)') !!}
+      {!! Form::text('nm_klasifikasi', null, ['class'=>'form-control','placeholder' => 'Classification', 'disabled'=>'']) !!}
+      {!! $errors->first('nm_klasifikasi', '<p class="help-block">:message</p>') !!}
+    </div>
+    <div class="col-sm-6 {{ $errors->has('nm_kategori') ? ' has-error' : '' }}">
+      {!! Form::label('nm_kategori', 'Categories (*)') !!}
+      {!! Form::text('nm_kategori', null, ['class'=>'form-control','placeholder' => 'Categories', 'disabled'=>'']) !!}
+      {!! $errors->first('nm_kategori', '<p class="help-block">:message</p>') !!}
+    </div>
+	</div>
+	<!-- /.form-group -->
+  <div class="form-group">
+    <div class="col-sm-3 {{ $errors->has('jml_plan') ? ' has-error' : '' }}">
+      {!! Form::label('jml_plan', 'Man Power (Plan)') !!}
+      {!! Form::text('jml_plan', numberFormatter(0, 0)->format($bgttcrsubmit->jml_plan), ['class'=>'form-control', 'placeholder' => 'Man Power (Plan)', 'style' => 'text-align:right', 'disabled'=>'']) !!}
+      {!! $errors->first('jml_plan', '<p class="help-block">:message</p>') !!}
+    </div>
+    <div class="col-sm-3 {{ $errors->has('amt_plan') ? ' has-error' : '' }}">
+      {!! Form::label('amt_plan', 'Amount (Plan)') !!}
+      {!! Form::text('amt_plan', numberFormatter(0, 2)->format($bgttcrsubmit->amt_plan), ['class'=>'form-control', 'placeholder' => 'Amount (Plan)', 'style' => 'text-align:right', 'disabled'=>'']) !!}
+      {!! $errors->first('amt_plan', '<p class="help-block">:message</p>') !!}
+    </div>
+    <div class="col-sm-3 {{ $errors->has('jml') ? ' has-error' : '' }}">
+      {!! Form::label('jml', 'Man Power (Actual)') !!}
+      @if($bgttcrsubmit->nm_klasifikasi === "MAN") 
+        {!! Form::number('jml', numberFormatterForm(0, 0)->format($bgttcrsubmit->jml), ['class'=>'form-control', 'placeholder' => 'Man Power (Actual)', 'min'=>'0', 'max'=>999, 'step'=>'1', 'onchange' => 'updateRate()', 'style' => 'text-align:right', 'id' => 'jml']) !!}
+      @else 
+        {!! Form::number('jml', numberFormatterForm(0, 0)->format($bgttcrsubmit->jml), ['class'=>'form-control', 'placeholder' => 'Man Power (Actual)', 'min'=>'0', 'max'=>999, 'step'=>'1', 'onchange' => 'updateRate()', 'style' => 'text-align:right', 'id' => 'jml', 'readonly' => 'readonly']) !!}
+      @endif
+      {!! $errors->first('jml', '<p class="help-block">:message</p>') !!}
+    </div>
+    <div class="col-sm-3 {{ $errors->has('amt') ? ' has-error' : '' }}">
+      {!! Form::label('amt', 'Amount (Actual)') !!}
+      @if($bgttcrsubmit->nm_klasifikasi === "MAN") 
+        {!! Form::number('amt', numberFormatterForm(0, 2)->format($bgttcrsubmit->amt), ['class'=>'form-control', 'placeholder' => 'Amount (Actual)', 'min'=>'0', 'max'=>999999999999999999.999999, 'step'=>'any', 'style' => 'text-align:right', 'id' => 'amt', 'readonly' => 'readonly']) !!}
+      @else 
+        {!! Form::number('amt', numberFormatterForm(0, 2)->format($bgttcrsubmit->amt), ['class'=>'form-control', 'placeholder' => 'Amount (Actual)', 'min'=>'0', 'max'=>999999999999999999.999999, 'step'=>'any', 'style' => 'text-align:right', 'id' => 'amt']) !!}
+      @endif
+      {!! $errors->first('amt', '<p class="help-block">:message</p>') !!}
+    </div>
+  </div>
+  <!-- /.form-group -->
+</div>
+<!-- /.box -->
+</div>
+<!-- /.box-body -->
+
+<div class="box-footer">
+  {!! Form::submit('Save as Draft', ['class'=>'btn btn-primary', 'id' => 'btn-save']) !!}
+  &nbsp;&nbsp;
+  <button id="btn-submit" type="button" class="btn btn-success">Save & Submit</button>
+  &nbsp;&nbsp;
+  <a class="btn btn-default" href="{{ route('bgttcrsubmits.index') }}">Cancel</a>
+    &nbsp;&nbsp;<p class="help-block pull-right has-error">{!! Form::label('info', '(*) tidak boleh kosong', ['style'=>'color:red']) !!}</p>
+</div>
+
+@section('scripts')
+<script type="text/javascript">
+  @if($bgttcrsubmit->nm_klasifikasi === "MAN") 
+    document.getElementById("jml").focus();
+  @else
+    document.getElementById("amt").focus();
+  @endif
+
+  //Initialize Select2 Elements
+  $(".select2").select2();
+
+  $("#btn-submit").click(function(){
+    var thn = document.getElementById("thn").value.trim();
+    var bln = document.getElementById("bln").value.trim();
+    var nm_aktivitas = document.getElementById("nm_aktivitas").value;
+    var nm_klasifikasi = document.getElementById("nm_klasifikasi").value.trim();
+    var nm_kategori = document.getElementById("nm_kategori").value.trim();
+
+    if(thn === "" || bln === "" || nm_aktivitas === "" || nm_klasifikasi === "" || nm_kategori === "") {
+      var info = "Isi data yang tidak boleh kosong!";
+      swal(info, "Perhatikan inputan anda!", "warning");
+    } else {
+      var msg = 'Anda yakin submit data ini?';
+      var txt = "Activity: " + nm_aktivitas + ", Tahun: " + thn + ", Bulan: " + bln + ", Classification: " + nm_klasifikasi + ", CR Categories: " + nm_kategori;
+      swal({
+          title: msg,
+          text: txt,
+          type: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: '<i class="fa fa-thumbs-up"></i> Yes, submit it!',
+          cancelButtonText: '<i class="fa fa-thumbs-down"></i> No, cancel!',
+          allowOutsideClick: true,
+          allowEscapeKey: true,
+          allowEnterKey: true,
+          reverseButtons: false,
+          focusCancel: true,
+      }).then(function () {
+          document.getElementById("st_submit").value = "T";
+          document.getElementById("form_id").submit();
+      }, function (dismiss) {
+          if (dismiss === 'cancel') {
+          }
+      })
+    }
+  });
+
+  $('#form_id').submit(function (e, params) {
+  	var localParams = params || {};
+  	if (!localParams.send) {
+  		e.preventDefault();
+
+  		var validasi = "T";
+  		var msg = "";
+
+  		if(validasi !== "T") {
+  			var info = msg;
+  			swal(info, "Perhatikan inputan anda!", "warning");
+  		} else {
+  			var valid = 'T';
+  			var msg = "Anda yakin menyimpan data ini?";
+  			var txt = "";
+
+  			if(valid === 'T') {
+  				swal({
+  					title: msg,
+  					text: txt,
+  					type: 'question',
+  					showCancelButton: true,
+  					confirmButtonColor: '#3085d6',
+  					cancelButtonColor: '#d33',
+  					confirmButtonText: '<i class="fa fa-thumbs-up"></i> Yes, save it!',
+  					cancelButtonText: '<i class="fa fa-thumbs-down"></i> No, cancel!',
+  					allowOutsideClick: true,
+  					allowEscapeKey: true,
+  					allowEnterKey: true,
+  					reverseButtons: false,
+  					focusCancel: false,
+  				}).then(function () {
+  					$(e.currentTarget).trigger(e.type, { 'send': true });
+  				}, function (dismiss) {
+  					if (dismiss === 'cancel') {
+  					}
+  				})
+  			} else {
+  				swal(msg, txt, "warning");
+  			}
+  		}
+  	}
+  });
+	
+  $(document).ready(function(){
+  	
+  });
+
+  function updateRate() {
+    var nm_klasifikasi = document.getElementById("nm_klasifikasi").value;
+    if(nm_klasifikasi === "MAN") {
+      var rate = 0;
+      var bln = document.getElementById("bln").value.trim();
+      bln = Number(bln);
+      var thn = document.getElementById("thn").value.trim();
+      if(thn != "") {
+        var url = '{{ route('datatables.rateMpBudget', 'param') }}';
+        url = url.replace('param', window.btoa(thn));
+        $.get(url, function(result){  
+          if(result !== 'null'){
+            result = JSON.parse(result);
+            rate = result["rate_mp"];
+            rate = Number(rate);
+          }
+          var jml = document.getElementById("jml").value.trim();
+          jml = Number(jml);
+          var amt = (jml*rate*(13-bln)/12).toFixed(2);
+          document.getElementById("amt").value = amt;
+        });
+      } else {
+        var jml = document.getElementById("jml").value.trim();
+        jml = Number(jml);
+        var amt = (jml*rate*(13-bln)/12).toFixed(2);
+        document.getElementById("amt").value = amt;
+      }
+    }
+  }
+</script>
+@endsection

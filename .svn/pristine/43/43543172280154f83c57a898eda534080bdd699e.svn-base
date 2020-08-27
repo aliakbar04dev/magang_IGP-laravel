@@ -1,0 +1,116 @@
+@extends('layouts.app')
+@section('content')
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            Daftar Ditolak Atasan
+            <small>Work Order</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="{{ url('/home') }}"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><i class="fa fa-files-o"></i> Work Order</li>
+            <li class="active"><i class="fa fa-files-o"></i>  Ditolak Atasan</li>
+        </ol>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        @include('layouts._flash')
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    @permission(['it-wo-create'])
+                    <div class="box-header">
+                        <p>
+                            <a class="btn btn-primary" href="{{ route('wos.create') }}">
+                                <span class="fa fa-plus"></span> Add Daftar Work Order
+                            </a>
+                        </p>
+                    </div>
+                    <!-- /.box-header -->
+                    @endpermission
+                
+                    <div class="box-header" center>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary">Lihat Daftar Status WO</button>
+                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                                <span class="caret"></span>
+                                <span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a href="{{ url('workorderstrial/atasanbelumapproval')}}">Belum Diapprove Atasan</a></li>       
+                                <li><a href="{{ url('workorderstrial/atasansudahapproval')}}">Sudah Diapprove Atasan</a></li>                             
+                                <li><a href="{{ url('workorderstrial/atasantolakapproval')}}">Ditolak Atasan</a></li>
+                                <li class="divider"></li>
+                                <li><a href="{{ url('workorderstrial/ITbelumapproval ')}}">Belum Diapprove IT</a></li>       
+                                <li><a href="{{ url('workorderstrial/ITsudahapproval ')}}">Sudah Diapprove IT</a></li>                             
+                                <li><a href="{{ url('workorderstrial/ITtolakapproval ')}}">Ditolak IT</a></li>
+                                <li class="divider"></li>
+                                <li><a href="{{ url('workorderstrial/sudahclosing ')}}">Sudah Close</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                   
+                    <div class="box-body">
+                    <div>
+                        @if (session('status'))
+                        <div class="alert alert-success" role="alert">
+                            {{ session('status') }}
+                        </div>
+                        @endif
+
+                        @if (count($errors) > 0)
+                        <div class="alert alert-danger">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        @endif
+                        <table id="datatables" class="table table-hover table-bordered table-striped" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Nomor WO</th>
+                                    <th>Jenis Pengajuan</th>
+                                    <th>Action</th>                         
+                                </tr>
+                            </thead>   
+                        </table>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+            </div>
+            <!-- /.col -->
+        </div>
+        <!-- /.row -->
+    </section>
+    <!-- /.content -->
+</div>
+<!-- /.content-wrapper -->
+@endsection
+
+@section('scripts')
+<script>
+        $(document).ready(function () {
+            var table = $('#datatables').DataTable({
+            
+              processing: true,
+              searching: true,
+              ajax: {
+                url: '{{ url("/workorderstrial/atasantolakapproval") }}'
+              },
+              "order": [[ 0, "desc" ]],
+              responsive: true,
+              columns: [               
+                {data: 'nowo', name: 'wo_it.nowo'}, 
+                {data: 'ketwo', name: 'wo_kode.ketwo'},
+                {data: 'action', name: 'action', orderable:false, searchable:false},
+              ],
+                });      
+              });
+</script>
+@endsection 

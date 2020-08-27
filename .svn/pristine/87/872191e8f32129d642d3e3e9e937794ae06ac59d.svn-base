@@ -1,0 +1,94 @@
+@if (strlen(Auth::user()->username) == 5)
+  @permission(['hr-*','hrd-*'])
+    <li class="header">HR NAVIGATION</li>
+    @permission(['hrd-kpi-*'])
+      <li class="treeview">
+        <a href="#">
+          <i class="fa fa-files-o"></i> <span>KPI</span>
+          <span class="pull-right-container">
+            <i class="fa fa-angle-left pull-right"></i>
+          </span>
+        </a>
+        <ul class="treeview-menu">
+        @permission(['hrd-kpi-view'])
+          <li class="{{ route('hrdtkpis.index') == request()->url() ? 'active' : '' }}">
+            <a href="{{ route('hrdtkpis.index') }}"><i class="fa fa-circle-o"></i>KPI Division</a>
+          </li>
+        @endpermission
+        @permission(['hrd-kpi-approve','hrd-kpi-reject'])
+          <li class="{{ route('hrdtkpis.approval') == request()->url() ? 'active' : '' }}">
+            <a href="{{ route('hrdtkpis.approval') }}"><i class="fa fa-circle-o"></i>KPI DIV - Approval Superior</a>
+          </li>
+        @endpermission
+        @permission(['hrd-kpi-approvehrd','hrd-kpi-rejecthrd'])
+          <li class="{{ route('hrdtkpis.approvalhrd') == request()->url() ? 'active' : '' }}">
+            <a href="{{ route('hrdtkpis.approvalhrd') }}"><i class="fa fa-circle-o"></i>KPI DIV - Approval HRD</a>
+          </li>
+        @endpermission
+        </ul>
+      </li>
+    @endpermission
+    @permission(['hrd-idp-*'])
+      <li class="treeview">
+        <a href="#">
+          <i class="fa fa-files-o"></i> <span>IDP</span>
+          <span class="pull-right-container">
+            <i class="fa fa-angle-left pull-right"></i>
+          </span>
+        </a>
+        <ul class="treeview-menu">
+        @permission(['hrd-idp-view'])
+          <li class="{{ route('hrdtidp1s.index') == request()->url() ? 'active' : '' }}">
+            <a href="{{ route('hrdtidp1s.index') }}"><i class="fa fa-circle-o"></i>IDP Section Head</a>
+          </li>
+        @endpermission
+        @permission(['hrd-idp-approve-div','hrd-idp-reject-div'])
+          <li class="{{ route('hrdtidp1s.approval') == request()->url() ? 'active' : '' }}">
+            <a href="{{ route('hrdtidp1s.approval') }}"><i class="fa fa-circle-o"></i>IDP SH - Approval Divisi</a>
+          </li>
+        @endpermission
+        @permission(['hrd-idp-approve-hrd','hrd-idp-reject-hrd'])
+          <li class="{{ route('hrdtidp1s.approvalhrd') == request()->url() ? 'active' : '' }}">
+            <a href="{{ route('hrdtidp1s.approvalhrd') }}"><i class="fa fa-circle-o"></i>IDP SH - Approval HRD</a>
+          </li>
+        @endpermission
+        @permission(['hrd-idpdep-view'])
+          <li class="{{ route('hrdtidpdep1s.index') == request()->url() ? 'active' : '' }}">
+            <a href="{{ route('hrdtidpdep1s.index') }}"><i class="fa fa-circle-o"></i>IDP Dept Head</a>
+          </li>
+        @endpermission
+        @permission(['hrd-idpdep-approve-hrd','hrd-idpdep-reject-hrd'])
+          <li class="{{ route('hrdtidpdep1s.approvalhrd') == request()->url() ? 'active' : '' }}">
+            <a href="{{ route('hrdtidpdep1s.approvalhrd') }}"><i class="fa fa-circle-o"></i>IDP Dept - Approval HRD</a>
+          </li>
+        @endpermission
+        </ul>
+      </li>
+    @endpermission
+    @permission(['hr-mobile-*'])
+      <li class="treeview">
+        <a href="#">
+          <i class="glyphicon glyphicon-phone"></i> <span>MOBILE</span>
+          <span class="pull-right-container">
+            <i class="fa fa-angle-left pull-right"></i>
+          </span>
+        </a>
+        <ul class="treeview-menu">
+        @permission(['hr-mobile-pk-view'])
+          <li class="{{ route('mobiles.pk') == request()->url() ? 'active' : '' }}">
+            <a href="{{ route('mobiles.pk') }}"><i class="fa fa-circle-o"></i>PK</a>
+          </li>
+        @endpermission
+        @permission(['hr-mobile-gaji-view'])
+          <li class="{{ route('mobiles.gaji') == request()->url() ? 'active' : '' }}">
+            <a href="{{ route('mobiles.gaji') }}"><i class="fa fa-circle-o"></i>Gaji & Lembur</a>
+          </li>
+          <li class="{{ route('mobiles.gajipokok') == request()->url() ? 'active' : '' }}">
+            <a href="{{ route('mobiles.gajipokok') }}"><i class="fa fa-circle-o"></i>Gaji Pokok</a>
+          </li>
+        @endpermission
+        </ul>
+      </li>
+    @endpermission
+  @endpermission
+@endif

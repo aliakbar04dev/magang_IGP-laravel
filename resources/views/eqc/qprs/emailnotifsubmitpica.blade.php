@@ -1,0 +1,40 @@
+<p>
+	{{ salam() }},
+</p>
+
+<p>
+	Kepada: <strong>{{ $qpr->namaSupp($qpr->kd_supp) }} ({{ $qpr->kd_supp }})</strong>
+</p>
+
+<p>
+	Berikut Informasi mengenai QPR dengan No: <strong>{{ $qpr->issue_no }}</strong>
+</p>
+
+<p>
+	<strong>Mohon Segera dibuatkan PICA dan di-SUBMIT ke {{ strtoupper(config('app.nm_pt', 'Laravel')) }}.</strong>
+</p>
+
+@if(!empty($qpr->portal_pict))
+<p>
+	Untuk melihat detail QPR tsb silahkan masuk ke <a href="{{ $login = str_replace('iaess','vendor', url('login')) }}">{{ str_replace('iaess','vendor', $login) }}</a> atau download melalui link <a href="{{ str_replace('iaess','vendor', route('qprs.downloadqpr', [base64_encode($qpr->kd_supp), base64_encode($qpr->issue_no)])) }}">Download File QPR</a>.
+</p>
+@else
+<p>
+	Untuk melihat detail QPR tsb silahkan masuk ke <a href="{{ $login = str_replace('iaess','vendor', url('login')) }}">{{ str_replace('iaess','vendor', $login) }}</a>.
+</p>
+@endif
+
+<p>
+	Terima kasih atas perhatian dan kerjasamanya.
+</p>
+
+<p>
+	Salam,<br><br>
+	{{ strtoupper(config('app.nm_pt', 'Laravel')) }}
+</p>
+
+<p>
+	********************************************************************************************************<br>
+	<strong>Note: Mohon untuk tidak membalas email ini, karena email ini dikirim dari Aplikasi.</strong><br>
+	********************************************************************************************************
+</p>

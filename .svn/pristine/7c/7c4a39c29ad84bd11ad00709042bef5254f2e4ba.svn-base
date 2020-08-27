@@ -1,0 +1,415 @@
+@extends('monitoring.mtc.layouts.app3')
+<style type="text/css">
+  #field_data { 
+    height: 100%; 
+    overflow-y: scroll;
+    overflow-x: hidden;
+  }
+</style>
+@section('content')
+  <div class="container2">
+    <div class="row" id="box-body" name="box-body">
+      <div class="col-md-12">
+        <div class="box">
+          <div class="box-header with-border">
+            <center><h3 class="box-title" id="box-title" name="box-title" style="font-family:serif;font-size: 30px;"><strong>DAILY ACTIVITY ZONE IGP-{{ $kd_plant }} ZONA {{ $lok_zona }}<br>TANGGAL: {{ \Carbon\Carbon::now()->format('d F Y') }}</strong></h3></center>
+            <div class="box-tools pull-right">
+              <button id="btn-close" name="btn-close" class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="Close" onclick="window.open('', '_self', ''); window.close();">
+                <span class="glyphicon glyphicon-remove"></span>
+              </button>
+            </div>
+          </div>
+          <!-- /.box-header -->
+          
+          <div id="field_data">
+            <div class="box-body">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="box box-primary">
+                    <div class="box-header with-border">
+                      <h3 class="box-title">
+                        <p><label id="info-detail">PMS Outstanding</label></p>
+                      </h3>
+                      <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-success btn-sm" data-widget="collapse">
+                          <i class="fa fa-minus"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                      <table id="tblMaster" class="table table-bordered table-striped" cellspacing="0" width="100%">
+                        <thead>
+                          <tr>
+                            <th style="width: 1%;">No</th>
+                            <th style="width: 15%;">Mesin</th>
+                            <th>Item Pengerjaan</th>
+                            <th style="width: 10%;">Tanggal</th>
+                            <th style="width: 15%;">No. LP</th>
+                            <th style="width: 15%;">No. DM</th>
+                            <th>No. PMS</th>
+                            <th>No. MS</th>
+                            <th>Plant</th>
+                            <th>Zona</th>
+                            <th>Periode</th>
+                            <th>PIC Tarik</th>
+                            <th>PIC Pending</th>
+                            <th>Ket. Pending</th>
+                          </tr>
+                        </thead>
+                      </table>
+                    </div>
+                    <!-- /.box-body -->
+                  </div>
+                  <!-- /.box -->
+                </div>
+                <!-- /.col -->
+              </div>
+              <!-- /.row -->
+            </div>
+            <!-- /.box-body -->
+            <div class="box-body">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="box box-primary">
+                    <div class="box-header with-border">
+                      <h3 class="box-title">
+                        <p><label id="info-detail">PMS Today</label></p>
+                      </h3>
+                      <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-success btn-sm" data-widget="collapse">
+                          <i class="fa fa-minus"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                      <table id="tblCurrent" class="table table-bordered table-striped" cellspacing="0" width="100%">
+                        <thead>
+                          <tr>
+                            <th style="width: 1%;">No</th>
+                            <th style="width: 15%;">Mesin</th>
+                            <th>Item Pengerjaan</th>
+                            <th style="width: 10%;">Tanggal</th>
+                            <th style="width: 15%;">No. LP</th>
+                            <th style="width: 15%;">No. DM</th>
+                            <th>No. PMS</th>
+                            <th>No. MS</th>
+                            <th>Plant</th>
+                            <th>Zona</th>
+                            <th>Periode</th>
+                            <th>PIC Tarik</th>
+                            <th>PIC Pending</th>
+                            <th>Ket. Pending</th>
+                          </tr>
+                        </thead>
+                      </table>
+                    </div>
+                    <!-- /.box-body -->
+                  </div>
+                  <!-- /.box -->
+                </div>
+                <!-- /.col -->
+              </div>
+              <!-- /.row -->
+            </div>
+            <!-- /.box-body -->
+            <div class="box-body">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="box box-primary">
+                    <div class="box-header with-border">
+                      <h3 class="box-title">
+                        <p><label id="info-detail">Daftar Masalah</label></p>
+                      </h3>
+                      <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-success btn-sm" data-widget="collapse">
+                          <i class="fa fa-minus"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                      <table id="tblDm" class="table table-bordered table-striped" cellspacing="0" width="100%">
+                        <thead>
+                          <tr>
+                            <th style="width: 1%;">No</th>
+                            <th>Mesin</th>
+                            <th style="width: 25%;">Counter Measure</th>
+                            <th style="width: 10%;">Tgl Plan</th>
+                            <th style="width: 15%;">No. LP</th>
+                            <th style="width: 15%;">No. DM</th>
+                            <th>Tanggal DM</th>
+                            <th>Plant</th>
+                          </tr>
+                        </thead>
+                      </table>
+                    </div>
+                    <!-- /.box-body -->
+                  </div>
+                  <!-- /.box -->
+                </div>
+                <!-- /.col -->
+              </div>
+              <!-- /.row -->
+            </div>
+            <!-- /.box-body -->
+            <div class="box-body">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="box box-primary">
+                    <div class="box-header with-border">
+                      <h3 class="box-title">
+                        <p><label id="info-detail">Daftar CMS</label></p>
+                      </h3>
+                      <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-success btn-sm" data-widget="collapse">
+                          <i class="fa fa-minus"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                      <table id="tblCms" class="table table-bordered table-striped" cellspacing="0" width="100%">
+                        <thead>
+                          <tr>
+                            <th style="width: 1%;">No</th>
+                            <th>Mesin</th>
+                            <th style="width: 25%;">Counter Measure</th>
+                            <th style="width: 10%;">Tgl Plan</th>
+                            <th style="width: 15%;">No. LP</th>
+                            <th style="width: 15%;">No. DM</th>
+                            <th>Tanggal DM</th>
+                            <th>Plant</th>
+                          </tr>
+                        </thead>
+                      </table>
+                    </div>
+                    <!-- /.box-body -->
+                  </div>
+                  <!-- /.box -->
+                </div>
+                <!-- /.col -->
+              </div>
+              <!-- /.row -->
+            </div>
+            <!-- /.box-body -->
+            <div class="box-body">
+            </div>
+            <div class="box-body">
+            </div>
+            <div class="box-body">
+            </div>
+          </div>
+          <!-- /.field_data -->
+        </div>
+        <!-- /.box -->
+      </div>
+      <!-- /.col -->
+    </div>
+    <!-- /.row -->
+  </div>
+  <footer style="background-color:white; min-height:50px;" class="navbar-fixed-bottom">
+      <center>
+        <a href="{{ route('smartmtcs.dashboardmtc2') }}" class="btn bg-navy">Home</a>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="{{ route('smartmtcs.dailyactivity') }}" class="btn bg-navy">Back</a>
+  </center>
+    </footer>
+@endsection
+
+@section('scripts')
+<script type="text/javascript">
+
+  var calcDataTableHeight = function() {
+    return $(window).height() * 30 / 100;
+  };
+
+  $(document).ready(function(){
+    var kd_plant = "{{ $kd_plant }}";
+    var lok_zona = "{{ $lok_zona }}";
+
+    var urlMaster = '{{ route('smartmtcs.dashboardmtctpms', ['param', 'param2', 'param3']) }}';
+    urlMaster = urlMaster.replace('param3', window.btoa(lok_zona));
+    urlMaster = urlMaster.replace('param2', window.btoa(kd_plant));
+    urlMaster = urlMaster.replace('param', window.btoa("OUTSTANDING"));
+    var tableMaster = $('#tblMaster').DataTable({
+      "columnDefs": [{
+        "searchable": false,
+        "orderable": false,
+        "targets": 0,
+        render: function (data, type, row, meta) {
+          return meta.row + meta.settings._iDisplayStart + 1;
+        }
+      }],
+      "aLengthMenu": [[5, 10, 25, 50, 75, 100, -1], [5, 10, 25, 50, 75, 100, "All"]],
+      "iDisplayLength": -1,
+      responsive: true,
+      "scrollY": calcDataTableHeight(),
+      "scrollCollapse": true,
+      "order": [[10, 'asc'],[1, 'asc'],[7, 'asc']],
+      processing: true, 
+      "oLanguage": {
+        'sProcessing': '<div id="processing" style="margin: 0px; padding: 0px; position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; background-color: rgb(102, 102, 102); z-index: 30001; opacity: 0.8;"><p style="position: absolute; color: White; top: 50%; left: 45%;"><img src="{{ asset('images/ajax-loader.gif') }}"></p></div>Processing...'
+      }, 
+      "dom": '<"top"fli>rt<"clear">', 
+      serverSide: true,
+      ajax: urlMaster, 
+      columns: [
+        {data: null, name: null},
+        {data: 'kd_mesin', name: 'kd_mesin'},
+        {data: 'nm_ic', name: 'nm_ic'},
+        {data: 'nm_tgl', name: 'nm_tgl', className: "dt-center"},
+        {data: 'no_lp', name: 'no_lp'},
+        {data: 'no_dm', name: 'no_dm'},
+        {data: 'no_pms', name: 'no_pms', className: "none"},
+        {data: 'no_ms', name: 'no_ms', className: "none"},
+        {data: 'kd_plant', name: 'kd_plant', className: "none"},
+        {data: 'lok_zona', name: 'lok_zona', className: "none"},
+        {data: 'periode', name: 'periode', className: "none"},
+        {data: 'pic_tarik', name: 'pic_tarik', className: "none"},
+        {data: 'pending_pic', name: 'pending_pic', className: "none"},
+        {data: 'pending_ket', name: 'pending_ket', className: "none"}
+      ], 
+    });
+
+    $('#tblMaster tbody').on( 'click', 'tr', function () {
+      if ($(this).hasClass('selected') ) {
+        $(this).removeClass('selected');
+      } else {
+        tableMaster.$('tr.selected').removeClass('selected');
+        $(this).addClass('selected');
+      }
+    });
+
+    var urlCurrent = '{{ route('smartmtcs.dashboardmtctpms', ['param', 'param2', 'param3']) }}';
+    urlCurrent = urlCurrent.replace('param3', window.btoa(lok_zona));
+    urlCurrent = urlCurrent.replace('param2', window.btoa(kd_plant));
+    urlCurrent = urlCurrent.replace('param', window.btoa("CURRENT"));
+    var tableCurrent = $('#tblCurrent').DataTable({
+      "columnDefs": [{
+        "searchable": false,
+        "orderable": false,
+        "targets": 0,
+      render: function (data, type, row, meta) {
+        return meta.row + meta.settings._iDisplayStart + 1;
+      }
+      }],
+      "aLengthMenu": [[5, 10, 25, 50, 75, 100, -1], [5, 10, 25, 50, 75, 100, "All"]],
+      "iDisplayLength": -1,
+      responsive: true,
+      "scrollY": calcDataTableHeight(),
+      "scrollCollapse": true,
+      "order": [[10, 'asc'],[1, 'asc'],[7, 'asc']],
+      processing: true, 
+      "oLanguage": {
+        'sProcessing': '<div id="processing" style="margin: 0px; padding: 0px; position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; background-color: rgb(102, 102, 102); z-index: 30001; opacity: 0.8;"><p style="position: absolute; color: White; top: 50%; left: 45%;"><img src="{{ asset('images/ajax-loader.gif') }}"></p></div>Processing...'
+      }, 
+      "dom": '<"top"fli>rt<"clear">', 
+      serverSide: true,
+      ajax: urlCurrent, 
+      columns: [
+        {data: null, name: null},
+        {data: 'kd_mesin', name: 'kd_mesin'},
+        {data: 'nm_ic', name: 'nm_ic'},
+        {data: 'nm_tgl', name: 'nm_tgl', className: "dt-center"},
+        {data: 'no_lp', name: 'no_lp'},
+        {data: 'no_dm', name: 'no_dm'},
+        {data: 'no_pms', name: 'no_pms', className: "none"},
+        {data: 'no_ms', name: 'no_ms', className: "none"},
+        {data: 'kd_plant', name: 'kd_plant', className: "none"},
+        {data: 'lok_zona', name: 'lok_zona', className: "none"},
+        {data: 'periode', name: 'periode', className: "none"},
+        {data: 'pic_tarik', name: 'pic_tarik', className: "none"},
+        {data: 'pending_pic', name: 'pending_pic', className: "none"},
+        {data: 'pending_ket', name: 'pending_ket', className: "none"}
+      ], 
+    });
+
+    $('#tblCurrent tbody').on( 'click', 'tr', function () {
+      if ($(this).hasClass('selected') ) {
+        $(this).removeClass('selected');
+      } else {
+        tableCurrent.$('tr.selected').removeClass('selected');
+        $(this).addClass('selected');
+      }
+    });
+
+    var urlDm = '{{ route('smartmtcs.dashboarddmmtctpms', ['param', 'param2', 'param3']) }}';
+    urlDm = urlDm.replace('param3', window.btoa(lok_zona));
+    urlDm = urlDm.replace('param2', window.btoa(kd_plant));
+    urlDm = urlDm.replace('param', window.btoa("F"));
+    var tableDm = $('#tblDm').DataTable({
+      "columnDefs": [{
+        "searchable": false,
+        "orderable": false,
+        "targets": 0,
+      render: function (data, type, row, meta) {
+        return meta.row + meta.settings._iDisplayStart + 1;
+      }
+      }],
+      "aLengthMenu": [[5, 10, 25, 50, 75, 100, -1], [5, 10, 25, 50, 75, 100, "All"]],
+      "iDisplayLength": -1,
+      responsive: true,
+      "scrollY": calcDataTableHeight(),
+      "scrollCollapse": true,
+      "order": [[3, 'desc'],[1, 'desc']],
+      processing: true,  
+      "oLanguage": {
+        'sProcessing': '<div id="processing" style="margin: 0px; padding: 0px; position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; background-color: rgb(102, 102, 102); z-index: 30001; opacity: 0.8;"><p style="position: absolute; color: White; top: 50%; left: 45%;"><img src="{{ asset('images/ajax-loader.gif') }}"></p></div>Processing...'
+      }, 
+      "dom": '<"top"fli>rt<"clear">', 
+      serverSide: true,
+      ajax: urlDm,
+      columns: [
+        {data: null, name: null},
+        {data: 'mesin', name: 'mesin'},
+        {data: 'ket_cm', name: 'ket_cm'},
+        {data: 'tgl_plan_mulai', name: 'tgl_plan_mulai', className: "dt-center"},
+        {data: 'no_lp', name: 'no_lp', orderable: false, searchable: false},
+        {data: 'no_dm', name: 'no_dm'},
+        {data: 'tgl_dm', name: 'tgl_dm', className: "none"},
+        {data: 'kd_plant', name: 'kd_plant', className: "none"}
+      ]
+    });
+
+    var urlCms = '{{ route('smartmtcs.dashboarddmmtctpms', ['param', 'param2', 'param3']) }}';
+    urlCms = urlCms.replace('param3', window.btoa(lok_zona));
+    urlCms = urlCms.replace('param2', window.btoa(kd_plant));
+    urlCms = urlCms.replace('param', window.btoa("T"));
+    var tableCms = $('#tblCms').DataTable({
+      "columnDefs": [{
+        "searchable": false,
+        "orderable": false,
+        "targets": 0,
+        render: function (data, type, row, meta) {
+          return meta.row + meta.settings._iDisplayStart + 1;
+        }
+      }],
+      "aLengthMenu": [[5, 10, 25, 50, 75, 100, -1], [5, 10, 25, 50, 75, 100, "All"]],
+      "iDisplayLength": -1,
+      responsive: true,
+      "scrollY": calcDataTableHeight(),
+      "scrollCollapse": true,
+      "order": [[3, 'desc'],[1, 'desc']],
+      processing: true, 
+      "oLanguage": {
+        'sProcessing': '<div id="processing" style="margin: 0px; padding: 0px; position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; background-color: rgb(102, 102, 102); z-index: 30001; opacity: 0.8;"><p style="position: absolute; color: White; top: 50%; left: 45%;"><img src="{{ asset('images/ajax-loader.gif') }}"></p></div>Processing...'
+      }, 
+      "dom": '<"top"fli>rt<"clear">', 
+      serverSide: true,
+      ajax: urlCms,
+      columns: [
+        {data: null, name: null},
+        {data: 'mesin', name: 'mesin'},
+        {data: 'ket_cm', name: 'ket_cm'},
+        {data: 'tgl_plan_cms', name: 'tgl_plan_cms', className: "dt-center"},
+        {data: 'no_lp', name: 'no_lp', orderable: false, searchable: false},
+        {data: 'no_dm', name: 'no_dm'},
+        {data: 'tgl_dm', name: 'tgl_dm', className: "none"},
+        {data: 'kd_plant', name: 'kd_plant', className: "none"}
+      ]
+    });
+  });
+</script>
+@endsection

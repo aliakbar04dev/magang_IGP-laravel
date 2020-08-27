@@ -1,0 +1,35 @@
+@if (strlen(Auth::user()->username) == 5)
+@permission(['prod-pos'])
+<li class="header">PRODUCTION NAVIGATION</li>
+@permission(['prod-pos'])
+<li class="treeview">
+  <a href="#">
+    <i class="fa fa-files-o"></i> <span>PRODUCTION</span>
+    <span class="pull-right-container">
+      <i class="fa fa-angle-left pull-right"></i>
+    </span>
+  </a>
+  <ul class="treeview-menu">
+    @permission(['prod-pos'])
+    <li class="treeview">
+      <a href="#">
+        <i class="fa fa-files-o"></i> <span>POS</span>
+        <span class="pull-right-container">
+          <i class="fa fa-angle-left pull-right"></i>
+        </span>
+      </a>
+      <ul class="treeview-menu">
+        @permission(['prod-pos'])
+        <li class="{{ route('prodpos.index') == request()->url() ? 'active' : '' }}">
+          <a href="{{ route('prodpos.index') }}"><i class="fa fa-circle-o"></i>Daftar POS</a>
+        </li>
+        
+        @endpermission
+      </ul>
+    </li>
+    @endpermission
+  </ul>
+</li>
+@endpermission
+@endpermission
+@endif

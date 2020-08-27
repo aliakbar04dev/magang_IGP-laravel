@@ -1,0 +1,52 @@
+@extends('layouts.app')
+@section('content')
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <h1>
+        @if ($mode_cm === "T")
+          Daftar Genba DEP - Countermeasure
+          <small>Update Genba DEP - Countermeasure</small>
+        @else
+          Daftar Genba DEP
+          <small>Update Genba DEP</small>
+        @endif
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="{{ url('/home') }}"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li><i class="fa fa-files-o"></i> MANAGEMENT - Transaksi</li>
+        @if ($mode_cm === "T")
+          <li><a href="{{ route('mgmtgembadeps.indexcm') }}"><i class="fa fa-files-o"></i> Daftar Genba DEP - CM</a></li>
+        @else
+          <li><a href="{{ route('mgmtgembadeps.index') }}"><i class="fa fa-files-o"></i> Daftar Genba DEP</a></li>
+        @endif
+        <li class="active">Update Genba DEP</li>
+      </ol>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      @include('layouts._flash')
+      <div class="box box-primary">
+        <div class="box-header with-border">
+          @if ($mode_cm === "T")
+            <h3 class="box-title">Update Genba DEP - Countermeasure</h3>
+          @else
+            <h3 class="box-title">Update Genba DEP</h3>
+          @endif
+        </div>
+        <!-- /.box-header -->
+        
+        <!-- form start -->
+        {!! Form::model($mgmtgembadep, ['url' => route('mgmtgembadeps.update', base64_encode($mgmtgembadep->no_gemba)),
+            'method'=>'put', 'files'=>'true', 'class'=>'form-horizontal', 'role'=>'form', 'id'=>'form_id']) !!}
+          @include('mgt.gembadep._form')
+        {!! Form::close() !!}
+      </div>
+      <!-- /.box -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+@endsection

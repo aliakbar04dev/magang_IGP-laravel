@@ -1,0 +1,56 @@
+@extends('layouts.app')
+@section('content')
+
+<style>
+
+
+</style>
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            Internal Audit
+            <small>Turtle Diagram</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="{{ url('/home') }}"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Turtle Diagram</li>
+        </ol>
+    </section>
+    
+    <!-- Main content -->
+    <section class="content">
+        @include('layouts._flash')
+        <!-- Form Izin Terlambat -->
+        <!-- Info boxes -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box">
+                    <h2 align="center">TURTLE DIAGRAM</h2>
+                    <div class="box-body">
+                        Ini berisi form turtle diagram
+                    </div>
+                            <!-- /.form-group -->
+                        </div>
+                        <!-- ./box-body -->
+                    </div>
+                    <!-- /.box -->
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- Form Izin Terlambat -->
+        </section>
+        <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+@endsection
+
+
+@section('scripts')
+<script type="text/javascript">
+
+
+</script>
+
+@endsection

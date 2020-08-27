@@ -1,0 +1,162 @@
+@extends('layouts.app')
+@section('content')
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <section class="content-header">
+    <h1>
+      PART INSPECTION STANDARD (PIS)
+      <small>Dept Head Approval</small>
+    </h1>
+    <ol class="breadcrumb">
+      <li><a href="{{ url('/home') }}"><i class="fa fa-dashboard"></i> Home</a></li>
+      <li><i class="fa fa-files-o"></i> Master</li>
+      <li><a href="{{ route('pistandards.index') }}"><i class="fa fa-files-o"></i> PART INSPECTION STANDARD (PIS)</a></li>
+
+    </ol>
+  </section>
+
+  <!-- Main content -->
+  <section class="content">
+    @include('layouts._flash')
+    <div class="row">
+      <div class="col-md-12">
+        <div class="box box-primary">
+          <div class="box-header with-border">
+            <h3 class="box-title">DETAIL PART INSPECTION STANDARD (PIS). NO.{{ $pistandards->no_pis }}</h3>
+          </div>
+          <!-- /.box-header -->
+          <div class="box-body">
+            <table class="table table-striped" cellspacing="0" width="100%">
+              <tbody>
+                <tr>
+                  <td style="width: 5%;"><b>NO PIS</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td>{{ $pistandards->no_pis }}</td>
+                </tr>
+                <tr>
+                  <td style="width: 9%;"><b>DATE ISSUE</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td>{{ $pistandards->date_issue }}</td>
+                </tr>
+                <tr>
+                  <td style="width: 5%;"><b>MODEL</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td>{{ $pistandards->model }}</td>
+                </tr>
+                <tr>
+                  <td style="width: 5%;"><b>PART NO</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td>{{ $pistandards->part_no }}</td>
+                </tr>
+                <tr>
+                  <td style="width: 5%;"><b>PART NAME</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td>{{ $pistandards->part_name }}</td>
+                </tr>
+                <tr>
+                  <td style="width: 15%;"><b>NAMA SUPPLIER</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  <td>{{ $pistandards->nama_supplier }}</td>
+                </tr>
+                <tr>
+                  <td style="width: 5%;"><b>STATUS</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+
+                  @if($pistandards->status == 0) 
+                  <td><b class="btn-xs btn-info btn-icon-pg" action="disable"> Belum Submit</b></td>
+
+                  @elseif($pistandards->status == 1)
+                  <td><b class="btn-xs btn-info btn-icon-pg" action="disable"> Belum Approv</b></td>
+
+                  @elseif($pistandards->status == 2)
+                  <td><b class="btn-xs btn-info btn-icon-pg" action="disable"> Disetujui</b></td>
+
+                  @elseif($pistandards->status == 3)
+                  <td><b class="btn-xs btn-info btn-icon-pg" action="disable"> Ditolak</b></td>
+                  @endif
+                </tr>
+                <tr>
+                  <td style="width: 15%;"><b>CATATAN STAFF</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  @if($pistandards->notestaff == "") 
+                  <td><b class="btn-xs btn-info btn-icon-pg" action="disable">Tidak ada catatan</b></td>
+                  @else()
+                  <td>{{ $pistandards->notestaff }}</td>
+                  @endif
+                </tr>
+                <tr>
+                  <td style="width: 15%;"><b>TANDATANGAN STAFF</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  @if($pistandards->approve_staff!="")
+                  <td><img src="/img/{{$pistandards->approve_staff }}" width="10%"></td>
+                  @else()
+                  <td><b class="btn-xs btn-info btn-icon-pg" action="disable">Belum ditandatangani staff</b></td>
+                  @endif
+                </tr>
+                <tr>
+                  <td style="width: 15%;"><b>CATATAN SECT</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  @if($pistandards->notesect == "") 
+                  <td><b class="btn-xs btn-info btn-icon-pg" action="disable">Tidak ada catatan</b></td>
+                  @else()
+                  <td>{{ $pistandards->notesect }}</td>
+                  @endif
+                </tr>
+                <tr>
+                  <td style="width: 15%;"><b>TANDATANGAN SECT</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  @if($pistandards->approve_sect!="")
+                  <td><img src="/img/{{$pistandards->approve_sect }}" width="10%"></td>
+                  @else()
+                  <td><b class="btn-xs btn-info btn-icon-pg" action="disable">Belum ditandatangani sect head</b></td>
+                  @endif
+                </tr>
+                <tr>
+                <td style="width: 15%;"><b>CATATAN DEPT</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  @if($pistandards->notedept == "") 
+                  <td><b class="btn-xs btn-info btn-icon-pg" action="disable">Tidak ada catatan</b></td>
+                  @else()
+                  <td>{{ $pistandards->notedept }}</td>
+                  @endif
+                </tr>
+                <tr>
+                  <td style="width: 15%;"><b>TANDATANGAN DEPT</b></td>
+                  <td style="width: 1%;"><b>:</b></td>
+                  @if($pistandards->approve_dept!="")
+                  <td><img src="/img/{{$pistandards->approve_dept }}" width="10%"></td>
+                  @else()
+                  <td><b class="btn-xs btn-info btn-icon-pg" action="disable">Belum ditandatangani dept head</b></td>
+                  @endif
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- /.box-body -->
+        </div>
+        <!-- /.box -->
+      </div>
+      <!-- /.col -->
+    </div>
+    <!-- /.row -->
+    <div class="box-footer">
+
+      <a class="btn btn-primary" href="{{ route('pisdepthead.edit', base64_encode($pistandards->no_pis)) }}" data-toggle="tooltip" data-placement="top" title="Next To Upload Electronic Sign/Note ">Next</a>
+      &nbsp;&nbsp;
+
+      &nbsp;&nbsp;
+
+      <a class="btn btn-danger" href="{{ route('pisdepthead.aprovalDeptHeadSQE') }}" data-toggle="tooltip" data-placement="top" title="Kembali ke Sect Head Approval" id="btn-cancel">Back</a>
+
+    </div>
+  </section>
+  <!-- /.content -->
+</div>
+<!-- /.content-wrapper -->
+@endsection
+
+@section('scripts')
+
+</script>
+@endsection

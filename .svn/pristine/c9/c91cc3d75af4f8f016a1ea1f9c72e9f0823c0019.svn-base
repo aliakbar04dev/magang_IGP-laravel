@@ -1,0 +1,101 @@
+@extends('monitoring.network.layouts.app')
+
+@section('content')
+	<BR>
+	<div class="container2">
+		<div class="row">
+			<div class="col-md-12">
+				<div class="panel panel-default">
+
+					<div class="panel-heading">
+						<center><a href="{{ url('/network') }}"><h4>Monitoring Network</h4></a></center>
+					</div>
+
+					<div class="panel-body">
+						<table id="tblMaster" class="table table-bordered table-striped" cellspacing="0" width="100%">
+	    			    	<thead>
+		  			            <tr>
+		  			            	<th style="width: 2%;text-align: center">No</th>
+					                <th style='width: 10%'>IP</th>
+					                <th>Keterangan</th>
+					                <th style='width: 5%;text-align: center'>Status</th>
+		  			            </tr>
+	    			        </thead>
+	    			    </table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+@endsection
+
+@section('scripts')
+<script>
+	$(document).ready(function(){
+	   	var tableMaster = $('#tblMaster').DataTable({
+	      "columnDefs": [{
+	        "searchable": false,
+	        "orderable": false,
+	        "targets": 0,
+		    render: function (data, type, row, meta) {
+		        return meta.row + meta.settings._iDisplayStart + 1;
+		    }
+	      }],
+	      "aLengthMenu": [[5, 10, 25, 50, 75, 100, -1], [5, 10, 25, 50, 75, 100, "All"]],
+	      "iDisplayLength": 10,
+	      "displayStart": {{ $displayStart }},
+	      responsive: true,
+	      // "searching": false,
+	      // "scrollX": true,
+	      // "scrollY": "700px",
+	      // "scrollCollapse": true,
+	      // "paging": false,
+	      // "lengthChange": false,
+	      // "ordering": true,
+	      // "info": true,
+	      // "autoWidth": false,
+	      "order": [],
+	      processing: true, 
+	      "oLanguage": {
+	      	'sProcessing': '<div id="processing" style="margin: 0px; padding: 0px; position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; background-color: rgb(102, 102, 102); z-index: 30001; opacity: 0.8;"><p style="position: absolute; color: White; top: 50%; left: 45%;"><img src="{{ asset('images/ajax-loader.gif') }}"></p></div>Processing...'
+	      }, 
+	      serverSide: true,
+	      ajax: "{{ route('dashboard.network') }}",
+	      columns: [
+	      	{data: null, name: null, className: "dt-center"},
+	        {data: 'ip', name: 'ip'},
+	        {data: 'keterangan', name: 'keterangan'},
+	        {data: 'status', name: 'status', className: "dt-center", orderable: false, searchable: false}
+		  ]
+	    });
+	});
+
+	$(function() {
+      $('\
+        <div id="filter_status" class="dataTables_length" style="display: inline-block; margin-left:10px;">\
+          <img src="{{ asset('images/red.png') }}" alt="X"> Disconnected \
+          <img src="{{ asset('images/yellow.png') }}" alt="X"> RTO \
+          <img src="{{ asset('images/green.png') }}" alt="X"> Connected \
+        </div>\
+      ').insertAfter('.dataTables_length');
+
+      $("#dataTableBuilder").on('preXhr.dt', function(e, settings, data) {
+        data.status = $('select[name="filter_status"]').val();
+      });
+
+      $('select[name="filter_status"]').change(function() {
+        window.LaravelDataTables["dataTableBuilder"].ajax.reload();
+      });
+    });
+
+	//auto refresh
+	setTimeout(function() {
+	  // location.reload();
+	  var displayStart = "{{ $displayStart }}";
+	  displayStart = Number(displayStart) + 10;
+	  var urlRedirect = "{{ url('/network/param') }}";
+	  urlRedirect = urlRedirect.replace('param', displayStart);
+	  window.location.href = urlRedirect;
+	}, 180000); //1000 = 1 second
+</script>
+@endsection

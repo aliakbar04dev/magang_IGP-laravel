@@ -1,0 +1,252 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use App\MtctDftMslh;
+use App\MtctPmsIs;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use App\Http\Requests\StoreMtctDftMslhRequest;
+use Illuminate\Support\Facades\Session;
+use App\Http\Requests\UpdateMtctDftMslhRequest;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use DB;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\File;
+use App\User;
+use Intervention\Image\ImageManagerStatic as Image;
+use Illuminate\Support\Facades\Mail;
+use PDF;
+use JasperPHP\JasperPHP;
+use Illuminate\Support\Facades\Input;
+use App\MtctMslhangkut;
+
+class MtctMslhAngkutController extends Controller
+{
+    public function index()
+    {
+        if (Auth::user()->can('mtc-dmaa-create')) {
+            return view('mtc.mtctmslhangkut.index');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+
+    public function dashboard(Request $request)
+    {
+        if (Auth::user()->can('mtc-dmaa-create')) {
+            if ($request->ajax()) {
+
+                $kar = new MtctMslhangkut;
+                $mtctmslhangkut = $kar->dashboard($request->get('tgl_awal'), $request->get('tgl_akhir'), $request->get('kd_unit'));
+
+                return Datatables::of($mtctmslhangkut)
+                    ->editColumn('tgl', function ($mtctmslhangkut) {
+                        $tgl = Carbon::parse($mtctmslhangkut->tgl)->format('d/m/Y');
+                        $isi = '<b>' . $tgl . ' shift:' . $mtctmslhangkut->shift . '</b>';
+
+                        return $isi;
+                    })
+                    // ->editColumn('pict_masalah', function ($mtctmslhangkut) {
+                    //     if ($mtctmslhangkut->pict_masalah != null) {
+                    //         $filename = $mtctmslhangkut->pict_masalah;
+                    //         if (config('app.env', 'local') === 'production') {
+                    //             $file_temp = DIRECTORY_SEPARATOR . "serverh" . DIRECTORY_SEPARATOR . "Portal" . DIRECTORY_SEPARATOR . config('app.kd_pt', 'XXX') . DIRECTORY_SEPARATOR . "mtclp" . DIRECTORY_SEPARATOR . "lchforklift" . $filename;
+                    //         } else {
+                    //             $file_temp = "\\\\192.168.0.5\\Public2\\Portal\\" . config('app.kd_pt', 'XXX') . "\\mtclp\\lchforklift" . $filename;
+                    //         }
+                    //         if (file_exists($file_temp)) {
+                    //             $loc_image = file_get_contents('file:///' . str_replace("\\\\", "\\", $file_temp));
+                    //             $image_codes = "data:" . mime_content_type($file_temp) . ";charset=utf-8;base64," . base64_encode($loc_image);
+
+                    //             return '<img src="' . $image_codes . '" alt="" style="height:15px;width:15px;>';
+                    //         } else {
+                    //             return 'No Image';
+                    //         }
+                    //     }
+                    // })
+                    ->editColumn('ket_progress', function ($mtctmslhangkut) {
+                        // $html =  '<input type="text" class="selectket_progress form-control" id="selectket_progress' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '" value="' . $mtctmslhangkut->ket_progress . '" style="width:100%" onChange="saveChange()">';
+                        if ($mtctmslhangkut->npk_close == '' || $mtctmslhangkut->npk_close == null) {
+                            $html =  '<textarea name="" id="selectket_progress' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '"  onChange="saveChange(' . $mtctmslhangkut->id . ',' . $mtctmslhangkut->no_is . ')">' . $mtctmslhangkut->ket_progress . '</textarea>';
+                        } else {
+                            $html =  '<textarea readonly name="" id="selectket_progress' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '"  onChange="saveChange(' . $mtctmslhangkut->id . ',' . $mtctmslhangkut->no_is . ')">' . $mtctmslhangkut->ket_progress . '</textarea>';
+                        }
+                        return $html;
+                    })
+
+                    ->editColumn('st_blh_jln', function ($mtctmslhangkut) {
+                        if ($mtctmslhangkut->npk_close == '' || $mtctmslhangkut->npk_close == null) {
+                            if ($mtctmslhangkut->st_blh_jln == 'T') {
+                                $htmlSat = '<select class="selectst_blh_jln form-control" style="width:100%; background-color:#47B881; color:white; min-height:70px;" data="' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '"  id="selectst_blh_jln' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '" onChange="ubahWarna(' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '); saveChange(' . $mtctmslhangkut->id . ',' . $mtctmslhangkut->no_is . ')">';
+                            } elseif ($mtctmslhangkut->st_blh_jln == 'F') {
+                                $htmlSat = '<select class="selectst_blh_jln form-control" style="width:100%; background-color:red; color:white; min-height:70px;" data="' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '"  id="selectst_blh_jln' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '" onChange="ubahWarna(' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '); saveChange(' . $mtctmslhangkut->id . ',' . $mtctmslhangkut->no_is . ')">';
+                            } else {
+                                $htmlSat = '<select class="selectst_blh_jln form-control" style="width:100%; background-color:#0575E6; color:white; min-height:70px;" data="' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '"  id="selectst_blh_jln' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '" onChange="ubahWarna(' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '); saveChange(' . $mtctmslhangkut->id . ',' . $mtctmslhangkut->no_is . ')">';
+                            }
+                            $htmlSat .= '<option value="">Pilih boleh atau tidak</option>';
+                            $mtctmslhangkut->st_blh_jln == 'T' ? $htmlSat .= '<option value="T" selected="selected">Forklift diperbolehkan jalan</option>' : $htmlSat .= '<option value="T">Forklift diperbolehkan jalan</option>';
+                            $mtctmslhangkut->st_blh_jln == 'F' ? $htmlSat .= '<option value="F" selected="selected">Forklift tidak diperbolehkan jalan</option>' : $htmlSat .= '<option value="F">Forklift tidak diperbolehkan jalan</option>';
+                            $htmlSat .= '</select>';
+                        } else {
+                            if ($mtctmslhangkut->st_blh_jln == 'T') {
+                                $htmlSat = '<select disabled class="selectst_blh_jln form-control" style="width:100%; background-color:#47B881; color:white; min-height:70px;" data="' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '"  id="selectst_blh_jln' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '" onChange="ubahWarna(' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '); saveChange(' . $mtctmslhangkut->id . ',' . $mtctmslhangkut->no_is . ')">';
+                            } elseif ($mtctmslhangkut->st_blh_jln == 'F') {
+                                $htmlSat = '<select disabled class="selectst_blh_jln form-control" style="width:100%; background-color:red; color:white; min-height:70px;" data="' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '"  id="selectst_blh_jln' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '" onChange="ubahWarna(' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '); saveChange(' . $mtctmslhangkut->id . ',' . $mtctmslhangkut->no_is . ')">';
+                            } else {
+                                $htmlSat = '<select disabled class="selectst_blh_jln form-control" style="width:100%; background-color:#0575E6; color:white; min-height:70px;" data="' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '"  id="selectst_blh_jln' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '" onChange="ubahWarna(' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '); saveChange(' . $mtctmslhangkut->id . ',' . $mtctmslhangkut->no_is . ')">';
+                            }
+                            $htmlSat .= '<option value="">Pilih boleh atau tidak</option>';
+                            $mtctmslhangkut->st_blh_jln == 'T' ? $htmlSat .= '<option value="T" selected="selected">Forklift diperbolehkan jalan</option>' : $htmlSat .= '<option value="T">Forklift diperbolehkan jalan</option>';
+                            $mtctmslhangkut->st_blh_jln == 'F' ? $htmlSat .= '<option value="F" selected="selected">Forklift tidak diperbolehkan jalan</option>' : $htmlSat .= '<option value="F">Forklift tidak diperbolehkan jalan</option>';
+                            $htmlSat .= '</select>';
+                        }
+
+
+                        return $htmlSat;
+                    })
+                    ->addColumn('action', function ($mtctmslhangkut) {
+                        if (Auth::user()->can('mtc-dmaa-close')) {
+                            // $htmlSat = $mtctmslhangkut->npk_close !== '' ? '<input type="checkbox" class="flat-red" name="chk[]" checked disabled value="' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '">' : '<input type="checkbox" class="flat-red" name="chk[]" value="' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '">';
+                            $htmlSat = $mtctmslhangkut->npk_close !== null ? '<div class="container">
+                        <div class="checkbox-container purple">
+                            <input type="checkbox" checked disabled value="' . $mtctmslhangkut->id . '" id="toggle' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '" />
+                            <label for="toggle' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '"></label>
+                            <div class="active-circle"></div>
+                        </div>
+                            </div>' : '<div class="container">
+                            <div class="checkbox-container green">
+                                <input type="checkbox" data="' . $mtctmslhangkut->no_is . '" value="' . $mtctmslhangkut->id . '" id="toggle' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '" name="chk[]"/>
+                                <label for="toggle' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '"></label>
+                                <div class="active-circle"></div>
+                            </div>
+                        </div>';
+                            return $htmlSat;
+                        } else {
+                            return '';
+                        }
+                    })
+                    ->editColumn('pict_masalah', function ($mtctmslhangkut) {
+                        $filename = $mtctmslhangkut->pict_masalah;
+                        if (config('app.env', 'local') === 'production') {
+                            $destinationPath = DIRECTORY_SEPARATOR . "serverh" . DIRECTORY_SEPARATOR . "Portal" . DIRECTORY_SEPARATOR . config('app.kd_pt', 'XXX') . DIRECTORY_SEPARATOR . "mtclp" . DIRECTORY_SEPARATOR . "lchforklift" . DIRECTORY_SEPARATOR . $filename;
+                        } else {
+
+                            if ($mtctmslhangkut->pict_masalah == null || $mtctmslhangkut->pict_masalah == '') {
+                                $destinationPath = '';
+                            } else {
+
+                                $destinationPath = "\\\\192.168.0.5\\Public2\\Portal\\" . config('app.kd_pt', 'XXX') . "\\mtclp\\lchforklift\\" . $filename;
+                            }
+                        }
+                        if ($destinationPath !== '') {
+                            if (file_exists($destinationPath)) {
+                                $loc_image = file_get_contents('file:///' . str_replace("\\\\", "\\", $destinationPath));
+                                $logo_supplier = "data:" . mime_content_type($destinationPath) . ";charset=utf-8;base64," . base64_encode($loc_image);
+                                return  '<img src="' . $logo_supplier . '" alt="" class="zoomgambar" onclick=zoomGambar("' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '") id="' . $mtctmslhangkut->id . $mtctmslhangkut->no_is . '">';
+                            } else {
+                                return 'No Image';
+                            }
+                        } else {
+                            return 'No Image';
+                        }
+                        return 'No Image';
+                    })
+                    ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        if (Auth::user()->can('mtc-dmaa-create')) {
+            $data = $request->all();
+            $mtcforklif = DB::table("mtct_lch_forklif2s")
+                ->select('*')
+                ->where("mtct_lch_forklif1_id", $data['mtct_lch_forklif1_id'])
+                ->where("no_is", $data['no_is'])
+                ->first();
+
+            $closeorNot = DB::table("mtct_lch_forklif2s")
+                ->select('npk_close')
+                ->where("mtct_lch_forklif1_id", $data['mtct_lch_forklif1_id'])
+                ->where("no_is", $data['no_is'])
+                ->value('npk_close');
+
+            if ($closeorNot == null || $closeorNot == '') {
+
+                DB::beginTransaction();
+                try {
+
+                    DB::table("mtct_lch_forklif2s")
+                        ->where("mtct_lch_forklif1_id", $data['mtct_lch_forklif1_id'])
+                        ->where("no_is", $data['no_is'])
+                        ->update([
+                            'ket_progress' =>  $data['ket_progress'],
+                            'st_blh_jln' => !empty($data['mt_judge']) ? $data['mt_judge'] : null,
+                            'modiby' => Auth::user()->username,
+                            'dtmodi' => Carbon::now()
+                        ]);
+
+                    DB::commit();
+                    $arr = array(
+                        'status' => true,
+                        'pesan' => "sukses"
+                    );
+                } catch (Exception $ex) {
+                    $arr = array(
+                        'status' => false,
+                        'pesan' => "gagal"
+                    );
+                }
+                return Response()->json($arr);
+            } else {
+                Session::flash("flash_notification", [
+                    "level" => "danger",
+                    "message" => "Data gagal diubah! Data tidak valid!"
+                ]);
+                return redirect()->route('mtcdpm.index');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function close(Request $request)
+    {
+        $arrayId = explode(',', $request->id);
+        $arrayNoIs = explode(',', $request->no_is);
+        try {
+            foreach ($arrayNoIs as $key => $isiStr) {
+                $close = DB::table('mtct_lch_forklif2s')
+                    ->where('mtct_lch_forklif1_id', $arrayId[$key])
+                    ->where('no_is', $isiStr)
+                    ->update([
+                        'npk_close' => Auth::user()->username,
+                        'dt_close' => Carbon::now()
+                    ]);
+            }
+            $arr = array(
+                'status' => true,
+                'pesan' => 'Sukses'
+            );
+            return Response()->json($arr);
+        } catch (Exception $ex) {
+            $arr = array(
+                'status' => false,
+                'pesan' => $ex
+            );
+            return Response()->json($arr);
+        }
+    }
+}

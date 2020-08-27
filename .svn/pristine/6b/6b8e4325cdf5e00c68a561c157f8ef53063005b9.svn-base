@@ -1,0 +1,306 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use DB;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\User;
+use App\IzinTelat;
+use PDF;
+use Illuminate\Support\Str;
+
+class IzinTelatController extends Controller
+{
+
+    public function izinterlambat_dashboard(Request $request)
+    {
+        if (strlen(Auth::user()->username) == 5) {
+            $kar = new IzinTelat;
+            $inputkar = $kar->masKaryawan(Auth::user()->username);
+            $inputatasan = $kar->namaByNpk($inputkar->npk_sec_head);
+            return view('hr.mobile.izinterlambat')->with(compact(['inputkar', 'inputatasan']));
+        } else {
+            return view('errors.403');
+        }
+    }
+    public function izinterlambat(Request $request)
+    { // 	App_IK3           
+        if ($request->ajax()) {
+            if (version_compare(PHP_VERSION, '7.2.0', '>=')) {
+                error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
+            }
+            $kar = new IzinTelat;
+            $riwayatik = $kar->iTelatData(Auth::user()->username);
+            return Datatables::of($riwayatik)
+                ->editColumn('tglpengajuan', function ($substrTgl) {
+                    $substrTgl = substr($substrTgl->tglpengajuan, 0, 16);
+                    return $substrTgl;
+                })
+                ->editColumn('jam_masuk', function ($substrJam) {
+                    $substrJam = substr($substrJam->jam_masuk, 0, 5);
+                    return $substrJam;
+                })
+                ->editColumn('status', function($striwayat){             
+                    if($striwayat->status == 2 and $striwayat->statuscetak == 0){
+                        return "<b style='color:green;'>"."IZIN DITERIMA"."</b>";
+                    }else if($striwayat->status == 2 and $striwayat->statuscetak == 1){
+                        return "<b style='color:green;'>"."IZIN DITERIMA ".
+                        "<span class='glyphicon glyphicon-print' data-toggle='tooltip' title='Sudah didownload!'   
+                        style='color:green;cursor:pointer;' aria-hidden='true'></span> "."</b>";
+                    }else if($striwayat->status == 1){
+                        return "<b style='color:red;'>"."IZIN DITOLAK"."</b>";   
+                    }else if($striwayat->status == 0){
+                        if($striwayat->statusbanding == 0){
+                            return "<b style='color:orange;'>MENUNGGU DIPROSES</b>"; 
+                        } else {
+                            return "<b style='color:orange;'>MENUNGGU DIPROSES</b><br><small><b>[aju banding]</b></small>";
+                        }
+                    }
+                })
+                ->addColumn('action', function ($riwayatik) {
+                    $kar = new IzinTelat;
+                    $namaatasan = $kar->namaByNpk($riwayatik->npk_sec_head);
+                    return view('datatable._action-riwayatik')->with(compact(['riwayatik', 'namaatasan']));
+                })->make(true);
+        }
+    }
+
+    public function iTelatSubmit(Request $request)
+    {
+        if ($request->ajax()) {
+            try {
+                DB::beginTransaction();
+                $msg = "Berhasil disubmit.";
+                $last_ik = DB::connection('pgsql-mobile')
+                    ->table('itelatpengajuan')
+                    ->orderBy('no_ik', 'desc')
+                    ->value('no_ik');
+
+                $lastincrement = substr($last_ik, -4);
+                $new_IK = 'IK' . date('ym') . str_pad($lastincrement + 1, 4, 0, STR_PAD_LEFT);
+                $randomstring = Str::random(6);
+
+                $t = explode('/', $request->tglijin);
+                $tgltrue = $t[2].'-'.$t[1].'-'.$t[0];
+
+                DB::connection('pgsql-mobile')
+                    ->table('itelatpengajuan')
+                    ->insert([
+                        'no_ik' => $new_IK,
+                        'npk' => $request->npk,
+                        'npk_atasan' => $request->npk_atasan,
+                        'tglijin' => $tgltrue,
+                        'jam_masuk' => $request->jamin,
+                        'alasan_it' => $request->alasanit,
+                        'status' => "0",
+                        'statuscetak' => "0",
+                        'statusubah' => "0",
+                        'statusbanding' => "0",
+                        'print_code' => $randomstring,
+                    ]);
+
+                DB::commit();
+                
+                return response()->json(['msg' => $msg]);
+
+            } catch (Exception $ex) {
+                DB::rollback();
+                $msg = $ex;
+
+                $t = explode($request->tglijin, '/');
+                $tgltrue = $t[2].'-'.$t[1].'-'.$t[0];
+
+                return response()->json(['msg' => $tgltrue]);
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function listApprovalTelat()
+    {
+        $kar = new IzinTelat();
+        $inputkar = $kar->masKaryawan(Auth::user()->username);
+        return view('hr.mobile.approval-itelat')->with(compact(['inputkar']));
+    }
+
+    public function listApprovalTelatdata(Request $request)
+    {
+
+        if ($request->ajax()) {
+            $kar = new IzinTelat;
+            $listAppTelat = $kar->listApprovalTelat(Auth::user()->username);
+            return Datatables::of($listAppTelat)
+                ->editColumn('tglpengajuan', function ($substrTgl) {
+                    $substrTgl = substr($substrTgl->tglpengajuan, 0, 16);
+                    return $substrTgl;
+                })
+                ->editColumn('tglijin', function ($listAppTelat) {
+                    $getdate = $listAppTelat->tglijin;
+                    $newDate = date("d-m-Y", strtotime($getdate));
+                    return $newDate;
+                })
+                ->editColumn('jam_masuk', function ($substrJam) {
+                    $substrJam = substr($substrJam->jam_masuk, 0, 5);
+                    return $substrJam;
+                })
+                ->editColumn('status', function ($st) {
+                    if ($st->status == 2 and $st->statuscetak == 0) {
+                        return "<b style='color:green;'>" . "IZIN DITERIMA" . "</b>";
+                    } elseif ($st->status == 2 and $st->statuscetak == 1) {
+                        return "<b style='color:green;'>" . "IZIN DITERIMA " .
+                            "<span class='glyphicon glyphicon-print' data-toggle='tooltip' title='Sudah dicetak oleh pemohon!'   
+                    style='color:green;cursor:pointer;' aria-hidden='true'></span> " . "</b>";
+                    } elseif ($st->status == 1) {
+                        return "<b style='color:red;'>" . "IZIN DITOLAK" . "</b>";
+                    } elseif ($st->status == 0) {
+                        if ($st->statusbanding == 0) {
+                            return "<b style='color:orange;'>MENUNGGU DIPROSES</b>";
+                        } else {
+                            return "<b style='color:orange;'>MENUNGGU DIPROSES</b><br><small><b>[aju banding]</b></small>";
+                        }
+                    }
+                })
+                ->addColumn('action', function ($listAppTelat) {
+                    return view('datatable._action-approvaltelat')->with(compact(['listAppTelat']));
+                })->make(true);
+        }
+    }
+
+    public function updateStatusApprv(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+            $msg = "Berhasil disubmit.";
+            $indctr = "1";
+
+            $statusubah = DB::connection('pgsql-mobile')
+                ->table('itelatpengajuan')
+                ->select(DB::raw("(select statusubah from itelatpengajuan where no_ik = '" . $request->no_ik . "') as statusubah, status"))
+                ->groupBy('statusubah', 'status')
+                ->get();
+
+            if ($statusubah->first()->status == '0') {
+                $statusubahUpdate = '0';
+            } else {
+                $statusubahUpdate = '1';
+            }
+
+            DB::connection('pgsql-mobile')
+                ->table('itelatpengajuan')
+                ->where('no_ik', $request->no_ik)
+                ->update(['status' => "2", 'tglok' => Carbon::now(), 'tglnok' => null, 'statusubah' => $statusubahUpdate]);
+
+            DB::commit();
+
+            return response()->json(['msg' => $msg, 'indctr' => $indctr]);
+        } catch (Exception $ex) {
+            DB::rollback();
+            $msg = $ex;
+            $indctr = "0";
+            return response()->json(['msg' => $msg, 'indctr' => $indctr]);
+        }
+    }
+
+    public function updateStatusDcln(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+            $msg = "Berhasil disubmit.";
+            $indctr = "1";
+
+            $statusubah = DB::connection('pgsql-mobile')
+                ->table('itelatpengajuan')
+                ->select(DB::raw("(select statusubah from itelatpengajuan where no_ik = '" . $request->no_ik . "') as statusubah, status"))
+                ->groupBy('statusubah', 'status')
+                ->get();
+
+            if ($statusubah->first()->status == '0') {
+                $statusubahUpdate = '0';
+            } else {
+                $statusubahUpdate = '1';
+            }
+
+            DB::connection('pgsql-mobile')
+                ->table('itelatpengajuan')
+                ->where('no_ik', $request->no_ik)
+                ->update(['status' => "1", 'tglnok' => Carbon::now(), 'tglok' => null, 'statusubah' => $statusubahUpdate]);
+
+            DB::commit();
+
+            return response()->json(['msg' => $msg, 'indctr' => $indctr]);
+        } catch (Exception $ex) {
+            DB::rollback();
+            $msg = "Gagal submit! Hubungi Admin.";
+            $indctr = "0";
+            return response()->json(['msg' => $msg, 'indctr' => $indctr]);
+        }
+    }
+
+    public function updateAjuBanding(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+            $msg = "Berhasil disubmit.";
+            $indctr = "1";
+
+            $old_alasan = DB::connection('pgsql-mobile')
+                ->table('itelatpengajuan')
+                ->select('alasan_it')
+                ->where('no_ik', $request->no_ik)
+                ->get();
+
+            DB::connection('pgsql-mobile')
+                ->table('itelatpengajuan')
+                ->where('no_ik', $request->no_ik)
+                ->update(['status' => "0", 'tglnok' => null, 'statusbanding' => "1", 'statusubah' => '1', 'alasan_it' => $old_alasan->first()->alasan_it . ' | ' . $request->new_alasan]);
+
+            DB::commit();
+
+            return response()->json(['msg' => $msg, 'indctr' => $indctr, 'alasan' => $request->new_alasan]);
+        } catch (Exception $ex) {
+            DB::rollback();
+            $msg = $ex;
+            $indctr = "0";
+            return response()->json(['msg' => $msg, 'indctr' => $indctr]);
+        }
+    }
+
+    public function cetak_itelat(Request $request)
+    {
+
+        $iterlambat= DB::connection('pgsql-mobile')
+        ->table('itelatpengajuan')
+        ->select('itelatpengajuan.*','v_mas_karyawan.nama','v_mas_karyawan.desc_dep', 'v_mas_karyawan.desc_div')
+        ->join('v_mas_karyawan','itelatpengajuan.npk','=','v_mas_karyawan.npk')
+        ->where('itelatpengajuan.no_ik', 'like', $request->no_ik)->get();
+        
+        DB::connection('pgsql-mobile')
+            ->table('itelatpengajuan')
+            ->where('no_ik', $request->no_ik)
+            ->update(['statuscetak' => "1"]);
+
+        $id = $request->no_ik;
+
+        // return view('hr.mobile.cetak-itelat',compact('iterlambat'));
+
+        $error_level = error_reporting();
+        error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
+
+        $pdf = PDF::loadView('hr.mobile.cetak-itelat', compact('iterlambat')); // use PDF;
+
+
+        return $pdf->download('' . $id . '.pdf');
+
+        // return redirect('/hronline/mobile/izinterlambat');
+    }
+}

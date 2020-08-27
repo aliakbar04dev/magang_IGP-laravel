@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="4656bdc9-90d1-448d-aff9-c7de9140a6e7">
+	<property name="ireport.zoom" value="0.6209213230591552"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="barcode" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["/"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="no_dns" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select distinct no_dn
+from baan_dn_supps
+where no_dn in ($P!{no_dns})]]>
+	</queryString>
+	<field name="no_dn" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="595" splitType="Stretch">
+			<subreport>
+				<reportElement x="0" y="0" width="842" height="595" uuid="ed0e95c2-58d8-4982-aab6-0d7bd11fad1d"/>
+				<subreportParameter name="barcode2">
+					<subreportParameterExpression><![CDATA[$P{barcode}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="barcode">
+					<subreportParameterExpression><![CDATA[$P{barcode}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="no_dn">
+					<subreportParameterExpression><![CDATA[$F{no_dn}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "baan_dn_supps_jasa.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+</jasperReport>

@@ -1,0 +1,2455 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="1190" pageHeight="842" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="1176" leftMargin="7" rightMargin="7" topMargin="7" bottomMargin="7" uuid="bd9cedf8-ea33-41b7-9055-2ddcccb3f12f">
+	<property name="ireport.zoom" value="1.3660269107301424"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="783"/>
+	<parameter name="path" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="path2" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="separator" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select p.no_pica, p.no_revisi, p.tgl_pica, p.issue_no, p.kd_supp, p.fp_pict_general, p.fp_pict_detail, p.sa_pict, p.iop_tools_subject, p.iop_tools_pc, p.iop_tools_std, p.iop_tools_act, p.iop_tools_status, p.iop_mat_subject, p.iop_mat_pc, p.iop_mat_std, p.iop_mat_act, p.iop_mat_status, p.iop_man_subject, p.iop_man_pc, p.iop_man_std, p.iop_man_act, p.iop_man_status, p.iop_met_subject, p.iop_met_pc, p.iop_met_std, p.iop_met_act, p.iop_met_status, p.iop_env_subject, p.iop_env_pc, p.iop_env_std, p.iop_env_act, p.iop_env_status, p.ioptm_pict, p.ioptm_pk, p.ioptm_pk_status, p.ioptm_qk, p.ioptm_qk_status, p.ioptm_kp, p.ioptm_kp_status, p.ioptm_sr, p.ioptm_sr_status, p.ioptm_it, p.ioptm_it_status, p.ioptm_jd, p.ioptm_jd_status, p.hp_pict, p.rca_why_occured, p.rca_pict_occured, p.rca_why_outflow, p.rca_pict_outflow, p.rca_root1, p.rca_root2, p.cop_temp_action1, p.cop_temp_action1_pict, p.cop_temp_action1_date, p.cop_temp_action1_pic, p.cop_temp_action2, p.cop_temp_action2_pict, p.cop_temp_action2_date, p.cop_temp_action2_pic, p.cop_temp_action3, p.cop_temp_action3_pict, p.cop_temp_action3_date, p.cop_temp_action3_pic, p.cop_temp_action4, p.cop_temp_action4_pict, p.cop_temp_action4_date, p.cop_temp_action4_pic, p.cop_temp_action5, p.cop_temp_action5_pict, p.cop_temp_action5_date, p.cop_temp_action5_pic, p.cop_fix_action1, p.cop_fix_action1_pict, p.cop_fix_action1_date, p.cop_fix_action1_pic, p.cop_fix_action2, p.cop_fix_action2_pict, p.cop_fix_action2_date, p.cop_fix_action2_pic, p.cop_fix_action3, p.cop_fix_action3_pict, p.cop_fix_action3_date, p.cop_fix_action3_pic, p.cop_fix_action4, p.cop_fix_action4_pict, p.cop_fix_action4_date, p.cop_fix_action4_pic, p.cop_fix_action5, p.cop_fix_action5_pict, p.cop_fix_action5_date, p.cop_fix_action5_pic, p.fp_improve_pict, p.evaluation, p.evaluation_pict, coalesce(p.std_sop,'F') std_sop, coalesce(p.std_wi,'F') std_wi, coalesce(p.std_qcpc,'F') std_qcpc, coalesce(p.std_fmea,'F') std_fmea, coalesce(p.std_point,'F') std_point, coalesce(p.std_warning,'F') std_warning, coalesce(p.std_check_sheet,'F') std_check_sheet, coalesce(p.std_others,'F') std_others, p.yokotenkai, p.submit_tgl, p.submit_pic, p.approve_tgl, p.approve_pic, p.reject_tgl, p.reject_pic, p.reject_ket, p.reject_st, p.status, p.dtcrea, p.creaby, p.dtmodi, p.modiby, q.nm_supp, 'PT. IGP' kd_pt, q.issue_date, q.part_no, q.nm_part, q.problem, q.qty_dpart, REPLACE(replace(q.alamat_content,'H:\qpr-car',$P{path2}),'\',$P{separator}) background,  REPLACE(replace(q.alamat_std,'H:\qpr-car',$P{path2}),'\',$P{separator}) pd_std, REPLACE(replace(q.alamat_content,'H:\qpr-car',$P{path2}),'\',$P{separator}) pd_act 
+from picas p, qprs q 
+where p.issue_no = q.issue_no and p.id = $P{id}]]>
+	</queryString>
+	<field name="no_pica" class="java.lang.String"/>
+	<field name="no_revisi" class="java.lang.Integer"/>
+	<field name="tgl_pica" class="java.sql.Date"/>
+	<field name="issue_no" class="java.lang.String"/>
+	<field name="kd_supp" class="java.lang.String"/>
+	<field name="fp_pict_general" class="java.lang.String"/>
+	<field name="fp_pict_detail" class="java.lang.String"/>
+	<field name="sa_pict" class="java.lang.String"/>
+	<field name="iop_tools_subject" class="java.lang.String"/>
+	<field name="iop_tools_pc" class="java.lang.String"/>
+	<field name="iop_tools_std" class="java.lang.String"/>
+	<field name="iop_tools_act" class="java.lang.String"/>
+	<field name="iop_tools_status" class="java.lang.String"/>
+	<field name="iop_mat_subject" class="java.lang.String"/>
+	<field name="iop_mat_pc" class="java.lang.String"/>
+	<field name="iop_mat_std" class="java.lang.String"/>
+	<field name="iop_mat_act" class="java.lang.String"/>
+	<field name="iop_mat_status" class="java.lang.String"/>
+	<field name="iop_man_subject" class="java.lang.String"/>
+	<field name="iop_man_pc" class="java.lang.String"/>
+	<field name="iop_man_std" class="java.lang.String"/>
+	<field name="iop_man_act" class="java.lang.String"/>
+	<field name="iop_man_status" class="java.lang.String"/>
+	<field name="iop_met_subject" class="java.lang.String"/>
+	<field name="iop_met_pc" class="java.lang.String"/>
+	<field name="iop_met_std" class="java.lang.String"/>
+	<field name="iop_met_act" class="java.lang.String"/>
+	<field name="iop_met_status" class="java.lang.String"/>
+	<field name="iop_env_subject" class="java.lang.String"/>
+	<field name="iop_env_pc" class="java.lang.String"/>
+	<field name="iop_env_std" class="java.lang.String"/>
+	<field name="iop_env_act" class="java.lang.String"/>
+	<field name="iop_env_status" class="java.lang.String"/>
+	<field name="ioptm_pict" class="java.lang.String"/>
+	<field name="ioptm_pk" class="java.lang.String"/>
+	<field name="ioptm_pk_status" class="java.lang.String"/>
+	<field name="ioptm_qk" class="java.lang.String"/>
+	<field name="ioptm_qk_status" class="java.lang.String"/>
+	<field name="ioptm_kp" class="java.lang.String"/>
+	<field name="ioptm_kp_status" class="java.lang.String"/>
+	<field name="ioptm_sr" class="java.lang.String"/>
+	<field name="ioptm_sr_status" class="java.lang.String"/>
+	<field name="ioptm_it" class="java.lang.String"/>
+	<field name="ioptm_it_status" class="java.lang.String"/>
+	<field name="ioptm_jd" class="java.lang.String"/>
+	<field name="ioptm_jd_status" class="java.lang.String"/>
+	<field name="hp_pict" class="java.lang.String"/>
+	<field name="rca_why_occured" class="java.lang.String"/>
+	<field name="rca_pict_occured" class="java.lang.String"/>
+	<field name="rca_why_outflow" class="java.lang.String"/>
+	<field name="rca_pict_outflow" class="java.lang.String"/>
+	<field name="rca_root1" class="java.lang.String"/>
+	<field name="rca_root2" class="java.lang.String"/>
+	<field name="cop_temp_action1" class="java.lang.String"/>
+	<field name="cop_temp_action1_pict" class="java.lang.String"/>
+	<field name="cop_temp_action1_date" class="java.sql.Date"/>
+	<field name="cop_temp_action1_pic" class="java.lang.String"/>
+	<field name="cop_temp_action2" class="java.lang.String"/>
+	<field name="cop_temp_action2_pict" class="java.lang.String"/>
+	<field name="cop_temp_action2_date" class="java.sql.Date"/>
+	<field name="cop_temp_action2_pic" class="java.lang.String"/>
+	<field name="cop_temp_action3" class="java.lang.String"/>
+	<field name="cop_temp_action3_pict" class="java.lang.String"/>
+	<field name="cop_temp_action3_date" class="java.sql.Date"/>
+	<field name="cop_temp_action3_pic" class="java.lang.String"/>
+	<field name="cop_temp_action4" class="java.lang.String"/>
+	<field name="cop_temp_action4_pict" class="java.lang.String"/>
+	<field name="cop_temp_action4_date" class="java.sql.Date"/>
+	<field name="cop_temp_action4_pic" class="java.lang.String"/>
+	<field name="cop_temp_action5" class="java.lang.String"/>
+	<field name="cop_temp_action5_pict" class="java.lang.String"/>
+	<field name="cop_temp_action5_date" class="java.sql.Date"/>
+	<field name="cop_temp_action5_pic" class="java.lang.String"/>
+	<field name="cop_fix_action1" class="java.lang.String"/>
+	<field name="cop_fix_action1_pict" class="java.lang.String"/>
+	<field name="cop_fix_action1_date" class="java.sql.Date"/>
+	<field name="cop_fix_action1_pic" class="java.lang.String"/>
+	<field name="cop_fix_action2" class="java.lang.String"/>
+	<field name="cop_fix_action2_pict" class="java.lang.String"/>
+	<field name="cop_fix_action2_date" class="java.sql.Date"/>
+	<field name="cop_fix_action2_pic" class="java.lang.String"/>
+	<field name="cop_fix_action3" class="java.lang.String"/>
+	<field name="cop_fix_action3_pict" class="java.lang.String"/>
+	<field name="cop_fix_action3_date" class="java.sql.Date"/>
+	<field name="cop_fix_action3_pic" class="java.lang.String"/>
+	<field name="cop_fix_action4" class="java.lang.String"/>
+	<field name="cop_fix_action4_pict" class="java.lang.String"/>
+	<field name="cop_fix_action4_date" class="java.sql.Date"/>
+	<field name="cop_fix_action4_pic" class="java.lang.String"/>
+	<field name="cop_fix_action5" class="java.lang.String"/>
+	<field name="cop_fix_action5_pict" class="java.lang.String"/>
+	<field name="cop_fix_action5_date" class="java.sql.Date"/>
+	<field name="cop_fix_action5_pic" class="java.lang.String"/>
+	<field name="fp_improve_pict" class="java.lang.String"/>
+	<field name="evaluation" class="java.lang.String"/>
+	<field name="evaluation_pict" class="java.lang.String"/>
+	<field name="std_sop" class="java.lang.String"/>
+	<field name="std_wi" class="java.lang.String"/>
+	<field name="std_qcpc" class="java.lang.String"/>
+	<field name="std_fmea" class="java.lang.String"/>
+	<field name="std_point" class="java.lang.String"/>
+	<field name="std_warning" class="java.lang.String"/>
+	<field name="std_check_sheet" class="java.lang.String"/>
+	<field name="std_others" class="java.lang.String"/>
+	<field name="yokotenkai" class="java.lang.String"/>
+	<field name="submit_tgl" class="java.sql.Timestamp"/>
+	<field name="submit_pic" class="java.lang.String"/>
+	<field name="approve_tgl" class="java.sql.Timestamp"/>
+	<field name="approve_pic" class="java.lang.String"/>
+	<field name="reject_tgl" class="java.sql.Timestamp"/>
+	<field name="reject_pic" class="java.lang.String"/>
+	<field name="reject_ket" class="java.lang.String"/>
+	<field name="reject_st" class="java.lang.String"/>
+	<field name="status" class="java.lang.String"/>
+	<field name="dtcrea" class="java.sql.Timestamp"/>
+	<field name="creaby" class="java.lang.String"/>
+	<field name="dtmodi" class="java.sql.Timestamp"/>
+	<field name="modiby" class="java.lang.String"/>
+	<field name="nm_supp" class="java.lang.String"/>
+	<field name="kd_pt" class="java.lang.String"/>
+	<field name="issue_date" class="java.sql.Date"/>
+	<field name="part_no" class="java.lang.String"/>
+	<field name="nm_part" class="java.lang.String"/>
+	<field name="problem" class="java.lang.String"/>
+	<field name="qty_dpart" class="java.math.BigDecimal"/>
+	<field name="background" class="java.lang.String"/>
+	<field name="pd_std" class="java.lang.String"/>
+	<field name="pd_act" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="828" splitType="Stretch">
+			<frame>
+				<reportElement x="0" y="0" width="294" height="828" uuid="8ec8f92d-a601-46a9-8644-9baba0105a92"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<staticText>
+					<reportElement x="0" y="232" width="50" height="12" uuid="cad3b487-46e5-4cee-9457-5d43a218ef38"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<text><![CDATA[Problem]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="220" width="50" height="12" uuid="2f432fd1-3535-4b41-a432-8e53d387bda9"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<text><![CDATA[No. Claim]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="208" width="50" height="12" uuid="1c3ad3bf-8ac7-400d-97b4-f483266ecf26"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<text><![CDATA[Attention]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="196" width="50" height="12" uuid="14dec16b-a847-47a4-a7fc-895faedb9cc3"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<text><![CDATA[Customer]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="184" width="147" height="12" uuid="68f2930d-a791-4730-956f-d5f727d23c70"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[2. DATA CLAIM]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement x="50" y="196" width="97" height="12" uuid="f5b268a2-132e-4b43-8798-c034e96b7930"/>
+					<box leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{kd_pt}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="50" y="208" width="97" height="12" uuid="4a6e1e70-33c7-436d-b319-3b4a0bdaf20e"/>
+					<box leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="50" y="220" width="97" height="12" uuid="8a4015dd-2fb6-4180-a1b3-54d72c4f8125"/>
+					<box leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{issue_no}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="50" y="232" width="97" height="12" uuid="c0d5626d-a09b-4094-bba1-3a2bd87c6d66"/>
+					<box leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{problem}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="0" width="294" height="40" uuid="1c1277de-f6a1-4531-a348-12dd18118077"/>
+					<box leftPadding="0">
+						<bottomPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="14" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{nm_supp}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="0" y="40" width="294" height="12" uuid="8f0a3095-46ef-431d-aa56-90fa9356be5e"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[1. BACKGROUND]]></text>
+				</staticText>
+				<frame>
+					<reportElement x="0" y="52" width="294" height="132" uuid="6ce38380-4e4c-4757-8471-e49a42c4680e"/>
+					<box>
+						<bottomPen lineWidth="0.25"/>
+					</box>
+					<image hAlign="Center" vAlign="Middle" onErrorType="Icon">
+						<reportElement x="2" y="2" width="290" height="128" uuid="d0ea9321-430e-4b5e-98bc-685e0735f161"/>
+						<imageExpression><![CDATA[$F{background} != null ? $F{background} : null]]></imageExpression>
+					</image>
+				</frame>
+				<staticText>
+					<reportElement x="147" y="184" width="147" height="12" uuid="9f810564-05ac-4363-af3e-19088a60c1dd"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[3. PROBLEM DESCRIPTION]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="147" y="196" width="17" height="60" uuid="78aec957-7972-4039-843b-3065dcd9de65"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle" rotation="Left">
+						<font fontName="Tahoma" size="7" isStrikeThrough="false"/>
+					</textElement>
+					<text><![CDATA[Standard / Kondisi Ideal]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="147" y="256" width="17" height="60" uuid="7d2832f9-5c0d-45b5-b504-a36287932e7a"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle" rotation="Left">
+						<font fontName="Tahoma" size="7" isStrikeThrough="false"/>
+					</textElement>
+					<text><![CDATA[Actual]]></text>
+				</staticText>
+				<frame>
+					<reportElement x="164" y="196" width="130" height="60" uuid="1d9750a1-6f83-4d44-8ed8-08d2a558cafa"/>
+					<box>
+						<bottomPen lineWidth="0.25"/>
+					</box>
+					<image hAlign="Center" vAlign="Middle" onErrorType="Icon">
+						<reportElement x="2" y="2" width="126" height="56" uuid="b042d202-1f5f-4cde-9aea-bc4f03ccd816"/>
+						<imageExpression><![CDATA[$F{pd_std} != null ? $F{pd_std} : null]]></imageExpression>
+					</image>
+				</frame>
+				<frame>
+					<reportElement x="164" y="256" width="130" height="60" uuid="e4a585b6-94f7-46b6-adc9-6c4f19a78b19"/>
+					<box>
+						<bottomPen lineWidth="0.25"/>
+					</box>
+					<image hAlign="Center" vAlign="Middle" onErrorType="Icon">
+						<reportElement x="2" y="2" width="126" height="56" uuid="19b84918-839e-451b-b4a9-c2d710db8460"/>
+						<imageExpression><![CDATA[$F{pd_act} != null ? $F{pd_act} : null]]></imageExpression>
+					</image>
+				</frame>
+				<staticText>
+					<reportElement x="0" y="316" width="294" height="12" uuid="f37855b2-f7d3-4aab-8cde-324396388f6b"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[4. FLOW PROCESS]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="328" width="294" height="8" uuid="c5672f91-aa78-4439-b75d-f88335fa808e"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="6" isBold="true"/>
+					</textElement>
+					<text><![CDATA[A. General Flow Process]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="666" width="294" height="12" uuid="79576505-d4a2-4c87-929f-d89856185136"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[5. SUPPLIER ACTION]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="497" width="294" height="8" uuid="3db9c96d-f5aa-4dd0-bbe3-bb11e984f6a9"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="6" isBold="true"/>
+					</textElement>
+					<text><![CDATA[B. Detail Flow Process]]></text>
+				</staticText>
+				<frame>
+					<reportElement x="0" y="336" width="294" height="161" uuid="2b70ccc6-ed98-454f-92ad-41545951780d"/>
+					<image hAlign="Center" vAlign="Middle" onErrorType="Icon">
+						<reportElement x="2" y="2" width="290" height="157" uuid="5971ce72-b24a-4ef2-b13b-5544d8d3b0b9"/>
+						<imageExpression><![CDATA[$F{fp_pict_general} != null ? $P{path} + $F{fp_pict_general} : null]]></imageExpression>
+					</image>
+				</frame>
+				<frame>
+					<reportElement x="0" y="505" width="294" height="161" uuid="5b25481e-9bbd-4889-b534-73817947a948"/>
+					<box>
+						<bottomPen lineWidth="0.25"/>
+					</box>
+					<image hAlign="Center" vAlign="Middle" onErrorType="Icon">
+						<reportElement x="2" y="2" width="290" height="157" uuid="14832f28-f8a6-4af8-af8b-cf229712fbb7"/>
+						<imageExpression><![CDATA[$F{fp_pict_detail} != null ? $P{path} + $F{fp_pict_detail} : null]]></imageExpression>
+					</image>
+				</frame>
+				<frame>
+					<reportElement x="0" y="678" width="294" height="150" uuid="47391df6-3d0a-461e-862a-1886819d3fbb"/>
+					<image hAlign="Center" vAlign="Middle" onErrorType="Icon">
+						<reportElement x="2" y="2" width="290" height="146" uuid="08ee57fa-4209-4534-8698-3af3ba92a3a5"/>
+						<imageExpression><![CDATA[$F{sa_pict} != null ? $P{path} + $F{sa_pict} : null]]></imageExpression>
+					</image>
+				</frame>
+			</frame>
+			<frame>
+				<reportElement x="294" y="0" width="882" height="828" uuid="711c993d-9389-4015-9228-fdcb5637f298"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="0" width="660" height="15" uuid="8d56c228-295c-4cf8-87d9-62e41648ea98"/>
+					<box leftPadding="0">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{nm_supp}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="0" y="15" width="660" height="25" uuid="37c88c20-baaf-4db2-a95d-5390c6087632"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="14" isBold="true"/>
+					</textElement>
+					<text><![CDATA[PROBLEM INVESTIGATION AND CORRECTIVE ACTION (PICA)]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="40" width="441" height="12" uuid="7564a549-01c9-4430-b47e-88b046e897f2"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[5. A. INVESTIGATION OF PROBLEM]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement x="441" y="40" width="219" height="12" uuid="8ce84520-73ef-4729-a46e-2e7177bfa55a"/>
+					<box leftPadding="0">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["PICA No."]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="0" y="52" width="200" height="8" uuid="3ad04bb1-0949-4bc3-a751-d441423d93fa"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="6" isBold="false" isItalic="true"/>
+					</textElement>
+					<text><![CDATA[(Man, Machine, Methode, Material, Environment)]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="200" y="52" width="241" height="8" uuid="d06f5116-e916-41ac-8dd9-736d207c2ad4"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="6" isBold="false" isItalic="true"/>
+					</textElement>
+					<text><![CDATA[]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="70" width="25" height="45" uuid="0a53fff0-5071-44bc-b086-2ea1b73d4c62"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle" rotation="Left">
+						<font fontName="Tahoma" size="7" isStrikeThrough="false"/>
+					</textElement>
+					<text><![CDATA[Machine / Tools]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="115" width="25" height="45" uuid="bacc3c12-cb1a-42c9-8f03-7606b94f163b"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle" rotation="Left">
+						<font fontName="Tahoma" size="7" isStrikeThrough="false"/>
+					</textElement>
+					<text><![CDATA[Material]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="160" width="25" height="45" uuid="a2c6f9e9-0d50-4828-a005-335e86dab051"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle" rotation="Left">
+						<font fontName="Tahoma" size="7" isStrikeThrough="false"/>
+					</textElement>
+					<text><![CDATA[Man]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="205" width="25" height="45" uuid="8e4ee836-d827-4fff-8843-4621019054af"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle" rotation="Left">
+						<font fontName="Tahoma" size="7" isStrikeThrough="false"/>
+					</textElement>
+					<text><![CDATA[Methode]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="250" width="25" height="45" uuid="53169fe6-0b17-43b7-9b31-9e5c176c79b7"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle" rotation="Left">
+						<font fontName="Tahoma" size="7" isStrikeThrough="false"/>
+					</textElement>
+					<text><![CDATA[Environment]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="60" width="25" height="10" uuid="9c7d8731-9c50-4b20-b798-7145487ae040"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Factor]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="25" y="60" width="75" height="10" uuid="99047cf0-90ba-4ffc-9cb5-dd877cde8f27"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Subject]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="100" y="60" width="100" height="10" uuid="d6fed821-be4c-4073-a4a8-913727671850"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Point Check]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement x="25" y="70" width="75" height="45" uuid="f28c0a7d-5073-42a2-b8ab-7a7ce5633efc"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{iop_tools_subject}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="25" y="115" width="75" height="45" uuid="5cd9a036-15e0-46e7-9a72-382a50f2b0df"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{iop_mat_subject}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="25" y="160" width="75" height="45" uuid="d8818f6e-6427-4016-a53b-9c846bd70e72"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{iop_man_subject}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="25" y="205" width="75" height="45" uuid="83c95cc7-1175-4a59-a5af-97936076cfb5"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{iop_met_subject}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="25" y="250" width="75" height="45" uuid="d6bdf6c9-38c6-4a5e-a0e0-87fb0949a88d"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{iop_env_subject}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="100" y="205" width="100" height="45" uuid="3bc0323d-46b0-4c28-9b84-893bc9423dd1"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{iop_met_pc}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="100" y="250" width="100" height="45" uuid="a54e0749-3305-44e7-9171-79a3ccb96aec"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{iop_env_pc}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="100" y="115" width="100" height="45" uuid="8a9c812e-fd37-4427-b655-ab77b40a7ef5"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{iop_mat_pc}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="100" y="70" width="100" height="45" uuid="0f50db0f-e6ec-45ba-816e-dcbf4643451d"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{iop_tools_pc}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="100" y="160" width="100" height="45" uuid="fec77a5c-cfa1-4b91-8349-e962b3f6f64a"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{iop_man_pc}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="200" y="60" width="100" height="10" uuid="150d1cf8-3b17-410d-8917-8aeaa79ad3a7"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Standard]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="300" y="60" width="100" height="10" uuid="89b4f321-29ce-4ca0-bf8b-a9d3f524302c"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Actual]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="400" y="60" width="41" height="10" uuid="bd5b9846-8f52-4e49-a2f7-388e88e1cc77"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Status]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement x="200" y="70" width="100" height="45" uuid="d8ad3023-2085-482c-9c38-2b3c0a441d77"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{iop_tools_std}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="200" y="250" width="100" height="45" uuid="4ee4b9d7-577b-4249-b1d1-eb61d5253a06"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{iop_env_std}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="200" y="115" width="100" height="45" uuid="faeec488-78b5-4345-a891-906c8d8a5fbe"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{iop_mat_std}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="200" y="205" width="100" height="45" uuid="575f8c35-2664-4421-9e76-0bb980555058"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{iop_met_std}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="200" y="160" width="100" height="45" uuid="46cfa7f3-f3e1-41f9-a049-0d30ed8277dd"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{iop_man_std}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="300" y="115" width="100" height="45" uuid="28cf04fb-2d99-4754-8edf-dd0285053b86"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{iop_mat_act}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="300" y="160" width="100" height="45" uuid="5fd5e698-bc8b-426e-9c3d-ff5104c994b7"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{iop_man_act}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="300" y="70" width="100" height="45" uuid="05ad64a7-d19e-4708-9c3c-4d39f485bf19"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{iop_tools_act}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="300" y="250" width="100" height="45" uuid="581ef8d4-14fa-4447-992e-1dd9b4077a5b"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{iop_env_act}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="300" y="205" width="100" height="45" uuid="e8921b5c-17a2-46d9-b257-bdb25de03abc"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{iop_met_act}]]></textFieldExpression>
+				</textField>
+				<frame>
+					<reportElement x="400" y="70" width="41" height="45" uuid="4eb83438-328b-4412-ae43-0863a393bf05"/>
+					<box>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<image hAlign="Center" vAlign="Middle">
+						<reportElement x="2" y="2" width="37" height="41" uuid="c69f78b1-c790-4bdb-ab32-802e9c823e4e"/>
+						<imageExpression><![CDATA[$F{iop_tools_status} != null ? $P{path} + $F{iop_tools_status} + ".png" : null]]></imageExpression>
+					</image>
+				</frame>
+				<frame>
+					<reportElement x="400" y="115" width="41" height="45" uuid="66be7e56-e344-4cf5-ac17-3c8c54732051"/>
+					<box>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<image hAlign="Center" vAlign="Middle">
+						<reportElement x="2" y="2" width="37" height="41" uuid="ae3dada3-6c15-438e-8977-967eac0b19bf"/>
+						<imageExpression><![CDATA[$F{iop_mat_status} != null ? $P{path} + $F{iop_mat_status} + ".png" : null]]></imageExpression>
+					</image>
+				</frame>
+				<frame>
+					<reportElement x="400" y="160" width="41" height="45" uuid="3dd7dce6-835a-44b8-9c3b-22cefbd79b88"/>
+					<box>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<image hAlign="Center" vAlign="Middle">
+						<reportElement x="2" y="2" width="37" height="41" uuid="326d3aa0-966c-4f86-9bf3-ce57873b3033"/>
+						<imageExpression><![CDATA[$F{iop_man_status} != null ? $P{path} + $F{iop_man_status} + ".png" : null]]></imageExpression>
+					</image>
+				</frame>
+				<frame>
+					<reportElement x="400" y="205" width="41" height="45" uuid="dd0c1f29-eb32-4540-8d42-1952e8b60ca5"/>
+					<box>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<image hAlign="Center" vAlign="Middle">
+						<reportElement x="2" y="2" width="37" height="41" uuid="b05712b7-d90b-4c4b-b380-3781723ffb61"/>
+						<imageExpression><![CDATA[$F{iop_met_status} != null ? $P{path} + $F{iop_met_status} + ".png" : null]]></imageExpression>
+					</image>
+				</frame>
+				<frame>
+					<reportElement x="400" y="250" width="41" height="45" uuid="95226e31-b03d-47ad-94a3-14cd0709b550"/>
+					<box>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<image hAlign="Center" vAlign="Middle">
+						<reportElement x="2" y="2" width="37" height="41" uuid="841c0446-df30-457c-a8ee-5fa73f98ecdc"/>
+						<imageExpression><![CDATA[$F{iop_env_status} != null ? $P{path} + $F{iop_env_status} + ".png" : null]]></imageExpression>
+					</image>
+				</frame>
+				<frame>
+					<reportElement x="0" y="295" width="441" height="21" uuid="53d3b33e-4764-405d-ac58-dec66b0bc88c"/>
+					<box>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<image hAlign="Center" vAlign="Middle">
+						<reportElement x="13" y="1" width="30" height="19" uuid="2159a7f4-bd72-4d94-922e-54a1a23f243b"/>
+						<imageExpression><![CDATA[$P{path} + "O.png"]]></imageExpression>
+					</image>
+					<staticText>
+						<reportElement x="43" y="0" width="100" height="21" uuid="2f401048-fb9d-46db-a083-bc0521e1c0c4"/>
+						<box leftPadding="0">
+							<topPen lineWidth="0.0"/>
+							<bottomPen lineWidth="0.0"/>
+							<rightPen lineWidth="0.0"/>
+						</box>
+						<textElement verticalAlignment="Middle">
+							<font fontName="Tahoma" size="8" isBold="false" isItalic="true"/>
+						</textElement>
+						<text><![CDATA[= OK sesuai standard]]></text>
+					</staticText>
+					<image hAlign="Center" vAlign="Middle">
+						<reportElement x="171" y="1" width="30" height="19" uuid="5997443d-cdce-4afb-b41b-7e49fdfbe397"/>
+						<imageExpression><![CDATA[$P{path} + "P.png"]]></imageExpression>
+					</image>
+					<staticText>
+						<reportElement x="201" y="0" width="100" height="21" uuid="ce365de1-a392-47a8-a348-41b66c48e400"/>
+						<box leftPadding="0">
+							<topPen lineWidth="0.0"/>
+							<bottomPen lineWidth="0.0"/>
+							<rightPen lineWidth="0.0"/>
+						</box>
+						<textElement verticalAlignment="Middle">
+							<font fontName="Tahoma" size="8" isBold="false" isItalic="true"/>
+						</textElement>
+						<text><![CDATA[= Potensi Problem]]></text>
+					</staticText>
+					<image hAlign="Center" vAlign="Middle">
+						<reportElement x="311" y="1" width="30" height="19" uuid="84106fc7-2f01-4601-b960-e111522ab965"/>
+						<imageExpression><![CDATA[$P{path} + "N.png"]]></imageExpression>
+					</image>
+					<staticText>
+						<reportElement x="341" y="0" width="100" height="21" uuid="3a2dd326-a357-45b8-a891-6702def6bc7a"/>
+						<box leftPadding="0">
+							<topPen lineWidth="0.0"/>
+							<bottomPen lineWidth="0.0"/>
+							<rightPen lineWidth="0.0"/>
+						</box>
+						<textElement verticalAlignment="Middle">
+							<font fontName="Tahoma" size="8" isBold="false" isItalic="true"/>
+						</textElement>
+						<text><![CDATA[= NG / Tidak standard]]></text>
+					</staticText>
+				</frame>
+				<staticText>
+					<reportElement x="0" y="316" width="441" height="12" uuid="e44c12f1-e3d3-49ad-a138-cd2f6f7e3713"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[5. B. INTERVIEW & OBSERVASI PENGAMATAN TERHADAP MEMBER]]></text>
+				</staticText>
+				<frame>
+					<reportElement x="0" y="348" width="120" height="120" uuid="afd4ff76-125d-44e9-accb-2f33044099fe"/>
+					<box>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<image hAlign="Center" vAlign="Middle" onErrorType="Icon">
+						<reportElement x="2" y="2" width="116" height="116" uuid="1afeb168-2ecd-4646-aa82-7b56f0265a74"/>
+						<imageExpression><![CDATA[$F{ioptm_pict} != null ? $P{path} + $F{ioptm_pict} : null]]></imageExpression>
+					</image>
+				</frame>
+				<staticText>
+					<reportElement x="120" y="348" width="70" height="20" uuid="47a65dc1-7982-4bdb-b833-568a948e2b64"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<text><![CDATA[Product Knowledge]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="120" y="368" width="70" height="20" uuid="22ed4a68-b0f2-4d14-9210-14f2e62a1c1d"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<text><![CDATA[Quality Knowledge]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="120" y="388" width="70" height="20" uuid="c818e5df-f5b3-4ce1-9146-38c6a22fd1f7"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<text><![CDATA[Kesulitan Proses]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="120" y="408" width="70" height="20" uuid="85f0d1db-775b-4e4c-871d-57000572cb3b"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<text><![CDATA[SCW Rule]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="120" y="428" width="70" height="20" uuid="b40092fc-39f4-46a8-a564-8f516921226a"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<text><![CDATA[Ijiwaru Test]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="120" y="448" width="70" height="20" uuid="b1cd828a-53ec-4494-9b32-14491b7b56e9"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<text><![CDATA[Job Desc]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="120" y="328" width="70" height="20" uuid="b182c0b6-0187-41d8-8535-e99a9571771f"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<text><![CDATA[ITEM CHECK]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="328" width="120" height="20" uuid="8d6a705b-d891-4817-9acb-ba4d6fd677af"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<text><![CDATA[MAN POWER]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="190" y="328" width="210" height="20" uuid="a8d68746-1f27-4876-8f3d-50a7d3b7dabf"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<text><![CDATA[POINT CHECK]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement x="190" y="348" width="210" height="20" uuid="c27c4731-d46b-487d-b1a7-e92fddf6953c"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{ioptm_pk}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="190" y="368" width="210" height="20" uuid="9d13b65f-8058-4d78-b107-7ec3a263c321"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{ioptm_qk}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="190" y="388" width="210" height="20" uuid="7a8223a0-6681-413e-82c6-4e2f70337a73"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{ioptm_kp}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="190" y="408" width="210" height="20" uuid="adf1bd60-502a-4d0c-bd3a-864e1743a1ca"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{ioptm_sr}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="190" y="428" width="210" height="20" uuid="52564576-4bd4-43d8-9c88-c486d248f3ef"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{ioptm_it}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="190" y="448" width="210" height="20" uuid="feef7995-da22-44cf-b8dc-ed06b0c49b3e"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{ioptm_jd}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="400" y="328" width="41" height="20" uuid="057dfc1e-a863-4267-b3dd-366f6f11ddab"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<text><![CDATA[JUDGE]]></text>
+				</staticText>
+				<frame>
+					<reportElement x="400" y="348" width="41" height="20" uuid="e9b9b2ff-4c87-40c0-b8b8-fd54bb1683ee"/>
+					<box>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<image hAlign="Center" vAlign="Middle">
+						<reportElement x="2" y="1" width="37" height="18" uuid="b72836b9-3ce5-4d94-a74e-08444c0bc663"/>
+						<imageExpression><![CDATA[$F{ioptm_pk_status} != null ? $P{path} + $F{ioptm_pk_status} + ".png" : null]]></imageExpression>
+					</image>
+				</frame>
+				<frame>
+					<reportElement x="400" y="368" width="41" height="20" uuid="13ec1c5d-4458-4a0c-9740-bc4fc2d7aef3"/>
+					<box>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<image hAlign="Center" vAlign="Middle">
+						<reportElement x="2" y="1" width="37" height="18" uuid="e57e3387-7485-47e9-80cc-a92710d4bcc6"/>
+						<imageExpression><![CDATA[$F{ioptm_qk_status} != null ? $P{path} + $F{ioptm_qk_status} + ".png" : null]]></imageExpression>
+					</image>
+				</frame>
+				<frame>
+					<reportElement x="400" y="388" width="41" height="20" uuid="935d79d7-490a-4e63-8ddf-d6d74be9c111"/>
+					<box>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<image hAlign="Center" vAlign="Middle">
+						<reportElement x="2" y="1" width="37" height="18" uuid="d96d1582-7864-445d-b376-a926239c5e25"/>
+						<imageExpression><![CDATA[$F{ioptm_kp_status} != null ? $P{path} + $F{ioptm_kp_status} + ".png" : null]]></imageExpression>
+					</image>
+				</frame>
+				<frame>
+					<reportElement x="400" y="408" width="41" height="20" uuid="eb79d6de-3b32-41be-9023-f829ea3a8c68"/>
+					<box>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<image hAlign="Center" vAlign="Middle">
+						<reportElement x="2" y="1" width="37" height="18" uuid="35cf1547-ac2a-4805-86ce-957f80443b96"/>
+						<imageExpression><![CDATA[$F{ioptm_sr_status} != null ? $P{path} + $F{ioptm_sr_status} + ".png" : null]]></imageExpression>
+					</image>
+				</frame>
+				<frame>
+					<reportElement x="400" y="428" width="41" height="20" uuid="353c8760-592b-4524-897d-ae9f28614626"/>
+					<box>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<image hAlign="Center" vAlign="Middle">
+						<reportElement x="2" y="1" width="37" height="18" uuid="f53d628a-260c-4f65-85a8-b043fb2a6753"/>
+						<imageExpression><![CDATA[$F{ioptm_it_status} != null ? $P{path} + $F{ioptm_it_status} + ".png" : null]]></imageExpression>
+					</image>
+				</frame>
+				<frame>
+					<reportElement x="400" y="448" width="41" height="20" uuid="66b561e4-b13d-40aa-935e-b2a0747e24a5"/>
+					<box>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<image hAlign="Center" vAlign="Middle">
+						<reportElement x="2" y="1" width="37" height="18" uuid="4f549dc7-a481-4e7e-9833-d5f65bc33427"/>
+						<imageExpression><![CDATA[$F{ioptm_jd_status} != null ? $P{path} + $F{ioptm_jd_status} + ".png" : null]]></imageExpression>
+					</image>
+				</frame>
+				<staticText>
+					<reportElement x="0" y="468" width="441" height="12" uuid="334e47c1-06e1-434c-97bd-d1334850d904"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[5. C. HENKATEN PROCESS / CHANGING POINT PROCESS]]></text>
+				</staticText>
+				<frame>
+					<reportElement x="0" y="480" width="441" height="120" uuid="d42d642f-17a0-4094-8124-5fb6d7900efc"/>
+					<box>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<image hAlign="Center" vAlign="Middle" onErrorType="Icon">
+						<reportElement x="2" y="2" width="437" height="116" uuid="fde4d4e1-3399-4580-a11f-19792caa6058"/>
+						<imageExpression><![CDATA[$F{hp_pict} != null ? $P{path} + $F{hp_pict} : null]]></imageExpression>
+					</image>
+				</frame>
+				<staticText>
+					<reportElement x="0" y="600" width="441" height="12" uuid="df43d585-6bbf-48b0-b044-490e5f670365"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[6. ROOTCAUSE ANALYZE]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="612" width="25" height="70" uuid="24ae8051-6011-4cde-b272-d5a8d3023715"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle" rotation="Left">
+						<font fontName="Tahoma" size="8" isStrikeThrough="false"/>
+					</textElement>
+					<text><![CDATA[WHY OCCURED]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="682" width="25" height="70" uuid="87edb57b-4cda-4ce9-a46a-2b27bc915cd6"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle" rotation="Left">
+						<font fontName="Tahoma" size="8" isStrikeThrough="false"/>
+					</textElement>
+					<text><![CDATA[WHY OUTFLOW]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="752" width="441" height="12" uuid="5029ed92-bb1c-4102-923b-891d62943a8c"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true" isItalic="true"/>
+					</textElement>
+					<text><![CDATA[Root / Primary Causes of Problem]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement x="25" y="612" width="250" height="70" uuid="f6c0bb17-b22a-4c62-af06-6b7291874644"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{rca_why_occured}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="25" y="682" width="250" height="70" uuid="b1a0c0c9-2ad9-4c4a-9a9b-4a3dc5ca4485"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{rca_why_outflow}]]></textFieldExpression>
+				</textField>
+				<frame>
+					<reportElement x="275" y="612" width="166" height="70" uuid="effb9210-f6d7-4b1e-9278-570d41ea382b"/>
+					<box>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<image hAlign="Center" vAlign="Middle" onErrorType="Icon">
+						<reportElement x="2" y="2" width="162" height="66" uuid="23057f71-7538-4c6f-9f3f-2d1fe5761f39"/>
+						<imageExpression><![CDATA[$F{rca_pict_occured} != null ? $P{path} + $F{rca_pict_occured} : null]]></imageExpression>
+					</image>
+				</frame>
+				<frame>
+					<reportElement x="275" y="682" width="166" height="70" uuid="e45c9733-b363-4dcc-b1d3-044e8658be75"/>
+					<box>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<image hAlign="Center" vAlign="Middle" onErrorType="Icon">
+						<reportElement x="2" y="2" width="162" height="66" uuid="00c04435-fe48-4e5c-985e-f8956c9eca17"/>
+						<imageExpression><![CDATA[$F{rca_pict_outflow} != null ? $P{path} + $F{rca_pict_outflow} : null]]></imageExpression>
+					</image>
+				</frame>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="764" width="200" height="64" uuid="d3e619ae-2ca8-47ad-b4e0-de76c224b33b"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{rca_root1}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="200" y="764" width="241" height="64" uuid="ab9e7be4-7041-4584-8d95-b896123bf3e2"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{rca_root2}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="441" y="52" width="219" height="18" backcolor="#FFFF00" uuid="aebb9612-be11-4ae9-8b73-8e4e17e00009"/>
+					<box leftPadding="0">
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{no_pica}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="660" y="0" width="74" height="10" uuid="aefd8bde-e3c0-4952-b85c-dedd3d0515d1"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Date]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="660" y="10" width="74" height="10" uuid="5955a925-152c-437b-85e8-fff4bc18831a"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Approved]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="734" y="0" width="148" height="10" uuid="24481e9f-1f95-4dad-a3c0-8c414eba122b"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="734" y="10" width="74" height="10" uuid="7a597611-cc32-49b5-8913-5d5f5337f995"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Checked]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="808" y="10" width="74" height="10" uuid="6a8d5dae-adcd-46ff-82b9-eb2c132547e6"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[In-Charge]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="660" y="20" width="74" height="32" uuid="81007b63-fd4c-4ea6-99d1-e9b85205dea5"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="734" y="20" width="74" height="32" uuid="ba5277ac-f47d-4756-904e-263e7975bf31"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="808" y="20" width="74" height="32" uuid="ef250df6-3144-4a37-a277-fd2424d92019"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="false" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement x="660" y="52" width="74" height="18" uuid="bf0a2aec-08d5-436a-a27a-e44007b9c634"/>
+					<box leftPadding="2">
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="734" y="52" width="74" height="18" uuid="c35a3da6-1127-48c6-b930-ab8ef8744237"/>
+					<box leftPadding="2">
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="808" y="52" width="74" height="18" uuid="66c9c172-8990-45ff-a597-c421f6862800"/>
+					<box leftPadding="2">
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="441" y="70" width="441" height="12" uuid="0875fdb6-fda4-4a55-80c3-76b3c1aa122f"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[7. COUNTERMEASURE OF PROBLEM]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="441" y="82" width="293" height="12" uuid="d07b95d8-1c2a-490c-809f-4cb6fae60b00"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[A. TEMPORARY ACTION]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement x="441" y="94" width="293" height="31" uuid="76c1ad44-e361-46b0-ad61-2a58af4e7159"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_temp_action1}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="734" y="82" width="93" height="12" uuid="89ba8d8a-7d78-473d-a340-74a2db1bc12b"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[PIC]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="827" y="82" width="55" height="12" uuid="2409b772-3c3c-436a-9e6a-578f8413ff2a"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Date]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement x="734" y="94" width="93" height="31" uuid="1c0abe93-6910-40d7-90a6-55a8d9f83900"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_temp_action1_pic}]]></textFieldExpression>
+				</textField>
+				<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+					<reportElement x="827" y="94" width="55" height="31" uuid="46ecb266-9fb3-4177-aab3-fdfd42c6a62c"/>
+					<box topPadding="2" leftPadding="0">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Top">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_temp_action1_date}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="441" y="262" width="293" height="35" uuid="e3041147-5cab-44ae-b549-00b24faf4405"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_fix_action1}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="441" y="250" width="293" height="12" uuid="e388b945-407a-471e-8b7b-61f79fb42bbb"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[B. FIX COUNTERMEASURE]]></text>
+				</staticText>
+				<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+					<reportElement x="827" y="262" width="55" height="35" uuid="a83a130f-a85a-496d-88ff-2a965d1dad3a"/>
+					<box topPadding="2" leftPadding="0">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Top">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_fix_action1_date}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="827" y="250" width="55" height="12" uuid="28eec49c-ddec-45c6-a604-aa29e6c228b0"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Date]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement x="734" y="262" width="93" height="35" uuid="4fd3a75f-2484-4987-92f1-c434c398bb0a"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_fix_action1_pic}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="734" y="250" width="93" height="12" uuid="2b234096-fffd-4ebd-a995-db90ccb552b2"/>
+					<box leftPadding="0">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[PIC]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="441" y="438" width="441" height="12" uuid="8e06dbf4-fd7b-4a8d-8d21-306b78252787"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[8. FLOW PROCESS AFTER IMPROVEMENT]]></text>
+				</staticText>
+				<frame>
+					<reportElement x="441" y="450" width="441" height="120" uuid="8d345740-159c-4565-ba58-dd527415c664"/>
+					<box>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<image hAlign="Center" vAlign="Middle" onErrorType="Icon">
+						<reportElement x="2" y="2" width="437" height="116" uuid="46d27108-edfd-42d7-8273-60fb5165ccca"/>
+						<imageExpression><![CDATA[$F{fp_improve_pict} != null ? $P{path} + $F{fp_improve_pict} : null]]></imageExpression>
+					</image>
+				</frame>
+				<staticText>
+					<reportElement x="441" y="570" width="441" height="12" uuid="c721264a-9d01-4359-bd60-3c15413a7593"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[9. EVALUATION & FOLLOW UP PROBLEM]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement x="441" y="582" width="441" height="30" uuid="d0ec59ee-0f68-4a47-a238-892cf60da7b4"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{evaluation}]]></textFieldExpression>
+				</textField>
+				<frame>
+					<reportElement x="441" y="612" width="441" height="140" uuid="f7e92af5-33bc-45af-b0e4-181f3097ddad"/>
+					<box>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<image hAlign="Center" vAlign="Middle" onErrorType="Icon">
+						<reportElement x="2" y="2" width="437" height="136" uuid="40b434d7-964e-4341-ab38-51ed396ffdab"/>
+						<imageExpression><![CDATA[$F{evaluation_pict} != null ? $P{path} + $F{evaluation_pict} : null]]></imageExpression>
+					</image>
+				</frame>
+				<staticText>
+					<reportElement x="441" y="752" width="250" height="12" uuid="1d66bb52-bba7-45cd-96a8-fa9cfd4adbf6"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[10. STANDARDIZATION]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="691" y="752" width="191" height="12" uuid="fe6ff2ae-c87b-4ecf-b1a4-a13752416b3c"/>
+					<box leftPadding="2">
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[11. YOKOTENKAI]]></text>
+				</staticText>
+				<frame>
+					<reportElement x="441" y="764" width="250" height="64" uuid="0de22bdd-190f-48ec-aeb4-b7ff09df7c04"/>
+					<box>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<staticText>
+						<reportElement mode="Opaque" x="20" y="2" width="12" height="12" backcolor="#FF0000" uuid="4fe1cda5-9081-4946-9f9c-19ef8c680c13">
+							<printWhenExpression><![CDATA[$F{std_sop}.equalsIgnoreCase("T")]]></printWhenExpression>
+						</reportElement>
+						<box>
+							<topPen lineWidth="0.0"/>
+							<leftPen lineWidth="0.0"/>
+							<rightPen lineWidth="0.0"/>
+						</box>
+						<text><![CDATA[]]></text>
+					</staticText>
+					<staticText>
+						<reportElement mode="Opaque" x="20" y="18" width="12" height="12" backcolor="#FF0000" uuid="f3c11c20-90ba-4627-9c6d-cb41693063ac">
+							<printWhenExpression><![CDATA[$F{std_wi}.equalsIgnoreCase("T")]]></printWhenExpression>
+						</reportElement>
+						<box>
+							<topPen lineWidth="0.0"/>
+							<leftPen lineWidth="0.0"/>
+							<rightPen lineWidth="0.0"/>
+						</box>
+						<text><![CDATA[]]></text>
+					</staticText>
+					<staticText>
+						<reportElement mode="Opaque" x="20" y="34" width="12" height="12" backcolor="#FF0000" uuid="a23612c6-d584-45b2-bec6-b4e946c71615">
+							<printWhenExpression><![CDATA[$F{std_qcpc}.equalsIgnoreCase("T")]]></printWhenExpression>
+						</reportElement>
+						<box>
+							<topPen lineWidth="0.0"/>
+							<leftPen lineWidth="0.0"/>
+							<rightPen lineWidth="0.0"/>
+						</box>
+						<text><![CDATA[]]></text>
+					</staticText>
+					<staticText>
+						<reportElement mode="Opaque" x="130" y="2" width="12" height="12" backcolor="#FF0000" uuid="2afd645e-2b38-467f-920f-0b527b40e03e">
+							<printWhenExpression><![CDATA[$F{std_point}.equalsIgnoreCase("T")]]></printWhenExpression>
+						</reportElement>
+						<box>
+							<topPen lineWidth="0.0"/>
+							<leftPen lineWidth="0.0"/>
+							<rightPen lineWidth="0.0"/>
+						</box>
+						<text><![CDATA[]]></text>
+					</staticText>
+					<staticText>
+						<reportElement mode="Opaque" x="130" y="18" width="12" height="12" backcolor="#FF0000" uuid="5522ce8f-a861-49aa-b270-f5611ab509d9">
+							<printWhenExpression><![CDATA[$F{std_warning}.equalsIgnoreCase("T")]]></printWhenExpression>
+						</reportElement>
+						<box>
+							<topPen lineWidth="0.0"/>
+							<leftPen lineWidth="0.0"/>
+							<rightPen lineWidth="0.0"/>
+						</box>
+						<text><![CDATA[]]></text>
+					</staticText>
+					<staticText>
+						<reportElement mode="Opaque" x="20" y="50" width="12" height="12" backcolor="#FF0000" uuid="c516bd3e-2766-4e1f-8ca9-d1bead883717">
+							<printWhenExpression><![CDATA[$F{std_fmea}.equalsIgnoreCase("T")]]></printWhenExpression>
+						</reportElement>
+						<box>
+							<topPen lineWidth="0.0"/>
+							<leftPen lineWidth="0.0"/>
+							<rightPen lineWidth="0.0"/>
+						</box>
+						<text><![CDATA[]]></text>
+					</staticText>
+					<staticText>
+						<reportElement mode="Opaque" x="130" y="34" width="12" height="12" backcolor="#FF0000" uuid="1837e80e-3a87-43dc-8282-0bfdca5e7e13">
+							<printWhenExpression><![CDATA[$F{std_check_sheet}.equalsIgnoreCase("T")]]></printWhenExpression>
+						</reportElement>
+						<box>
+							<topPen lineWidth="0.0"/>
+							<leftPen lineWidth="0.0"/>
+							<rightPen lineWidth="0.0"/>
+						</box>
+						<text><![CDATA[]]></text>
+					</staticText>
+					<staticText>
+						<reportElement x="36" y="2" width="40" height="12" uuid="9fce82ba-ae98-4353-87a3-771730bfcc3c"/>
+						<box leftPadding="0">
+							<topPen lineWidth="0.0"/>
+							<bottomPen lineWidth="0.0"/>
+							<rightPen lineWidth="0.0"/>
+						</box>
+						<textElement verticalAlignment="Middle">
+							<font fontName="Tahoma" size="8" isBold="false" isItalic="false"/>
+						</textElement>
+						<text><![CDATA[SOP]]></text>
+					</staticText>
+					<staticText>
+						<reportElement x="36" y="18" width="40" height="12" uuid="0f26c119-3d96-49fd-99ba-b87dfb7d84c9"/>
+						<box leftPadding="0">
+							<topPen lineWidth="0.0"/>
+							<bottomPen lineWidth="0.0"/>
+							<rightPen lineWidth="0.0"/>
+						</box>
+						<textElement verticalAlignment="Middle">
+							<font fontName="Tahoma" size="8" isBold="false" isItalic="false"/>
+						</textElement>
+						<text><![CDATA[WI]]></text>
+					</staticText>
+					<staticText>
+						<reportElement x="36" y="34" width="40" height="12" uuid="c337240a-e63c-486e-ac76-8b24c4b53414"/>
+						<box leftPadding="0">
+							<topPen lineWidth="0.0"/>
+							<bottomPen lineWidth="0.0"/>
+							<rightPen lineWidth="0.0"/>
+						</box>
+						<textElement verticalAlignment="Middle">
+							<font fontName="Tahoma" size="8" isBold="false" isItalic="false"/>
+						</textElement>
+						<text><![CDATA[QCPC]]></text>
+					</staticText>
+					<staticText>
+						<reportElement x="36" y="50" width="40" height="12" uuid="226eca34-ff8e-454c-86c5-eb0801857d48"/>
+						<box leftPadding="0">
+							<topPen lineWidth="0.0"/>
+							<bottomPen lineWidth="0.0"/>
+							<rightPen lineWidth="0.0"/>
+						</box>
+						<textElement verticalAlignment="Middle">
+							<font fontName="Tahoma" size="8" isBold="false" isItalic="false"/>
+						</textElement>
+						<text><![CDATA[FMEA]]></text>
+					</staticText>
+					<staticText>
+						<reportElement x="146" y="2" width="60" height="12" uuid="8e460227-bcca-44b7-a892-510e5c0e3190"/>
+						<box leftPadding="0">
+							<topPen lineWidth="0.0"/>
+							<bottomPen lineWidth="0.0"/>
+							<rightPen lineWidth="0.0"/>
+						</box>
+						<textElement verticalAlignment="Middle">
+							<font fontName="Tahoma" size="8" isBold="false" isItalic="false"/>
+						</textElement>
+						<text><![CDATA[Point Penting]]></text>
+					</staticText>
+					<staticText>
+						<reportElement x="146" y="18" width="60" height="12" uuid="afe2d7a9-8eb4-47c6-8ef4-63d2faeae116"/>
+						<box leftPadding="0">
+							<topPen lineWidth="0.0"/>
+							<bottomPen lineWidth="0.0"/>
+							<rightPen lineWidth="0.0"/>
+						</box>
+						<textElement verticalAlignment="Middle">
+							<font fontName="Tahoma" size="8" isBold="false" isItalic="false"/>
+						</textElement>
+						<text><![CDATA[Warning]]></text>
+					</staticText>
+					<staticText>
+						<reportElement x="146" y="34" width="60" height="12" uuid="1e43c864-e012-46c5-b89c-78958d823859"/>
+						<box leftPadding="0">
+							<topPen lineWidth="0.0"/>
+							<bottomPen lineWidth="0.0"/>
+							<rightPen lineWidth="0.0"/>
+						</box>
+						<textElement verticalAlignment="Middle">
+							<font fontName="Tahoma" size="8" isBold="false" isItalic="false"/>
+						</textElement>
+						<text><![CDATA[Check Sheet]]></text>
+					</staticText>
+					<staticText>
+						<reportElement mode="Transparent" x="20" y="2" width="12" height="12" uuid="9795d587-4166-428b-b384-ae30656a0f77">
+							<printWhenExpression><![CDATA[!$F{std_sop}.equalsIgnoreCase("T")]]></printWhenExpression>
+						</reportElement>
+						<box>
+							<topPen lineWidth="0.25"/>
+							<leftPen lineWidth="0.25"/>
+							<bottomPen lineWidth="0.25"/>
+							<rightPen lineWidth="0.25"/>
+						</box>
+						<text><![CDATA[]]></text>
+					</staticText>
+					<staticText>
+						<reportElement mode="Transparent" x="20" y="18" width="12" height="12" uuid="8bfba9b0-f259-4d38-b7b7-366de8ab058d">
+							<printWhenExpression><![CDATA[!$F{std_wi}.equalsIgnoreCase("T")]]></printWhenExpression>
+						</reportElement>
+						<box>
+							<topPen lineWidth="0.25"/>
+							<leftPen lineWidth="0.25"/>
+							<bottomPen lineWidth="0.25"/>
+							<rightPen lineWidth="0.25"/>
+						</box>
+						<text><![CDATA[]]></text>
+					</staticText>
+					<staticText>
+						<reportElement mode="Transparent" x="20" y="34" width="12" height="12" uuid="3fc0fbb7-487e-48d0-bf6f-dfb975ef4294">
+							<printWhenExpression><![CDATA[!$F{std_qcpc}.equalsIgnoreCase("T")]]></printWhenExpression>
+						</reportElement>
+						<box>
+							<topPen lineWidth="0.25"/>
+							<leftPen lineWidth="0.25"/>
+							<bottomPen lineWidth="0.25"/>
+							<rightPen lineWidth="0.25"/>
+						</box>
+						<text><![CDATA[]]></text>
+					</staticText>
+					<staticText>
+						<reportElement mode="Transparent" x="20" y="50" width="12" height="12" uuid="5fff2414-d047-4fe0-b9f8-271aa0f8411b">
+							<printWhenExpression><![CDATA[!$F{std_fmea}.equalsIgnoreCase("T")]]></printWhenExpression>
+						</reportElement>
+						<box>
+							<topPen lineWidth="0.25"/>
+							<leftPen lineWidth="0.25"/>
+							<bottomPen lineWidth="0.25"/>
+							<rightPen lineWidth="0.25"/>
+						</box>
+						<text><![CDATA[]]></text>
+					</staticText>
+					<staticText>
+						<reportElement mode="Transparent" x="130" y="2" width="12" height="12" uuid="2ed6c11b-8534-4d63-aaa3-57d539124c05">
+							<printWhenExpression><![CDATA[!$F{std_point}.equalsIgnoreCase("T")]]></printWhenExpression>
+						</reportElement>
+						<box>
+							<topPen lineWidth="0.25"/>
+							<leftPen lineWidth="0.25"/>
+							<bottomPen lineWidth="0.25"/>
+							<rightPen lineWidth="0.25"/>
+						</box>
+						<text><![CDATA[]]></text>
+					</staticText>
+					<staticText>
+						<reportElement mode="Transparent" x="130" y="18" width="12" height="12" uuid="966deb41-3df9-4df3-a9c3-51f364acdb35">
+							<printWhenExpression><![CDATA[!$F{std_warning}.equalsIgnoreCase("T")]]></printWhenExpression>
+						</reportElement>
+						<box>
+							<topPen lineWidth="0.25"/>
+							<leftPen lineWidth="0.25"/>
+							<bottomPen lineWidth="0.25"/>
+							<rightPen lineWidth="0.25"/>
+						</box>
+						<text><![CDATA[]]></text>
+					</staticText>
+					<staticText>
+						<reportElement mode="Transparent" x="130" y="34" width="12" height="12" uuid="d2becd19-ae40-4a17-a290-254f2f848139">
+							<printWhenExpression><![CDATA[!$F{std_check_sheet}.equalsIgnoreCase("T")]]></printWhenExpression>
+						</reportElement>
+						<box>
+							<topPen lineWidth="0.25"/>
+							<leftPen lineWidth="0.25"/>
+							<bottomPen lineWidth="0.25"/>
+							<rightPen lineWidth="0.25"/>
+						</box>
+						<text><![CDATA[]]></text>
+					</staticText>
+					<staticText>
+						<reportElement mode="Opaque" x="130" y="50" width="12" height="12" backcolor="#FF0000" uuid="8e4e09e3-f904-4029-a58e-93e7696506f1">
+							<printWhenExpression><![CDATA[$F{std_others}.equalsIgnoreCase("T")]]></printWhenExpression>
+						</reportElement>
+						<box>
+							<topPen lineWidth="0.0"/>
+							<leftPen lineWidth="0.0"/>
+							<rightPen lineWidth="0.0"/>
+						</box>
+						<text><![CDATA[]]></text>
+					</staticText>
+					<staticText>
+						<reportElement x="146" y="50" width="60" height="12" uuid="fecf4430-02b2-4707-9576-717744087ad4"/>
+						<box leftPadding="0">
+							<topPen lineWidth="0.0"/>
+							<bottomPen lineWidth="0.0"/>
+							<rightPen lineWidth="0.0"/>
+						</box>
+						<textElement verticalAlignment="Middle">
+							<font fontName="Tahoma" size="8" isBold="false" isItalic="false"/>
+						</textElement>
+						<text><![CDATA[Others]]></text>
+					</staticText>
+					<staticText>
+						<reportElement mode="Transparent" x="130" y="50" width="12" height="12" uuid="253a6830-b1c6-47f9-a71f-81fef0d55dc9">
+							<printWhenExpression><![CDATA[!$F{std_others}.equalsIgnoreCase("T")]]></printWhenExpression>
+						</reportElement>
+						<box>
+							<topPen lineWidth="0.25"/>
+							<leftPen lineWidth="0.25"/>
+							<bottomPen lineWidth="0.25"/>
+							<rightPen lineWidth="0.25"/>
+						</box>
+						<text><![CDATA[]]></text>
+					</staticText>
+				</frame>
+				<textField isBlankWhenNull="true">
+					<reportElement x="441" y="125" width="293" height="31" uuid="54b8de7c-3010-4c61-8ded-c32e89b36861"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_temp_action2}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="441" y="156" width="293" height="31" uuid="80093105-de0d-47b0-9144-751140f21d65"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_temp_action3}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="441" y="187" width="293" height="31" uuid="84536488-3303-488f-a5ef-13f9d38c05dc"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_temp_action4}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="441" y="218" width="293" height="32" uuid="cf2ef144-e122-41dd-b622-76a551993941"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_temp_action5}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="734" y="125" width="93" height="31" uuid="f1222df6-0521-480c-8096-af34c270f092"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_temp_action2_pic}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="734" y="156" width="93" height="31" uuid="582dafc7-06d5-465c-a44f-fb990cbf9ba2"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_temp_action3_pic}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="734" y="187" width="93" height="31" uuid="6732dc2d-4751-4c75-a697-dbac82cdf97e"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_temp_action4_pic}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="734" y="218" width="93" height="32" uuid="e38b3c9f-8b55-4fcc-a45d-f4a1472b2353"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_temp_action5_pic}]]></textFieldExpression>
+				</textField>
+				<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+					<reportElement x="827" y="125" width="55" height="31" uuid="ec104948-618a-4c20-ad00-59153c22b2aa"/>
+					<box topPadding="2" leftPadding="0">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Top">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_temp_action2_date}]]></textFieldExpression>
+				</textField>
+				<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+					<reportElement x="827" y="156" width="55" height="31" uuid="01339e0a-2d31-4fe7-90d7-95f47f623f1c"/>
+					<box topPadding="2" leftPadding="0">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Top">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_temp_action3_date}]]></textFieldExpression>
+				</textField>
+				<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+					<reportElement x="827" y="187" width="55" height="31" uuid="94893502-4c21-4cfe-ab4e-2a508f927394"/>
+					<box topPadding="2" leftPadding="0">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Top">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_temp_action4_date}]]></textFieldExpression>
+				</textField>
+				<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+					<reportElement x="827" y="218" width="55" height="32" uuid="0f3c0266-9743-4025-b93e-1b5625d4e55e"/>
+					<box topPadding="2" leftPadding="0">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Top">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_temp_action5_date}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="441" y="297" width="293" height="35" uuid="3cedc7d3-2875-4aa1-8d02-892283047087"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_fix_action2}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="441" y="332" width="293" height="35" uuid="a49e75a2-b6ca-44d5-a4b3-ba37d7f7a6e9"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_fix_action3}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="441" y="367" width="293" height="35" uuid="ca71e8c0-fd2b-4d65-91fa-ad55f4eeb9e4"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_fix_action4}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="441" y="402" width="293" height="36" uuid="c5204527-e928-414c-bde0-035244fb9f5d"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_fix_action5}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="734" y="297" width="93" height="35" uuid="596cdf9a-9a95-41ec-a30e-5cb20ca56a01"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_fix_action2_pic}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="734" y="332" width="93" height="35" uuid="2b2a82c5-51b3-4a58-b925-ea7fad78c043"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_fix_action3_pic}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="734" y="367" width="93" height="35" uuid="59c52036-7fc8-4396-8248-fa9ff496c30d"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_fix_action4_pic}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="734" y="402" width="93" height="36" uuid="b8525740-ce39-4ea4-b5ba-7b0be810cbc6"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_fix_action5_pic}]]></textFieldExpression>
+				</textField>
+				<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+					<reportElement x="827" y="297" width="55" height="35" uuid="d242f6fd-dc82-4c1c-aba8-2b88081a9785"/>
+					<box topPadding="2" leftPadding="0">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Top">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_fix_action2_date}]]></textFieldExpression>
+				</textField>
+				<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+					<reportElement x="827" y="332" width="55" height="35" uuid="79cad0d7-067f-417d-abd2-b75be969156e"/>
+					<box topPadding="2" leftPadding="0">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Top">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_fix_action3_date}]]></textFieldExpression>
+				</textField>
+				<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+					<reportElement x="827" y="367" width="55" height="35" uuid="cc23d935-2d00-43b1-9a33-f0040973312c"/>
+					<box topPadding="2" leftPadding="0">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Top">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_fix_action4_date}]]></textFieldExpression>
+				</textField>
+				<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+					<reportElement x="827" y="402" width="55" height="36" uuid="582b5b52-8c3f-4878-b1a1-da74b08ac89c"/>
+					<box topPadding="2" leftPadding="0">
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Top">
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cop_fix_action5_date}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="691" y="764" width="191" height="64" uuid="9ba4a8c7-b287-4b44-9a72-6e5997b64e40"/>
+					<box topPadding="2" leftPadding="2">
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement>
+						<font fontName="Tahoma" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{yokotenkai}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<staticText>
+				<reportElement x="0" y="304" width="50" height="12" uuid="8f5df58f-402e-4cdb-8c40-3741ad8139e6"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<text><![CDATA[Work Center]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="292" width="50" height="12" uuid="e0ab3fdf-ee00-4322-b732-a9115f814dc2"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<text><![CDATA[Lot Produksi]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="280" width="50" height="12" uuid="1108ebb1-b6da-4416-b471-fca9fceac10c"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<text><![CDATA[Issue Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="268" width="50" height="12" uuid="7b1b8d25-3d47-46d2-92fa-168d662ecd34"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<text><![CDATA[Quantity]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="256" width="50" height="12" uuid="9ff189d5-b7ae-4ba9-b03c-76e3eb2f45e6"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<text><![CDATA[Part No.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="244" width="50" height="12" uuid="0e6c21aa-606a-45a1-bfbb-cc82089bcf17"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<text><![CDATA[Part Name]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="50" y="244" width="97" height="12" uuid="99a7dc78-7981-4648-a4fa-8b9e63807594"/>
+				<box leftPadding="2">
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nm_part}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="50" y="256" width="97" height="12" uuid="f62e6e4d-c616-4315-9068-9915b1e31261"/>
+				<box leftPadding="2">
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{part_no}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="50" y="268" width="97" height="12" uuid="66cd2c2f-4949-45c2-88a1-94877d611ba4"/>
+				<box leftPadding="2">
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{qty_dpart}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="50" y="280" width="97" height="12" uuid="dabf8850-12a3-4b97-aeb9-ca3edcfe8e0c"/>
+				<box leftPadding="2">
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{issue_date}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="50" y="292" width="97" height="12" uuid="b09364bf-acd6-41de-a70a-e099131e18dc"/>
+				<box leftPadding="2">
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="50" y="304" width="97" height="12" uuid="6fc06684-339b-4412-b400-3e54b12520f5"/>
+				<box leftPadding="2">
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Tahoma" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+</jasperReport>

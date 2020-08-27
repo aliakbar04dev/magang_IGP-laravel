@@ -1,0 +1,784 @@
+@extends('monitoring.mtc.layouts.app3')
+
+@section('content')
+  <div class="container4">
+    <div class="row" id="box-body" name="box-body">
+      <div class="col-md-12">
+        <div class="box">
+          <div class="box-header with-border">
+            <center><h3 class="box-title" id="box-title" name="box-title" style="font-size: 30px;"><strong>DASHBOARD SMART MAINTENANCE</strong></h3></center>
+          </div>
+          <!-- /.box-header -->
+          <div class="box-body">
+            <div class="row">
+              <div class="col-md-2">
+                <button class="info-button btn-primary" id="btn-dm-igp1-zona1">
+                  DAFTAR MASALAH<br>IGP-1 ZONA 1
+                </button>
+              </div>
+              <!-- /.col -->
+              <div class="col-md-2">
+                <button class="info-button btn-primary" id="btn-dm-igp1-zona2">
+                  DAFTAR MASALAH<br>IGP-1 ZONA 2
+                </button>
+              </div>
+              <!-- /.col -->
+
+              <!-- fix for small devices only -->
+              <div class="clearfix visible-sm-block"></div>
+
+              <div class="col-md-2">
+                <button class="info-button btn-primary" id="btn-dm-igp2-zona1">
+                  DAFTAR MASALAH<br>IGP-2 ZONA 1
+                </button>
+              </div>
+              <!-- /.col -->
+              <div class="col-md-2">
+                <button class="info-button btn-primary" id="btn-dm-igp2-zona2">
+                  DAFTAR MASALAH<br>IGP-2 ZONA 2
+                </button>
+              </div>
+              <!-- /.col -->
+
+              <!-- fix for small devices only -->
+              <div class="clearfix visible-sm-block"></div>
+
+              <div class="col-md-2">
+                <button class="info-button btn-primary" id="btn-dm-igp2-zona3">
+                  DAFTAR MASALAH<br>IGP-2 ZONA 3
+                </button>
+              </div>
+              <!-- /.col -->
+              <div class="col-md-2">
+                <button class="info-button btn-primary" id="btn-dm-igp3-zona1">
+                  DAFTAR MASALAH<br>IGP-3 ZONA 1
+                </button>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- ./row -->
+          </div>
+          <!-- ./box-body -->
+          <div class="box-body">
+            <div class="row">
+              <div class="col-md-2">
+                <button class="info-button btn-success" id="btn-dm-igp3-zona2">
+                  DAFTAR MASALAH<br>IGP-3 ZONA 2
+                </button>
+              </div>
+              <!-- /.col -->
+              <div class="col-md-2">
+                <button class="info-button btn-success" id="btn-dm-igp3-zona3">
+                  DAFTAR MASALAH<br>IGP-3 ZONA 3
+                </button>
+              </div>
+              <!-- /.col -->
+
+              <!-- fix for small devices only -->
+              <div class="clearfix visible-sm-block"></div>
+
+              <div class="col-md-2">
+                <button class="info-button btn-success" id="btn-pms-igp1-zona1">
+                  PMS ACHIEVEMENT<br>IGP-1 ZONA 1
+                </button>
+              </div>
+              <!-- /.col -->
+              <div class="col-md-2">
+                <button class="info-button btn-success" id="btn-pms-igp1-zona2">
+                  PMS ACHIEVEMENT<br>IGP-1 ZONA 2
+                </button>
+              </div>
+              <!-- /.col -->
+
+              <!-- fix for small devices only -->
+              <div class="clearfix visible-sm-block"></div>
+
+              <div class="col-md-2">
+                <button class="info-button btn-success" id="btn-pms-igp2-zona1">
+                  PMS ACHIEVEMENT<br>IGP-2 ZONA 1
+                </button>
+              </div>
+              <!-- /.col -->
+              <div class="col-md-2">
+                <button class="info-button btn-success" id="btn-pms-igp2-zona2">
+                  PMS ACHIEVEMENT<br>IGP-2 ZONA 2
+                </button>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- ./row -->
+          </div>
+          <!-- ./box-body -->
+          <div class="box-body">
+            <div class="row">
+              <div class="col-md-2">
+                <button class="info-button btn-info" id="btn-pms-igp2-zona3">
+                  PMS ACHIEVEMENT<br>IGP-2 ZONA 3
+                </button>
+              </div>
+              <!-- /.col -->
+              <div class="col-md-2">
+                <button class="info-button btn-info" id="btn-pms-igp3-zona1">
+                  PMS ACHIEVEMENT<br>IGP-3 ZONA 1
+                </button>
+              </div>
+              <!-- /.col -->
+
+              <!-- fix for small devices only -->
+              <div class="clearfix visible-sm-block"></div>
+
+              <div class="col-md-2">
+                <button class="info-button btn-info" id="btn-pms-igp3-zona2">
+                  PMS ACHIEVEMENT<br>IGP-3 ZONA 2
+                </button>
+              </div>
+              <!-- /.col -->
+              <div class="col-md-2">
+                <button class="info-button btn-info" id="btn-pms-igp3-zona3">
+                  PMS ACHIEVEMENT<br>IGP-3 ZONA 3
+                </button>
+              </div>
+              <!-- /.col -->
+
+              <!-- fix for small devices only -->
+              <div class="clearfix visible-sm-block"></div>
+
+              <div class="col-md-2">
+                <button class="info-button btn-info" id="btn-daz-igp1-zona1">
+                  DAILY ACTIVITY<br>IGP-1 ZONA 1
+                </button>
+              </div>
+              <!-- /.col -->
+              <div class="col-md-2">
+                <button class="info-button btn-info" id="btn-daz-igp1-zona2">
+                  DAILY ACTIVITY<br>IGP-1 ZONA 2
+                </button>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- ./row -->
+          </div>
+          <!-- ./box-body -->
+          <div class="box-body">
+            <div class="row">
+              <div class="col-md-2">
+                <button class="info-button btn-warning" id="btn-daz-igp2-zona1">
+                  DAILY ACTIVITY<br>IGP-2 ZONA 1
+                </button>
+              </div>
+              <!-- /.col -->
+              <div class="col-md-2">
+                <button class="info-button btn-warning" id="btn-daz-igp2-zona2">
+                  DAILY ACTIVITY<br>IGP-2 ZONA 2
+                </button>
+              </div>
+              <!-- /.col -->
+
+              <!-- fix for small devices only -->
+              <div class="clearfix visible-sm-block"></div>
+
+              <div class="col-md-2">
+                <button class="info-button btn-warning" id="btn-daz-igp2-zona3">
+                  DAILY ACTIVITY<br>IGP-2 ZONA 3
+                </button>
+              </div>
+              <!-- /.col -->
+              <div class="col-md-2">
+                <button class="info-button btn-warning" id="btn-daz-igp3-zona1">
+                  DAILY ACTIVITY<br>IGP-3 ZONA 1
+                </button>
+              </div>
+              <!-- /.col -->
+
+              <!-- fix for small devices only -->
+              <div class="clearfix visible-sm-block"></div>
+
+              <div class="col-md-2">
+                <button class="info-button btn-warning" id="btn-daz-igp3-zona2">
+                  DAILY ACTIVITY<br>IGP-3 ZONA 2
+                </button>
+              </div>
+              <!-- /.col -->
+              <div class="col-md-2">
+                <button class="info-button btn-warning" id="btn-daz-igp3-zona3">
+                  DAILY ACTIVITY<br>IGP-3 ZONA 3
+                </button>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- ./row -->
+          </div>
+          <!-- ./box-body -->
+          <div class="box-body">
+            <div class="row">
+              <div class="col-md-2">
+                <button class="info-button btn-danger" id="btn-stock-sparepart-mesin">
+                  STOCK SPARE PART MESIN
+                </button>
+              </div>
+              <!-- /.col -->
+              <div class="col-md-2">
+                <button class="info-button btn-danger" id="btn-andon">
+                  MONITORING ANDON
+                </button>
+              </div>
+              <!-- /.col -->
+
+              <!-- fix for small devices only -->
+              <div class="clearfix visible-sm-block"></div>
+
+              <div class="col-md-2">
+                <button class="info-button btn-danger" id="btn-lch">
+                  MONITORING LCH FORKLIFT
+                </button>
+              </div>
+              <!-- /.col -->
+              <div class="col-md-2">
+                <button class="info-button btn-danger" id="btn-lp-igp1">
+                  LAPORAN PEKERJAAN<br>IGP-1
+                </button>
+              </div>
+              <!-- /.col -->
+
+              <!-- fix for small devices only -->
+              <div class="clearfix visible-sm-block"></div>
+
+              <div class="col-md-2">
+                <button class="info-button btn-danger" id="btn-lp-igp2">
+                  LAPORAN PEKERJAAN<br>IGP-2
+                </button>
+              </div>
+              <!-- /.col -->
+              <div class="col-md-2">
+                <button class="info-button btn-danger" id="btn-lp-igp3">
+                  LAPORAN PEKERJAAN<br>IGP-3
+                </button>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- ./row -->
+          </div>
+          <!-- ./box-body -->
+          <div class="box-body">
+            <div class="row">
+              <div class="col-md-2">
+                <button class="info-button bg-purple" id="btn-breakdownrate-igp2">
+                  BREAKDOWN RATE<br>IGP-2 LAST MONTH
+                </button>
+              </div>
+              <!-- /.col -->
+              <div class="col-md-2">
+                <button class="info-button bg-purple" id="btn-mtcj-performance">
+                  MTC JAKARTA PERFORMANCE
+                </button>
+              </div>
+              <!-- /.col -->
+
+              <!-- fix for small devices only -->
+              <div class="clearfix visible-sm-block"></div>
+
+              <div class="col-md-2">
+                <button class="info-button bg-purple" id="btn-dpm-1">
+                  DIGITAL POWER METER<br>MDB 1
+                </button>
+              </div>
+              <!-- /.col -->
+              <div class="col-md-2">
+                <button class="info-button bg-purple" id="btn-dpm-2">
+                  DIGITAL POWER METER<br>MDB 2
+                </button>
+              </div>
+              <!-- /.col -->
+
+              <!-- fix for small devices only -->
+              <div class="clearfix visible-sm-block"></div>
+
+              <div class="col-md-2">
+                <button class="info-button bg-purple" id="btn-dpm-3">
+                  DIGITAL POWER METER<br>MDB 3
+                </button>
+              </div>
+              <!-- /.col -->
+              <div class="col-md-2">
+                <button class="info-button bg-purple" id="btn-resumeoli">
+                  RESUME PENGISIAN OLI<br>IGP JAKARTA
+                </button>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- ./row -->
+          </div>
+          <!-- ./box-body -->
+          <div class="box-body">
+            <div class="row">
+              <div class="col-md-2">
+                <button class="info-button bg-navy" id="btn-topoli-igp1">
+                  TOP 20 PEMAKAIAN OLI<br>IGP-1
+                </button>
+              </div>
+              <!-- /.col -->
+              <div class="col-md-2">
+                <button class="info-button bg-navy" id="btn-topoli-igp2">
+                  TOP 20 PEMAKAIAN OLI<br>IGP-2
+                </button>
+              </div>
+              <!-- /.col -->
+
+              <!-- fix for small devices only -->
+              <div class="clearfix visible-sm-block"></div>
+
+              <div class="col-md-2">
+                <button class="info-button bg-navy" id="btn-topoli-igp3">
+                  TOP 20 PEMAKAIAN OLI<br>IGP-3
+                </button>
+              </div>
+              <!-- /.col -->
+              <div class="col-md-2">
+                <button class="info-button bg-navy" id="btn-login">
+                  LOGIN SMART MAINTENANCE
+                </button>
+              </div>
+              <!-- /.col -->
+
+              <!-- fix for small devices only -->
+              <div class="clearfix visible-sm-block"></div>
+
+              {{-- <div class="col-md-2">
+                <button class="info-button bg-purple" id="btn-dpm-3">
+                  DIGITAL POWER METER<br>MDB 3
+                </button>
+              </div> --}}
+              <!-- /.col -->
+              {{-- <div class="col-md-2">
+                <button class="info-button bg-purple" id="btn-login">
+                  LOGIN SMART MAINTENANCE
+                </button>
+              </div> --}}
+              <!-- /.col -->
+            </div>
+            <!-- ./row -->
+          </div>
+          <!-- ./box-body -->
+        </div>
+        <!-- /.box -->
+      </div>
+      <!-- /.col -->
+    </div>
+    <!-- /.row -->
+  </div>
+@endsection
+
+@section('scripts')
+<script type="text/javascript">
+
+  document.title = "DASHBOARD SMART MTC";
+
+  $("#btn-dm-igp1-zona1").click(function(){
+    var kd_plant = "1";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.indexdm', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-dm-igp1-zona2").click(function(){
+    var kd_plant = "1";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.indexdm', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-dm-igp2-zona1").click(function(){
+    var kd_plant = "2";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.indexdm', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-dm-igp2-zona2").click(function(){
+    var kd_plant = "2";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.indexdm', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-dm-igp2-zona3").click(function(){
+    var kd_plant = "2";
+    var lok_zona = "3";
+    var urlRedirect = "{{ route('smartmtcs.indexdm', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-dm-igp3-zona1").click(function(){
+    var kd_plant = "3";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.indexdm', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-dm-igp3-zona2").click(function(){
+    var kd_plant = "3";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.indexdm', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-dm-igp3-zona3").click(function(){
+    var kd_plant = "3";
+    var lok_zona = "3";
+    var urlRedirect = "{{ route('smartmtcs.indexdm', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-pms-igp1-zona1").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "1";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-pms-igp1-zona2").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "1";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-pms-igp2-zona1").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "2";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-pms-igp2-zona2").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "2";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-pms-igp2-zona3").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "2";
+    var lok_zona = "3";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-pms-igp3-zona1").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "3";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-pms-igp3-zona2").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "3";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-pms-igp3-zona3").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "3";
+    var lok_zona = "3";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-daz-igp1-zona1").click(function(){
+    var kd_plant = "1";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.indexmtctpms', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-daz-igp1-zona2").click(function(){
+    var kd_plant = "1";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.indexmtctpms', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-daz-igp2-zona1").click(function(){
+    var kd_plant = "2";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.indexmtctpms', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-daz-igp2-zona2").click(function(){
+    var kd_plant = "2";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.indexmtctpms', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-daz-igp2-zona3").click(function(){
+    var kd_plant = "2";
+    var lok_zona = "3";
+    var urlRedirect = "{{ route('smartmtcs.indexmtctpms', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-daz-igp3-zona1").click(function(){
+    var kd_plant = "3";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.indexmtctpms', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-daz-igp3-zona2").click(function(){
+    var kd_plant = "3";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.indexmtctpms', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-daz-igp3-zona3").click(function(){
+    var kd_plant = "3";
+    var lok_zona = "3";
+    var urlRedirect = "{{ route('smartmtcs.indexmtctpms', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-stock-sparepart-mesin").click(function(){
+    var urlRedirect = "{{ route('smartmtcs.indexstockohigp') }}";
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-andon").click(function(){
+    var urlRedirect = "{{ route('smartmtcs.monitoringandon') }}";
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-lch").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var urlRedirect = "{{ route('smartmtcs.monitoringlch', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-lp-igp1").click(function(){
+    var kd_plant = "1";
+    var urlRedirect = "{{ route('smartmtcs.monitoringlp', 'param') }}";
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-lp-igp2").click(function(){
+    var kd_plant = "2";
+    var urlRedirect = "{{ route('smartmtcs.monitoringlp', 'param') }}";
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-lp-igp3").click(function(){
+    var kd_plant = "3";
+    var urlRedirect = "{{ route('smartmtcs.monitoringlp', 'param') }}";
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-breakdownrate-igp2").click(function(){
+    var kd_plant = "2";
+    var urlRedirect = "{{ route('smartmtcs.monitoringasakai', 'param') }}";
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-mtcj-performance").click(function(){
+    var kd_plant = "IGPJ";
+    var urlRedirect = "{{ route('smartmtcs.monitoringmtc', 'param') }}";
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-dpm-1").click(function(){
+    var mdb = "1";
+    var urlRedirect = "{{ route('smartmtcs.dpm', 'param') }}";
+    urlRedirect = urlRedirect.replace('param', mdb);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-dpm-2").click(function(){
+    var mdb = "2";
+    var urlRedirect = "{{ route('smartmtcs.dpm', 'param') }}";
+    urlRedirect = urlRedirect.replace('param', mdb);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-dpm-3").click(function(){
+    var mdb = "3";
+    var urlRedirect = "{{ route('smartmtcs.dpm', 'param') }}";
+    urlRedirect = urlRedirect.replace('param', mdb);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-login").click(function(){
+    var urlRedirect = "{{ url('login') }}";
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-resumeoli").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var kd_site = "IGPJ";
+    var urlRedirect = "{{ route('smartmtcs.resumepengisianoli', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', window.btoa(tahun));
+    urlRedirect = urlRedirect.replace('param', kd_site);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-topoli-igp1").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "1";
+    var urlRedirect = "{{ route('smartmtcs.toppengisianoli', ['param','param2','param3']) }}";
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-topoli-igp2").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "2";
+    var urlRedirect = "{{ route('smartmtcs.toppengisianoli', ['param','param2','param3']) }}";
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+
+  $("#btn-topoli-igp3").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "3";
+    var urlRedirect = "{{ route('smartmtcs.toppengisianoli', ['param','param2','param3']) }}";
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    // window.location.href = urlRedirect;
+    window.open(urlRedirect, '_blank');
+  });
+</script>
+@endsection

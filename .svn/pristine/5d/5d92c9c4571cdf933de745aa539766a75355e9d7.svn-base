@@ -1,0 +1,16 @@
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Session;
+use Carbon\Carbon;
+use DB;
+
+class Mcalworksheet extends Model
+{
+    public function mcalworksheetDet($noWs)
+	{ 
+		return DB::connection("oracle-usrklbr")->table('mcalworksheetdet')->where(DB::raw("no_ws"), '=', $noWs)->orderByRaw('to_number(titik_ukur)');
+	}
+}

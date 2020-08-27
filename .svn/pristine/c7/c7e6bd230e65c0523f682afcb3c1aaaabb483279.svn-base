@@ -1,0 +1,711 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use DB;
+use Exception;
+use App\User;
+
+class StockohigpsController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        if(Auth::user()->can(['mtc-stockwhs-view'])) {
+            $baan_whs = DB::connection('oracle-usrbaan')
+            ->table("baan_whs")
+            ->selectRaw("kd_cwar, nm_dsca")
+            ->whereRaw("kd_cwar in ('JWJTS','KWJTS','JWCSF','KWCSF')")
+            ->orderBy("kd_cwar");
+            return view('mtc.stockwhs.index', compact('baan_whs'));
+        } else {
+           return view('errors.403');
+       }
+   }
+
+   public function dashboard(Request $request)
+   {
+    if(Auth::user()->can(['mtc-stockwhs-view'])) {
+        if ($request->ajax()) {
+
+            $lists = DB::connection('oracle-usrbrgcorp')
+            ->table(DB::raw("(select item, usrbaan.fnm_item(item) item_name, whse, qty, dtcrea from usrbaan.stockohigp where whse in ('JWJTS','KWJTS','JWCSF','KWCSF')) sh"))
+            ->select(DB::raw("item, item_name, whse, qty, dtcrea"));
+
+            if(!empty($request->get('kd_mesin'))) {
+                if(!empty($request->get('item'))) {
+                    $kd_mesin = $request->get('kd_mesin');
+                    $item = $request->get('item');
+                    $lists->whereExists(function ($query) use ($kd_mesin, $item) {
+                        $query->select(DB::raw(1))
+                        ->from(DB::raw("mtct_dpm dp, mtct_dpm_bom db"))
+                        ->whereRaw("db.no_dpm = dp.no_dpm and db.item_no = sh.item")
+                        ->where("dp.kd_mesin", $kd_mesin)
+                        ->where("db.item_no", $item);
+                    }
+                );
+                } else {
+                    $kd_mesin = $request->get('kd_mesin');
+                    $lists->whereExists(function ($query) use ($kd_mesin) {
+                        $query->select(DB::raw(1))
+                        ->from(DB::raw("mtct_dpm dp, mtct_dpm_bom db"))
+                        ->whereRaw("db.no_dpm = dp.no_dpm and db.item_no = sh.item")
+                        ->where("dp.kd_mesin", $kd_mesin);
+                    }
+                );
+                }
+            }
+            if(!empty($request->get('whs'))) {
+                if($request->get('whs') !== "ALL") {
+                    $lists->where("sh.whse", $request->get('whs'));
+                }
+            }
+            if(!empty($request->get('item'))) {
+                $lists->where("sh.item", $request->get('item'));
+            }
+
+            return Datatables::of($lists)
+            ->editColumn('dtcrea', function($data){
+                return Carbon::parse($data->dtcrea)->format('d/m/Y H:i:s');
+            })
+            ->filterColumn('dtcrea', function ($query, $keyword) {
+                $query->whereRaw("to_char(dtcrea,'dd-mm-yyyy hh24:mi:ss') like ?", ["%$keyword%"]);
+            })
+            ->editColumn('qty', function($data){
+                return numberFormatter(0, 2)->format($data->qty);
+            })
+            ->filterColumn('qty', function ($query, $keyword) {
+                $query->whereRaw("trim(to_char(qty,'999999999999999999.99')) like ?", ["%$keyword%"]);
+            })
+            ->make(true);
+        } else {
+            return redirect('home');
+        }
+    } else {
+        return view('errors.403');
+    }
+}
+
+public function dashboardmesin(Request $request)
+{
+    if(Auth::user()->can(['mtc-stockwhs-view'])) {
+        if ($request->ajax()) {
+            $kd_mesin = $request->get('kd_mesin');
+            $lists = DB::connection('oracle-usrbrgcorp')
+            ->table(DB::raw("vw_mesin_dpm_bom"))
+            ->select(DB::raw("kd_mesin, item_no, nil_qpu"))
+            ->whereRaw("length(item_no) <> 17 and substr(item_no,1,3) <> 'p17'")
+            ->where("kd_mesin", $kd_mesin);
+
+            return Datatables::of($lists)
+            ->make(true);
+        } else {
+            return redirect('home');
+        }
+    } else {
+        return view('errors.403');
+    }
+}
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexppc()
+    {
+        if(Auth::user()->can(['ppc-stockwhs-view'])) {
+            $baan_whs = DB::connection('oracle-usrbaan')
+            ->table("baan_whs")
+            ->selectRaw("kd_cwar, nm_dsca")
+            ->orderBy("kd_cwar");
+            return view('ppc.stockwhs.index', compact('baan_whs'));
+        } else {
+           return view('errors.403');
+       }
+   }
+
+   public function dashboardppc(Request $request)
+   {
+    if(Auth::user()->can(['ppc-stockwhs-view'])) {
+        if ($request->ajax()) {
+
+            $lists = DB::connection('oracle-usrbrgcorp')
+            ->table(DB::raw("(select item, usrbaan.fnm_item(item) item_name, whse, decode(whse, 'JWJTS', usrigpmfg.flok_rak(usrbaan.fkd_brg_igp_item(item), decode(substr(item,1,1), 'P', '17', decode(substr(item,1,3), 'TJF', '1J', decode(substr(item,1,3), 'TCC', '1T', '-'))))||' ['||usrbaan.fkd_brg_igp_item(item)||']', '-') lokasi, qty, dtcrea from usrbaan.stockohigp) sh"))
+            ->select(DB::raw("item, item_name, whse, lokasi, qty, dtcrea"));
+
+            if(!empty($request->get('kd_mesin'))) {
+                if(!empty($request->get('item'))) {
+                    $kd_mesin = $request->get('kd_mesin');
+                    $item = $request->get('item');
+                    $lists->whereExists(function ($query) use ($kd_mesin, $item) {
+                        $query->select(DB::raw(1))
+                        ->from(DB::raw("mtct_dpm dp, mtct_dpm_bom db"))
+                        ->whereRaw("db.no_dpm = dp.no_dpm and db.item_no = sh.item")
+                        ->where("dp.kd_mesin", $kd_mesin)
+                        ->where("db.item_no", $item);
+                    }
+                );
+                } else {
+                    $kd_mesin = $request->get('kd_mesin');
+                    $lists->whereExists(function ($query) use ($kd_mesin) {
+                        $query->select(DB::raw(1))
+                        ->from(DB::raw("mtct_dpm dp, mtct_dpm_bom db"))
+                        ->whereRaw("db.no_dpm = dp.no_dpm and db.item_no = sh.item")
+                        ->where("dp.kd_mesin", $kd_mesin);
+                    }
+                );
+                }
+            }
+            if(!empty($request->get('whs'))) {
+                if($request->get('whs') !== "ALL") {
+                    $lists->where("sh.whse", $request->get('whs'));
+                }
+            }
+            if(!empty($request->get('item'))) {
+                $lists->where("sh.item", $request->get('item'));
+            }
+
+            return Datatables::of($lists)
+            ->editColumn('dtcrea', function($data){
+                return Carbon::parse($data->dtcrea)->format('d/m/Y H:i:s');
+            })
+            ->filterColumn('dtcrea', function ($query, $keyword) {
+                $query->whereRaw("to_char(dtcrea,'dd-mm-yyyy hh24:mi:ss') like ?", ["%$keyword%"]);
+            })
+            ->editColumn('qty', function($data){
+                return numberFormatter(0, 2)->format($data->qty);
+            })
+            ->filterColumn('qty', function ($query, $keyword) {
+                $query->whereRaw("trim(to_char(qty,'999999999999999999.99')) like ?", ["%$keyword%"]);
+            })
+            ->make(true);
+        } else {
+            return redirect('home');
+        }
+    } else {
+        return view('errors.403');
+    }
+}
+
+public function indexcomponenpart()
+{
+    if(Auth::user()->can(['ppc-levelinventorycp-view'])) {
+        $label = "Component Part";
+        $filter_whs = DB::connection('oracle-usrbaan')
+        ->table("baan_whs")
+        ->selectRaw("kd_cwar, nm_dsca")
+        ->whereRaw("kd_cwar in ('JWRM1','JWRM2','JP5K3','JPRA3')")
+        ->orderBy("kd_cwar");
+        return view('ppc.stockppc.index', compact(['label', 'filter_whs']));
+    } else {
+       return view('errors.403');
+   }
+}
+
+public function indexcomponenpartkim()
+{
+    if(Auth::user()->can(['ppckim-levelinventorycp-view'])) {
+        $label = "Component Part";
+        $filter_whs = DB::connection('oracle-usrbaan')
+        ->table("baan_whs")
+        ->selectRaw("kd_cwar, nm_dsca")
+        ->whereRaw("kd_cwar in ('KWRMA','KWRMB', 'SPT01', 'SPT04', 'SPT03', 'SMC03')")
+        ->orderBy("kd_cwar");
+        return view('ppc.stockppc.indexkim', compact(['label', 'filter_whs']));
+    } else {
+       return view('errors.403');
+   }
+}
+
+public function indexconsumable()
+{
+    if(Auth::user()->can(['ppc-levelinventorycons-view'])) {
+        $label = "Consumable";
+        $filter_whs = DB::connection('oracle-usrbaan')
+        ->table("baan_whs")
+        ->selectRaw("kd_cwar, nm_dsca")
+        ->whereRaw("kd_cwar in ('JWCSF')")
+        ->orderBy("kd_cwar");
+        return view('ppc.stockppc.index', compact(['label', 'filter_whs']));
+    } else {
+       return view('errors.403');
+   }
+}
+
+public function indexconsumablekim()
+{
+    if(Auth::user()->can(['ppckim-levelinventorycons-view'])) {
+        $label = "Consumable";
+        $filter_whs = DB::connection('oracle-usrbaan')
+        ->table("baan_whs")
+        ->selectRaw("kd_cwar, nm_dsca")
+        ->whereRaw("kd_cwar in ('KWCSF')")
+        ->orderBy("kd_cwar");
+        return view('ppc.stockppc.indexconstoolskim', compact(['label', 'filter_whs']));
+    } else {
+       return view('errors.403');
+   }
+}
+
+public function indexservicepart()
+{
+    if(Auth::user()->can(['ppc-levelinventorysp-view'])) {
+        $label = "Service Part";
+        $filter_whs = DB::connection('oracle-usrbaan')
+        ->table("baan_whs")
+        ->selectRaw("kd_cwar, nm_dsca")
+        ->whereRaw("kd_cwar in ('JWRM3')")
+        ->orderBy("kd_cwar");
+        return view('ppc.stockppc.index', compact(['label', 'filter_whs']));
+    } else {
+       return view('errors.403');
+   }
+}
+
+public function indextools()
+{
+    if(Auth::user()->can(['ppc-levelinventorytsp-view'])) {
+        $label = "Tools & Sparepart";
+        $filter_whs = DB::connection('oracle-usrbaan')
+        ->table("baan_whs")
+        ->selectRaw("kd_cwar, nm_dsca")
+        ->whereRaw("kd_cwar in ('JWJTS')")
+        ->orderBy("kd_cwar");
+        return view('ppc.stockppc.index', compact(['label', 'filter_whs']));
+    } else {
+       return view('errors.403');
+   }
+}
+
+public function indextoolskim()
+{
+    if(Auth::user()->can(['ppckim-levelinventorytsp-view'])) {
+        $label = "Tools & Sparepart";
+        $filter_whs = DB::connection('oracle-usrbaan')
+        ->table("baan_whs")
+        ->selectRaw("kd_cwar, nm_dsca")
+        ->whereRaw("kd_cwar in ('KWJTS')")
+        ->orderBy("kd_cwar");
+        return view('ppc.stockppc.indexconstoolskim', compact(['label', 'filter_whs']));
+    } else {
+       return view('errors.403');
+   }
+}
+
+public function dashboardinventorylevel(Request $request)
+{
+    if(Auth::user()->can(['ppc-levelinventorycp-view', 'ppc-levelinventorycons-view', 'ppc-levelinventorysp-view', 'ppc-levelinventorytsp-view', 'ppckim-levelinventorycp-view', 'ppckim-levelinventorycons-view', 'ppckim-levelinventorytsp-view'])) {
+        if ($request->ajax()) {
+            $whse = "XXX";
+            if(!empty($request->get('whs'))) {
+                $whse = $request->get('whs');
+
+                DB::beginTransaction();
+                try {
+                    DB::connection("oracle-usrbaan")
+                    ->table("baan_std_stok")
+                    ->whereRaw("cm is not null and exists (select 1 from ppcv_stockoh where ppcv_stockoh.whse = baan_std_stok.whse and ppcv_stockoh.item = baan_std_stok.item and ppcv_stockoh.st_stock not in ('WARNING','CRITICAL'))")
+                    ->where("whse", "=", $whse)
+                    ->update(["cm" => null]);
+                    DB::commit();
+                } catch (Exception $ex) {
+                    DB::rollback();
+                    Session::flash("flash_notification", [
+                        "level"=>"danger",
+                        "message"=>"Proses Data Gagal!"
+                    ]);
+                    return redirect('home');
+                }
+            }
+            $lists = DB::connection('oracle-usrbaan')
+            ->table("ppcv_stockoh")
+            ->select(DB::raw("bpid, item, nm_item, whse, day, qty_min, qty_max, qty, st_stock, stok_age, lokasi, dtcrea, cm"));
+
+            if(!empty($request->get('stok'))) {
+                if($request->get('stok') != "") {
+                    $st_stock = $request->get('stok');
+                    $lists->whereIn("st_stock", $st_stock);
+                }
+            }
+
+            $lists->where("whse", "=", $whse);
+
+            return Datatables::of($lists)
+            ->editColumn('st_stock', function($data){
+                if ($data->st_stock=='NORMAL') {
+                    $loc_image = asset("images/green.png");
+                    return '<img src="'. $loc_image .'" alt="X" data-toggle="tooltip" data-placement="top" title="NORMAL">';
+                } else  if ($data->st_stock=='OVER') {
+                    $loc_image = asset("images/blue.png");
+                    return '<img src="'. $loc_image .'" alt="X" data-toggle="tooltip" data-placement="top" title="OVER">';
+                } else  if ($data->st_stock=='WARNING') {
+                    $param1 = '"'.$data->whse.'"';
+                    $param2 = '"'.$data->item.'"';
+                    $param3 = '"'.$data->cm.'"';
+                    $loc_image = asset("images/yellow.png");
+                    return "<img src='".$loc_image."' alt='X' data-toggle='tooltip' data-placement='top' title='WARNING' onclick='updatecm(". $param1 .",". $param2 .",". $param3 .")'>";
+                } else {
+                    $param1 = '"'.$data->whse.'"';
+                    $param2 = '"'.$data->item.'"';
+                    $param3 = '"'.$data->cm.'"';
+                    $loc_image = asset("images/red.png");
+                    return "<img src='".$loc_image."' alt='X' data-toggle='tooltip' data-placement='top' title='CRITICAL' onclick='updatecm(". $param1 .",". $param2 .",". $param3 .")'>";
+                }
+            })
+            ->editColumn('dtcrea', function($data){
+                return Carbon::parse($data->dtcrea)->format('d/m/Y H:i:s');
+            })
+            ->filterColumn('dtcrea', function ($query, $keyword) {
+                $query->whereRaw("to_char(dtcrea,'dd-mm-yyyy hh24:mi:ss') like ?", ["%$keyword%"]);
+            })
+            ->editColumn('qty', function($data){
+                return numberFormatter(0, 2)->format($data->qty);
+            })
+            ->filterColumn('qty', function ($query, $keyword) {
+                $query->whereRaw("trim(to_char(qty,'999999999999999999.99')) like ?", ["%$keyword%"]);
+            })
+            ->make(true);
+        } else {
+            return redirect('home');
+        }
+    } else {
+        return view('errors.403');
+    }
+}
+
+public function dashboardinventorylevelctkim(Request $request)
+{
+    if(Auth::user()->can(['ppckim-levelinventorycons-view', 'ppckim-levelinventorytsp-view'])) {
+        if ($request->ajax()) {
+            $whse = "XXX";
+            $lap_whs = $request->get('lap_whs');
+            $konsinyasi = $request->get('konsinyasi');
+
+            if($lap_whs == 'ALL'){
+                $lap_whs = '';
+            }
+            if(!empty($request->get('whs'))) {
+                $whse = $request->get('whs');               
+
+                DB::beginTransaction();
+                try {
+                    DB::connection("oracle-usrbaan")
+                    ->table("baan_std_stok")
+                    ->whereRaw("cm is not null and exists (select 1 from ppcv_stockoh where ppcv_stockoh.whse = baan_std_stok.whse and ppcv_stockoh.item = baan_std_stok.item and ppcv_stockoh.st_stock not in ('WARNING','CRITICAL'))")
+                    ->where("whse", "=", $whse)
+                    ->update(["cm" => null]);
+                    DB::commit();
+                } catch (Exception $ex) {
+                    DB::rollback();
+                    Session::flash("flash_notification", [
+                        "level"=>"danger",
+                        "message"=>"Proses Data Gagal!"
+                    ]);
+                    return redirect('home');
+                }
+            }
+            $lists = DB::connection('oracle-usrbaan')
+            ->table("ppcv_lvl_stok")
+            ->select(DB::raw("bpid, item, nm_item, whse, day, qty_min, qty_max, qty, st_stock, stok_age, lokasi, dtcrea, cm"));
+
+            if(!empty($request->get('stok'))) {
+                if($request->get('stok') != "") {
+                    $st_stock = $request->get('stok');
+                    $lists->whereIn("st_stock", $st_stock);
+                }
+            }
+
+            $lists->where("whse", "=", $whse)
+            ->where("st_konsinyasi", "=", $konsinyasi)
+            ->whereRaw("(kode_lap_whs = '".$lap_whs."' OR '".$lap_whs."' is null)");
+
+            return Datatables::of($lists)
+            ->editColumn('st_stock', function($data){
+                if ($data->st_stock=='NORMAL') {
+                    $loc_image = asset("images/green.png");
+                    return '<img src="'. $loc_image .'" alt="X" data-toggle="tooltip" data-placement="top" title="NORMAL">';
+                } else  if ($data->st_stock=='OVER') {
+                    $loc_image = asset("images/blue.png");
+                    return '<img src="'. $loc_image .'" alt="X" data-toggle="tooltip" data-placement="top" title="OVER">';
+                } else  if ($data->st_stock=='WARNING') {
+                    $param1 = '"'.$data->whse.'"';
+                    $param2 = '"'.$data->item.'"';
+                    $param3 = '"'.$data->cm.'"';
+                    $loc_image = asset("images/yellow.png");
+                    return "<img src='".$loc_image."' alt='X' data-toggle='tooltip' data-placement='top' title='WARNING' onclick='updatecm(". $param1 .",". $param2 .",". $param3 .")'>";
+                } else {
+                    $param1 = '"'.$data->whse.'"';
+                    $param2 = '"'.$data->item.'"';
+                    $param3 = '"'.$data->cm.'"';
+                    $loc_image = asset("images/red.png");
+                    return "<img src='".$loc_image."' alt='X' data-toggle='tooltip' data-placement='top' title='CRITICAL' onclick='updatecm(". $param1 .",". $param2 .",". $param3 .")'>";
+                }
+            })
+            ->editColumn('dtcrea', function($data){
+                return Carbon::parse($data->dtcrea)->format('d/m/Y H:i:s');
+            })
+            ->filterColumn('dtcrea', function ($query, $keyword) {
+                $query->whereRaw("to_char(dtcrea,'dd-mm-yyyy hh24:mi:ss') like ?", ["%$keyword%"]);
+            })
+            ->editColumn('qty', function($data){
+                return numberFormatter(0, 2)->format($data->qty);
+            })
+            ->filterColumn('qty', function ($query, $keyword) {
+                $query->whereRaw("trim(to_char(qty,'999999999999999999.99')) like ?", ["%$keyword%"]);
+            })
+            ->make(true);
+        } else {
+            return redirect('home');
+        }
+    } else {
+        return view('errors.403');
+    }
+}
+
+public function history(Request $request, $whse, $item)
+{
+    if(Auth::user()->can(['ppc-levelinventorycp-view', 'ppc-levelinventorycons-view', 'ppc-levelinventorysp-view', 'ppc-levelinventorytsp-view', 'ppckim-levelinventorycp-view', 'ppckim-levelinventorycons-view', 'ppckim-levelinventorytsp-view'])) {
+        if ($request->ajax()) {
+            $whse = base64_decode($whse);
+            $item = base64_decode($item);
+
+            $lists = DB::connection("oracle-usrbaan")
+            ->table("ppct_stock_cm")
+            ->select(DB::raw("*"))
+            ->where("whse", $whse)
+            ->where("item", $item);
+
+            return Datatables::of($lists)
+            ->editColumn('dtcrea', function($data){
+                return Carbon::parse($data->dtcrea)->format('d/m/Y H:i:s');
+            })
+            ->filterColumn('dtcrea', function ($query, $keyword) {
+                $query->whereRaw("to_char(dtcrea,'dd-mm-yyyy hh24:mi:ss') like ?", ["%$keyword%"]);
+            })
+            ->make(true);
+        } else {
+            return redirect('home');
+        }
+    } else {
+        return view('errors.403');
+    }
+}
+
+public function updatecm(Request $request)
+{
+    if ($request->ajax()) {
+
+        $data = $request->all();
+        $whse = trim($data['whse']) !== '' ? trim($data['whse']) : null;
+        $whse = base64_decode($whse);
+        $item = trim($data['item']) !== '' ? trim($data['item']) : null;
+        $item = base64_decode($item);
+        $keterangan = trim($data['keterangan']) !== '' ? trim($data['keterangan']) : null;
+        $status = "OK";
+        $msg = "Keterangan CM Warehouse: ".$whse.", Part No: ".$item." Berhasil di-Update.";
+        $action_new = "";
+
+        if($whse != null && $item != null && $keterangan != null) {
+
+            $baan_std_stok = DB::connection("oracle-usrbaan")
+            ->table("baan_std_stok")
+            ->whereRaw("exists (select 1 from ppcv_stockoh where ppcv_stockoh.whse = baan_std_stok.whse and ppcv_stockoh.item = baan_std_stok.item and ppcv_stockoh.st_stock in ('WARNING','CRITICAL'))")
+            ->where("whse", "=", $whse)
+            ->where("item", "=", $item)
+            ->first();
+
+            if($baan_std_stok == null) {
+                $status = "NG";
+                $msg = "Keterangan CM Warehouse: ".$whse.", Part No: ".$item." Gagal di-Update. Data tidak ditemukan.";
+            } else {
+                DB::beginTransaction();
+                try {
+
+                    $baan_std_stok = DB::connection("oracle-usrbaan")
+                    ->table("baan_std_stok")
+                    ->whereRaw("exists (select 1 from ppcv_stockoh where ppcv_stockoh.whse = baan_std_stok.whse and ppcv_stockoh.item = baan_std_stok.item and ppcv_stockoh.st_stock in ('WARNING','CRITICAL'))")
+                    ->where("whse", "=", $whse)
+                    ->where("item", "=", $item)
+                    ->update(["cm" => $keterangan]);
+
+                        //insert logs
+                    $log_keterangan = "StockohigpsController.updatecm: ".$msg;
+                    $log_ip = \Request::session()->get('client_ip');
+                    $created_at = Carbon::now();
+                    $updated_at = Carbon::now();
+                    DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                    DB::commit();
+                } catch (Exception $ex) {
+                    DB::rollback();
+                    $status = "NG";
+                    $msg = "Keterangan CM Warehouse: ".$whse.", Part No: ".$item." Gagal di-Update.";
+                }
+            }
+        } else {
+            $status = "NG";
+            $msg = "Keterangan CM Warehouse: ".$whse.", Part No: ".$item." Gagal di-Update.";
+        }
+        return response()->json(['status' => $status, 'message' => $msg, 'action_new' => $action_new]);
+    } else {
+        return redirect('home');
+    }
+}
+
+public function indexfinishgood()
+{
+    if(Auth::user()->can(['ppc-levelinventoryfg-view'])) {
+        return view('ppc.stockppc.indexfg');
+    } else {
+       return view('errors.403');
+   }
+}
+
+public function indexfinishgoodkim()
+{
+    if(Auth::user()->can(['ppckim-levelinventoryfg-view'])) {
+        return view('ppc.stockppc.indexfgkim');
+    } else {
+       return view('errors.403');
+   }
+}
+
+public function dashboardfinishgood(Request $request)
+{
+    if(Auth::user()->can(['ppc-levelinventoryfg-view', 'ppckim-levelinventoryfg-view'])) {
+        $whse = $request->get('whs');
+        $status = $request->get('stok');
+        if ($request->ajax()) {
+          $lists = DB::connection('oracle-usrbaan')
+          ->table("ppcv_stockohfg")
+          ->select(DB::raw("cust, item, part_no_cust, nm_item, whse, qty_min, qty_max, qty, st_stock"))
+          ->where("whse", "=", $whse)
+          ->orderBy('nm_item');
+
+          if(!empty($request->get('whs')) && !empty($request->get('stok'))) {
+           if($request->get('stok') == "ALL") {
+            $lists = DB::connection('oracle-usrbaan')
+            ->table("ppcv_stockohfg")
+            ->select(DB::raw("cust, item, part_no_cust, nm_item, whse, qty_min, qty_max, qty, st_stock"))
+            ->where("whse", "=", $whse)
+            ->orderBy('nm_item');
+        }else{
+            $lists = DB::connection('oracle-usrbaan')
+            ->table("ppcv_stockohfg")
+            ->select(DB::raw("cust, item, part_no_cust, nm_item, whse, qty_min, qty_max, qty, st_stock"))
+            ->where("st_stock", "=", $status)
+            ->where("whse", "=", $whse)
+            ->orderBy('nm_item'); 
+        }
+    }
+
+    return Datatables::of($lists)
+    ->editColumn('st_stock', function($data){
+        if ($data->st_stock=='NORMAL') {
+            $loc_image = asset("images/green.png");
+            return '<img src="'. $loc_image .'" alt="X" data-toggle="tooltip" data-placement="top" title="NORMAL">';
+        } else  if ($data->st_stock=='OVER') {
+            $loc_image = asset("images/blue.png");
+            return '<img src="'. $loc_image .'" alt="X" data-toggle="tooltip" data-placement="top" title="OVER">';
+        } else  if ($data->st_stock=='WARNING') {
+            $loc_image = asset("images/yellow.png");
+            return '<img src="'. $loc_image .'" alt="X" data-toggle="tooltip" data-placement="top" title="WARNING">';
+        } else {
+            $loc_image = asset("images/red.png");
+            return '<img src="'. $loc_image .'" alt="X" data-toggle="tooltip" data-placement="top" title="CRITICAL">';
+        }
+    })
+    ->editColumn('qty', function($data){
+        return numberFormatter(0, 2)->format($data->qty);
+    })
+    ->filterColumn('qty', function ($query, $keyword) {
+        $query->whereRaw("trim(to_char(qty,'999999999999999999.99')) like ?", ["%$keyword%"]);
+    })
+    ->make(true);
+} else {
+    return redirect('home');
+}
+} else {
+    return view('errors.403');
+}
+}
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        return view('errors.404');
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        return view('errors.404');
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        return view('errors.404');
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        return view('errors.404');
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        return view('errors.404');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        return view('errors.404');
+    }
+}

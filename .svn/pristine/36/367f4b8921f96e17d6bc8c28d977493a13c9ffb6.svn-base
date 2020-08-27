@@ -1,0 +1,138 @@
+@include('audit.temuanaudit._detail')
+<div class="form-group">
+        <div class="col-md-12">
+<table class="table-borderless" style="width: 100%;">
+<tr>
+    <td colspan="3">
+        <input type="hidden" id="id" value="{{ $get_temuan->id }}">
+        <label>CONTAINMENT ACTION</label>
+        <textarea style="background-color: #fff" id="coa" name="coa" class="form-control"></textarea>
+    </td>
+</tr>
+<tr>
+    <td>
+        <label>PIC</label>
+        <input class="form-control" id="pic" name="pic">
+    </td>
+    <td>
+        <label>DUE DATE</label>
+        <input type="date" class="form-control" id="due_date" name="due_date" style="padding-top: 0px;">
+    </td>
+    <td>
+        <label>TARGET ROOT CAUSE & CORRECTIVE ACTION</label>
+        <input type="date" class="form-control" id="target_date" name="target_date" style="padding-top: 0px;">
+    </td>
+</tr>
+<tr>
+    <td>
+        <div class="checkbox">
+            <label><input type="checkbox" id="sign" name="sign" value="1">Dengan ini saya menandatangani temuan audit diatas</label>
+        </div>
+    </td>
+    <td style="text-align: right;" colspan="2">
+        <button type="submit" id="submit" class="btn btn-primary">TANDA TANGANI</button>
+    </td>
+</tr>
+</table>
+</div>
+</div>
+
+@section('scripts')
+<script type="text/javascript">
+    $(document).ready(function(){
+       
+    });
+
+    $('#form_id').submit(function(event) {
+    event.preventDefault();
+    var coa = document.getElementById('coa').value;
+    var pic = document.getElementById('pic').value;
+    var due_date = document.getElementById('due_date').value;
+    var target_date = document.getElementById('target_date').value;
+    var sign = document.getElementById('sign').checked;
+    
+    const due_date_val = new Date(due_date);
+    const target_date_val = new Date(target_date);
+    // const diffTime = Math.abs(target_date_val - due_date_val);
+    // const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+    // console.log(diffDays);
+
+    if (coa == '' || pic == '' || due_date == '' || target_date == '' || sign == ''){
+        swal(
+            'Info',
+            'Form yang diisi belum lengkap!',
+            'info'
+            )        
+            return;
+    }
+
+    if (target_date_val < due_date_val){
+        swal(
+            'Info',
+            'Perhatikan inputan pada Target Root dan Due Date!',
+            'info'
+            )        
+            return;
+    }
+
+    var id = document.getElementById('id').value.trim();
+    var url = "{{ route('auditors.temuanaudit_sign_auditee_submit', 'param') }}";
+    url = url.replace('param', id);
+    // alert(id);
+    // alert(url);
+    swal({
+          title: 'Anda yakin ingin submit?',
+          text: '',
+          type: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Ya, submit',
+          cancelButtonText: 'Batal',
+          allowOutsideClick: true,
+          allowEscapeKey: true,
+          allowEnterKey: true,
+          reverseButtons: false,
+          focusCancel: false,
+        }).then(function () {
+        $.ajax({
+        url: url,
+        type: 'post',
+        data: $('#form_id').serialize(), // Remember that you need to have your csrf token included
+        dataType: 'json',
+        success: function( _response ){
+          swal(
+            'Sukses',
+            'Berhasil disubmit!',
+            'success'
+            ).then(function (){
+                $(".btn").prop("disabled", true);                
+                // Simulate an HTTP redirect:
+                window.location.replace("{{ route('auditors.daftartemuan') }}");
+            });
+        },
+        error: function( _response ){
+          swal(
+            'Terjadi kesalahan',
+            'Segera hubungi Admin!',
+            'error'
+            )
+        }
+    });
+        }, function (dismiss) {
+          // dismiss can be 'cancel', 'overlay',
+          // 'close', and 'timer'
+          if (dismiss === 'cancel') {
+            // swal(
+            //   'Cancelled',
+            //   'Your imaginary file is safe :)',
+            //   'error'
+            // )
+          }
+        })
+});
+
+</script>
+
+@endsection
+

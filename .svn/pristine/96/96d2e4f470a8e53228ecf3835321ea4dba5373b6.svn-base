@@ -1,0 +1,1 @@
+php artisan route:call --uri=/notifikasi/baanpo1s

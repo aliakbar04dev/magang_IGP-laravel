@@ -1,0 +1,530 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="293" pageHeight="802" whenNoDataType="AllSectionsNoDetail" columnWidth="293" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isIgnorePagination="true" uuid="2fbf2a46-4abc-4806-9b02-5b247eb48cb0">
+	<property name="ireport.zoom" value="1.4641000000000017"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select id, no_wp, no_rev, tgl_wp, tgl_rev, kd_supp, no_pp, coalesce(no_po,'-') no_po, 
+nm_proyek, lok_proyek, coalesce(pic_pp,'-') pic_pp, coalesce((select nama from v_mas_karyawan where v_mas_karyawan.npk = ehst_wp1s.pic_pp),'-') nm_pic, coalesce((select desc_dep from v_mas_karyawan where v_mas_karyawan.npk = ehst_wp1s.pic_pp),'-') desc_dep, 
+to_char(tgl_laksana1,'dd-mm-yyyy') tgl_laksana1, to_char(tgl_laksana2,'dd-mm-yyyy') tgl_laksana2, 
+to_char(tgl_laksana1,'HH24:MI:SS') jam_laksana1, to_char(tgl_laksana2,'HH24:MI:SS') jam_laksana2, no_perpanjang, 
+kat_kerja_sfp, kat_kerja_hwp, kat_kerja_csp, kat_kerja_hpp, kat_kerja_ele, kat_kerja_oth, kat_kerja_ket, 
+alat_pakai, submit_pic, submit_tgl, 
+approve_prc_pic, approve_prc_tgl, reject_prc_pic, reject_prc_tgl, reject_prc_ket, reject_prc_st, 
+approve_user_pic, approve_user_tgl, reject_user_pic, reject_user_tgl, reject_user_ket, reject_user_st, 
+approve_ehs_pic, approve_ehs_tgl, reject_ehs_pic, reject_ehs_tgl, reject_ehs_ket, reject_ehs_st, 
+tgl_expired, tgl_close, pic_close, dtcrea, creaby, dtmodi, modiby, status, 
+apd_1, apd_2, apd_3, apd_4, apd_5, apd_6, apd_7, apd_8, apd_9, apd_10, apd_11
+from ehst_wp1s where id = $P{id}]]>
+	</queryString>
+	<field name="id" class="java.lang.Integer"/>
+	<field name="no_wp" class="java.lang.String"/>
+	<field name="no_rev" class="java.lang.Integer"/>
+	<field name="tgl_wp" class="java.sql.Date"/>
+	<field name="tgl_rev" class="java.sql.Timestamp"/>
+	<field name="kd_supp" class="java.lang.String"/>
+	<field name="no_pp" class="java.lang.String"/>
+	<field name="no_po" class="java.lang.String"/>
+	<field name="nm_proyek" class="java.lang.String"/>
+	<field name="lok_proyek" class="java.lang.String"/>
+	<field name="pic_pp" class="java.lang.String"/>
+	<field name="nm_pic" class="java.lang.String"/>
+	<field name="desc_dep" class="java.lang.String"/>
+	<field name="tgl_laksana1" class="java.lang.String"/>
+	<field name="tgl_laksana2" class="java.lang.String"/>
+	<field name="jam_laksana1" class="java.lang.String"/>
+	<field name="jam_laksana2" class="java.lang.String"/>
+	<field name="no_perpanjang" class="java.math.BigDecimal"/>
+	<field name="kat_kerja_sfp" class="java.lang.String"/>
+	<field name="kat_kerja_hwp" class="java.lang.String"/>
+	<field name="kat_kerja_csp" class="java.lang.String"/>
+	<field name="kat_kerja_hpp" class="java.lang.String"/>
+	<field name="kat_kerja_ele" class="java.lang.String"/>
+	<field name="kat_kerja_oth" class="java.lang.String"/>
+	<field name="kat_kerja_ket" class="java.lang.String"/>
+	<field name="alat_pakai" class="java.lang.String"/>
+	<field name="submit_pic" class="java.lang.String"/>
+	<field name="submit_tgl" class="java.sql.Timestamp"/>
+	<field name="approve_prc_pic" class="java.lang.String"/>
+	<field name="approve_prc_tgl" class="java.sql.Timestamp"/>
+	<field name="reject_prc_pic" class="java.lang.String"/>
+	<field name="reject_prc_tgl" class="java.sql.Timestamp"/>
+	<field name="reject_prc_ket" class="java.lang.String"/>
+	<field name="reject_prc_st" class="java.lang.String"/>
+	<field name="approve_user_pic" class="java.lang.String"/>
+	<field name="approve_user_tgl" class="java.sql.Timestamp"/>
+	<field name="reject_user_pic" class="java.lang.String"/>
+	<field name="reject_user_tgl" class="java.sql.Timestamp"/>
+	<field name="reject_user_ket" class="java.lang.String"/>
+	<field name="reject_user_st" class="java.lang.String"/>
+	<field name="approve_ehs_pic" class="java.lang.String"/>
+	<field name="approve_ehs_tgl" class="java.sql.Timestamp"/>
+	<field name="reject_ehs_pic" class="java.lang.String"/>
+	<field name="reject_ehs_tgl" class="java.sql.Timestamp"/>
+	<field name="reject_ehs_ket" class="java.lang.String"/>
+	<field name="reject_ehs_st" class="java.lang.String"/>
+	<field name="tgl_expired" class="java.sql.Date"/>
+	<field name="tgl_close" class="java.sql.Date"/>
+	<field name="pic_close" class="java.lang.String"/>
+	<field name="dtcrea" class="java.sql.Timestamp"/>
+	<field name="creaby" class="java.lang.String"/>
+	<field name="dtmodi" class="java.sql.Timestamp"/>
+	<field name="modiby" class="java.lang.String"/>
+	<field name="status" class="java.lang.String"/>
+	<field name="apd_1" class="java.lang.String"/>
+	<field name="apd_2" class="java.lang.String"/>
+	<field name="apd_3" class="java.lang.String"/>
+	<field name="apd_4" class="java.lang.String"/>
+	<field name="apd_5" class="java.lang.String"/>
+	<field name="apd_6" class="java.lang.String"/>
+	<field name="apd_7" class="java.lang.String"/>
+	<field name="apd_8" class="java.lang.String"/>
+	<field name="apd_9" class="java.lang.String"/>
+	<field name="apd_10" class="java.lang.String"/>
+	<field name="apd_11" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<staticText>
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="0" y="0" width="80" height="15" uuid="dd6bd066-53e5-42f7-a3d6-77f3725562f3"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25" lineStyle="Dotted"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nama Proyek]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="85" y="0" width="208" height="15" uuid="902b7422-bfe3-42cc-9e1c-0a1fae1f4f02"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25" lineStyle="Dotted"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nm_proyek}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="80" y="0" width="5" height="15" uuid="5244cfa0-f67a-4547-823c-a8f72acc2c84"/>
+				<box leftPadding="0">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+		</band>
+		<band height="15">
+			<staticText>
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="0" y="0" width="80" height="15" uuid="19664db3-554f-4cd0-91dd-909c542bd472"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25" lineStyle="Dotted"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Lokasi Proyek]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="85" y="0" width="208" height="15" uuid="bd5c4059-a0a0-47f1-92f5-d3097f5b9880"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25" lineStyle="Dotted"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{lok_proyek}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="80" y="0" width="5" height="15" uuid="e350e4ce-8ecd-43d3-a705-f33b6889c35b"/>
+				<box leftPadding="0">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+		</band>
+		<band height="15">
+			<staticText>
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="0" y="0" width="80" height="15" uuid="0e281260-dc55-4588-a030-c3fce2876a1f"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25" lineStyle="Dotted"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[User / Bagian]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="85" y="0" width="208" height="15" uuid="ed0e1a05-d9bf-4832-9ba9-f4daf414e2df"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25" lineStyle="Dotted"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{pic_pp} + " / " + $F{nm_pic} + " / " + $F{desc_dep}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="80" y="0" width="5" height="15" uuid="2f1127b8-d006-4f60-ba82-ceed8f9fe885"/>
+				<box leftPadding="0">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+		</band>
+		<band height="15">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="85" y="0" width="208" height="15" uuid="1b10ad3a-a749-473e-bbf2-54e37b5c764d"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25" lineStyle="Dotted"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tgl_laksana1} + " s/d " + $F{tgl_laksana2}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="80" y="0" width="5" height="15" uuid="7ecc9f32-efb6-486d-821a-3e9b4a20b06b"/>
+				<box leftPadding="0">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="0" y="0" width="80" height="15" uuid="c78a2575-9c51-4d08-9823-c18565d22f9d"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25" lineStyle="Dotted"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tgl Pelaksanaan]]></text>
+			</staticText>
+		</band>
+		<band height="15">
+			<staticText>
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="80" y="0" width="5" height="15" uuid="c32fb804-f355-4f88-bab2-7e366fe9b707"/>
+				<box leftPadding="0">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="0" y="0" width="80" height="15" uuid="4212a4f3-a394-4bde-b8f3-cc39bcf8dcaa"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25" lineStyle="Dotted"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Jam]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="85" y="0" width="208" height="15" uuid="2336c9a4-8fdf-4bc8-8a99-f8d4a2c0ace3"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25" lineStyle="Dotted"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{jam_laksana1} + " s/d " + $F{jam_laksana2}]]></textFieldExpression>
+			</textField>
+		</band>
+		<band height="35">
+			<staticText>
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="80" y="0" width="5" height="35" uuid="5da80250-9dc7-49cc-a3d2-e26937545c82"/>
+				<box leftPadding="0">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" mode="Transparent" x="85" y="0" width="208" height="35" uuid="9580ac80-de82-4f6c-9c4f-a604a5d0de76"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25" lineStyle="Dotted"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="9"/>
+				</textElement>
+			</textField>
+			<staticText>
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="0" y="0" width="80" height="35" uuid="1b197857-f46f-4f36-9fa6-83e3d443f520"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25" lineStyle="Dotted"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Kategori Pekerjaan]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="87" y="5" width="10" height="10" uuid="e3eacc2f-0726-4677-99e0-dcc6f617caa7"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{kat_kerja_sfp}.equalsIgnoreCase("T") ? "X" : null]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="97" y="5" width="46" height="10" uuid="53f8bf20-4097-405a-983b-2a693ce76a0d"/>
+				<box leftPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="6"/>
+				</textElement>
+				<text><![CDATA[Safe Work Permit]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="148" y="5" width="10" height="10" uuid="7f1b0d0c-e31d-4542-bcf8-cdd370e81f11"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{kat_kerja_hwp}.equalsIgnoreCase("T") ? "X" : null]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="158" y="5" width="46" height="10" uuid="cd180765-1750-40cc-b17b-ce5f0620ccbe"/>
+				<box leftPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="6"/>
+				</textElement>
+				<text><![CDATA[Hot Work Permit]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="219" y="5" width="60" height="10" uuid="4b89d70a-1e66-409a-906c-bd2ceba884ad"/>
+				<box leftPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="6"/>
+				</textElement>
+				<text><![CDATA[Confined Space Permit]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="209" y="5" width="10" height="10" uuid="169730ec-4ea4-4102-a4df-346b089e1ae4"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{kat_kerja_csp}.equalsIgnoreCase("T") ? "X" : null]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="87" y="20" width="10" height="10" uuid="04d6d946-213e-4144-a16d-48aeab792a5a"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{kat_kerja_hpp}.equalsIgnoreCase("T") ? "X" : null]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="158" y="20" width="46" height="10" uuid="2601e9d1-53a3-4109-af26-182f3667b0b6"/>
+				<box leftPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="6"/>
+				</textElement>
+				<text><![CDATA[Electrical]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="209" y="20" width="10" height="10" uuid="834696da-7362-4fcf-b7e7-0df37f07b12b"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{kat_kerja_oth}.equalsIgnoreCase("T") ? "X" : null]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="219" y="20" width="60" height="10" uuid="5b5d4853-7cb1-4235-9815-254cbc776b55"/>
+				<box leftPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="6"/>
+				</textElement>
+				<text><![CDATA[Others]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="97" y="20" width="46" height="10" uuid="aea1d169-2b1a-4c31-a540-1ebb53016653"/>
+				<box leftPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="6"/>
+				</textElement>
+				<text><![CDATA[High Place Permit]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="148" y="20" width="10" height="10" uuid="d56960cf-d8ba-4c13-8bbb-0a760d39413e"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{kat_kerja_ele}.equalsIgnoreCase("T") ? "X" : null]]></textFieldExpression>
+			</textField>
+		</band>
+		<band height="15">
+			<printWhenExpression><![CDATA[$F{kat_kerja_oth}.equalsIgnoreCase("T")]]></printWhenExpression>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="85" y="0" width="208" height="15" uuid="1d1ccddd-5e4b-4089-ac22-eaf1ff6032f7"/>
+				<box topPadding="2" leftPadding="2">
+					<pen lineWidth="0.25" lineStyle="Dotted"/>
+					<topPen lineWidth="0.0" lineStyle="Dotted"/>
+					<leftPen lineWidth="0.0" lineStyle="Dotted"/>
+					<bottomPen lineWidth="0.25" lineStyle="Dotted"/>
+					<rightPen lineWidth="0.0" lineStyle="Dotted"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font fontName="Times New Roman" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{kat_kerja_ket}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="0" y="0" width="80" height="15" uuid="d6d27fcb-fb33-45d1-b8c4-2ac3076362d7"/>
+				<box topPadding="2" leftPadding="0" rightPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font fontName="Times New Roman" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Others]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="80" y="0" width="5" height="15" uuid="dd2a04c4-2e6b-48dd-a549-b55f5897e957"/>
+				<box topPadding="2" leftPadding="0">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="Times New Roman" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+		</band>
+		<band height="20">
+			<staticText>
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="0" y="0" width="80" height="20" uuid="28a1e277-0263-40f1-b960-7d5e1a9366ae"/>
+				<box topPadding="2" leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0" lineStyle="Dotted"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font fontName="Times New Roman" size="9" isBold="true" isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Alat yg digunakan]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="80" y="0" width="5" height="20" uuid="8ce417d9-484a-4897-8fca-44c8f4365e6f"/>
+				<box topPadding="2" leftPadding="0">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="Times New Roman" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="85" y="0" width="208" height="20" uuid="22c1786a-f6ec-4521-b48e-10eeba7dc771"/>
+				<box topPadding="2" leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0" lineStyle="Dotted"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font fontName="Times New Roman" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{alat_pakai}]]></textFieldExpression>
+			</textField>
+		</band>
+		<band height="12">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="0" y="0" width="293" height="12" uuid="ab6d9d63-ad84-4d59-b976-7bdd8189ee5a"/>
+				<box topPadding="0" leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25" lineStyle="Dotted"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["(Jika ada alat yg membutuhkan Ijin Alat/Pengujian Lampirkan Ijin Alat atau Hasil Uji nya)"]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

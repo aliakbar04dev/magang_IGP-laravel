@@ -1,0 +1,263 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Http\Requests;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+use DB;
+use Exception;
+use Carbon\Carbon;
+use Intervention\Image\ImageManagerStatic as Image;
+
+class SettingsController extends Controller
+{
+	public function __construct()
+	{
+		$this->middleware('auth');
+	}
+
+    public function profile()
+	{
+		return view('settings.profile');
+	}
+
+	public function editProfile()
+	{
+		return view('settings.edit-profile');
+	}
+
+	public function updateProfile(Request $request)
+	{
+		$user = Auth::user();
+		$this->validate($request, [
+			'name' => 'required|max:255',
+			'username' => 'required|min:5|max:50|unique:users,username,' . $user->id,
+			'email' => 'required|max:255|unique:users,email,' . $user->id,
+			// 'init_supp' => 'required|unique:users,init_supp,' . $user->id
+			'init_supp' => 'required|max:10',
+			'picture' => 'image|mimes:jpeg,png,jpg,gif,svg|max:8192', 
+			'no_hp' => 'max:15',
+            'telegram_id' => 'max:50|unique:users,telegram_id,' . $user->id,
+            'st_collapse' => 'max:1'
+		]);
+
+		DB::beginTransaction();
+        try {
+			$user->name = strtoupper($request->get('name'));
+			$user->username = strtolower($request->get('username'));
+			$user->email = strtolower($request->get('email'));
+			$user->init_supp = strtoupper($request->get('init_supp'));
+			$user->no_hp = trim($request->get('no_hp')) !== '' ? trim($request->get('no_hp')) : null;
+			$user->telegram_id = trim($request->get('telegram_id')) !== '' ? trim($request->get('telegram_id')) : null;
+			$user->st_collapse = trim($request->get('st_collapse')) !== '' ? trim($request->get('st_collapse')) : null;
+
+			// isi field picture jika ada picture yang diupload
+	        if ($request->hasFile('picture')) {
+	            // Mengambil file yang diupload
+	            $uploaded_picture = $request->file('picture');
+	            // mengambil extension file
+	            $extension = $uploaded_picture->getClientOriginalExtension();
+	            // membuat nama file berikut extension
+	            $filename = $user->id . '.' . $extension;
+	            $filename = base64_encode($filename);
+	            // menyimpan picture ke folder public/dist/img
+	            if(config('app.env', 'local') === 'production') {
+	                $destinationPath = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."avatar";
+	            } else {
+	                $destinationPath = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\avatar";
+	            }
+	            $img = Image::make($uploaded_picture->getRealPath());
+                if($img->filesize()/1024 > 2048) {
+                    $img->save($destinationPath.DIRECTORY_SEPARATOR.$filename, 75);
+                } else {
+                    $uploaded_picture->move($destinationPath, $filename);
+                    //$img->save($destinationPath.DIRECTORY_SEPARATOR.$filename);
+                }
+	            // mengisi field picture di book dengan filename yang baru dibuat
+	            $user->picture = $filename;
+	        }
+
+			$user->save();
+
+			$log_keterangan = "Update Profile Berhasil";
+			$log_ip = \Request::session()->get('client_ip');
+			$created_at = Carbon::now();
+			$updated_at = Carbon::now();
+			DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+            DB::commit();
+
+            Session::flash("sweet_alert", [
+				"type"=>"success",
+				"title"=>"Wonderful!",
+				"text"=>"Your profile is up to date",
+				"timer"=>2000,
+				"showConfirmButton"=>true
+			]);
+        } catch (Exception $ex) {
+            DB::rollback();
+            Session::flash("sweet_alert", [
+				"type"=>"error",
+				"title"=>"Update Profile Gagal!",
+				"text"=>"",
+				"timer"=>2000,
+				"showConfirmButton"=>true
+			]);
+        }
+		return redirect('settings/profile');
+	}
+
+	public function editPassword()
+	{
+		return view('settings.edit-password');
+	}
+
+	public function updatePassword(Request $request)
+	{
+		$user = Auth::user();
+		$this->validate($request, [
+			'password' => 'required|passcheck:' . $user->password,
+			'new_password' => 'required|confirmed|min:6',
+		], [
+			'password.passcheck' => 'Password lama tidak sesuai'
+		]);
+		DB::beginTransaction();
+        try {
+
+        	$portal = "F";
+        	$intranet = "F";
+        	$igpro = "F";
+        	if(strlen(Auth::user()->username) == 5) {
+	        	$data_chk = $request->only('portal', 'intranet', 'igpro');
+	        	$portal = trim($data_chk['portal']) !== '' ? trim($data_chk['portal']) : "F";
+	        	$intranet = trim($data_chk['intranet']) !== '' ? trim($data_chk['intranet']) : "F";
+	        	$igpro = trim($data_chk['igpro']) !== '' ? trim($data_chk['igpro']) : "F";
+	        }
+
+        	if($portal !== "T" && $intranet !== "T" && $igpro !== "T") {
+        		$user->password = bcrypt($request->get('new_password'));
+        		$user->save();
+        	} else {
+        		if($portal === "T") {
+        			$user->password = bcrypt($request->get('new_password'));
+        			$user->save();
+        		}
+        		if($intranet === "T") {
+        			if(config('app.env', 'local') === 'production') {
+        				$npk = $user->username;
+        				$passwd = $request->get('new_password');
+                    	//buang slashes terlebih dahulu
+        				if (get_magic_quotes_gpc()) 
+        				{
+        					$passwd = stripslashes($passwd);
+        				}
+                        //$str = trim(stripslashes($str));
+        				$passwd = trim($passwd);
+                        //$str = str_replace("'", "`", $str); //hal ini dilakukan karena Oracle menganggap ' => ''
+        				$passwd = preg_replace(array('/\'/', '/\"/', '/\&/', '/\s\s+/'), array('`', '`', 'dan', ' '), $passwd);
+        				$passwd = addslashes($passwd);
+        				$password = md5(strtoupper($passwd . ", " . $npk));
+
+        				$valid = "T";
+        				try {
+        					$param1 = "MOBILE_PASSWORD";
+        					$param2 = $npk;
+        					$param3 = $password;
+        					if(config('app.env', 'local') === 'production') {
+        						$output = shell_exec("cd / && cd sync && java -jar sync.jar $param1 $param2 $param3");
+        					} else {
+        						$output = shell_exec("cd D:\Aplikasi-192.168.9.54\uat\sync && java -jar sync.jar $param1 $param2 $param3");
+        					}
+        					if (strpos($output, "BERHASIL") === false) {
+        						$valid = "F";
+        					}
+        				} catch (Exception $ex) {
+        					$valid = "F";
+        				}
+        			}
+        		}
+        		if($igpro === "T") {
+        			$password = md5($request->get('new_password'));
+        			DB::connection("oracle-usrigpmfg")
+        			->table(DB::raw("sec_user"))
+        			->where("username", $user->username)
+        			->update(['st_lock' => "F", 'tglupdate' => Carbon::now(), 'userid' => Auth::user()->username, 'password' => $password]);
+        		}
+        	}
+
+			$log_keterangan = "Update Password Berhasil";
+			$log_ip = \Request::session()->get('client_ip');
+			$created_at = Carbon::now();
+			$updated_at = Carbon::now();
+			DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+            DB::commit();
+
+            Session::flash("sweet_alert", [
+				"type"=>"success",
+				"title"=>"Wonderful!",
+				"text"=>"Your password is up to date",
+				"timer"=>2000,
+				"showConfirmButton"=>true
+			]);
+        } catch (Exception $ex) {
+            DB::rollback();
+            Session::flash("sweet_alert", [
+				"type"=>"error",
+				"title"=>"Update Password Gagal!",
+				"text"=>"",
+				"timer"=>2000,
+				"showConfirmButton"=>true
+			]);
+        }
+		return redirect('settings/password');
+	}
+
+	public function userguide() 
+    { 
+        try {
+            $output = public_path(). DIRECTORY_SEPARATOR .'userguide'. DIRECTORY_SEPARATOR .'userguide-setting.pdf';
+            
+            ob_end_clean();
+            ob_start();
+            $headers = array(
+                'Content-Description: File Transfer',
+                'Content-Type: application/pdf',
+                'Content-Disposition: attachment; filename='.$output,
+                'Content-Transfer-Encoding: binary',
+                'Expires: 0',
+                'Cache-Control: must-revalidate, post-check=0, pre-check=0',
+                'Pragma: public',
+                'Content-Length: ' . filesize($output)
+            );
+            return response()->file($output, $headers);
+
+            /*
+            $headers = array(
+                'Content-Description: File Transfer',
+                'Content-Type: application/pdf',
+                'Content-Disposition: attachment; filename='.$no_tmp_certi.$type,
+                'Content-Transfer-Encoding: binary',
+                'Expires: 0',
+                'Cache-Control: must-revalidate, post-check=0, pre-check=0',
+                'Pragma: public',
+                'Content-Length: ' . filesize($output.'.'.$type)
+            );
+            return response()->download($output.'.'.$type, $no_tmp_certi.$type, $headers);
+             */
+        } catch (Exception $ex) {
+            Session::flash("flash_notification", [
+                "level"=>"danger",
+                "message"=>"Download User Guide gagal!"
+            ]);
+            return redirect('home');
+        }
+    }
+
+    public function cp()
+	{
+		return view('settings.cp');
+	}
+}

@@ -1,0 +1,144 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use App\AppUsulProb;
+use Illuminate\Support\Facades\Auth;
+use Yajra\Datatables\Facades\Datatables;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Crypt;
+use Carbon\Carbon;
+use DB;
+use Exception;
+use Validator;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Input;
+
+class AppUsulProbController extends Controller
+{
+    public function index()
+    {
+        if (Auth::user()->can('qc-usul-prob-approve')) {
+            return view('eqa.appusulprob.setting.index');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function dashboard(Request $request)
+    {
+        if (Auth::user()->can('qc-usul-prob-approve')) {
+            if ($request->ajax()) {
+
+
+                $kar = new AppUsulProb;
+                $appusulprob = $kar->list($request->input('isi'));
+
+                return Datatables::of($appusulprob)
+                    ->editColumn('creaby', function ($appusulprob) {
+                        $kar = new AppUsulProb;
+                        $createBy = $kar->namaByNpk($appusulprob->creaby);
+                        return  "<b style='color:orange;'>" . $createBy . " / " . $appusulprob->creaby . "</b><br><b style='color:gray; font-size:14px;'>*" . Carbon::parse($appusulprob->dtcrea)->format('d-m-Y H:i:s') . "</b>";
+                    })
+                    ->editColumn('pic_aprov', function ($appusulprob) {
+                        if ($appusulprob->pic_aprov) {
+                            $kar = new AppUsulProb;
+                            $approvBy = $kar->namaByNpk($appusulprob->pic_aprov);
+                            return  "<b style='color:green;'>" . $approvBy . " / " . $appusulprob->pic_aprov . "</b><br><b style='color:gray; font-size:14px;'>*" . Carbon::parse($appusulprob->tgl_aprov)->format('d-m-Y H:i:s') . "</b>";
+                        } else {
+                            return "<b>BELUM DIPROSES</b>";
+                        }
+                    })
+                    ->addColumn('action', function ($appusulprob) {
+                        if (Auth::user()->can(['qc-usul-prob-approve'])) {
+                            if (!$appusulprob->pic_aprov) {
+                                $form_id = str_replace('/', '', $appusulprob->nm_problem);
+                                $form_id = str_replace('-', '', $form_id);
+                                $form_id = str_replace(' ', '', $form_id);
+                                return view('datatable._action-appusulprob', [
+                                    'model' => $appusulprob,
+                                    'approv_url' => route('appusulprob.approve', base64_encode($appusulprob->nm_problem)),
+                                    'class' => 'form-inline js-ajax-delete',
+                                    'form_id' => 'form-' . $form_id,
+                                    'id_table' => 'tblMaster',
+                                    'confirm_message' => 'Anda yakin menghapus data usulan ini? ' . $appusulprob->nm_problem . '?'
+                                ]);
+                            }
+                        } else {
+                            return '';
+                        }
+                    })
+                    ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function approve(Request $request)
+    {
+        if (Auth::user()->can('qc-usul-prob-approve')) {
+            $data1 = $request->all();
+            $data = base64_decode($data1['id']);
+            $usulprob = DB::table("qat_qpr_problems")
+                ->select(DB::raw("distinct nm_problem"))
+                ->where("nm_problem", $data)
+                ->first();
+
+            if ($usulprob != null) {
+
+                try {
+                    if ($request->ajax()) {
+                        $status = 'OK';
+                        $msg = "Data Usulan Problem " . $data . " berhasil disetujui.";
+
+                        $bstatus_ora = DB::table("orastatus")
+                            ->select('*')
+                            ->first();
+
+                        if ($bstatus_ora) {
+                            DB::connection('oracle-usrigpmfg')
+                                ->table("qat_qpr_problem")
+                                ->insert([
+                                    'nm_problem' => $usulprob->nm_problem,
+                                    'creaby' => Auth::user()->username,
+                                    'dtcrea' => Carbon::now()
+                                ]);
+                        }
+
+                        DB::table("qat_qpr_problems")
+                            ->where('nm_problem', $data)
+                            ->update([
+                                'nm_problem' => $data,
+                                'pic_aprov' => Auth::user()->username,
+                                'tgl_aprov' => Carbon::now()
+                            ]);
+
+                        return response()->json(['id' => $data, 'status' => $status, 'message' => $msg]);
+                    }
+                } catch (Exception $ex) {
+                    DB::connection("oracle-usrigpmfg")->rollback();
+                    DB::connection("pgsql")->rollback();
+                    $status = 'GAGAL';
+                    $msg = "Data Usulan Problem " . $ex . $data . " gagal disetujui. data tidak masuk disalah satu database,oracle atau postgree";
+
+
+                    return response()->json(['id' => $data, 'status' => $status, 'message' => $msg]);
+                }
+            } else {
+                $status = 'GAGAL';
+                $msg = "Data Usulan Problem " . $data . " gagal disetujui.";
+
+
+                return response()->json(['id' => $data, 'status' => $status, 'message' => $msg]);
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+}

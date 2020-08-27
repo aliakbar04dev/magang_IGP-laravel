@@ -1,0 +1,90 @@
+<?php
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| This file is where you may define all of the routes that are handled
+| by your application. Just tell Laravel the URIs it should respond
+| to using a Closure or controller method. Build something great!
+|
+*/
+
+Route::group(['prefix'=>'admin', 'middleware'=>['auth']], function () {
+    // Route diisi disini...
+    Route::resource('pistandards', 'PistandardsController');
+
+    Route::get('index',[
+        'as'=> 'pistandards.index',
+        'uses'=> 'PistandardsController@index'
+        ]);
+
+    Route::get('create',[
+        'as'=> 'pistandards.create',
+        'uses'=> 'PistandardsController@create'
+        ]);
+    Route::post('store',[
+        'as'=> 'pistandards.store',
+        'uses'=> 'PistandardsController@store'
+        ]);
+
+    Route::get('edit/{no_pisigp}',[
+        'as'=> 'pistandards.edit',
+        'uses'=> 'PistandardsController@edit'
+        ]);
+
+    Route::post('update','PistandardsController@update');
+
+
+    // Route::resource('submit', 'PissubmitController');
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////Route Staff////////////////////
+    Route::resource('pisstaff', 'PisstaffController');
+    Route::get('aprovalstaf',[
+        'as'=> 'pisstaff.aprovalstaf',
+        'uses'=> 'PisstaffController@aprovalstaf'
+        ]);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////Route SectHead//////////////////
+    Route::resource('pissecthead', 'PissectheadController');
+    Route::get('aprovalSectHeadSQE',[
+        'as'=> 'pissecthead.aprovalSectHeadSQE',
+        'uses'=> 'PissectheadController@aprovalSectHeadSQE'
+        ]);
+
+    Route::post('aprovalSectSetujui', [
+        'as'=>'pissecthead.aprovalSectSetujui',
+        'uses'=>'PistandardsController@aprovalSectSetujui'
+        ]);
+
+    Route::post('aprovalSectTolak', [
+        'as'=>'pissecthead.aprovalSectTolak',
+        'uses'=>'PistandardsController@aprovalSectTolak'
+        ]);
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////Route DeptHead///////////////////
+    Route::resource('pisdepthead', 'PisdeptheadController');
+    Route::get('aprovalDeptHeadSQE',[
+        'as'=> 'pisdepthead.aprovalDeptHeadSQE',
+        'uses'=> 'PisdeptheadController@aprovalDeptHeadSQE'
+        ]);
+
+    Route::post('aprovalDeptSetujui', [
+        'as'=>'pisdepthead.aprovalDeptSetujui',
+        'uses'=>'PisdeptheadController@aprovalDeptSetujui'
+        ]);
+
+    Route::post('aprovalDeptTolak', [
+        'as'=>'pisdepthead.aprovalDeptTolak',
+        'uses'=>'PisdeptheadController@aprovalDeptTolak'
+        ]);
+
+    Route::delete('tlhpn01s/deleteLine/{param}/{param2}', [
+        'as' => 'tlhpn01s.deleteLine',
+        'uses' => 'tlhpn01sController@deleteLine'
+        ]);
+    
+});

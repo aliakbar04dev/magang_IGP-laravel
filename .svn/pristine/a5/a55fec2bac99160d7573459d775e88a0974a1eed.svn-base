@@ -1,0 +1,29 @@
+<center>
+@if (strlen(Auth::user()->username) == 5)
+	@if (empty($model->portal_sh_tgl_reject))
+		@if (empty($model->portal_sh_tgl))
+			@if (Auth::user()->can('qpr-approve'))
+				<button id='btnapprove' type='button' class='btn btn-xs btn-primary' data-toggle='tooltip' data-placement='top' title='Approve Section QPR {{ $model->issue_no }}' onclick='approveQpr("{{ $model->issue_no }}", "SH")'>
+		        	<span class='glyphicon glyphicon-check'></span>
+		      	</button>
+			@endif
+			@if (Auth::user()->can('qpr-reject'))
+				<button id='btnreject' type='button' class='btn btn-xs btn-danger' data-toggle='tooltip' data-placement='top' title='Reject Section QPR {{ $model->issue_no }}' onclick='rejectQpr("{{ $model->issue_no }}", "SH")'>
+		        	<span class='glyphicon glyphicon-remove'></span>
+		      	</button>
+			@endif
+		@else
+			@if (!empty($model->portal_tgl_reject))
+				@if ($model->portal_apr_reject === "R")
+					<button id='btncomplain' type='button' class='btn btn-xs btn-warning' data-toggle='tooltip' data-placement='top' title='Approve/Reject Complain QPR {{ $model->issue_no }}' onclick='complainQpr("{{ $model->issue_no }}", "SH2", "{{ $model->status_reject }}", "{{ $model->portal_ket_reject }}")'>
+		        	<span class='glyphicon glyphicon-question-sign'></span>
+		      	</button>
+				@endif
+			@endif
+		@endif
+	@endif
+	@if (!empty($model->portal_pict))
+		<a class="btn btn-xs btn-success" data-toggle="tooltip" data-placement="top" title="Download File {{ $model->issue_no }}" href="{{ $download_url }}"><span class="glyphicon glyphicon-download-alt"></span></a>
+	@endif
+@endif
+</center>

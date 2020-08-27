@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="b12e1461-f2c2-4eb5-91b6-f20b18705cbe">
+	<property name="ireport.zoom" value="1.4641000000000006"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="tgl" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="lok_pt" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="kd_line" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="kd_mesin" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["/"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="jns_oli" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="logo" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT M2.KD_SITE, M2.KD_PLANT, M2.TAHUN, M2.BULAN, M2.TGL, M2.KD_LINE, USRIGPMFG.FNM_LINEX(M2.KD_LINE) NM_LINE,
+       M2.KD_MESIN, M2.KD_BRG, NVL(MM.NM_ALIAS,FNM_BRG(M2.KD_BRG)) NM_BRG, M2.JNS_OLI, M2.QTY, M2.JNS_ISI,
+       (SELECT SUM(SI.QTY) FROM MTCV_ISI_OLI2 SI
+        WHERE SI.KD_SITE = M2.KD_SITE
+        AND SI.KD_PLANT = M2.KD_PLANT
+        AND SI.TAHUN = M2.TAHUN
+        AND SI.BULAN = M2.BULAN
+        AND (SI.TGL >= '01' AND SI.TGL <= M2.TGL)
+        AND SI.KD_LINE = M2.KD_LINE
+        AND SI.KD_MESIN = M2.KD_MESIN
+        AND SI.KD_BRG = M2.KD_BRG) QTY_SD
+FROM MTCV_ISI_OLI2 M2, MTCT_M_OILING MM
+WHERE M2.KD_BRG = MM.KD_BRG
+AND M2.JNS_OLI = MM.JNS_OLI
+AND M2.KD_MESIN = MM.KD_MESIN
+AND M2.TAHUN||M2.BULAN||M2.TGL = TO_CHAR($P{tgl},'YYYYMMDD')
+AND M2.KD_PLANT = $P{lok_pt}
+AND (M2.KD_LINE = $P{kd_line} OR $P{kd_line} IS NULL)
+AND (M2.KD_MESIN = $P{kd_mesin} OR $P{kd_mesin} IS NULL)
+AND (M2.JNS_OLI = $P{jns_oli} OR $P{jns_oli} IS NULL)
+ORDER BY M2.KD_MESIN, M2.KD_LINE, M2.JNS_OLI]]>
+	</queryString>
+	<field name="KD_SITE" class="java.lang.String"/>
+	<field name="KD_PLANT" class="java.lang.String"/>
+	<field name="TAHUN" class="java.lang.String"/>
+	<field name="BULAN" class="java.lang.String"/>
+	<field name="TGL" class="java.lang.String"/>
+	<field name="KD_LINE" class="java.lang.String"/>
+	<field name="NM_LINE" class="java.lang.String"/>
+	<field name="KD_MESIN" class="java.lang.String"/>
+	<field name="KD_BRG" class="java.lang.String"/>
+	<field name="NM_BRG" class="java.lang.String"/>
+	<field name="JNS_OLI" class="java.lang.String"/>
+	<field name="QTY" class="java.math.BigDecimal"/>
+	<field name="JNS_ISI" class="java.lang.String"/>
+	<field name="QTY_SD" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="50">
+			<staticText>
+				<reportElement x="176" y="0" width="202" height="45" uuid="7df38838-887e-4fc9-ad73-a9352d1c203d"/>
+				<box leftPadding="0">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[LAPORAN PENGISIAN OLI]]></text>
+			</staticText>
+			<image onErrorType="Icon">
+				<reportElement x="0" y="0" width="100" height="45" uuid="054e81f4-028c-4564-a511-3284e17889f4"/>
+				<imageExpression><![CDATA[$P{logo} != null ? (!$P{logo}.equals("") ? $P{logo} : "../../src/images/igp_new.jpg") : "../../src/images/igp_new.jpg"]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement x="455" y="15" width="100" height="30" uuid="61b7d952-8a99-4b63-90e0-67cb54e276b3"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[MTC]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="455" y="0" width="100" height="15" uuid="af6c4290-88de-4ca0-94e6-8401e157e702"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[DEPARTMENT]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="50" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="35" width="70" height="15" uuid="09ee53d8-df6b-4097-b7cc-f00660f6b762"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Mesin]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="70" y="35" width="100" height="15" uuid="7013a940-8278-4996-8bd9-3b71e4507413"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Line]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="425" y="35" width="30" height="15" uuid="58484300-4942-4530-b0f8-a2555adb623b"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Satuan]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="455" y="35" width="50" height="15" uuid="11374a5d-69e3-47bb-8669-3fd6376e2c21"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None">
+					<font size="8" isBold="true" isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[QTY (Tgl)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="40" height="15" uuid="7dcb146a-2c65-43ab-abe4-a1a205f3a798"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Plant]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="15" width="40" height="15" uuid="6603ad30-2304-48dd-a2cc-2bcdba564ce3"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tanggal]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="40" y="0" width="10" height="15" uuid="78961591-7ea9-4ca7-82ee-52687b5be96d"/>
+				<box leftPadding="0">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="40" y="15" width="10" height="15" uuid="c7652438-3f34-4261-ba5e-d24121742b57"/>
+				<box leftPadding="0">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="50" y="15" width="100" height="15" uuid="742f2249-2683-45eb-8547-ddbd3568b004"/>
+				<box topPadding="0" leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{tgl}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="50" y="0" width="100" height="15" uuid="43696203-25fc-408d-bed1-440865f341c8"/>
+				<box topPadding="0" leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{lok_pt}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="505" y="35" width="50" height="15" uuid="cf7c2076-3bb5-4956-802d-4536ceefde77"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None">
+					<font size="8" isBold="true" isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[QTY (S/d)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="170" y="35" width="50" height="15" uuid="0e7a20be-36d2-467f-bbf1-7448dae6b37d"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Jenis Oli]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="375" y="35" width="50" height="15" uuid="8c5dee0d-c92f-4e32-9d93-b339a7bb4ea9"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Jenis Isi]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="220" y="35" width="155" height="15" uuid="1ef84d38-668b-4010-9987-e61d36370209"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Barang]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="70" height="15" uuid="9d1dcc06-1a8f-48be-b83d-114dea55c94a"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{KD_MESIN}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="70" y="0" width="100" height="15" uuid="79e1f9bd-d90d-4219-b2a3-b461a0b48858"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{KD_LINE} + " - " + $F{NM_LINE}]]></textFieldExpression>
+			</textField>
+			<subreport>
+				<reportElement x="170" y="0" width="385" height="15" uuid="c953ec01-df8f-4a7b-8ccb-5b88aa80484b"/>
+				<subreportParameter name="tgl">
+					<subreportParameterExpression><![CDATA[$P{tgl}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="kd_line">
+					<subreportParameterExpression><![CDATA[$F{KD_LINE}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="kd_mesin">
+					<subreportParameterExpression><![CDATA[$F{KD_MESIN}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="jns_oli">
+					<subreportParameterExpression><![CDATA[$P{jns_oli}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="lok_pt">
+					<subreportParameterExpression><![CDATA[$F{KD_PLANT}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "ReportPengisianOli_Sub4.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+	<summary>
+		<band height="35">
+			<subreport>
+				<reportElement x="0" y="5" width="555" height="30" uuid="9dd47e3e-dc33-4a64-b300-9d6351b43bcc"/>
+				<subreportParameter name="tgl">
+					<subreportParameterExpression><![CDATA[$P{tgl}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="kd_line">
+					<subreportParameterExpression><![CDATA[$P{kd_line}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="kd_mesin">
+					<subreportParameterExpression><![CDATA[$P{kd_mesin}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="jns_oli">
+					<subreportParameterExpression><![CDATA[$P{jns_oli}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="lok_pt">
+					<subreportParameterExpression><![CDATA[$P{lok_pt}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "ReportPengisianOli_Sub3.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</summary>
+</jasperReport>

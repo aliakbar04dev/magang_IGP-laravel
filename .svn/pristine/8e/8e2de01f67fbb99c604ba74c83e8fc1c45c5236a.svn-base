@@ -1,0 +1,237 @@
+@extends('layouts.app')
+@section('content')
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <h1>
+        Gaji Pokok
+        <small>Gaji Pokok</small>
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="{{ url('/home') }}"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li><i class="glyphicon glyphicon-phone"></i> HR - Mobile</li>
+        <li class="active"><i class="fa fa-files-o"></i> Gaji Pokok</li>
+      </ol>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      @include('layouts._flash')
+      <div class="box box-primary">        
+    		<div class="box-body form-horizontal">
+          <div class="form-group">
+            <div class="col-sm-2">
+              {!! Form::label('lbltahun', 'Tahun') !!}
+              <select name="filter_status_tahun" aria-controls="filter_status" 
+                class="form-control select2">
+                @for ($i = \Carbon\Carbon::now()->format('Y'); $i > \Carbon\Carbon::now()->format('Y')-2; $i--)
+                  @if ($i == \Carbon\Carbon::now()->format('Y'))
+                    <option value={{ $i }} selected="selected">{{ $i }}</option>
+                  @else
+                    <option value={{ $i }}>{{ $i }}</option>
+                  @endif
+                @endfor
+              </select>
+            </div>
+            <div class="col-sm-2">
+              {!! Form::label('lblpt', 'PT') !!}
+              <select name="filter_status_pt" aria-controls="filter_status" class="form-control select2">
+                <option value="ALL" selected="selected">ALL</option>
+                <option value="IGP">PT. IGP</option>
+                <option value="GKD">PT. GKD</option>
+                <option value="WEP">PT. WEP</option>
+                <option value="AGI">PT. AGI</option>
+              </select>
+            </div>
+            <div class="col-sm-2">
+              {!! Form::label('lblsite', 'Site') !!}
+              <select name="filter_status_site" aria-controls="filter_status" class="form-control select2">
+                <option value="ALL" selected="selected">ALL</option>
+                <option value="IGPJ">IGP - JAKARTA</option>
+                <option value="IGPK">IGP - KARAWANG</option>
+                <option value="GKDJ">GKD - JAKARTA</option>
+                <option value="GKDC">GKD - CIKAMPEK</option>
+                <option value="AGIJ">AGI - JAKARTA</option>
+                <option value="AGIK">AGI - KARAWANG</option>
+                <option value="WEPJ">WEP - JAKARTA</option>
+              </select>
+            </div>
+          </div>
+    		  <div class="form-group">
+            <div class="col-sm-2">
+              {!! Form::label('lblkeluar', 'Status') !!}
+              <select name="filter_status_keluar" aria-controls="filter_status" class="form-control select2">
+                <option value="ALL" selected="selected">ALL</option>
+                <option value="T">Aktif</option>
+                <option value="F">Keluar</option>
+              </select>
+            </div>
+            <div class="col-sm-2">
+              {!! Form::label('lbldisplay', ' ') !!}
+              <button id="display" type="button" class="form-control btn btn-primary" data-toggle="tooltip" data-placement="top" title="Display">Display</button>
+            </div>
+    		  </div>
+    		  <!-- /.form-group -->
+    		</div>
+    		<!-- /.box-body -->
+
+        <div class="box-body">
+          <table id="tblMaster" class="table table-bordered table-striped" cellspacing="0" width="100%">
+            <thead>
+              <tr>
+                <th rowspan="2" style="width: 1%;">No</th>
+                <th rowspan="2">NPK</th>
+                <th rowspan="2" style="width: 15%;">Nama</th>
+                <th rowspan="2">Golongan</th>
+                <th colspan="2" style='text-align: center'>Januari</th>
+                <th colspan="2" style='text-align: center'>Februari</th>
+                <th colspan="2" style='text-align: center'>Maret</th>
+                <th colspan="2" style='text-align: center'>April</th>
+                <th colspan="2" style='text-align: center'>Mei</th>
+                <th colspan="2" style='text-align: center'>Juni</th>
+                <th colspan="2" style='text-align: center'>Juli</th>
+                <th colspan="2" style='text-align: center'>Agustus</th>
+                <th colspan="2" style='text-align: center'>September</th>
+                <th colspan="2" style='text-align: center'>Oktober</th>
+                <th colspan="2" style='text-align: center'>November</th>
+                <th colspan="2" style='text-align: center'>Desember</th>
+                <th rowspan="2" style='width: 8%;text-align: center'>Total</th>
+                <th rowspan="2" style='width: 7%;text-align: center'>Rata-Rata</th>
+                <th rowspan="2">PT</th>
+                <th rowspan="2">Site</th>
+                <th rowspan="2" style="width: 20%;">Divisi</th>
+                <th rowspan="2" style="width: 20%;">Departemen</th>
+              </tr>
+              <tr>
+                <th>GP</th>
+                <th>Koreksi</th>
+                <th>GP</th>
+                <th>Koreksi</th>
+                <th>GP</th>
+                <th>Koreksi</th>
+                <th>GP</th>
+                <th>Koreksi</th>
+                <th>GP</th>
+                <th>Koreksi</th>
+                <th>GP</th>
+                <th>Koreksi</th>
+                <th>GP</th>
+                <th>Koreksi</th>
+                <th>GP</th>
+                <th>Koreksi</th>
+                <th>GP</th>
+                <th>Koreksi</th>
+                <th>GP</th>
+                <th>Koreksi</th>
+                <th>GP</th>
+                <th>Koreksi</th>
+                <th>GP</th>
+                <th>Koreksi</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+        <!-- /.box-body -->
+      </div>
+      <div>
+        <button id="btn-download" type="button" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Download to Excel"><span class="glyphicon glyphicon-download-alt"></span> Download to Excel</button>
+      </div>
+      <!-- /.box -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+@endsection
+
+@section('scripts')
+<script type="text/javascript">
+
+$("#btn-download").click(function(){
+  var tahun = $('select[name="filter_status_tahun"]').val();
+  var pt = $('select[name="filter_status_pt"]').val();
+  var kd_site = $('select[name="filter_status_site"]').val();
+  var status = $('select[name="filter_status_keluar"]').val();
+  var urlRedirect = '{{ route('mobiles.downloadgajipokok', ['param', 'param2', 'param3', 'param4']) }}';
+  urlRedirect = urlRedirect.replace('param4', window.btoa(status));
+  urlRedirect = urlRedirect.replace('param3', window.btoa(kd_site));
+  urlRedirect = urlRedirect.replace('param2', window.btoa(pt));
+  urlRedirect = urlRedirect.replace('param', window.btoa(tahun));
+  window.location.href = urlRedirect;
+});
+
+$(document).ready(function(){
+
+  var tableMaster = $('#tblMaster').DataTable({
+    "columnDefs": [{
+      "searchable": false,
+      "orderable": false,
+      "targets": 0,
+    render: function (data, type, row, meta) {
+        return meta.row + meta.settings._iDisplayStart + 1;
+    }
+    }],
+    "aLengthMenu": [[5, 10, 25, 50, 75, 100, -1], [5, 10, 25, 50, 75, 100, "All"]],
+    "iDisplayLength": 10,
+    //responsive: true,
+    "scrollX": true,
+    "scrollY": "500px",
+    "scrollCollapse": true,
+    "paging": false,
+    "order": [[1, 'asc']],
+    processing: true,
+    serverSide: true,
+    ajax: "{{ route('mobiles.dashboardgajipokok') }}",
+    columns: [
+      {data: null, name: null},
+      {data: 'npk', name: 'npk'},
+      {data: 'nama', name: 'nama'},
+      {data: 'kode_gol', name: 'kode_gol'},
+      {data: 't_gp_01', name: 't_gp_01', className: "dt-right", orderable: false, searchable: false},
+      {data: 't_kgp_01', name: 't_kgp_01', className: "dt-right", orderable: false, searchable: false},
+      {data: 't_gp_02', name: 't_gp_02', className: "dt-right", orderable: false, searchable: false},
+      {data: 't_kgp_02', name: 't_kgp_02', className: "dt-right", orderable: false, searchable: false},
+      {data: 't_gp_03', name: 't_gp_03', className: "dt-right", orderable: false, searchable: false},
+      {data: 't_kgp_03', name: 't_kgp_03', className: "dt-right", orderable: false, searchable: false},
+      {data: 't_gp_04', name: 't_gp_04', className: "dt-right", orderable: false, searchable: false},
+      {data: 't_kgp_04', name: 't_kgp_04', className: "dt-right", orderable: false, searchable: false},
+      {data: 't_gp_05', name: 't_gp_05', className: "dt-right", orderable: false, searchable: false},
+      {data: 't_kgp_05', name: 't_kgp_05', className: "dt-right", orderable: false, searchable: false},
+      {data: 't_gp_06', name: 't_gp_06', className: "dt-right", orderable: false, searchable: false},
+      {data: 't_kgp_06', name: 't_kgp_06', className: "dt-right", orderable: false, searchable: false},
+      {data: 't_gp_07', name: 't_gp_07', className: "dt-right", orderable: false, searchable: false},
+      {data: 't_kgp_07', name: 't_kgp_07', className: "dt-right", orderable: false, searchable: false},
+      {data: 't_gp_08', name: 't_gp_08', className: "dt-right", orderable: false, searchable: false},
+      {data: 't_kgp_08', name: 't_kgp_08', className: "dt-right", orderable: false, searchable: false},
+      {data: 't_gp_09', name: 't_gp_09', className: "dt-right", orderable: false, searchable: false},
+      {data: 't_kgp_09', name: 't_kgp_09', className: "dt-right", orderable: false, searchable: false},
+      {data: 't_gp_10', name: 't_gp_10', className: "dt-right", orderable: false, searchable: false},
+      {data: 't_kgp_10', name: 't_kgp_10', className: "dt-right", orderable: false, searchable: false},
+      {data: 't_gp_11', name: 't_gp_11', className: "dt-right", orderable: false, searchable: false},
+      {data: 't_kgp_11', name: 't_kgp_11', className: "dt-right", orderable: false, searchable: false},
+      {data: 't_gp_12', name: 't_gp_12', className: "dt-right", orderable: false, searchable: false},
+      {data: 't_kgp_12', name: 't_kgp_12', className: "dt-right", orderable: false, searchable: false},
+      {data: 'ttl_t_gp', name: 'ttl_t_gp', className: "dt-right", orderable: false, searchable: false},
+      {data: 'rata_rata_gp', name: 'rata_rata_gp', className: "dt-right", orderable: false, searchable: false},
+      {data: 'kd_pt', name: 'kd_pt', className: "dt-center"},
+      {data: 'kode_site', name: 'kode_site', className: "dt-center"},
+      {data: 'divisi', name: 'divisi'},
+      {data: 'departemen', name: 'departemen'}
+    ]
+  });
+
+  $("#tblMaster").on('preXhr.dt', function(e, settings, data) {
+    data.tahun = $('select[name="filter_status_tahun"]').val();
+    data.pt = $('select[name="filter_status_pt"]').val();
+    data.kd_site = $('select[name="filter_status_site"]').val();
+    data.status = $('select[name="filter_status_keluar"]').val();
+  });
+
+  $('#display').click( function () {
+    tableMaster.ajax.reload();
+  });
+
+  // $('#display').click();
+});
+</script>
+@endsection

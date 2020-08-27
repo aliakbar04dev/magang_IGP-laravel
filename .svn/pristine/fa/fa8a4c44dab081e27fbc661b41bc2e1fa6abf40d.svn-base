@@ -1,0 +1,97 @@
+<?php
+
+Route::group(['prefix'=>'dashboardmtc'], function () {
+	Route::get('/', [
+		'as' => 'smartmtcs.dashboardmtc',
+		'uses'=>'SmartMtcsController@dashboardmtc'
+	]);
+	Route::get('dm/{param}/{param2}', [
+		'as' => 'smartmtcs.indexdm',
+		'uses'=>'SmartMtcsController@indexdm'
+	]);
+	Route::get('dashboard/dm/{param}/{param2}', [
+		'as' => 'smartmtcs.dashboarddm',
+		'uses'=>'SmartMtcsController@dashboarddm'
+	]);
+	Route::get('showdetail/dm/{param}', [
+		'as' => 'smartmtcs.showdetaildm',
+		'uses'=>'SmartMtcsController@showdetaildm'
+	]);
+	Route::get('showdetail/lp/{param}', [
+		'as' => 'smartmtcs.showdetaillp',
+		'uses'=>'SmartMtcsController@showdetaillp'
+	]);
+	Route::get('grafik/pmsachievement/{param}/{param2}/{param3}/{param4}', [
+		'as' => 'smartmtcs.pmsachievement',
+		'uses'=>'SmartMtcsController@pmsachievement'
+	]);
+	Route::get('pmsachievementprogressmesin/{param}/{param2}/{param3}/{param4}', [
+		'as' => 'smartmtcs.pmsachievementprogressmesin',
+		'uses'=>'SmartMtcsController@pmsachievementprogressmesin'
+	]);
+	Route::get('stockohigp', [
+		'as' => 'smartmtcs.indexstockohigp',
+		'uses'=>'SmartMtcsController@indexstockohigp'
+	]);
+	Route::get('dashboardstockohigp/stockohigps', [
+		'as'=>'smartmtcs.dashboardstockohigp',
+		'uses'=>'SmartMtcsController@dashboardstockohigp'
+	]);
+	Route::get('dashboardmesinstockohigp/stockohigps', [
+		'as'=>'smartmtcs.dashboardmesinstockohigp',
+		'uses'=>'SmartMtcsController@dashboardmesinstockohigp'
+	]);
+	Route::get('mtctpms/{param}/{param2}', [
+		'as' => 'smartmtcs.indexmtctpms',
+		'uses'=>'SmartMtcsController@indexmtctpms'
+	]);
+	Route::get('dashboardmtctpms/mtctpms/{param}/{param2}/{param3}', [
+		'as'=>'smartmtcs.dashboardmtctpms',
+		'uses'=>'SmartMtcsController@dashboardmtctpms'
+	]);
+	Route::get('dashboarddmmtctpms/mtctpms/{param}/{param2}/{param3}', [
+		'as'=>'smartmtcs.dashboarddmmtctpms',
+		'uses'=>'SmartMtcsController@dashboarddmmtctpms'
+	]);
+	Route::get('dpm/{param}', [
+		'as'=>'smartmtcs.dpm',
+		'uses'=>'SmartMtcsController@dpm'
+	]);
+});
+
+Route::get('/monitoringlp/{param?}/{param2?}', [
+	'as' => 'smartmtcs.monitoringlp',
+	'uses'=>'SmartMtcsController@monitoringlp'
+]);
+Route::get('/monitoringmtc/{param?}', [
+	'as' => 'smartmtcs.monitoringmtc',
+	'uses'=>'SmartMtcsController@monitoringmtc'
+]);
+Route::get('/monitoringlch/{param?}/{param2?}', [
+	'as' => 'smartmtcs.monitoringlch',
+	'uses'=>'SmartMtcsController@monitoringlch'
+]);
+Route::get('lch/detail/{param}/{param2}/{param3}', [
+	'as'=>'smartmtcs.detaillch',
+	'uses'=>'SmartMtcsController@detaillch'
+]);
+Route::get('/monitoringasakai/{param}/{param2?}', [
+	'as' => 'smartmtcs.monitoringasakai',
+	'uses'=>'SmartMtcsController@monitoringasakai'
+]);
+Route::get('/monitoringandon', [
+	'as' => 'smartmtcs.monitoringandon',
+	'uses'=>'SmartMtcsController@monitoringandon'
+]);
+Route::get('/mtc-andon-igp1/{param?}', [
+	'as' => 'smartmtcs.andon1',
+	'uses'=>'SmartMtcsController@andon1'
+]);
+Route::get('/mtc-andon-igp2/{param?}', [
+	'as' => 'smartmtcs.andon2',
+	'uses'=>'SmartMtcsController@andon2'
+]);
+Route::get('/mtc-andon-igp3/{param?}', [
+	'as' => 'smartmtcs.andon3',
+	'uses'=>'SmartMtcsController@andon3'
+]);

@@ -1,0 +1,512 @@
+<div class="form-group">
+    <div id="head_sec">
+        <div class="col-md-3">
+            <label>PLANT</label><br>
+            @php $tahun_now = \Carbon\Carbon::now()->format("Y"); $bulan = \Carbon\Carbon::now()->format("m") @endphp
+            @if ($data_schedule->first()->plant == "igpj")
+            <a class="btn bg-olive" style="width:48%" disabled>JAKARTA</a>
+            <a href="{{ route('auditors.schedule', ['igpk', $tahun_now, 'I', 'latest']) }}" class="btn bg-olive" style="width:48%">KARAWANG</a>
+            @else
+            <a href="{{ route('auditors.schedule', ['igpj', $tahun_now, 'I', 'latest']) }}" class="btn bg-olive" style="width:48%">JAKARTA</a>
+            <a class="btn bg-olive" style="width:48%" disabled>KARAWANG</a>
+            @endif
+        </div>
+        <div class="col-md-2">
+            <label>TAHUN</label>
+            <select class="form-control" id="tahun_select" autocomplete="off">
+                @foreach ($gettahun as $tahun)
+                @if ($tahun->tahun == $data_schedule->first()->tahun)
+                <option value="{{ $tahun->tahun }}" selected>{{ $tahun->tahun }}</option>
+                @else
+                <option value="{{ $tahun->tahun }}">{{ $tahun->tahun }}</option>
+                @endif
+                @if ($tahun->tahun != \Carbon\Carbon::now()->format('Y') && $loop->iteration == $loop->last)
+                <option value="{{ \Carbon\Carbon::now()->format('Y') + 1 }}">{{ \Carbon\Carbon::now()->format('Y') + 1}}</option>
+                @endif
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label>PERIODE</label>
+            <select class="form-control" id="periode_select" autocomplete="off">
+                @if ($data_schedule->first()->periode == 'I')
+                <option value="I" selected>I (SATU)</option>
+                <option value="II">II (DUA)</option>
+                @else
+                <option value="I">I (SATU)</option>
+                <option value="II" selected>II (DUA)</option>
+                @endif
+            </select>
+        </div>
+        <div class="col-md-1">
+            <label>REVISI</label>
+            <select class="form-control" id="revisi_select" autocomplete="off">
+                @foreach ($all_periode_divisi as $revisi)
+                @if ($revisi->rev_no == $data_schedule->first()->rev_no)
+                <option tahun="{{ $revisi->tahun . $revisi->periode }}" value="{{ $revisi->rev_no }}" selected>{{ $revisi->rev_no }}</option>
+                @else
+                <option tahun="{{ $revisi->tahun . $revisi->periode }}" value="{{ $revisi->rev_no }}">{{ $revisi->rev_no }}</option>
+                @endif
+                @endforeach
+            </select>    
+        </div>
+        <div class="col-md-2">
+            <label>TANGGAL</label>
+            <input class="form-control" id="tanggal" value="{{ date('d M Y', strtotime($data_schedule->first()->created_date)) }}" readonly>
+        </div>
+        <div class="col-md-2">
+            <label>ACTION</label>
+            <button class="btn btn-primary" id="display_filter" style="display:block;">Display</button>
+        </div>
+        @if ($data_schedule->first()->status == '0')
+        <div class="col-md-12" style="margin-top: 15px;">
+            @if ($data_schedule->first()->rev_no != '00')
+            <div class="alert alert-info">
+                Schedule Internal Audit ini adalah draft. Schedule sebelumnya yang masih aktif bisa dicek 
+                <a style="font-weight: bold;" href="{{ route('auditors.schedule', [$data_schedule->first()->plant, $data_schedule->first()->tahun, $data_schedule->first()->periode, sprintf('%02s', $data_schedule->first()->rev_no - 1)]) }}">di sini</a>
+            </div>
+            @else
+            <div class="alert alert-info">
+                Schedule Internal Audit ini adalah draft. 
+            </div>
+            @endif
+        </div>
+        @endif
+        <div class="col-md-6">
+            @if ($data_schedule->first()->status == '0')
+            <button class="btn btn-success" id="add_schedule">TAMBAH JADWAL</button>
+            <!-- <button class="btn btn-danger" id="delete_schedule">HAPUS JADWAL</button> -->
+            @endif
+        </div>
+        
+    </div>
+    <div id="add_sec" style="margin-top: 15px;display:none;">
+        {!! Form::open(['method' => 'post', 'files'=>'true', 'class'=>'form-horizontal', 'role'=>'form', 'id'=>'form_new_schedule', 'autocomplete' => 'off', 'required']) !!}
+        <div class="col-md-12">
+            <div class="col-md-6" style="padding-right: 50px;">
+                <div class="row">
+                    <label>JENIS SCHEDULE</label>
+                    <select id="jenis_schedule" name="jenis_schedule" class="form-control">
+                        <option value="1">NORMAL SCHEDULE</option>
+                        <option value="2">OPENING MEETING</option>
+                        <option value="3">CLOSING MEETING</option>
+                    </select>
+                </div>
+                <div class="row">
+                    <div style="margin-top: 8px;">
+                    <label>TANGGAL</label>
+                    <input id="select_date" class="form-control" name="tanggal" style="background-color: white; width: 60%;" onkeydown="return false;" autocomplete="off" required>
+                    <input id="tahun_val" type="hidden" class="form-control" name="tahun" style="width: 100px;margin-top: -34px;margin-left: 115px;" value="{{$data_schedule->first()->tahun}}" readonly autocomplete="off">
+                    <input id="plant_val" type="hidden" class="form-control" name="plant" style="width: 100px;margin-top: -34px;margin-left: 115px;" value="{{$data_schedule->first()->plant}}" readonly autocomplete="off">
+                    <input id="periode_val" class="form-control" type="hidden" value="{{$data_schedule->first()->periode}}">
+                    <input id="rev_no_val" class="form-control" type="hidden" value="{{$data_schedule->first()->rev_no}}">
+                </div>
+                </div>
+                <div class="add_sec_sub">
+                    <div class="row">
+                        <input id="schedule_id_form" type="hidden" name="schedule_id" value="{{$data_schedule->first()->id}}" required>
+                        <div style="margin-top: 8px;">
+                            {!! Form::label('div', 'DIVISI') !!}
+                            <select class="form-control select2" id="kd_div" name="kd_div" name="kd_div" style="width:100%;" autocomplete="off" required>
+                                <option></option>
+                                @foreach ($getdiv as $div)
+                                @if ($div->desc_div != null)
+                                <option value="{{ $div->kd_div }}">{{ $div->desc_div }}</option>
+                                @endif
+                                @endforeach
+                            </select>
+                            {!! $errors->first('kd_dep', '<p class="help-block">:message</p>') !!}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div style="margin-top: 8px;">
+                            {!! Form::label('dept', 'DEPT') !!}
+                            <select class="form-control select2" id="kd_dep" name="kd_dep" name="kd_dep" style="width:100%;" autocomplete="off" required>
+                                <option></option>
+                                @foreach ($getdep as $dep)
+                                <option value="{{ $dep->kd_dep }}">{{ $dep->desc_dep }}</option>
+                                @endforeach
+                            </select>
+                            {!! $errors->first('kd_dep', '<p class="help-block">:message</p>') !!}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div style="margin-top: 8px;">
+                            {!! Form::label('sect', 'SEKSI') !!}
+                            <select class="form-control select2" id="kd_sie" name="kd_sie" name="kd_sie" style="width:100%;" autocomplete="off" required>
+                                <option></option>
+                                @foreach ($getsie as $sie)
+                                <option value="{{ $sie->kd_sie }}">{{ $sie->desc_sie }}</option>
+                                @endforeach
+                            </select>
+                            {!! $errors->first('kd_dep', '<p class="help-block">:message</p>') !!}
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                        <div style="margin-top: 8px;">
+                    <label>KETERANGAN</label>
+                    <textarea class="form-control" id="keterangan_id" name="keterangan"></textarea>
+                </div>
+                </div>
+            </div>
+
+            <div class="add_sec_sub">
+            <div class="col-md-6">
+                <div style="margin-top: 8px;">
+                    <label>AUDITEE</label>
+                    <table id="tblAuditee" class="table-borderless" width="100%">
+                        <tr id="row_auditee1">
+                            <td><input type="hidden" id="npkaud1" name="auditee[]"><input id="auditee1" class="form-control" onclick="popupAuditee(this.id)" data-toggle="modal" data-target="#karyawanModal" style="background-color: white;" onkeydown="return false;" required></td>
+                            <td><button type="button" id="tambah_auditee" class="btn btn-success"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button></td>
+                        </tr>
+                    </table>
+                </div>
+                <div style="margin-top: 8px;">
+                    <label>LEAD AUDITOR</label>
+                    <table id="tblLead" class="table-borderless" width="100%">
+                        <tr>
+                            <td><input type="hidden" id="npklead" name="leadauditor"><input id="leadauditor" class="form-control" onclick="popupKaryawanAuditor(this.id)" data-toggle="modal" data-target="#auditorModal" style="background-color: white;" onkeydown="return false;" required></td>
+                        </tr>
+                    </table>
+                </div>
+                <div style="margin-top: 8px;">
+                    <label>AUDITOR</label>
+                    <table id="tblAuditor" class="table-borderless" width="100%">
+                        <tr id="row_auditor1">
+                            <td><input type="hidden" id="npkauditor1" name="auditor[]"><input id="auditor1" class="form-control" onclick="popupKaryawanAuditor2(this.id)" data-toggle="modal" data-target="#auditorModal" style="background-color: white;" onkeydown="return false;" required></td>
+                            <td><button type="button" id="tambah_auditor" class="btn btn-success"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12" style="margin-top :50px;">
+            <button id="closing_add_schedule" type="button" class="btn btn-success" style="float:right;display:none;">TAMBAH CLOSING</button>
+            <button id="opening_add_schedule" type="button" class="btn btn-success" style="float:right;display:none;">TAMBAH OPENING</button>
+            <button id="submit_add_schedule" type="submit" class="btn btn-success" style="float:right;display:none;">TAMBAH JADWAL</button>
+            <button id="back_btn" type="button" class="btn btn-danger" style="float:right;display:none;margin-right: 5px;">KEMBALI</button>        
+        </div>
+    </div>
+    
+    {!! Form::close() !!}
+</div>
+<div id="table_sec" class="col-md-12" style="margin-top:8px;">
+    <div style="display: inline;font-size: 30px;font-weight: 600;"> &nbsp;Periode {{$data_schedule->first()->periode}} - Revisi {{$data_schedule->first()->rev_no}}</div>
+    <div style="overflow-x:auto;" id="item">
+        <input id="schedule_id" type="hidden" value="{{$data_schedule->first()->id}}">
+        <table id="tblSchedule" class="table-bordered hoverTable" style="width:100%;margin-bottom:0px;">
+            <thead>
+                <tr class="notHover">
+                    <th rowspan="4" width="10px">NO</th>
+                    <th rowspan="4" colspan="2" style="width:30%;border-right:none;">AREA/PROC</th>
+                    <th rowspan="4">AUDITEE</th>
+                    <th rowspan="2" colspan="2">AUDITOR</th>
+                    <th colspan="{{ count($gethari) }}">{{$data_schedule->first()->tahun}}</th>
+                    <th rowspan="4" colspan="2">KETERANGAN</th>
+                </tr>
+                <tr class="notHover" style="background-color: white;">
+                    @foreach ($getbulan as $bulan)
+                    @php $total_row_bulan = 0; @endphp
+                    @foreach ($gethari as $tanggal)
+                    @if ($tanggal->bulan == $bulan->bulan)
+                    @php $total_row_bulan++; @endphp
+                    @php 
+                    switch ($bulan->bulan) {
+                        case "01":
+                        $nama_bulan = 'JAN';
+                        break;
+                        case "02":
+                        $nama_bulan = 'FEB';
+                        break;
+                        case "03":
+                        $nama_bulan = 'MAR';
+                        break;
+                        case "04":
+                        $nama_bulan = 'APR';
+                        break;
+                        case "05":
+                        $nama_bulan = 'MAY';
+                        break;
+                        case "06":
+                        $nama_bulan = 'JUN';
+                        break;
+                        case "07":
+                        $nama_bulan = 'JUL';
+                        break;
+                        case "08":
+                        $nama_bulan = 'AUG';
+                        break;
+                        case "09":
+                        $nama_bulan = 'SEP';
+                        break;
+                        case "10":
+                        $nama_bulan = 'OCT';
+                        break;
+                        case "11":
+                        $nama_bulan = 'NOV';
+                        break;
+                        case "12":
+                        $nama_bulan = 'DES';
+                        break;
+                        default:
+                        $nama_bulan = '';
+                    }
+                    @endphp
+                    @endif
+                    @endforeach
+                    <th colspan="{{ $total_row_bulan }}" style="border-right: 1px solid #f4f4f4;">{{$nama_bulan}}</th>
+                    @endforeach
+                </tr>
+                <tr class="notHover">
+                    <th rowspan="2">LEAD AUDITOR</th>
+                    <th rowspan="2">AUDITOR</th>
+                    @foreach ($gethari as $hari)
+                    <th style="border-right: 1px solid #f4f4f4;">{{ $hari->tanggal }}</th>
+                    @endforeach
+                </tr>
+                <tr style="background-color: white;">
+                    @foreach ($gethari as $hari)
+                    @php $nama_hari = date("D", strtotime($hari->tahun . '-' . $hari->bulan . '-' . $hari->tanggal)); @endphp
+                    @php 
+                    switch ($nama_hari) {
+                        case "Mon":
+                        $nama_hari = 'SEN';
+                        break;
+                        case "Tue":
+                        $nama_hari = 'SEL';
+                        break;
+                        case "Wed":
+                        $nama_hari = 'RAB';
+                        break;
+                        case "Thu":
+                        $nama_hari = 'KAM';
+                        break;
+                        case "Fri":
+                        $nama_hari = 'JUM';
+                        break;
+                        case "Sat":
+                        $nama_hari = 'SAB';
+                        break;
+                        case "Sun":
+                        $nama_hari = 'MIN';
+                        break;
+                        default:
+                        $nama_hari = 'Kosong';
+                    }
+                    @endphp
+                    <th style="border-right: 1px solid #f4f4f4;">{{ $nama_hari }}</th>
+                    @endforeach
+                </tr>
+            </thead>
+            <tbody>
+                    @if (count($gethari) == 0) @php $count_span = 9; @endphp @else @php $count_span = count($gethari) + 8; @endphp @endif
+                @if ($data_schedule->first()->plant == "igpj")
+                <tr>   
+                    <td colspan="{{ $count_span }}">IGP PLANT JAKARTA</td>
+                </tr>
+                @else
+                <tr>
+                    <td colspan="{{ $count_span }}">IGP PLANT KARAWANG</td>
+                </tr>
+                @endif
+                @php $current_no = 1; @endphp
+                @if (count($date) == 0)
+                <tr>
+                    <td style="text-align: center;" colspan="9">Belum ada jadwal bulan ini</td>
+                </tr>
+                @else
+                @foreach ($date as $tanggal)
+                @if ($tanggal->flag_reschedule == null)
+                <tr>
+                    <td>{{ $current_no }}. @php $current_no++; @endphp</td>
+                    <td style="white-space: nowrap;border-right:none;" class="hapus_td"><div>@if ($tanggal->div == 'AO') <i>OPENING MEETING</i> @elseif ($tanggal->div == 'AC') <i>CLOSING MEETING</i> @else {{ $tanggal->desc_dep . ' - ' . $tanggal->desc_sie }} @endif</div>
+                    </td>
+                    <td style="white-space: nowrap;border-left:none;">
+                        @if ($data_schedule->first()->status == 0)
+                        <button class="btn btn-danger btn-sm hapus_btn" id="{{ $tanggal->id2 }}" style="float:right;"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+                        @endif
+                        @if ($tanggal->flag_selesai == null && $data_schedule->first()->status == 1)
+                            <button id="btn_re{{ $tanggal->id2 }}" class="btn btn-sm bg-olive batal_btn"><span class="glyphicon glyphicon-calendar" aria-hidden="true"></span></button>
+                            <button class="btn btn-sm bg-olive selesai_btn" id="{{ $tanggal->id2 }}"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></button>
+                        @endif
+                    </td>
+                    @if (count($auditor) == 0)
+                    @php $all_auditee = "All.."; @endphp 
+                    @else
+                    @php $all_auditee = ""; @endphp 
+                    @endif
+                    @foreach ($auditor as $data_auditee)
+                    @if ($tanggal->div == 'AO' || $tanggal->div == 'AC')
+                    @php $all_auditee = "All//"; @endphp
+                    @else
+                    @if ($data_auditee->role_audit == 'AUDITEE' && $data_auditee->id2 == $tanggal->id2) 
+                    @if ($tanggal->tanggal == $data_auditee->tanggal) 
+                    @php 
+                    $list_auditee = DB::table('v_mas_karyawan')
+                    ->select('nama')
+                    ->join('ia_schedule3', 'v_mas_karyawan.npk', 'ia_schedule3.npk')
+                    ->where('ia_schedule3.npk', '=', $data_auditee->npk)
+                    ->where('tanggal', '=', $tanggal->tanggal)
+                    ->value('nama');
+                    
+                    $words = explode(" ", $list_auditee);
+                    $akronim_auditee = "";
+                    $count = 1;
+                    foreach ($words as $w) {
+                        if ($count == 1){
+                            $akronim_auditee .= $w.' ';
+                        } else {    
+                            $akronim_auditee .= $w[0];
+                        }
+                        $count++;
+                    }
+                    
+                    $all_auditee .= $akronim_auditee . ', ';
+                    
+                    @endphp 
+                    @endif @endif @endif @endforeach
+                    <td style="white-space: nowrap;">{{ substr($all_auditee, 0, -2) }}</td>
+                    @if (count($auditor) == 0)
+                    @php $akronim_leadauditor = "All"; $all_auditor = "All.." ; @endphp
+                    @else
+                    @php $akronim_leadauditor = ""; $all_auditor = "" ; @endphp
+                    @endif
+                    @foreach ($auditor as $data_auditee)
+                    @if ($tanggal->div == 'AO' || $tanggal->div == 'AC')
+                    @php $akronim_leadauditor = "All"; $all_auditor = "All//" @endphp
+                    @else
+                    @if ($tanggal->tanggal == $data_auditee->tanggal && $tanggal->bulan == $data_auditee->bulan)
+                    @if ($data_auditee->role_audit == 'LEAD AUDITOR') 
+                    @php 
+                    $leadauditor = DB::table('v_mas_karyawan')
+                    ->select('nama')
+                    ->join('ia_schedule3', 'v_mas_karyawan.npk', 'ia_schedule3.npk')
+                    ->where('ia_schedule3.npk', '=', $data_auditee->npk)
+                    ->where('tanggal', '=', $tanggal->tanggal)
+                    ->value('nama');
+                    
+                    $words = explode(" ", $leadauditor);
+                    $count = 1;
+                    foreach ($words as $w) {
+                        if ($count == 1){
+                            $akronim_leadauditor .= $w.' ';
+                        } else {    
+                            $akronim_leadauditor .= $w[0];
+                        }
+                        $count++;
+                    }            
+                    @endphp 
+                    @elseif ($data_auditee->role_audit == 'AUDITOR' && $data_auditee->id2 == $tanggal->id2)
+                    @php
+                    $nama_auditor = DB::table('v_mas_karyawan')
+                    ->select('nama')
+                    ->join('ia_schedule3', 'v_mas_karyawan.npk', 'ia_schedule3.npk')
+                    ->where('ia_schedule3.npk', '=', $data_auditee->npk)
+                    ->where('tanggal', '=', $tanggal->tanggal)
+                    ->value('nama');
+                    
+                    $words = explode(" ", $nama_auditor);
+                    $count = 1;
+                    $akronim_auditor = "";
+                    
+                    if (count($words) == 1){
+                        if ($words[0] == '' || $words[0] == null) {
+                            $all_auditor .= $akronim_auditor;                
+                        } else {
+                            $akronim_auditor = $words[0];
+                            $all_auditor .= $akronim_auditor . ', ';
+                        }
+                    } else if (count($words) > 1) {
+                        foreach ($words as $w) {
+                            if ($count == 1){
+                                $akronim_auditor .= $w.' ';
+                            } else {    
+                                $akronim_auditor .= $w[0];
+                            }
+                            $count++;
+                        }
+                        $all_auditor .= $akronim_auditor . ', ';
+                    }
+                    @endphp
+                    @endif @endif @endif @endforeach
+                    <td style="white-space: nowrap;">{{ $akronim_leadauditor }}</td>
+                    <td style="white-space: nowrap;">{{ substr($all_auditor, 0, -2) }}</td>
+                    @php $tgl_before = ''; $tgl_act = ''; @endphp
+                    @foreach ($gethari as $hari)
+                    @foreach ($date2 as $tgl)
+                    @php  @endphp
+                    @if ($hari->tanggal == $tgl->tanggal)
+                    @if ($tgl->tanggal == $tanggal->tanggal && $tgl->bulan == $tanggal->bulan)
+                    @if ($tanggal->flag_selesai == null)
+                    @if ($tgl_before != $tgl_act)
+                    <td style="text-align: center;">O</td>
+                    @break
+                    @else
+                    <td style="text-align: center;">O</td>
+                    @endif
+                    @elseif ($tanggal->flag_selesai == 'S')
+                    @if ($tgl_before != $tgl_act || $tgl_before == '')
+                    <td style="text-align: center;"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></td>
+                    @break
+                    @endif
+                    @else
+                    <td style="text-align: center;"><b>X</b></td>
+                    @endif
+                    @else
+                    @if ($tanggal->div == $tgl->div && $tanggal->dep == $tgl->dep && $tanggal->sie == $tgl->sie)
+                    @if ($tgl_before != $tgl_act || $tgl_before == '')
+                    <td style="text-align: center;"><b>X</b></td>
+                    @break
+                    @elseif ($tgl_before != '')
+                    <td style="white-space: nowrap;"></td>
+                    @endif
+                    @else
+                    @if ($tgl_before != $tgl_act || $tgl_before == '')
+                    <td style="white-space: nowrap;"></td>
+                    @break
+                    @endif
+                    @endif
+                    @endif
+                    @endif
+                    @endforeach
+                    @php $tgl_act = $tgl_before; $tgl_before = $hari->tanggal; @endphp
+                    @endforeach
+                    <td id="keterangan_{{ $tanggal->id2 }}" style="white-space: nowrap;text-align: center;border-right: none;">{{ $tanggal->keterangan }} </td>
+                    <td style="border-left: none;">@if ($data_schedule->first()->status != 2)<button id="btn_ket{{ $tanggal->id2 }}" class="btn btn-sm bg-olive ket_edit_btn"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button>@endif</td>
+                </tr>
+                @endif
+                @endforeach
+                @endif
+            </tbody>
+        </table>
+    </div>
+    <!-- <div class="col-md-7" style="font-size: 12px;margin-top: 12px;">
+        <div style="font-weight: bold;">NOTE :</div>
+        1. Untuk kelancaran internal audit maka waktu audit disesuaikan dengan auditor/auditee<br>
+        2. Jika pada jadwal tersebut berhalangan harap informasi ke sekretariat. (Anisa Belgis ext 345)<br>
+        3. Total Auditor 14 MP
+    </div> -->
+    <div class="col-md-8" style="font-size: 12px;margin-top: 8px;">
+        <div style="font-weight: bold;">KET :</div>
+        <b>O</b> = SCHEDULE AWAL / REVISI<br>
+        <b>X</b> = RESCHEDULE <br>
+        <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> = SUDAH TERAUDIT
+    </div>
+    <div class="col-md-4" style="margin-top: 8px;">
+        @if ($data_schedule->first()->status == '0')
+        <button id="submit_btn" type="submit" class="btn btn-primary" style="float:right;">SUBMIT</button>
+        @if ($data_schedule->first()->rev_no != '00')
+        <button id="hapus_draft" type="button" class="btn btn-danger" style="float:right;margin-right: 8px;">HAPUS DRAFT</button>
+        @endif
+        @elseif ($data_schedule->first()->status == '1')
+        <button id="revisi" type="button" class="btn btn-primary" style="float:right;">REVISI</button>
+        <button id="print_schedule" type="button" class="btn btn-primary" style="float:right; margin-right: 8px;">PRINT SCHEDULE</button>
+        @else
+        <a href="{{ route('auditors.schedule', [$data_schedule->first()->plant, $data_schedule->first()->tahun, $data_schedule->first()->periode, 'latest']) }}" type="button" class="btn btn-primary" style="float:right; margin-right: 8px;">LIHAT REVISI TERBARU</a>
+        @endif
+    </div>
+    
+</div>
+</div>

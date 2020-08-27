@@ -1,0 +1,104 @@
+@extends('layouts.app')
+@section('content')
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <h1>
+        Keterangan Pengajuan
+        <small>Daftar Pengajuan</small>
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="{{ url('/home') }}"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li><i class="fa fa-files-o"></i>HRD</li>
+        <li class="active"><i class="fa fa-files-o"></i>Suket Karyawan</li>
+      </ol>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="row">
+          <div class="col-md-12">
+            <div class="box box-primary">
+              <div class="box-header">
+                <p> 
+                  <a class="btn btn-primary" href="{{ route('mobiles.createsuketkaryawan') }}">
+                    <span class="fa fa-plus"></span> Tambah Data Pengajuan
+                  </a>
+                </p>
+              </div>
+              <!-- /.box-header -->
+              <div class="box-body">
+
+                <table id="tblDetail" class="table table-bordered table-striped" cellspacing="0" width="100%">
+                      <thead>
+                            <tr>
+                                <th width="20">No</th>
+                                <th width="65">Tanggal Surat</th>
+                                <th>Keperluan</th>
+                                <th>Status</th>
+                                <th width="50">Aksi</th>
+                                
+                            </tr>
+                        </thead>
+          </table>
+              </div>
+              <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+          </div>
+          <!-- /.col -->
+        </div>
+      <!-- /.row -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+@endsection
+
+@section('scripts')
+<script type="text/javascript">
+
+
+  $(document).ready(function(){
+
+    var tableDetail = $('#tblDetail').DataTable({
+      "columnDefs": [{
+        "searchable": false,
+        "orderable": false,
+        "targets": 0,
+        render: function (data, type, row, meta) {
+          return meta.row + meta.settings._iDisplayStart + 1;
+        }
+      }],
+      "aLengthMenu": [[5, 10, 25, 50, 75, 100, -1], [5, 10, 25, 50, 75, 100, "All"]],
+      "iDisplayLength": 10,
+      responsive: true,
+      // "searching": false,
+      // "scrollX": true,
+      // "scrollY": "700px",
+      // "scrollCollapse": true,
+      // "paging": false,
+      // "lengthChange": false,
+      // "ordering": true,
+      // "info": true,
+      // "autoWidth": false,
+      "order": [[1, 'desc']],
+      processing: true, 
+      "oLanguage": {
+        'sProcessing': '<div id="processing" style="margin: 0px; padding: 0px; position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; background-color: rgb(102, 102, 102); z-index: 30001; opacity: 0.8;"><p style="position: absolute; color: White; top: 50%; left: 45%;"><img src="{{ asset('images/ajax-loader.gif') }}"></p></div>Processing...'
+      }, 
+      ajax: "{{ route('mobiles.dashboardsuketkaryawan') }}",
+      columns: [
+      {data: null, name: null, orderable: false, searchable: false},
+      {data: 'tglsurat', name: 'tglsurat'},
+      {data: 'keperluan', name: 'keperluan'},
+      {data: 'status', name: 'status'},
+      {data: 'action', name: 'action'}
+      // {data: 'action', name: 'status'},
+      
+      ]
+    });
+  });
+</script>
+@endsection

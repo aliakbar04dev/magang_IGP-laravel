@@ -1,0 +1,185 @@
+<div class="form-group">
+    <div class="col-md-4">
+        <label><u>PLANT</u></label>
+        <div style="font-size:18px;">@if ($get_temuan->plant == 1)IGP-1
+                @elseif($get_temuan->plant == 2)IGP-2
+                @elseif($get_temuan->plant == 3)IGP-3
+                @elseif($get_temuan->plant == 4)IGP-4
+                @elseif($get_temuan->plant == A)KIM-A
+                @elseif($get_temuan->plant == B)KIM-B
+                @endif</div>
+    </div>
+    <div class="col-md-4">
+        <label><u>DEPT</u></label>
+        <div style="font-size:18px">{{ $get_temuan->dep }}</div>
+    </div>
+    <div class="col-md-4">
+        <label><u>FINDING NO.</u></label>
+        <div style="font-size:18px">{{ $get_temuan->finding_no }}</div>
+    </div>
+</div>
+<div class="form-group">
+    <div class="col-md-4" style="margin-top: 8px;">
+        <label><u>TANGGAL</u></label>
+        <div style="font-size:18px">{{ $get_temuan->tanggal }}</div>
+    </div>
+    <div class="col-md-4" style="margin-top: 8px;">
+        <label><u>CATEGORY FINDING</u></label>
+        <div style="font-size:18px">{{ $get_temuan->cat }}</div>
+    </div>
+    <div class="col-md-4" style="margin-top: 8px;">
+        <label><u>AUDIT TYPE</u></label>
+        <div style="font-size:18px">{{ $get_temuan->a_type }}</div>
+    </div>
+</div>
+<div class="form-group">
+    <div class="col-md-4" style="margin-top: 8px;">
+        <label><u>SHIFT</u></label>
+        <div style="font-size:18px">{{ $get_temuan->shift }}</div>
+    </div>
+    <div class="col-md-4" style="margin-top: 8px;">
+        <label><u>PERIODE</u></label>
+        <div style="font-size:18px">{{ $get_temuan->periode }}</div>
+    </div>
+    <div class="col-md-4" style="margin-top: 8px;">
+        <label><u>TAHUN</u></label>
+        <div style="font-size:18px">{{ $get_temuan->tahun }}</div>
+    </div>
+</div>
+<div class="form-group">
+    <div class="col-md-6" style="margin-top: 8px;">
+        <label><u>LINE</u></label>
+        <div style="font-size:18px">{{ $get_temuan->line }}</div>
+    </div>
+    <div class="col-md-6" style="margin-top: 8px;">
+        <label><u>PROCESS</u></label>
+        <div style="font-size:18px">{{ $get_temuan->process }}</div>
+    </div>
+</div>
+<div class="form-group">
+    <div class="col-md-6" style="margin-top: 8px;">
+        <table class="table table-bordered">
+            <tr>
+                <td colspan="4"><label>AUDITOR</label></td>
+            </tr>
+            <tr>
+                    @foreach ($get_audteetor as $auditor)
+                    @if ($auditor->status == 'Auditor')
+                        <td><input placeholder="No data" style="text-align: center;" class="form-control" value="{{$auditor->npk}}" disabled></td>
+                    @endif
+                    @endforeach
+                </tr>
+            <tr>
+                        <td colspan="4"><input placeholder="No data" id="listauditor" name="listauditor" class="form-control" value="@foreach($get_audteetor as $auditor) @if($auditor->status == 'Auditor'){{$auditor->nama}},@endif @endforeach" disabled></td>
+                </tr>
+        </table>
+    </div>
+    
+    <div class="col-md-6" style="margin-top: 8px;">
+        <table class="table table-bordered">
+            <tr>
+                <td colspan="4"><label>AUDITEE</label></td>
+            </tr>
+            <tr>
+                    @foreach ($get_audteetor as $auditee)
+                    @if ($auditee->status == 'Auditee')
+                        <td><input placeholder="No data" style="text-align: center;" class="form-control" value="{{ $auditee->npk }}" disabled></td>
+                    @endif
+                    @endforeach</tr>
+            <tr>
+                    <td colspan="4"><input placeholder="No data" id="listauditee" name="listauditee" class="form-control" value="@foreach($get_audteetor as $auditee) @if($auditee->status == 'Auditee'){{$auditee->nama}},@endif @endforeach" disabled></td>
+
+            </tr>
+        </table>
+    </div>
+</div>
+<div class="form-group">
+    <div class="col-md-12" style="margin-top: 8px;">   
+        <table class="table-borderless">
+            <tr>
+                <td colspan="3">
+                    <label>STATEMENT OF NC</label>
+                    <textarea id="snc" name="snc" class="form-control" disabled>{{ $get_temuan->statement_of_nc }}</textarea></td>
+                </tr>
+                <tr>
+                    <td rowspan="4" style="width: 20%;"><label>REFERENCE OR STANDARD</label></td>
+                    <td>
+                        <label>QMS DOC REF</label>
+                        <input class="form-control" value="{{ $get_temuan->qms_doc_ref }}" disabled>
+                    </td>
+                    <td rowspan="2" style="width:10%;vertical-align: top;border: 1px solid #e1e1e1;padding-left: 10px;">
+                        {!! Form::label('ev_img', 'EVIDENCE FOTO') !!}
+                        {!! Form::file('ev_img', null, ['class'=>'form-control-file']) !!}
+                        {!! $errors->first('ev_img', '<p class="help-block">:message</p>') !!}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>IATF 16949</label>
+                        <input class="form-control" value="{{ $get_temuan->iatf_ref }}" disabled>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>ISO 9001</label>
+                        <input class="form-control" value="{{ $get_temuan->iso_ref }}" disabled>
+                    </td>
+                    <td rowspan="2" style="width:10%;vertical-align: top;border: 1px solid #e1e1e1;padding-left: 10px;">
+                        {!! Form::label('ev_sv', 'EVIDENCE SOUND/VIDEO') !!}
+                        {!! Form::file('ev_sv', null, ['class'=>'form-control-file']) !!}
+                        {!! $errors->first('ev_sv', '<p class="help-block">:message</p>') !!}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>CSR</label>
+                        <input class="form-control" value="{{ $get_temuan->csr }}" disabled>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        <label>DETAIL OF PROBLEM</label>
+                        <textarea id="dop" name="dop" class="form-control" disabled>{{ $get_temuan->detail_problem }}</textarea>
+                    </td>
+                </tr>
+            </table>
+        </div>       
+    </div>
+    <div class="form-group">
+        <div class="col-md-12">
+@if ($get_temuan->auditee_sign != null )
+<table class="table-borderless" style="width: 100%;">
+<tr>
+    <td colspan="3">
+        <label>CONTAINMENT ACTION</label>
+        <textarea id="coa" name="coa" class="form-control" disabled>{{ $get_temuan->containment_action }}</textarea>
+    </td>
+</tr>
+<tr>
+    <td>
+        <label>PIC</label>
+        <input class="form-control" id="pic" name="pic" value="{{ $get_temuan->pic }}" disabled>
+    </td>
+    <td>
+        <label>DUE DATE</label>
+        <input type="date" class="form-control" id="due_date" name="due_date" style="padding-top: 0px;" value="{{ $get_temuan->due_date }}" disabled> 
+    </td>
+    <td>
+        <label>TARGET ROOT CAUSE & CORRECTIVE ACTION</label>
+        <input type="date" class="form-control" id="target_date" name="target_date" style="padding-top: 0px;" value="{{ $get_temuan->target_date }}" disabled>
+    </td>
+</tr>
+    <tr>
+        <td style="color:green;">- Telah ditandatangani oleh <i><b>{{ $nama_auditee }}</b></i> sebagai Auditee</td>
+    </tr>
+    @if ($get_temuan->auditor_sign != null)
+    <tr>
+        <td style="color:green;">- Telah ditandatangani oleh <i><b>{{ $nama_auditor }}</b></i> sebagai Auditor</td>
+    </tr>
+    @endif
+</table>
+</div>
+</div>
+@endif
+    
+    

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="565" pageHeight="802" whenNoDataType="AllSectionsNoDetail" columnWidth="565" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="b12e1461-f2c2-4eb5-91b6-f20b18705cbe">
+	<property name="ireport.zoom" value="1.4641000000000006"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="tgl1" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="tgl2" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="lok_pt" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="kd_line" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="kd_mesin" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="npk" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT M1.KD_LINE||'-'||L.XNM_LINE LINE, COUNT(M1.NO_DM) JML_DM
+FROM MTCT_DFT_MSLH M1, USRIGPMFG.XMLINE L, MMTCMESIN M
+WHERE M1.KD_LINE = L.XKD_LINE(+)
+AND M1.KD_MESIN(+) = M.KD_MESIN
+AND (TO_CHAR(M1.TGL_DM,'YYYYMMDD') >= TO_CHAR($P{tgl1},'YYYYMMDD') 
+AND TO_CHAR(M1.TGL_DM,'YYYYMMDD') <= TO_CHAR($P{tgl2},'YYYYMMDD'))
+AND M1.KD_PLANT = $P{lok_pt}
+AND (M1.KD_LINE = $P{kd_line} OR $P{kd_line} IS NULL)
+AND (M1.KD_MESIN = $P{kd_mesin} OR $P{kd_mesin} IS NULL)
+AND EXISTS (SELECT 1 FROM MTCM_NPK WHERE MTCM_NPK.NPK = $P{npk} AND MTCM_NPK.KD_PLANT = M1.KD_PLANT AND ROWNUM = 1)
+GROUP BY M1.KD_LINE||'-'||L.XNM_LINE
+ORDER BY 1]]>
+	</queryString>
+	<field name="LINE" class="java.lang.String"/>
+	<field name="JML_DM" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="15" splitType="Stretch">
+			<staticText>
+				<reportElement x="40" y="0" width="360" height="15" uuid="fa6d2674-6a29-45d8-9bea-7c4aeded917d"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Line]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="400" y="0" width="100" height="15" uuid="7a4d743d-9fa9-4e4e-9734-c0c8a788a056"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Total]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="40" y="0" width="360" height="15" uuid="fe2383b5-7908-40c0-969e-fa92460323b8"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{LINE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="400" y="0" width="100" height="15" uuid="312a27c5-d792-49e2-93b2-683cca52ebc3"/>
+				<box topPadding="1" leftPadding="0" rightPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{JML_DM}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

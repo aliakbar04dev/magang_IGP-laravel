@@ -1,0 +1,709 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Pistandard;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Datatables;
+use Session;
+use exception;
+use Carbon\Carbon;
+use DB;
+use App\User;
+use Alert;
+
+class PistandardsController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @retun \Illuminate\Http\Response
+     */
+    public function index(Request $request)
+    {
+        //
+     if ($request->ajax()) {
+        $pistandards = DB::table("pistandards")
+        ->select(DB::raw("no_pisigp, no_pis, model, part_no, part_name, nama_supplier, status"));
+        return Datatables::of($pistandards)
+        ->editColumn('status', function($pistandard){
+            if($pistandard->status == 0){
+                return '<b class="btn-xs btn-warning btn-icon-pg" action="disable"> Draft</b>';
+            }
+            elseif($pistandard->status == 1){
+                return '<b class="btn-xs btn-info btn-icon-pg"  action="disable"> Belum Approv </b>';
+            }
+            elseif($pistandard->status == 2){
+                return '<b class="btn-xs btn-success btn-icon-pg"  action="disable"> Disetujui  </b>';
+            }
+            elseif($pistandard->status == 3){
+                return '<b class="btn-xs btn-danger btn-icon-pg" action="disable"> Ditolak</b>';
+            }
+        })
+        ->addColumn('action', function($pistandard){
+            if ($pistandard->status == 0) {
+                return view('datatable._action-pistandard', [
+                 'model' => $pistandard,
+                         // 'form_url' => route('pistandards.destroy', base64_encode($pistandard->no_pisigp)),
+                 'edit_url' => route('pistandards.edit', base64_encode($pistandard->no_pisigp)),
+                 'class' => 'form-inline js-ajax-delete',
+                 'form_id' => 'form-'.$pistandard->no_pisigp,
+                 'id_table' => 'tblMaster',
+                 'confirm_message' => 'Anda yakin menghapus NO' . $pistandard->no_pisigp . '?'
+                 ]);
+            } else {     
+                return view('datatable._action-pistandardedit')->with(compact('pistandard'));
+            }
+        })
+
+        ->make(true);
+    } 
+    return view('pis.supplier.index')->with(compact('pistandard'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        //
+     return view('pis.supplier.create');
+ }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        //
+          $data = $request->all();
+            $jml_line1 = trim($data['jml_line1']) !== '' ? trim($data['jml_line1']) : '0';
+            $jml_linee = trim($data['jml_linee']) !== '' ? trim($data['jml_linee']) : '0';
+            $jml_line3 = trim($data['jml_line3']) !== '' ? trim($data['jml_line3']) : '0';
+            $jml_line4 = trim($data['jml_line4']) !== '' ? trim($data['jml_line4']) : '0';
+            $jml_line5 = trim($data['jml_line5']) !== '' ? trim($data['jml_line5']) : '0';
+            $jml_rows = trim($data['jml_rows']) !== '' ? trim($data['jml_rows']) : '0';
+            $jml_input1 = trim($data['jml_input1']) !== '' ? trim($data['jml_input1']) : '0';
+            $inputhidden = trim($data['inputhidden']) !== '' ? trim($data['inputhidden']) : '0';
+            $barishidden = trim($data['barishidden']) !== '' ? trim($data['barishidden']) : '0';
+            $test = trim($data['test']) !== '' ? trim($data['test']) : '0';
+
+
+            $no_pis = trim($data['no_pis']) !== '' ? trim($data['no_pis']) : null;
+            $model = trim($data['model']) !== '' ? trim($data['model']) : null;
+            $part_no = trim($data['part_no']) !== '' ? trim($data['part_no']) : null;  
+            $part_name = trim($data['part_name']) !== '' ? trim($data['part_name']) : null;
+            $nama_supplier = trim($data['nama_supplier']) !== '' ? trim($data['nama_supplier']) : null;
+            $reff_no = trim($data['reff_no']) !== '' ? trim($data['reff_no']) : null;
+            $date_issue = trim($data['date_issue']) !== '' ? trim($data['date_issue']) : null;
+            $material = trim($data['material']) !== '' ? trim($data['material']) : null;
+            $general_tol = trim($data['general_tol']) !== '' ? trim($data['general_tol']) : null;
+            $weight = trim($data['weight']) !== '' ? trim($data['weight']) : null;
+            $supp_dept = trim($data['supp_dept']) !== '' ? trim($data['supp_dept']) : null;
+            $thn = Carbon::now()->format('y');
+
+            // no_doc otomatis
+            $nourutakhir=DB::table("pistandards")
+                        ->orderBy('date_issue', 'desc')
+                        ->value('no_pisigp');
+            $nourut=(int) substr($nourutakhir,7,10);
+            $nourut++;
+            $new_no_doc['no_pisigp']='PIS'.'/'.$thn.'/'. sprintf('%05s',$nourut);
+
+            // input Tanggal
+            $date = Carbon::now()->format('d-m-Y');    
+            $time = Carbon::now()->format('H:i:s'); 
+            $jamTgl = $date." ".$time;
+            $jamTgl=date("Y-m-d H:i:s",strtotime($jamTgl)); 
+            $data['date_issue'] = $jamTgl; 
+
+            $date = Carbon::now()->format('d-m-Y');    
+            $time = Carbon::now()->format('h:i:s'); 
+            $jamTgl = $date." ".$time;
+            $jamTgl=date("Y-m-d h:i:s",strtotime($jamTgl)); 
+            $data['tgl_submit'] = $jamTgl; 
+
+            $date = Carbon::now()->format('d-m-Y');    
+            $time = Carbon::now()->format('h:i:s'); 
+            $jamTgl = $date." ".$time;
+            $jamTgl=date("Y-m-d h:i:s",strtotime($jamTgl)); 
+            $data['tgl_draft'] = $jamTgl; 
+
+        switch ($request->input('action')){
+            case 'save': 
+                 //action save here
+                 DB::table("pistandards")
+                   ->insert([
+                          'no_pisigp'=>$new_no_doc['no_pisigp'],
+                          'no_pis'=>$request->no_pis,
+                          'model'=>$request->model,
+                          'part_no'=>$request->part_no,
+                          'part_name'=>$request->part_name,
+                          'nama_supplier'=>$request->nama_supplier,
+                          'reff_no'=>$request->reff_no,
+                          'date_issue'=>$request->date_issue,
+                          'material'=>$request->material,
+                          'general_tol'=>$request->general_tol,
+                          'weight'=>$request->weight,
+                          'supp_dept'=>$request->supp_dept,
+                          'status'=>1,
+                          'date_issue'=>$data['date_issue'] ,
+                          'tgl_submit'=> $data['tgl_submit'],
+                        ]);                 
+             
+                Alert::success("Berhasil Submit","Nomor $request->no_pis")
+                      ->autoclose(2000000)
+                      ->persistent("Close");
+            break;
+            case 'save_draft': 
+                  //action for save-draft here
+                  DB::table("pistandards")
+                     ->insert([
+                          'no_pisigp'=>$new_no_doc['no_pisigp'],
+                          'no_pis'=>$request->no_pis,
+                          'model'=>$request->model,
+                          'part_no'=>$request->part_no,
+                          'part_name'=>$request->part_name,
+                          'nama_supplier'=>$request->nama_supplier,
+                          'reff_no'=>$request->reff_no,
+                          'date_issue'=>$request->date_issue,
+                          'material'=>$request->material,
+                          'general_tol'=>$request->general_tol,
+                          'weight'=>$request->weight,
+                          'supp_dept'=>$request->supp_dept,
+                          'date_issue'=>$data['date_issue'] ,
+                          'tgl_draft'=>$data['tgl_draft'],
+                        ]); 
+   
+                    Alert::success("Data Disimpan Sebagai Draft","Nomor $request->no_pis")
+                      ->autoclose(2000000)
+                      ->persistent("Close");  
+            break;
+        }
+
+                   /////CHEMICAL COMPOSITION
+             for ($i = 1; $i <= $jml_line1; $i++) {
+                   $cno = trim($data['cno_'.$i]) !== '' ? trim($data['cno_'.$i]) : '';
+                   $citem = trim($data['citem_'.$i]) !== '' ? trim($data['citem_'.$i]) : '';
+                   $cnom = trim($data['cnom_'.$i]) !== '' ? trim($data['cnom_'.$i]) : '';
+                   $ctol = trim($data['ctol_'.$i]) !== '' ? trim($data['ctol_'.$i]) : '';
+                   $cins = trim($data['cins_'.$i]) !== '' ? trim($data['cins_'.$i]) : '';
+                   $crank = trim($data['crank_'.$i]) !== '' ? trim($data['crank_'.$i]) : '';
+                   $cpro = trim($data['cpro_'.$i]) !== '' ? trim($data['cpro_'.$i]) : '';
+                   $cdel = trim($data['cdel_'.$i]) !== '' ? trim($data['cdel_'.$i]) : '';
+                   $crem = trim($data['crem_'.$i]) !== '' ? trim($data['crem_'.$i]) : '';
+
+                   
+                   DB::table("pisccompositions")
+                   ->insert([
+                       'no_pisigp'=>$new_no_doc['no_pisigp'],
+                       'no_pis'=>$request->no_pis,
+                       'no' =>$cno,
+                       'item' =>$citem,
+                       'nominal' =>$cnom,
+                       'tolerance' => $ctol,
+                       'instrument' => $cins,
+                       'rank' => $crank,
+                       'proses' => $cpro,
+                       'delivery' => $cdel,
+                       'remarks' => $crem,
+                       ]);   
+                }
+
+                for ($i = 1; $i <= $test; $i++) {
+                   $tno = trim($data['tno_'.$i]) !== '' ? trim($data['tno_'.$i]) : '';
+                   $titem = trim($data['titem_'.$i]) !== '' ? trim($data['titem_'.$i]) : '';
+                   $tnom = trim($data['tnom_'.$i]) !== '' ? trim($data['tnom_'.$i]) : '';
+                   $ttol = trim($data['ttol_'.$i]) !== '' ? trim($data['ttol_'.$i]) : '';
+                   $tins = trim($data['tins_'.$i]) !== '' ? trim($data['tins_'.$i]) : '';
+                   $trank = trim($data['trank_'.$i]) !== '' ? trim($data['trank_'.$i]) : '';
+                   $tpro = trim($data['tpro_'.$i]) !== '' ? trim($data['tpro_'.$i]) : '';
+                   $tdel = trim($data['tdel_'.$i]) !== '' ? trim($data['tdel_'.$i]) : '';
+                   $trem = trim($data['trem_'.$i]) !== '' ? trim($data['trem_'.$i]) : '';
+
+                   
+                   DB::table("pistests")
+                   ->insert([
+                       'no_pisigp'=>$new_no_doc['no_pisigp'],
+                       'no_pis'=>$request->no_pis,
+                       'no' =>$tno,
+                       'item' =>$titem,
+                       'nominal' =>$tnom,
+                       'tolerance' => $ttol,
+                       'instrument' => $tins,
+                       'rank' => $trank,
+                       'proses' => $tpro,
+                       'delivery' => $tdel,
+                       'remarks' => $trem,
+                       ]);   
+                }
+                  ////////////MECHANICAL PROPERTIES
+                for ($i = 1; $i <= $jml_linee; $i++) {
+                   $mno = trim($data['mno_'.$i]) !== '' ? trim($data['mno_'.$i]) : '';
+                   $mitem = trim($data['mitem_'.$i]) !== '' ? trim($data['mitem_'.$i]) : '';
+                   $mnom = trim($data['mnom_'.$i]) !== '' ? trim($data['mnom_'.$i]) : '';
+                   $mtol = trim($data['mtol_'.$i]) !== '' ? trim($data['mtol_'.$i]) : '';
+                   $mins = trim($data['mins_'.$i]) !== '' ? trim($data['mins_'.$i]) : '';
+                   $mrank = trim($data['mrank_'.$i]) !== '' ? trim($data['mrank_'.$i]) : '';
+                   $mpro = trim($data['mpro_'.$i]) !== '' ? trim($data['mpro_'.$i]) : '';
+                   $mdel = trim($data['mdel_'.$i]) !== '' ? trim($data['mdel_'.$i]) : '';
+                   $mrem = trim($data['mrem_'.$i]) !== '' ? trim($data['mrem_'.$i]) : '';
+
+                   
+                   DB::table("pismproperties")
+                   ->insert([
+                       'no_pisigp'=>$new_no_doc['no_pisigp'],
+                       'no_pis'=>$request->no_pis,
+                       'no' =>$mno,
+                       'item' =>$mitem,
+                       'nominal' =>$mnom,
+                       'tolerance' => $mtol,
+                       'instrument' => $mins,
+                       'rank' => $mrank,
+                       'proses' => $mpro,
+                       'delivery' => $mdel,
+                       'remarks' => $mrem,
+                       ]);   
+                }
+                ////WELDING PERFORMANCE (IF ANY)
+                for ($i = 1; $i <= $jml_line3; $i++) {
+                   $wno = trim($data['wno_'.$i]) !== '' ? trim($data['wno_'.$i]) : '';
+                   $witem = trim($data['witem_'.$i]) !== '' ? trim($data['witem_'.$i]) : '';
+                   $wnom = trim($data['wnom_'.$i]) !== '' ? trim($data['wnom_'.$i]) : '';
+                   $wtol = trim($data['wtol_'.$i]) !== '' ? trim($data['wtol_'.$i]) : '';
+                   $wins = trim($data['wins_'.$i]) !== '' ? trim($data['wins_'.$i]) : '';
+                   $wrank = trim($data['wrank_'.$i]) !== '' ? trim($data['wrank_'.$i]) : '';
+                   $wpro = trim($data['wpro_'.$i]) !== '' ? trim($data['wpro_'.$i]) : '';
+                   $wdel = trim($data['wdel_'.$i]) !== '' ? trim($data['wdel_'.$i]) : '';
+                   $wrem = trim($data['wrem_'.$i]) !== '' ? trim($data['wrem_'.$i]) : '';
+
+                   
+                   DB::table("piswperformances")
+                   ->insert([ 
+                       'no_pisigp'=>$new_no_doc['no_pisigp'],
+                       'no_pis'=>$request->no_pis,
+                       'no' =>$wno,
+                       'item' =>$witem,
+                       'nominal' =>$wnom,
+                       'tolerance' => $wtol,
+                       'instrument' => $wins,
+                       'rank' => $wrank,
+                       'proses' => $wpro,
+                       'delivery' => $wdel,
+                       'remarks' => $wrem,
+                       ]);   
+                }
+
+                  //SURFACE TREATMENT (IF ANY)
+                for ($i = 1; $i <= $jml_line4; $i++) {
+                   $sno = trim($data['sno_'.$i]) !== '' ? trim($data['sno_'.$i]) : '';
+                   $sitem = trim($data['sitem_'.$i]) !== '' ? trim($data['sitem_'.$i]) : '';
+                   $snominal = trim($data['snominal_'.$i]) !== '' ? trim($data['snominal_'.$i]) : '';
+                   $stolerance = trim($data['stolerance_'.$i]) !== '' ? trim($data['stolerance_'.$i]) : '';
+                   $sinstrument = trim($data['sinstrument_'.$i]) !== '' ? trim($data['sinstrument_'.$i]) : '';
+                   $srank = trim($data['srank_'.$i]) !== '' ? trim($data['srank_'.$i]) : '';
+                   $sproses = trim($data['sproses_'.$i]) !== '' ? trim($data['sproses_'.$i]) : '';
+                   $sdelivery = trim($data['sdelivery_'.$i]) !== '' ? trim($data['sdelivery_'.$i]) : '';
+                   $sremarks = trim($data['sremarks_'.$i]) !== '' ? trim($data['sremarks_'.$i]) : '';
+
+                   
+                   DB::table("pisstreatements")
+                   ->insert([ 
+                       'no_pisigp'=>$new_no_doc['no_pisigp'],
+                       'no_pis'=>$request->no_pis,
+                       'no' =>$sno,
+                       'item' =>$sitem,
+                       'nominal' =>$snominal,
+                       'tolerance' => $stolerance,
+                       'instrument' => $sinstrument,
+                       'rank' => $srank,
+                       'proses' => $sproses,
+                       'delivery' => $sdelivery,
+                       'remarks' => $sremarks,
+                       ]);   
+                }
+
+                 //HEAT TREATMENT (IF ANY)
+                for ($i = 1; $i <= $jml_line5; $i++) {
+                   $hno = trim($data['hno_'.$i]) !== '' ? trim($data['hno_'.$i]) : '';
+                   $hitem = trim($data['hitem_'.$i]) !== '' ? trim($data['hitem_'.$i]) : '';
+                   $hnominal = trim($data['hnominal_'.$i]) !== '' ? trim($data['hnominal_'.$i]) : '';
+                   $htolerance = trim($data['htolerance_'.$i]) !== '' ? trim($data['htolerance_'.$i]) : '';
+                   $hinstrument = trim($data['hinstrument_'.$i]) !== '' ? trim($data['hinstrument_'.$i]) : '';
+                   $hrank = trim($data['hrank_'.$i]) !== '' ? trim($data['hrank_'.$i]) : '';
+                   $hproses = trim($data['hproses_'.$i]) !== '' ? trim($data['hproses_'.$i]) : '';
+                   $hdelivery = trim($data['hdelivery_'.$i]) !== '' ? trim($data['hdelivery_'.$i]) : '';
+                   $hremarks = trim($data['hremarks_'.$i]) !== '' ? trim($data['hremarks_'.$i]) : '';
+
+                   
+                   DB::table("pishtreatements")
+                   ->insert([ 
+                       'no_pisigp'=>$new_no_doc['no_pisigp'],
+                       'no_pis'=>$request->no_pis,
+                       'no' =>$hno,
+                       'item' =>$hitem,
+                       'nominal' =>$hnominal,
+                       'tolerance' => $htolerance,
+                       'instrument' => $hinstrument,
+                       'rank' => $hrank,
+                       'proses' => $hproses,
+                       'delivery' => $hdelivery,
+                       'remarks' => $hremarks,
+                       ]);   
+                }
+
+                 // APPEARENCE
+                for ($i = 1; $i <= $jml_rows; $i++) {
+                   $apno = trim($data['apno_'.$i]) !== '' ? trim($data['apno_'.$i]) : '';
+                   $apitem = trim($data['apitem_'.$i]) !== '' ? trim($data['apitem_'.$i]) : '';
+                   $apnominal = trim($data['apnominal_'.$i]) !== '' ? trim($data['apnominal_'.$i]) : '';
+                   $aptolerance = trim($data['aptolerance_'.$i]) !== '' ? trim($data['aptolerance_'.$i]) : '';
+                   $apinstrument = trim($data['apinstrument_'.$i]) !== '' ? trim($data['apinstrument_'.$i]) : '';
+                   $aprank = trim($data['aprank_'.$i]) !== '' ? trim($data['aprank_'.$i]) : '';
+                   $approses = trim($data['approses_'.$i]) !== '' ? trim($data['approses_'.$i]) : '';
+                   $apdelivery = trim($data['apdelivery_'.$i]) !== '' ? trim($data['apdelivery_'.$i]) : '';
+                   $apremarks = trim($data['apremarks_'.$i]) !== '' ? trim($data['apremarks_'.$i]) : '';
+
+                   
+                   DB::table("pisappearences")
+                   ->insert([ 
+                       'no_pisigp'=>$new_no_doc['no_pisigp'],
+                       'no_pis'=>$request->no_pis,
+                       'no' =>$apno,
+                       'item' =>$apitem,
+                       'nominal' =>$apnominal,
+                       'tolerance' => $aptolerance,
+                       'instrument' => $apinstrument,
+                       'rank' => $aprank,
+                       'proses' => $approses,
+                       'delivery' => $apdelivery,
+                       'remarks' => $apremarks,
+                       ]);   
+                }
+
+                 ///DIMENSION
+                for ($i = 1; $i <= $jml_input1; $i++) {
+                   $dno = trim($data['dno_'.$i]) !== '' ? trim($data['dno_'.$i]) : '';
+                   $ditem = trim($data['ditem_'.$i]) !== '' ? trim($data['ditem_'.$i]) : '';
+                   $dnominal = trim($data['dnominal_'.$i]) !== '' ? trim($data['dnominal_'.$i]) : '';
+                   $dtolerance = trim($data['dtolerance_'.$i]) !== '' ? trim($data['dtolerance_'.$i]) : '';
+                   $dinstrument = trim($data['dinstrument_'.$i]) !== '' ? trim($data['dinstrument_'.$i]) : '';
+                   $drank = trim($data['drank_'.$i]) !== '' ? trim($data['drank_'.$i]) : '';
+                   $dproses = trim($data['dproses_'.$i]) !== '' ? trim($data['dproses_'.$i]) : '';
+                   $ddelivery = trim($data['ddelivery_'.$i]) !== '' ? trim($data['ddelivery_'.$i]) : '';
+                   $dremarks = trim($data['dremarks_'.$i]) !== '' ? trim($data['dremarks_'.$i]) : '';
+
+                   
+                   DB::table("pisdimentions")
+                   ->insert([ 
+                       'no_pisigp'=>$new_no_doc['no_pisigp'],
+                       'no_pis'=>$request->no_pis,
+                       'no' =>$dno,
+                       'item' =>$ditem,
+                       'nominal' =>$dnominal,
+                       'tolerance' => $dtolerance,
+                       'instrument' => $dinstrument,
+                       'rank' => $drank,
+                       'proses' => $dproses,
+                       'delivery' => $ddelivery,
+                       'remarks' => $dremarks,
+                       ]);   
+                }
+
+                  //SOC FREE
+                for ($i = 1; $i <= $inputhidden; $i++) {
+                   $scno = trim($data['scno_'.$i]) !== '' ? trim($data['scno_'.$i]) : '';
+                   $scitem = trim($data['scitem_'.$i]) !== '' ? trim($data['scitem_'.$i]) : '';
+                   $scnominal = trim($data['scnominal_'.$i]) !== '' ? trim($data['scnominal_'.$i]) : '';
+                   $sctolerance = trim($data['sctolerance_'.$i]) !== '' ? trim($data['sctolerance_'.$i]) : '';
+                   $scinstrument = trim($data['scinstrument_'.$i]) !== '' ? trim($data['scinstrument_'.$i]) : '';
+                   $scrank = trim($data['scrank_'.$i]) !== '' ? trim($data['scrank_'.$i]) : '';
+                   $scproses = trim($data['scproses_'.$i]) !== '' ? trim($data['scproses_'.$i]) : '';
+                   $scdelivery = trim($data['scdelivery_'.$i]) !== '' ? trim($data['scdelivery_'.$i]) : '';
+                   $scremarks = trim($data['scremarks_'.$i]) !== '' ? trim($data['scremarks_'.$i]) : '';
+
+                   
+                   DB::table("pissocfs")
+                   ->insert([ 
+                       'no_pisigp'=>$new_no_doc['no_pisigp'],
+                       'no_pis'=>$request->no_pis,
+                       'no' =>$scno,
+                       'item' =>$scitem,
+                       'nominal' =>$scnominal,
+                       'tolerance' => $sctolerance,
+                       'instrument' => $scinstrument,
+                       'rank' => $scrank,
+                       'proses' => $scproses,
+                       'delivery' => $scdelivery,
+                       'remarks' => $scremarks,
+                       ]);   
+                }
+
+                  ///PART ROUTING
+                for ($i = 1; $i <= $barishidden; $i++) {
+                   $pno = trim($data['pno_'.$i]) !== '' ? trim($data['pno_'.$i]) : '';
+                   $plevel = trim($data['plevel_'.$i]) !== '' ? trim($data['plevel_'.$i]) : '';
+                   $ppart_no = trim($data['ppart_no_'.$i]) !== '' ? trim($data['ppart_no_'.$i]) : '';
+                   $ppart_name = trim($data['ppart_name_'.$i]) !== '' ? trim($data['ppart_name_'.$i]) : '';
+                   $pproses = trim($data['pproses_'.$i]) !== '' ? trim($data['pproses_'.$i]) : '';
+                   $psupplier = trim($data['psupplier_'.$i]) !== '' ? trim($data['psupplier_'.$i]) : '';
+                  
+                   
+                   DB::table("pisroutes")
+                   ->insert([ 
+                       'no_pisigp'=>$new_no_doc['no_pisigp'],
+                       'no_pis'=>$request->no_pis,
+                       'no' =>$pno,
+                       'level' =>$plevel,
+                       'part_no' =>$ppart_no,
+                       'part_name' => $ppart_name,
+                       'proses' => $pproses,
+                       'supplier' => $psupplier,
+                       ]);   
+                }
+
+     return redirect()->route('pistandards.index');    
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+
+    public function edit($no_pisigp)
+    {
+         $no_pisigp = base64_decode($no_pisigp); 
+         $pistandard = DB::table('pistandards')
+                    ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+                    ->first(); 
+         $composition = DB::table('pisccompositions')
+                    ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+                    ->first();
+
+         $properties = DB::table('pismproperties')
+                    ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+                    ->first();
+
+          $performances = DB::table('piswperformances')
+                    ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+                    ->first();
+
+          $treatements = DB::table('pisstreatements')
+                    ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+                    ->first();
+
+          $htreatements = DB::table('pishtreatements')
+                    ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+                    ->first();
+
+          $appearences = DB::table('pisappearences')
+                    ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+                    ->first();
+
+          $dimentions = DB::table('pisdimentions')
+                    ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+                    ->first();
+
+          $socfs = DB::table('pissocfs')
+                    ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+                    ->first();
+
+          $routs = DB::table('pisroutes')
+                    ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+                    ->first();
+
+            $entity = new Pistandard();
+ 
+            //  echo json_encode($pistandard) ;
+            // die();
+
+     return view('pis.supplier.edit')->with(compact(['pistandard','composition','properties','performances','treatements','htreatements','appearences','dimentions','socfs','routs', 'entity']));
+ } 
+
+
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request,$id)
+    {
+        //
+        switch ($request->input('action')){
+            //submit to igp
+            case 'save': 
+            //action save here
+            $data = $request->all();
+            $no_pisigp = trim($data['no_pisigp']) !== '' ? trim($data['no_pisigp']) : null;
+            // $jml_line = trim($data['jml_line']) !== '' ? trim($data['jml_line']) : '0';
+            $no_pis = trim($data['no_pis']) !== '' ? trim($data['no_pis']) : null;
+            $model = trim($data['model']) !== '' ? trim($data['model']) : null;
+            $part_no = trim($data['part_no']) !== '' ? trim($data['part_no']) : null;  
+            $part_name = trim($data['part_name']) !== '' ? trim($data['part_name']) : null;
+            $nama_supplier = trim($data['nama_supplier']) !== '' ? trim($data['nama_supplier']) : null;
+            $reff_no = trim($data['reff_no']) !== '' ? trim($data['reff_no']) : null;
+            $date_issue = trim($data['date_issue']) !== '' ? trim($data['date_issue']) : null;
+            $material = trim($data['material']) !== '' ? trim($data['material']) : null;
+            $general_tol = trim($data['general_tol']) !== '' ? trim($data['general_tol']) : null;
+            $weight = trim($data['weight']) !== '' ? trim($data['weight']) : null;
+            $thn = Carbon::now()->format('y');
+
+
+            // no_doc otomatis
+            $nourutakhir=DB::table("pistandards")
+            ->orderBy('date_issue', 'desc')
+            ->value('no_pisigp');
+            $nourut=(int) substr($nourutakhir,7,10);
+            $nourut++;
+            $new_no_doc['no_pisigp']='PIS'.'/'.$thn.'/'. sprintf('%05s',$nourut);
+
+            // input Tanggal
+
+            $date = Carbon::now()->format('d-m-Y');    
+            $time = Carbon::now()->format('H:i:s'); 
+            $jamTgl = $date." ".$time;
+            $jamTgl=date("Y-m-d H:i:s",strtotime($jamTgl)); 
+            $data['date_issue'] = $jamTgl; 
+
+
+            $date = Carbon::now()->format('d-m-Y');    
+            $time = Carbon::now()->format('h:i:s'); 
+            $jamTgl = $date." ".$time;
+            $jamTgl=date("Y-m-d h:i:s",strtotime($jamTgl)); 
+            $data['tgl_submit'] = $jamTgl; 
+            
+            DB::beginTransaction();
+
+            
+            DB::table("pistandards")
+            ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+
+            ->Update([
+                'no_pis'=>$request->no_pis,
+                'model'=>$request->model,
+                'part_no'=>$request->part_no,
+                'part_name'=>$request->part_name,
+                'nama_supplier'=>$request->nama_supplier,
+                'reff_no'=>$request->reff_no,
+                'date_issue'=>$request->date_issue,
+                'material'=>$request->material,
+                'general_tol'=>$request->general_tol,
+                'weight'=>$request->weight,
+                'status'=>1,
+                'date_issue'=>$data['date_issue'] ,
+                'tgl_submit'=> $data['tgl_submit'],
+                ]); 
+            DB::commit();
+
+            Alert::success("Berhasil Submit","Nomor $request->no_pis")
+            ->autoclose(2000000)
+            ->persistent("Close");
+            break;
+
+
+            case 'save_draft': 
+            //action for save-draft here
+            $data = $request->all();
+            // $jml_line = trim($data['jml_line']) !== '' ? trim($data['jml_line']) : '0';
+            $no_pisigp = trim($data['no_pisigp']) !== '' ? trim($data['no_pisigp']) : null;
+            $no_pis = trim($data['no_pis']) !== '' ? trim($data['no_pis']) : null;
+            $model = trim($data['model']) !== '' ? trim($data['model']) : null;
+            $part_no = trim($data['part_no']) !== '' ? trim($data['part_no']) : null;  
+            $part_name = trim($data['part_name']) !== '' ? trim($data['part_name']) : null;
+            $nama_supplier = trim($data['nama_supplier']) !== '' ? trim($data['nama_supplier']) : null;
+            $reff_no = trim($data['reff_no']) !== '' ? trim($data['reff_no']) : null;
+            $date_issue = trim($data['date_issue']) !== '' ? trim($data['date_issue']) : null;
+            $material = trim($data['material']) !== '' ? trim($data['material']) : null;
+            $general_tol = trim($data['general_tol']) !== '' ? trim($data['general_tol']) : null;
+            $weight = trim($data['weight']) !== '' ? trim($data['weight']) : null;
+            $thn = Carbon::now()->format('y');
+
+
+            // no_doc otomatis
+            $nourutakhir=DB::
+            table("pistandards")
+            ->orderBy('date_issue', 'desc')
+            ->value('no_pisigp');
+            $nourut=(int) substr($nourutakhir,7,10);
+            $nourut++;
+            $new_no_doc['no_pisigp']='PIS'.'/'.$thn.'/'. sprintf('%05s',$nourut);
+
+            // input Tanggal
+
+            $date = Carbon::now()->format('d-m-Y');    
+            $time = Carbon::now()->format('H:i:s'); 
+            $jamTgl = $date." ".$time;
+            $jamTgl=date("Y-m-d H:i:s",strtotime($jamTgl)); 
+            $data['date_issue'] = $jamTgl; 
+
+            $date = Carbon::now()->format('d-m-Y');    
+            $time = Carbon::now()->format('h:i:s'); 
+            $jamTgl = $date." ".$time;
+            $jamTgl=date("Y-m-d h:i:s",strtotime($jamTgl)); 
+            $data['tgl_draft'] = $jamTgl; 
+
+            DB::beginTransaction();
+
+            
+            DB::table("pistandards")
+            ->where(DB::raw("no_pisigp"), '=', $no_pisigp)
+            ->Update([
+                'no_pis'=>$request->no_pis,
+                'model'=>$request->model,
+                'part_no'=>$request->part_no,
+                'part_name'=>$request->part_name,
+                'nama_supplier'=>$request->nama_supplier,
+                'reff_no'=>$request->reff_no,
+                'date_issue'=>$request->date_issue,
+                'material'=>$request->material,
+                'general_tol'=>$request->general_tol,
+                'weight'=>$request->weight,
+                'date_issue'=>$data['date_issue'] ,
+                'tgl_draft'=>$data['tgl_draft'],
+                'tgl_submit'=> $data['tgl_submit'],
+                ]); 
+            DB::commit();
+
+            Alert::success("Data Disimpan Sebagai Draft","Nomor $request->no_pis")
+            ->autoclose(2000000)
+            ->persistent("Close");  
+            break;
+
+        }
+
+        return redirect()->route('pistandards.index');    
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        //
+    }
+}

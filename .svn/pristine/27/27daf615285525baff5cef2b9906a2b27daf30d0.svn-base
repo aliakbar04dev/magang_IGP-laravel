@@ -1,0 +1,480 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use DB;
+use Exception;
+use App\MtcDpm;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\User;
+use Illuminate\Support\Facades\Input;
+
+class MtcDpmController extends Controller
+{
+    public function index()
+    {
+        if (Auth::user()->can('mtc-master-*')) {
+            return view('mtc.dpmesin.setting.index');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function daftarmesin(Request $request)
+    {
+        if (Auth::user()->can('mtc-master-*')) {
+            if ($request->ajax()) {
+
+                // $mtcmesin = DB::connection('oracle-usrbrgcorp')
+                //     ->table("mmtcmesin")
+                //     ->select(DB::raw("distinct kd_mesin, nm_mesin,maker,mdl_type,mfd_thn,no_seri,st_aktif,st_me,kd_line,lok_zona"));
+
+                $kar = new MtcDpm;
+                $mtcdpm = $kar->Mesin();
+
+                return Datatables::of($mtcdpm)
+                    // ->filterColumn('nm_mesin', function ($query, $keyword) {
+                    //     $query->whereRaw("fnm_mesin(kd_mesin) like ?", ["%$keyword%"]);
+                    // })
+                    ->editColumn('st_aktif', function ($mtcdpm) {
+                        if (!empty($mtcdpm->st_aktif)) {
+                            if ($mtcdpm->st_aktif == 'T') {
+                                return 'AKTIF';
+                            } else {
+                                return 'TIDAK AKTIF';
+                            }
+                        }
+                    })
+                    ->editColumn('st_me', function ($mtcdpm) {
+                        if (!empty($mtcdpm->st_me)) {
+                            if ($mtcdpm->st_me == 'M') {
+                                return 'MESIN';
+                            } else {
+                                return 'EQUIPMENT';
+                            }
+                        }
+                    })
+                    ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function daftaritem(Request $request)
+    {
+        if (Auth::user()->can('mtc-master-*')) {
+            if ($request->ajax()) {
+                $itemcheck = DB::connection('oracle-usrbrgcorp')
+                    ->table('mtct_item_cek')
+                    ->select("no_ic", "nm_ic", "st_aktif");
+
+                return Datatables::of($itemcheck)
+                    ->editColumn('st_aktif', function ($mtcdpm) {
+                        if (!empty($mtcdpm->st_aktif)) {
+                            if ($mtcdpm->st_aktif == 'T') {
+                                return 'AKTIF';
+                            } else {
+                                return 'TIDAK AKTIF';
+                            }
+                        }
+                    })
+                    ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function daftaritemkatalog(Request $request)
+    {
+        if (Auth::user()->can('mtc-master-*')) {
+            if ($request->ajax()) {
+                $itemkatalog = DB::connection('oracle-usrbaan')
+                    ->table('baan_mpart')
+                    ->select("item", "desc1", "itemdesc", "unit", "sk");
+
+                return Datatables::of($itemkatalog)
+                    ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function dashboard(Request $request)
+    {
+        if (Auth::user()->can('mtc-master-*')) {
+            if ($request->ajax()) {
+
+                $kar = new MtcDpm;
+                $mtcdpm = $kar->list($request->input('isi'));
+
+                return Datatables::of($mtcdpm)
+                    ->editColumn('st_aktif', function ($mtcdpm) {
+                        $htmlAktif = '<select class="selectSat form-control" style="width:100%" onChange="saveChange()" id="selectaktif' . $mtcdpm->no_dpm . '">';
+                        $mtcdpm->st_aktif == 'T' ? $htmlAktif .= '<option value="T" selected="selected"">AKTIF</option>' : $htmlAktif .= '<option value="T">AKTIF</option>';
+                        $mtcdpm->st_aktif  == 'F' ? $htmlAktif .= '<option value="F" selected="selected">TIDAK AKTIF</option>' : $htmlAktif .= '<option value="F">TIDAK AKTIF</option>';
+                        $htmlAktif .= '</select>';
+                        return $htmlAktif;
+                    })
+                    ->editColumn('no_urut', function ($mtcdpm) {
+                        $htmlNoUrut = $mtcdpm->no_urut ? '<input type="text" onChange="saveChange() "class="selectnourut form-control" id="selectnourut' . $mtcdpm->no_dpm . '" value="' . $mtcdpm->no_urut . '" style="width:100%">' : '<input type="text" id="selectnourut' . $mtcdpm->no_dpm . '" class="selectnourut form-control" onChange="saveChange()" value="" style="width:100%">';
+
+                        return $htmlNoUrut;
+                    })
+                    ->editColumn('no_ic', function ($mtcdpm) {
+                        $htmlNoIC = $mtcdpm->no_ic ? '<div class="input-group">
+                      <input class="form-control" id="selectnoic' . $mtcdpm->no_dpm . '" value="' . $mtcdpm->no_ic . '" data=""
+                      required="required"
+                        style="text-transform:uppercase;background-color:white;" readonly name="selectnoic' . $mtcdpm->no_dpm . '" type="number" onChange="saveChange()">
+                      <span class="input-group-btn">
+                        <button type="button" class="btn btn-info" onclick="showPopupItemCheck(' . $mtcdpm->no_dpm . ')"
+                          data-toggle="modal" data-target="#KDItemModal" style="height: 34px;">
+                          <span class="glyphicon glyphicon-search"></span>
+                        </button>
+                      </span>
+                  </div>' : '<div class="input-group">
+                  <input class="form-control" id="selectnoic' . $mtcdpm->no_dpm . '" value="" data=""
+                  required="required"
+                    style="text-transform:uppercase;background-color:white;" readonly name="selectnoic' . $mtcdpm->no_dpm . '" type="number" onChange="saveChange()">
+                  <span class="input-group-btn">
+                    <button type="button" class="btn btn-info" onclick="showPopupItemCheck(' . $mtcdpm->no_dpm . ')"
+                      data-toggle="modal" data-target="#KDItemModal" style="height: 34px;">
+                      <span class="glyphicon glyphicon-search"></span>
+                    </button>
+                  </span>
+              </div>';
+
+                        // $htmlNoIC = $mtcdpm->no_ic ? '<input type="text" class="selectnoic form-control" id="selectnoic' . $mtcdpm->no_dpm . '" value="' . $mtcdpm->no_ic . '" style="width:100%" onChange="saveChange()">' : '<input type="text" id="selectnoic' . $mtcdpm->no_dpm . '" class="selectnoic form-control" value="" style="width:100%" onChange="saveChange()">';
+
+                        return $htmlNoIC;
+                    })
+                    ->editColumn('nil_period', function ($mtcdpm) {
+                        $htmlNilPeriod = $mtcdpm->nil_period ? '<input type="text" class="selectnilai form-control" id="selectnilai' . $mtcdpm->no_dpm . '" value="' . $mtcdpm->nil_period . '" style="width:100%" onChange="saveChange()">' : '<input type="text" id="selectnilai' . $mtcdpm->no_dpm . '" class="selectnilai form-control" value="" style="width:100%" onChange="saveChange()">';
+
+                        return $htmlNilPeriod;
+                    })
+                    ->editColumn('ket_dpm', function ($mtcdpm) {
+                        $htmlKetDpm = $mtcdpm->ket_dpm ? '<input type="text" class="selectket_dpm form-control" id="selectket_dpm' . $mtcdpm->no_dpm . '" value="' . $mtcdpm->ket_dpm . '" style="width:100%" onChange="saveChange()">' : '<input type="text" id="selectket_dpm' . $mtcdpm->no_dpm . '" class="selectket_dpm form-control" value="" style="width:100%" onChange="saveChange()">';
+
+                        return $htmlKetDpm;
+                    })
+                    ->editColumn('sat_period', function ($mtcdpm) {
+                        if (!empty($mtcdpm->sat_period)) {
+                            $htmlSat = '<select class="selectsat form-control" style="width:100%" id="selectsat' . $mtcdpm->no_dpm . '" onChange="saveChange()">';
+                            $mtcdpm->sat_period == 'D' ? $htmlSat .= '<option value="D" selected="selected">DAY</option>' : $htmlSat .= '<option value="D">DAY</option>';
+                            $mtcdpm->sat_period == 'W' ? $htmlSat .= '<option value="W" selected="selected">WEEK</option>' : $htmlSat .= '<option value="W">WEEK</option>';
+                            $mtcdpm->sat_period == 'M' ? $htmlSat .= '<option value="M" selected="selected">MONTH</option>' : $htmlSat .= '<option value="M">MONTH</option>';
+                            $mtcdpm->sat_period == 'Y' ? $htmlSat .= '<option value="Y" selected="selected">YEAR</option>' : $htmlSat .= '<option value="Y">YEAR</option>';
+                            $htmlSat .= '</select>';
+
+                            return $htmlSat;
+                        }
+                    })
+                    ->editColumn('pic_dpm', function ($mtcdpm) {
+                        if (!empty($mtcdpm->pic_dpm)) {
+                            $htmlPicDpm = '<select class="selectpicdpm form-control" style="width:100%" id="selectpicdpm' . $mtcdpm->no_dpm . '" onChange="saveChange()">';
+                            $mtcdpm->pic_dpm == 'MTC' ? $htmlPicDpm .= '<option value="MTC" selected="selected">MTC</option>' : $htmlPicDpm .= '<option value="MTC">MTC</option>';
+                            $mtcdpm->pic_dpm == 'PRO' ? $htmlPicDpm .= '<option value="PRO" selected="selected">PRO</option>' : $htmlPicDpm .= '<option value="PRO">PRO</option>';
+                            $mtcdpm->pic_dpm == 'QC' ? $htmlPicDpm .= '<option value="QC" selected="selected">QC</option>' : $htmlPicDpm .= '<option value="QC">QC</option>';
+                            $mtcdpm->pic_dpm == 'USR' ? $htmlPicDpm .= '<option value="USR" selected="selected">USER</option>' : $htmlPicDpm .= '<option value="USR">USER</option>';
+                            $htmlPicDpm .= '</select>';
+
+                            return $htmlPicDpm;
+                        }
+                    })
+                    ->addColumn('nmic', function ($mtcdpm) {
+                        $no_ic = $mtcdpm->no_ic;
+                        $nmic = DB::connection('oracle-usrbrgcorp')
+                            ->table(DB::raw("dual"))
+                            ->selectRaw("mtcf_nm_ic('$no_ic') nmic")
+                            ->value("nmic");
+
+                        $htmlNmIC = '<input type="text" class="selectnmic form-control" id="selectnmic' . $mtcdpm->no_dpm . '" value="' . $nmic . '" style="width:100%" readonly>';
+
+                        return $htmlNmIC;
+                    })
+                    ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+
+    public function additem(Request $request)
+    {
+        if (Auth::user()->can('mtc-master-create')) {
+            $data = $request->all();
+            try {
+                DB::connection("oracle-usrbrgcorp")
+                    ->table("mtct_dpm")
+                    ->insert([
+                        'kd_mesin' => $data['kd_mesin_add'],
+                        'no_urut' => $data['no_urut_add'],
+                        'no_ic' => $data['itemcheck_add'],
+                        'nil_period' => $data['nil_add'],
+                        'sat_period' => $data['satuan_add'],
+                        'pic_dpm' => $data['pic_add'],
+                        'ket_dpm' => $data['ket_add'],
+                        'st_aktif' => $data['st_aktif_add'],
+                        'creaby' => Auth::user()->username,
+                        'dtcrea' => Carbon::now()
+                    ]);
+                // DB::connection("oracle-usrbrgcorp")->commit();
+                $arr = array(
+                    'status' => true,
+                    'pesan' => "sukses"
+                );
+            } catch (Exception $ex) {
+                $arr = array(
+                    'status' => false,
+                    'pesan' => "gagal"
+                );
+            }
+            return Response()->json($arr);
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function additemkatalog(Request $request)
+    {
+        if (Auth::user()->can('mtc-master-create')) {
+            $data = $request->all();
+            try {
+                DB::connection("oracle-usrbrgcorp")
+                    ->table("mtct_dpm_bom")
+                    ->insert([
+                        'no_dpm' => $data['no_dpm'],
+                        'item_no' => $data['item_no_add'],
+                        'nil_qpu' => $data['nil_qpu_add'],
+                        'qty_life_time' => $data['qty_life_add'],
+                        'ket' => $data['kete_add'],
+                        'creaby' => Auth::user()->username,
+                        'dtcrea' => Carbon::now()
+                    ]);
+                // DB::connection("oracle-usrbrgcorp")->commit();
+                $arr = array(
+                    'status' => true,
+                    'pesan' => "sukses"
+                );
+            } catch (Exception $ex) {
+                $arr = array(
+                    'status' => false,
+                    'pesan' => "gagal"
+                );
+            }
+            return Response()->json($arr);
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        if (Auth::user()->can('mtc-master-create')) {
+            $data = $request->all();
+            $mtcdpm = DB::connection('oracle-usrbrgcorp')
+                ->table("mtct_dpm")
+                ->select('*')
+                ->where("no_dpm", $data['nodpm'])
+                ->first();
+
+            if ($mtcdpm != null) {
+
+                DB::connection("oracle-usrbrgcorp")->beginTransaction();
+                try {
+
+                    DB::connection("oracle-usrbrgcorp")
+                        ->table("mtct_dpm")
+                        ->where('no_dpm', $data['nodpm'])
+                        ->update([
+                            'no_urut' => $data['selectnourut'],
+                            'no_ic' => $data['selectnoic'],
+                            'nil_period' => $data['selectnilai'],
+                            'sat_period' => $data['selectsat'],
+                            'pic_dpm' => $data['selectpicdpm'],
+                            'st_aktif' => $data['selectaktif'],
+                            'ket_dpm' => $data['selectket_dpm'],
+                            'modiby' => Auth::user()->username,
+                            'dtmodi' => Carbon::now()
+                        ]);
+
+                    //insert logs
+
+                    DB::connection("oracle-usrbrgcorp")->commit();
+                    $arr = array(
+                        'status' => true,
+                        'pesan' => "sukses"
+                    );
+                } catch (Exception $ex) {
+                    $arr = array(
+                        'status' => false,
+                        'pesan' => "gagal"
+                    );
+                }
+                return Response()->json($arr);
+            } else {
+                Session::flash("flash_notification", [
+                    "level" => "danger",
+                    "message" => "Data gagal diubah! Kode Mesin tidak valid!"
+                ]);
+                return redirect()->route('mtcmesin.index');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function updatekatalog(Request $request)
+    {
+        if (Auth::user()->can('mtc-master-create')) {
+            $data = $request->all();
+            $mtcdpm = DB::connection('oracle-usrbrgcorp')
+                ->table("mtct_dpm_bom")
+                ->select('*')
+                ->where("no_dpm", $data['nodpm'])
+                ->where("item_no", $data['item_no'])
+                ->first();
+
+            if ($mtcdpm != null) {
+
+                DB::connection("oracle-usrbrgcorp")->beginTransaction();
+                try {
+
+                    DB::connection("oracle-usrbrgcorp")
+                        ->table("mtct_dpm_bom")
+                        ->where('no_dpm', $data['nodpm'])
+                        ->where('item_no', $data['item_no'])
+                        ->update([
+                            'item_no' => $data['item_no_update'],
+                            'nil_qpu' => $data['nil_qpu_update'],
+                            'qty_life_time' => $data['qty_life_time_update'],
+                            'ket' => $data['kete_update'],
+                            'modiby' => Auth::user()->username,
+                            'dtmodi' => Carbon::now()
+                        ]);
+
+                    //insert logs
+
+                    DB::connection("oracle-usrbrgcorp")->commit();
+                    $arr = array(
+                        'status' => true,
+                        'pesan' => "sukses"
+                    );
+                } catch (Exception $ex) {
+                    $arr = array(
+                        'status' => false,
+                        'pesan' => "gagal"
+                    );
+                }
+                return Response()->json($arr);
+            } else {
+                Session::flash("flash_notification", [
+                    "level" => "danger",
+                    "message" => "Data gagal diubah! Kode Mesin tidak valid!"
+                ]);
+                return redirect()->route('mtcmesin.index');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function katalog(Request $request)
+    {
+        if (Auth::user()->can('mtc-master-create')) {
+
+            if ($request->ajax()) {
+                // $data = $request->all();
+                try {
+                    $mtckatalog =  DB::connection('oracle-usrbrgcorp')
+                        ->table("mtct_dpm_bom")
+                        ->select('mtct_dpm_bom.*', 'baan_mpart.*')
+                        ->leftJoin('usrbaan.baan_mpart', 'mtct_dpm_bom.item_no', '=', 'baan_mpart.item')
+                        ->where('no_dpm', $request->input('nodpm'));
+
+                    // DB::connection("oracle-usrbrgcorp")->commit();
+                    return Datatables::of($mtckatalog)
+                        ->editColumn('item_no', function ($mtckatalog) {
+                            $htmlNoIC = $mtckatalog->item_no ? "<div class='input-group'>
+                            <input class='form-control' id='item_no_update" . $mtckatalog->item_no . "' value=" . $mtckatalog->item_no . "
+                            required='required'
+                                style='text-transform:uppercase;background-color:white;' readonly name='item_no_update" . $mtckatalog->item_no . "' type='text' onChange='saveKatalog()'>
+                            <span class='input-group-btn'>
+                                <button type='button' class='btn btn-info' onclick='showPopupItemKatalog(\"" . $mtckatalog->item_no . "\")'
+                                data-toggle='modal' data-target='#KDItemKatalogModal' style='height: 34px;'>
+                                <span class='glyphicon glyphicon-search'></span>
+                                </button>
+                            </span>
+                        </div>" : "<div class='input-group'>
+                                        <input class='form-control' id='item_no_update" . $mtckatalog->item_no . "' value='' 
+                                        required='required'
+                                            style='text-transform:uppercase;background-color:white;' readonly name='item_no_update" . $mtckatalog->item_no . "' type='text' onChange='saveKatalog()'>
+                                        <span class='input-group-btn'>
+                                            <button type='button' class='btn btn-info' onclick='showPopupItemKatalog(\"" . $mtckatalog->item_no . "\")'
+                                            data-toggle='modal' data-target='#KDItemKatalogModal' style='height: 34px;'>
+                                            <span class='glyphicon glyphicon-search'></span>
+                                            </button>
+                                        </span>
+                                    </div>";
+
+                            return $htmlNoIC;
+                        })
+                        ->editColumn('nil_qpu', function ($mtckatalog) {
+                            $htmlNilQpu = $mtckatalog->nil_qpu ? '<input type="text" onChange="saveKatalog()" class="nil_qpu_update form-control" id="nil_qpu_update' . $mtckatalog->item_no . '" value="' . $mtckatalog->nil_qpu . '" style="width:100%">' : '<input type="text" id="qil_qpu_update' . $mtckatalog->nil_qpu . '" class="qil_qpu_update form-control" onChange="saveKatalog()" value="" style="width:100%">';
+
+                            return $htmlNilQpu;
+                        })
+                        ->editColumn('qty_life_time', function ($mtckatalog) {
+                            $htmlItemNO = $mtckatalog->qty_life_time ? '<input type="text" onChange="saveKatalog()" class="qty_life_time_update form-control" id="qty_life_time_update' . $mtckatalog->item_no . '" value="' . $mtckatalog->qty_life_time . '" style="width:100%">' : '<input type="text" id="qty_life_time_update' . $mtckatalog->item_no . '" class="qty_life_time_update form-control" onChange="saveKatalog()" value="" style="width:100%">';
+
+                            return $htmlItemNO;
+                        })
+                        ->editColumn('ket', function ($mtckatalog) {
+                            $htmlKet = $mtckatalog->ket ? '<input type="text" onChange="saveKatalog() "class="kete_update form-control" id="kete_update' . $mtckatalog->item_no . '" value="' . $mtckatalog->ket . '" style="width:100%">' : '<input type="text" id="kete_update' . $mtckatalog->ket . '" class="kete_update form-control" onChange="saveKatalog()" value="" style="width:100%">';
+
+                            return $htmlKet;
+                        })
+                        ->editColumn('desc1', function ($mtckatalog) {
+                            $htmlDesc1 = '<input type="text" class="desc1_update form-control" id="desc1_update' . $mtckatalog->item_no . '" value="' . $mtckatalog->desc1 . '" style="width:100%" readonly>';
+                            return $htmlDesc1;
+                        })
+                        ->addColumn('item_no_oper', function ($mtcdpm) {
+
+                            return $mtcdpm->item_no;
+                        })
+                        ->make(true);
+                } catch (Exception $ex) {
+                    $arr = array(
+                        'status' => false,
+                        'pesan' => "gagal"
+                    );
+                    return Response()->json($arr);
+                }
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+}

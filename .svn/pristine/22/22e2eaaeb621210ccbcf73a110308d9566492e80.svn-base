@@ -1,0 +1,89 @@
+@extends('layouts.app')
+@section('content')
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+	<!-- Content Header (Page header) -->
+	<section class="content-header">
+		<h1>
+			Monitoring PP
+			<small>Hanya PP Baan</small>
+		</h1>
+		<ol class="breadcrumb">
+			<li><a href="{{ url('/home') }}"><i class="fa fa-dashboard"></i> Home</a></li>
+			<li><a href="{{ route('reportpp.index') }}"><i class="fa fa-files-o"></i>PROCUREMENT - Report - Monitoring PP</a></li>
+			<li class="active">Monitoring PP</li>
+		</ol>
+	</section>
+
+	<!-- Main content -->
+	<section class="content">
+		@include('layouts._flash')
+		<div class="box box-primary">
+			<div class="box-header with-border">
+				<h3 class="box-title">Cetak Monitoring PP</h3>
+			</div>
+			<!-- /.box-header -->
+
+			<!-- form start -->
+			{!! Form::open(['url' => route('reportpp.index'),
+			'method' => 'post', 'files'=>'true', 'role'=>'form', 'id'=>'form_id']) !!}
+			<div class="tab-content">
+				<div role="tabpanel" class="tab-pane active" id="fp">
+					<div class="box-body">
+						<div class="form-group">
+							<div class="col-md-12">
+								<div class="col-md-2">
+									{!! Form::label('periode_awal', 'Periode Awal') !!}
+									{!! Form::date('periode_awal', \Carbon\Carbon::now(), ['class'=>'form-control','placeholder' => 'Periode Awal']) !!}
+									{!! $errors->first('periode_awal', '<p class="help-block">:message</p>') !!}
+								</div>
+								<div class="col-md-2">
+									{!! Form::label('periode_akhir', 'Periode Akhir') !!}
+									{!! Form::date('periode_akhir', \Carbon\Carbon::now(), ['class'=>'form-control','placeholder' => 'Periode Akhir']) !!}
+									{!! $errors->first('periode_akhir', '<p class="help-block">:message</p>') !!}
+								</div>
+							</div>
+						</div>
+
+						<div class="form-group">
+							<div class="col-md-12">
+								<div class="col-md-6">
+									<br>
+									{!! Form::button('Print Report PP', ['class'=>'btn btn-primary', 'id' => 'btn-print']) !!}
+								</div>
+							</div>
+						</div>
+
+					</div>
+				</div>
+			</div>
+			@section('scripts')
+			<script type="text/javascript">
+				document.getElementById("periode_awal").focus();
+
+				$(document).ready(function(){
+					$('#btn-print').click( function () {
+						printPdf();
+					});
+				});
+
+			  //CETAK DOKUMEN
+			  function printPdf(){
+			  	var param = document.getElementById("periode_awal").value;
+			  	var param1 = document.getElementById("periode_akhir").value;
+
+			  	var url = '{{ route('reportpp.print', ['param', 'param1']) }}';
+			  	url = url.replace('param', window.btoa(param));
+			  	url = url.replace('param1', window.btoa(param1));
+			  	window.open(url);
+			  }
+</script>
+@endsection
+{!! Form::close() !!}
+</div>
+<!-- /.box -->
+</section>
+<!-- /.content -->
+</div>
+<!-- /.content-wrapper -->
+@endsection

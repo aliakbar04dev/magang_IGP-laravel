@@ -1,0 +1,51 @@
+<div class="box-body">
+	<div class="col-md-12">
+		<div class="form-group">
+			{!! Form::label('approve_dept ', 'APPROVED', ['class'=>'col-md-2 control-label']) !!}
+			<div class="col-md-4">
+				{!! Form::file('approve_dept') !!}
+			</div>
+		</div>
+	</div>
+	&nbsp;&nbsp;
+	&nbsp;&nbsp;
+	&nbsp;&nbsp;
+	&nbsp;&nbsp; 
+	<div class="form-group">
+		
+		<div class="col-md-2">
+			{!! Form::label('notedept', 'CATATAN', ['class'=>'col-md-2 control-label']) !!}
+		</div>
+		<div class="col-md-4">
+			{!! Form::textarea('notedept', null, ['class'=>'form-control']) !!}
+			
+		</div>
+	</div>
+	<div class="col-sm-3">
+		<div class="form-group">
+			<div class="col-sm-12 {{ $errors->has('tgl_doc') ? ' has-error' : '' }}">
+				{!! Form::hidden('PIS NO:', '') !!}
+				{!! Form::hidden('no_pisigp', null, ['class'=>'form-control']) !!}
+				{!! Form::hidden('norev', null, ['class'=>'form-control']) !!}
+				{!! $errors->first('no_pis', '<p class="help-block">:message</p>') !!}
+			</div>
+		</div>
+	</div>
+</div>
+ 
+<div class="box-footer">
+
+	<form action="{{ url('update') }}" method="POST">
+		<!-- fields -->
+		<button type="submit" name="action" value="save" class="btn btn-success" onsubmit="return confirm('Anda Yakin Ingin Menyetujui $pistandard->no_pis ?');", style ='display:inline;' data-toggle="tooltip" data-placement="top" title="Click untuk menyetujui" class="btn btn-success "><i class="fa fa-check"></i></button>
+		&nbsp;&nbsp;
+		&nbsp;&nbsp;
+		<button type="submit" name="action" value="save_draft"  onsubmit="return confirm('Anda Yakin Ingin Mereject $pistandard->no_pis ?');", style ='display:inline;' data-toggle="tooltip" data-placement="top" title="Click untuk reject" class="btn btn-danger"><i class="fa fa-remove"></i></button>
+	</form>
+
+	
+	&nbsp;&nbsp;
+	&nbsp;&nbsp;
+	<a class="btn btn-danger" href="{{ route('pisdepthead.aprovalDeptHeadSQE') }}" data-toggle="tooltip" data-placement="top" title="Kembali ke approval dept head" id="btn-cancel">Back</a>
+	&nbsp;&nbsp;
+</div>

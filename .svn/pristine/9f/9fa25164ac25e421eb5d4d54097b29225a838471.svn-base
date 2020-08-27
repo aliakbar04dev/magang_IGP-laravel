@@ -1,0 +1,122 @@
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+use DB;
+class Pistandard extends Model
+{
+	// protected $fillable = ['no_pisigp','no_pis','model','part_no','nama_supplier','reff_no','date_issue','material','general_tol','weight','status','part_name'];
+
+	// protected $fillable = ['no_pis','no','item','nominal','tolerance','instrument','rank','proses','delivery','remarks'];
+
+
+	protected $fillable = ['no','no_pisigp', 'no_pis','level','part_no','part_name','proses','supplier'];
+
+
+	public function getLines($no_pisigp) 
+	{
+
+		return DB::table('pisccompositions')
+		->select(DB::raw("no, item, nominal, tolerance, instrument, rank, proses , delivery, remarks"))
+		->where(DB::raw("no_pisigp"), '=', $no_pisigp);
+
+	}
+
+	public function getLines1($no_pisigp) 
+	{
+
+		return DB::table('pismproperties')
+		->select(DB::raw("no, item, nominal, tolerance, instrument, rank, proses , delivery, remarks"))
+		->where(DB::raw("no_pisigp"), '=', $no_pisigp);
+
+	}
+
+	public function getLines2($no_pisigp) 
+	{
+
+		return DB::table('piswperformances')
+		->select(DB::raw("no, item, nominal, tolerance, instrument, rank, proses , delivery, remarks"))
+		->where(DB::raw("no_pisigp"), '=', $no_pisigp);
+
+	}
+
+	public function getLines3($no_pisigp) 
+	{
+
+		return DB::table('pisstreatements')
+		->select(DB::raw("no, item, nominal, tolerance, instrument, rank, proses , delivery, remarks"))
+		->where(DB::raw("no_pisigp"), '=', $no_pisigp);
+
+	}
+
+	public function getLines4($no_pisigp) 
+	{
+
+		return DB::table('pishtreatements')
+		->select(DB::raw("no, item, nominal, tolerance, instrument, rank, proses , delivery, remarks"))
+		->where(DB::raw("no_pisigp"), '=', $no_pisigp);
+
+	}
+
+	public function getLines5($no_pisigp) 
+	{
+
+		return DB::table('pisappearences')
+		->select(DB::raw("no, item, nominal, tolerance, instrument, rank, proses , delivery, remarks"))
+		->where(DB::raw("no_pisigp"), '=', $no_pisigp);
+
+	}
+
+	public function getLines6($no_pisigp) 
+	{
+
+		return DB::table('pisdimentions')
+		->select(DB::raw("no, item, nominal, tolerance, instrument, rank, proses , delivery, remarks"))
+		->where(DB::raw("no_pisigp"), '=', $no_pisigp);
+
+	}
+	
+
+	public function getLines7($no_pisigp) 
+	{
+
+		return DB::table('pissocfs')
+		->select(DB::raw("no, item, nominal, tolerance, instrument, rank, proses , delivery, remarks"))
+		->where(DB::raw("no_pisigp"), '=', $no_pisigp);
+
+	}
+
+	public function getLines8($no_pisigp) 
+	{
+
+		return DB::table('pisroutes')
+		->select(DB::raw("no,level, part_no, part_name, proses, supplier"))
+		->where(DB::raw("no_pisigp"), '=', $no_pisigp);
+
+	}
+
+
+	public function cekModel($no_pis)
+	{ 
+		$cek = DB::table('prod_lhp02s')
+		->select(db::raw("no_pis"))
+		->whereRaw("no_pis = '".$no_pis."'")
+		->get();
+		return $cek;
+	}
+
+	public function cekModelLine($no_pis,$jam)
+	{ 
+		$cek = DB::connection('pgsql-mobile')
+		->table('prod_lhp02s')
+		->select(db::raw("no_pis"))
+		->whereRaw("no_pis = '".$no_pis."'")
+		->whereRaw("jam = '".$jam."'")
+		->get();
+		return $cek;
+	}
+
+
+
+}

@@ -1,0 +1,43 @@
+<div class="box-body">
+	<div class="col-md-12">
+		<div class="form-group">
+			{!! Form::label('approve_staff ', 'APPROVED', ['class'=>'col-md-2 control-label']) !!}
+			<div class="col-md-4">
+				{!! Form::file('approve_staff') !!}
+				{!! $errors->first('approve_staff', '<p class="help-block">:message</p>') !!}
+			</div>
+		</div>
+	</div>
+
+	
+	&nbsp;&nbsp;
+	&nbsp;&nbsp;
+	&nbsp;&nbsp;
+	&nbsp;&nbsp;
+	<div class="form-group">
+		<div class="col-md-2">
+			{!! Form::label('notestaff', 'CATATAN', ['class'=>'col-md-2 control-label']) !!}
+		</div>
+		<div class="col-md-4">
+			{!! Form::textarea('notestaff', null, ['class'=>'form-control']) !!}
+		</div>
+	</div>
+	<div class="col-sm-3">
+		<div class="form-group">
+			<div class="col-sm-12 {{ $errors->has('tgl_doc') ? ' has-error' : '' }}">
+				
+				{!! Form::hidden('no_pisigp', null, ['class'=>'form-control']) !!}
+				{!! Form::hidden('norev', null, ['class'=>'form-control']) !!}
+				{!! $errors->first('no_pisigp', '<p class="help-block">:message</p>') !!}
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div class="box-footer">
+	{!! Form::submit('SUBMIT', ['class'=>'btn btn-success', 'data-toggle'=>'tooltip', 'data-placement'=>'top', 'title'=>'SUBMIT TO NEXT PROCESS']) !!}
+	&nbsp;&nbsp;
+	<a class="btn btn-danger" href="{{ route('pisstaff.aprovalstaf') }}" data-toggle="tooltip" data-placement="top" title="Kembali ke Staff Approval" id="btn-cancel">Back</a>
+	&nbsp;&nbsp;
+</div>

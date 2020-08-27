@@ -1,0 +1,1219 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use DB;
+use Yajra\Datatables\Datatables;
+use Carbon\Carbon;
+use App\PrctCekPp;
+use Exception;
+
+class GuestController extends Controller
+{
+    public function ops(Request $request)
+    {
+    	$stds = DB::connection('oracle-usrigpadmin')
+        ->table("tiprc015t")
+        ->select(DB::raw("nvl(sum(std_app_prcbgt),0) std_app_prcbgt, nvl(sum(std_app_bgtdep),0) std_app_bgtdep, nvl(sum(std_app_admdiv),0) std_app_admdiv, nvl(sum(std_app_secdok),0) std_app_secdok, nvl(sum(std_app_od),0) std_app_od, nvl(sum(std_app_fd),0) std_app_fd, nvl(sum(std_app_vpd),0) std_app_vpd, nvl(sum(std_app_pd),0) std_app_pd, nvl(sum(std_app_bgtdok),0) std_app_bgtdok, nvl(sum(std_app_bgt),0) std_app_bgt, nvl(sum(std_app_prcdok),0) std_app_prcdok"))
+        ->whereRaw("to_char(tgl_oh,'mmyyyy') = to_char(sysdate,'mmyyyy')")
+        // ->whereRaw("to_char(tgl_oh,'mmyyyy') = '092017'")
+        ->whereNotNull('tgl_app_prcbgt')
+        ->first();
+
+        if($stds != null) {
+            $std = [$stds->std_app_prcbgt, $stds->std_app_bgtdep, $stds->std_app_admdiv, $stds->std_app_secdok, $stds->std_app_od, $stds->std_app_fd, $stds->std_app_vpd, $stds->std_app_pd, $stds->std_app_bgtdok, $stds->std_app_bgt, $stds->std_app_prcdok];
+        } else {
+            $std = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        }
+
+        $acts = DB::connection('oracle-usrigpadmin')
+        ->table("tiprc015t")
+        ->select(DB::raw("nvl(sum(act_app_prcbgt),0) act_app_prcbgt, nvl(sum(act_app_bgtdep),0) act_app_bgtdep, nvl(sum(act_app_admdiv),0) act_app_admdiv, nvl(sum(act_app_secdok),0) act_app_secdok, nvl(sum(act_app_od),0) act_app_od, nvl(sum(act_app_fd),0) act_app_fd, nvl(sum(act_app_vpd),0) act_app_vpd, nvl(sum(act_app_pd),0) act_app_pd, nvl(sum(act_app_bgtdok),0) act_app_bgtdok, nvl(sum(act_app_bgt),0) act_app_bgt, nvl(sum(act_app_prcdok),0) act_app_prcdok"))
+        ->whereRaw("to_char(tgl_oh,'mmyyyy') = to_char(sysdate,'mmyyyy')")
+        // ->whereRaw("to_char(tgl_oh,'mmyyyy') = '092017'")
+        ->whereNotNull('tgl_app_prcbgt')
+        ->first();
+
+        if($acts != null) {
+            $act = [$acts->act_app_prcbgt, $acts->act_app_bgtdep, $acts->act_app_admdiv, $acts->act_app_secdok, $acts->act_app_od, $acts->act_app_fd, $acts->act_app_vpd, $acts->act_app_pd, $acts->act_app_bgtdok, $acts->act_app_bgt, $acts->act_app_prcdok];
+        } else {
+            $act = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        }
+
+        $stds2 = DB::connection('oracle-usrigpadmin')
+        ->table("tiprc015t")
+        ->select(DB::raw("to_char(tgl_oh,'mm') bulan, nvl(sum(std_app_prcbgt+std_app_bgtdep+std_app_admdiv+std_app_secdok+std_app_od+std_app_fd+std_app_vpd+std_app_pd+std_app_bgtdok+std_app_bgt+std_app_prcdok),0) total"))
+        ->whereRaw("to_char(tgl_oh,'yyyy') = to_char(sysdate,'yyyy')")
+        ->whereNotNull('tgl_app_prcbgt')
+        ->groupBy(DB::raw("to_char(tgl_oh,'mm')"))
+        ->orderBy(DB::raw("to_char(tgl_oh,'mm')"))
+        ->get();
+
+        $jan = 0;$feb = 0;$mar = 0;$apr = 0;$mei = 0;$jun = 0;$jul = 0;$aug = 0;$sep = 0;$okt = 0;$nov = 0;$des = 0;
+        foreach($stds2 as $x) {
+            if($x->bulan === '01') {
+                $jan = $x->total;
+            } else if($x->bulan === '02') {
+                $feb = $x->total;
+            } else if($x->bulan === '03') {
+                $mar = $x->total;
+            } else if($x->bulan === '04') {
+                $apr = $x->total;
+            } else if($x->bulan === '05') {
+                $mei = $x->total;
+            } else if($x->bulan === '06') {
+                $jun = $x->total;
+            } else if($x->bulan === '07') {
+                $jul = $x->total;
+            } else if($x->bulan === '08') {
+                $aug = $x->total;
+            } else if($x->bulan === '09') {
+                $sep = $x->total;
+            } else if($x->bulan === '10') {
+                $okt = $x->total;
+            } else if($x->bulan === '11') {
+                $nov = $x->total;
+            } else if($x->bulan === '12') {
+                $des = $x->total;
+            }
+        }
+        $std2 = [$jan, $feb, $mar, $apr, $mei, $jun, $jul, $aug, $sep, $okt, $nov, $des];
+
+        $acts2 = DB::connection('oracle-usrigpadmin')
+                    ->table("tiprc015t")
+                    ->select(DB::raw("to_char(tgl_oh,'mm') bulan, nvl(sum(act_app_prcbgt+act_app_bgtdep+act_app_admdiv+act_app_secdok+act_app_od+act_app_fd+act_app_vpd+act_app_pd+act_app_bgtdok+act_app_bgt+act_app_prcdok),0) total"))
+                    ->whereRaw("to_char(tgl_oh,'yyyy') = to_char(sysdate,'yyyy')")
+                    ->whereNotNull('tgl_app_prcbgt')
+                    ->groupBy(DB::raw("to_char(tgl_oh,'mm')"))
+                    ->orderBy(DB::raw("to_char(tgl_oh,'mm')"))
+                    ->get();
+
+        $jan = 0;$feb = 0;$mar = 0;$apr = 0;$mei = 0;$jun = 0;$jul = 0;$aug = 0;$sep = 0;$okt = 0;$nov = 0;$des = 0;
+        foreach($acts2 as $x) {
+            if($x->bulan === '01') {
+                $jan = $x->total;
+            } else if($x->bulan === '02') {
+                $feb = $x->total;
+            } else if($x->bulan === '03') {
+                $mar = $x->total;
+            } else if($x->bulan === '04') {
+                $apr = $x->total;
+            } else if($x->bulan === '05') {
+                $mei = $x->total;
+            } else if($x->bulan === '06') {
+                $jun = $x->total;
+            } else if($x->bulan === '07') {
+                $jul = $x->total;
+            } else if($x->bulan === '08') {
+                $aug = $x->total;
+            } else if($x->bulan === '09') {
+                $sep = $x->total;
+            } else if($x->bulan === '10') {
+                $okt = $x->total;
+            } else if($x->bulan === '11') {
+                $nov = $x->total;
+            } else if($x->bulan === '12') {
+                $des = $x->total;
+            }
+        }
+
+        $act2 = [$jan, $feb, $mar, $apr, $mei, $jun, $jul, $aug, $sep, $okt, $nov, $des];
+
+    	return view('monitoring.ops.dashboard.index', compact('std','act','std2','act2'));
+    }
+
+    public function ops2(Request $request)
+    {
+        return view('monitoring.ops.dashboard.index2');
+    }
+
+    public function dashboard(Request $request)
+    {
+        if ($request->ajax()) {
+            $ops = DB::connection('oracle-usrigpadmin')
+            ->table("tiprc015t")
+            ->select(DB::raw("no_oh, nvl(act_app_prcbgt,0) act_app_prcbgt, nvl(act_app_bgtdep,0) act_app_bgtdep, nvl(act_app_admdiv,0) act_app_admdiv, nvl(act_app_secdok,0) act_app_secdok, nvl(act_app_od,0) act_app_od, nvl(act_app_fd,0) act_app_fd, nvl(act_app_vpd,0) act_app_vpd, nvl(act_app_pd,0) act_app_pd, nvl(act_app_bgtdok,0) act_app_bgtdok, nvl(act_app_bgt,0) act_app_bgt, nvl(act_app_prcdok,0) act_app_prcdok"))
+            ->whereRaw("to_char(tgl_oh,'yyyymm') = to_char(sysdate,'yyyymm')")
+            ->whereNotNull('tgl_app_prcbgt')
+            ->orderBy(DB::raw("no_oh"));
+
+            return Datatables::of($ops)
+            ->editColumn('act_app_prcbgt', function($op) {
+                if($op->act_app_prcbgt > 0 || $op->act_app_bgtdep > 0 || $op->act_app_admdiv > 0 || $op->act_app_secdok > 0 || $op->act_app_od > 0 || $op->act_app_fd > 0 || $op->act_app_vpd > 0 || $op->act_app_pd > 0 || $op->act_app_bgtdok > 0 || $op->act_app_bgt > 0 || $op->act_app_prcdok > 0) {
+                    $loc_image = asset("images/red.png");
+                    return '<img src="'. $loc_image .'" alt="X">';
+                } else {
+                    return "";
+                }
+            })
+            ->editColumn('act_app_bgtdep', function($op) {
+                if($op->act_app_bgtdep > 0 || $op->act_app_admdiv > 0 || $op->act_app_secdok > 0 || $op->act_app_od > 0 || $op->act_app_fd > 0 || $op->act_app_vpd > 0 || $op->act_app_pd > 0 || $op->act_app_bgtdok > 0 || $op->act_app_bgt > 0 || $op->act_app_prcdok > 0) {
+                    $loc_image = asset("images/red.png");
+                    return '<img src="'. $loc_image .'" alt="X">';
+                } else {
+                    return "";
+                }
+            })
+            ->editColumn('act_app_admdiv', function($op) {
+                if($op->act_app_admdiv > 0 || $op->act_app_secdok > 0 || $op->act_app_od > 0 || $op->act_app_fd > 0 || $op->act_app_vpd > 0 || $op->act_app_pd > 0 || $op->act_app_bgtdok > 0 || $op->act_app_bgt > 0 || $op->act_app_prcdok > 0) {
+                    $loc_image = asset("images/red.png");
+                    return '<img src="'. $loc_image .'" alt="X">';
+                } else {
+                    return "";
+                }
+            })
+            ->editColumn('act_app_secdok', function($op) {
+                if($op->act_app_secdok > 0 || $op->act_app_od > 0 || $op->act_app_fd > 0 || $op->act_app_vpd > 0 || $op->act_app_pd > 0 || $op->act_app_bgtdok > 0 || $op->act_app_bgt > 0 || $op->act_app_prcdok > 0) {
+                    $loc_image = asset("images/red.png");
+                    return '<img src="'. $loc_image .'" alt="X">';
+                } else {
+                    return "";
+                }
+            })
+            ->editColumn('act_app_od', function($op) {
+                if($op->act_app_od > 0 || $op->act_app_fd > 0 || $op->act_app_vpd > 0 || $op->act_app_pd > 0 || $op->act_app_bgtdok > 0 || $op->act_app_bgt > 0 || $op->act_app_prcdok > 0) {
+                    $loc_image = asset("images/red.png");
+                    return '<img src="'. $loc_image .'" alt="X">';
+                } else {
+                    return "";
+                }
+            })
+            ->editColumn('act_app_fd', function($op) {
+                if($op->act_app_fd > 0 || $op->act_app_vpd > 0 || $op->act_app_pd > 0 || $op->act_app_bgtdok > 0 || $op->act_app_bgt > 0 || $op->act_app_prcdok > 0) {
+                    $loc_image = asset("images/red.png");
+                    return '<img src="'. $loc_image .'" alt="X">';
+                } else {
+                    return "";
+                }
+            })
+            ->editColumn('act_app_vpd', function($op) {
+                if($op->act_app_vpd > 0 || $op->act_app_pd > 0 || $op->act_app_bgtdok > 0 || $op->act_app_bgt > 0 || $op->act_app_prcdok > 0) {
+                    $loc_image = asset("images/red.png");
+                    return '<img src="'. $loc_image .'" alt="X">';
+                } else {
+                    return "";
+                }
+            })
+            ->editColumn('act_app_pd', function($op) {
+                if($op->act_app_pd > 0 || $op->act_app_bgtdok > 0 || $op->act_app_bgt > 0 || $op->act_app_prcdok > 0) {
+                    $loc_image = asset("images/red.png");
+                    return '<img src="'. $loc_image .'" alt="X">';
+                } else {
+                    return "";
+                }
+            })
+            ->editColumn('act_app_bgtdok', function($op) {
+                if($op->act_app_bgtdok > 0 || $op->act_app_bgt > 0 || $op->act_app_prcdok > 0) {
+                    $loc_image = asset("images/red.png");
+                    return '<img src="'. $loc_image .'" alt="X">';
+                } else {
+                    return "";
+                }
+            })
+            ->editColumn('act_app_bgt', function($op) {
+                if($op->act_app_bgt > 0 || $op->act_app_prcdok > 0) {
+                    $loc_image = asset("images/red.png");
+                    return '<img src="'. $loc_image .'" alt="X">';
+                } else {
+                    return "";
+                }
+            })
+            ->editColumn('act_app_prcdok', function($op) {
+                if($op->act_app_prcdok > 0) {
+                    $loc_image = asset("images/red.png");
+                    return '<img src="'. $loc_image .'" alt="X">';
+                } else {
+                    return "";
+                }
+            })
+            ->make(true);
+        }
+    }
+
+    public function komite(Request $request, $displayStart = null)
+    {
+        if($displayStart == null) {
+            $displayStart = 0;
+        } else {
+            $komites = DB::connection('oracle-usrigpadmin')
+            ->table("prct_tgl_komite")
+            ->select(DB::raw("no_seq, ket_komite"))
+            ->whereRaw("not exists (select 1 from usrigpmfg.twslpb2 tb where tb.no_pp = prct_tgl_komite.no_pp and rownum = 1) and not exists (select 1 from usrbaan.baan_lpb2 tb where nvl(tb.no_pp,'null') <> 'null' and tb.no_pp = prct_tgl_komite.no_pp and rownum = 1)");
+            if($komites->get()->count() <= $displayStart) {
+                return redirect('pppolpb');
+            }
+        }
+        return view('monitoring.ops.dashboard.komite', compact('displayStart'));
+    }
+
+    public function dashboardKomite(Request $request)
+    {
+        if ($request->ajax()) {
+            $komites = DB::connection('oracle-usrigpadmin')
+            ->table("prct_tgl_komite")
+            ->select(DB::raw("upper(to_char(tgl_komite,'dd')||' '||usrhrcorp.fnm_bulan(to_char(tgl_komite,'mm'))||' '||to_char(tgl_komite,'yyyy')) tglkomite, no_seq, ket_komite, no_pp, (select no_ia_ea from usrbrgcorp.tcprj002tb tb where prct_tgl_komite.no_pp = tb.no_pp and rownum = 1) no_ia, (select tb.no_oh from tiprc017t tb where prct_tgl_komite.no_pp = tb.no_pp and rownum = 1) no_oh, case when length(no_pp) = 9 then (select baan.no_po from usrbaan.baan_po2 baan where baan.no_pp = prct_tgl_komite.no_pp and rownum = 1) else (select tb.no_po from prc_dtlpo tb where tb.no_ppkpp = prct_tgl_komite.no_pp and rownum = 1) end as no_po"))
+            ->whereRaw("not exists (select 1 from usrigpmfg.twslpb2 tb where tb.no_pp = prct_tgl_komite.no_pp and rownum = 1) and not exists (select 1 from usrbaan.baan_lpb2 tb where nvl(tb.no_pp,'null') <> 'null' and tb.no_pp = prct_tgl_komite.no_pp and rownum = 1)")
+            ->orderBy(DB::raw("tgl_komite, no_seq"));
+
+            return Datatables::of($komites)
+            ->filterColumn('tglkomite', function ($query, $keyword) {
+                $query->whereRaw("upper(to_char(tgl_komite,'dd')||' '||usrhrcorp.fnm_bulan(to_char(tgl_komite,'mm'))||' '||to_char(tgl_komite,'yyyy')) like ?", ["%$keyword%"]);
+            })
+            ->addColumn('pp', function($komite) {
+                if(!empty($komite->no_ia)) {
+                    //return '<font color="green">'.$komite->no_pp.'</font>';
+                    $loc_image = asset("images/green.png");
+                    return '<img src="'. $loc_image .'" alt="X" data-toggle="tooltip" data-placement="top" title="No. PP: '. $komite->no_pp .'">';
+                } else {
+                    if(!empty($komite->no_ia)) {
+                        $loc_image = asset("images/green.png");
+                    } else if(!empty($komite->no_pp)) {
+                        $loc_image = asset("images/yellow.png");
+                    } else {
+                        $loc_image = asset("images/red.png");
+                    }
+                    return '<img src="'. $loc_image .'" alt="X">';
+                }
+            })
+            ->addColumn('eaia', function($komite) {
+                if(!empty($komite->no_oh)) {
+                    // return $komite->no_ia;
+                    $loc_image = asset("images/green.png");
+                    return '<img src="'. $loc_image .'" alt="X" data-toggle="tooltip" data-placement="top" title="No. EA/IA: '. $komite->no_ia .'">';
+                } else {
+                    if(!empty($komite->no_oh)) {
+                        $loc_image = asset("images/green.png");
+                    } else if(!empty($komite->no_ia)) {
+                        $loc_image = asset("images/yellow.png");
+                    } else {
+                        $loc_image = asset("images/red.png");
+                    }
+                    return '<img src="'. $loc_image .'" alt="X">';
+                }
+            })
+            ->addColumn('ops', function($komite) {
+                if(!empty($komite->no_po)) {
+                    // return $komite->no_oh;
+                    $loc_image = asset("images/green.png");
+                    return '<img src="'. $loc_image .'" alt="X" data-toggle="tooltip" data-placement="top" title="No. OPS: '. $komite->no_oh .'">';
+                } else {
+                    if(!empty($komite->no_po)) {
+                        $loc_image = asset("images/green.png");
+                    } else if(!empty($komite->no_oh)) {
+                        $loc_image = asset("images/yellow.png");
+                    } else {
+                        $loc_image = asset("images/red.png");
+                    }
+                    return '<img src="'. $loc_image .'" alt="X">';
+                }
+            })
+            ->addColumn('po', function($komite) {
+                // if(!empty($komite->no_lpb)) {
+                //     // return $komite->no_po;
+                //     $loc_image = asset("images/green.png");
+                //     return '<img src="'. $loc_image .'" alt="X" data-toggle="tooltip" data-placement="top" title="No. PO: '. $komite->no_po .'">';
+                // } else {
+                //     if(!empty($komite->no_lpb)) {
+                //         $loc_image = asset("images/green.png");
+                //     } else if(!empty($komite->no_po)) {
+                //         $loc_image = asset("images/yellow.png");
+                //     } else {
+                //         $loc_image = asset("images/red.png");
+                //     }
+                //     return '<img src="'. $loc_image .'" alt="X">';
+                // }
+                if(!empty($komite->no_po)) {
+                    // return $komite->no_po;
+                    $loc_image = asset("images/green.png");
+                    return '<img src="'. $loc_image .'" alt="X" data-toggle="tooltip" data-placement="top" title="No. PO: '. $komite->no_po .'">';
+                } else {
+                    if(!empty($komite->no_po)) {
+                        $loc_image = asset("images/green.png");
+                    } else {
+                        $loc_image = asset("images/red.png");
+                    }
+                    return '<img src="'. $loc_image .'" alt="X">';
+                }
+            })
+            ->addColumn('keterangan', function($komite) {
+                return "";
+            })
+            ->make(true);
+        }
+    }
+
+    public function network(Request $request, $displayStart = null)
+    {
+        if($displayStart == null) {
+            $displayStart = 0;
+        } else {
+            $networks = DB::table("networks")
+                    ->select(DB::raw("ip, keterangan"));
+            if($networks->get()->count() <= $displayStart) {
+                return redirect('network');
+            }
+        }
+        return view('monitoring.network.dashboard.network', compact('displayStart'));
+    }
+
+    public function dashboardNetwork(Request $request)
+    {
+        if ($request->ajax()) {
+            $networks = DB::table("networks")
+            ->select(DB::raw("ip, keterangan"));
+            //->orderBy(DB::raw("2"));
+
+            return Datatables::of($networks)
+            ->addColumn('status', function($network) {
+                $ip_client = $network->ip;
+                // exec("ping -n 1 $ip_client", $output, $status);
+                // exec("/bin/ping -c2 -w2 $ip_client", $output, $status); //untuk os linux 
+                if(config('app.env', 'local') === 'production') {
+                    exec("/bin/ping -c2 -w2 $ip_client", $output, $status);
+                } else {
+                    //exec("ping $ip_client", $output, $status);
+                    exec("ping -n 2 $ip_client", $output, $status);
+                }
+                if($status == 0) {
+                    $error_rto = 0;
+                    $error_disconnected = 0;
+
+                    //$status_conn = array($output['2'], $output['3'], $output['4'], $output['5']);
+                    $status_conn = array($output['2'], $output['3']);
+                    foreach($status_conn as $output) {
+                        $cut = explode(":", $output);
+                        $hasil = trim($cut['0'], " .");
+                        $hasil = strtolower($hasil);
+                        switch ($hasil) {
+                            case strtolower('Request timed out'):
+                                $error_rto = $error_rto + 1;
+                            break;
+
+                            default:
+                                $hasil1 = trim($cut['1'], " .");
+                                $hasil1 = strtolower($hasil1);
+                                switch ($hasil1) {
+                                    case strtolower('Destination net unreachable'):
+                                        $error_disconnected = $error_disconnected + 1;
+                                    break;
+
+                                    case strtolower('Destination host unreachable'):
+                                        $error_disconnected = $error_disconnected + 1;
+                                    break;
+
+                                    default:
+                                        $log = "Connected";
+                                    break;
+                                }
+                            break;
+                        }
+                    }
+
+                    if($error_rto > 0 || $error_disconnected > 0) {
+                        if($error_rto > $error_disconnected) {
+                            $loc_image = asset("images/yellow.png");
+                        } else {
+                            $loc_image = asset("images/red.png");
+                        }
+                    } else {
+                        $loc_image = asset("images/green.png");
+                    }
+                } else {
+                    $loc_image = asset("images/red.png");
+                }
+                return '<img src="'. $loc_image .'" alt="X">';
+            })
+            ->make(true);
+        }
+    }
+
+    public function pppolpb(Request $request, $displayStart = null)
+    {
+        $prctcekpp = new PrctCekPp();
+        $periode = Carbon::now();
+
+        if($displayStart == null) {
+            $displayStart = 0;
+        } else {
+            $prctcekpp2s = DB::connection('oracle-usrbaan')
+            ->table("prct_cek_pp2")
+            ->select(DB::raw("nm_item, nm_supp, nm_pic, nm_user, pp_st, pp_ket, po_st, po_ket, lpb_st, lpb_ket"))
+            ->where("st_kel", "REG")
+            ->where(DB::raw("thn||bln"), $periode->format('Ym'));
+            if($prctcekpp2s->get()->count() <= $displayStart) {
+                return redirect('pppolpb2');
+            }
+        }
+        return view('monitoring.ops.dashboard.pppolpb', compact('displayStart','periode'));
+    }
+
+    public function dashboardPppolpb(Request $request, $periode)
+    {
+        if ($request->ajax()) {
+            $prctcekpp2s = DB::connection('oracle-usrbaan')
+            ->table("prct_cek_pp2")
+            ->select(DB::raw("nm_item, nm_supp, nm_pic, nm_user, pp_st, pp_ket, po_st, po_ket, lpb_st, lpb_ket"))
+            ->where("st_kel", "REG")
+            ->where(DB::raw("thn||bln"), base64_decode($periode))
+            ->orderBy(DB::raw("to_number(no_cek_bpid,'9999999999')"));
+
+            return Datatables::of($prctcekpp2s)
+            ->addColumn('pp', function($prctcekpp2) {
+                if(!empty($prctcekpp2->pp_st)) {
+                    $loc_image = "";
+                    if ($prctcekpp2->pp_st == "1") {
+                        $loc_image = asset("images/red.png");
+                    } else if($prctcekpp2->pp_st == "2") {
+                        $loc_image = asset("images/green.png");
+                    } else if($prctcekpp2->pp_st == "3") {
+                        $loc_image = asset("images/greenred.png");
+                    } 
+                    if($loc_image !== "") {
+                        if(!empty($prctcekpp2->pp_ket)) {
+                            return '<center><img src="'. $loc_image .'" alt="X" data-toggle="tooltip" data-placement="top" title="'. $prctcekpp2->pp_ket .'"></center>';
+                        } else {
+                            return '<center><img src="'. $loc_image .'" alt="X"></center>';
+                        }
+                    } else {
+                        return "";
+                    }
+                } else {
+                    return "";
+                }
+            })
+            ->addColumn('po', function($prctcekpp2) {
+                if(!empty($prctcekpp2->po_st)) {
+                    $loc_image = "";
+                    if ($prctcekpp2->po_st == "1") {
+                        $loc_image = asset("images/red.png");
+                    } else if($prctcekpp2->po_st == "2") {
+                        $loc_image = asset("images/green.png");
+                    } else if($prctcekpp2->po_st == "3") {
+                        $loc_image = asset("images/greenred.png");
+                    } 
+                    if($loc_image !== "") {
+                        if(!empty($prctcekpp2->po_ket)) {
+                            return '<center><img src="'. $loc_image .'" alt="X" data-toggle="tooltip" data-placement="top" title="'. $prctcekpp2->po_ket .'"></center>';
+                        } else {
+                            return '<center><img src="'. $loc_image .'" alt="X"></center>';
+                        }
+                    } else {
+                        return "";
+                    }
+                } else {
+                    return "";
+                }
+            })
+            ->addColumn('lpb', function($prctcekpp2) {
+                if(!empty($prctcekpp2->lpb_st)) {
+                    $loc_image = "";
+                    if ($prctcekpp2->lpb_st == "1") {
+                        $loc_image = asset("images/red.png");
+                    } else if($prctcekpp2->lpb_st == "2") {
+                        $loc_image = asset("images/green.png");
+                    } else if($prctcekpp2->lpb_st == "3") {
+                        $loc_image = asset("images/greenred.png");
+                    } 
+                    if($loc_image !== "") {
+                        if(!empty($prctcekpp2->lpb_ket)) {
+                            return '<center><img src="'. $loc_image .'" alt="X" data-toggle="tooltip" data-placement="top" title="'. $prctcekpp2->lpb_ket .'"></center>';
+                        } else {
+                            return '<center><img src="'. $loc_image .'" alt="X"></center>';
+                        }
+                    } else {
+                        return "";
+                    }
+                } else {
+                    return "";
+                }
+            })
+            ->make(true);
+        }
+    }
+
+    public function pppolpb2(Request $request, $displayStart = null)
+    {
+        $prctcekpp = new PrctCekPp();
+        $periode = Carbon::now();
+
+        if($displayStart == null) {
+            $displayStart = 0;
+        } else {
+            $prctcekpp2s = DB::connection('oracle-usrbaan')
+            ->table("prct_cek_pp2")
+            ->select(DB::raw("nm_item, nm_supp, nm_pic, nm_user, pp_st, pp_ket, po_st, po_ket, lpb_st, lpb_ket"))
+            // ->where("st_kel","<>", "REG")
+            ->where("st_kel", "KON")
+            ->where(DB::raw("thn||bln"), $periode->format('Ym'));
+            if($prctcekpp2s->get()->count() <= $displayStart) {
+                return redirect('komite');
+            }
+        }
+        return view('monitoring.ops.dashboard.pppolpb2', compact('displayStart','periode'));
+    }
+
+    public function dashboardPppolpb2(Request $request, $periode)
+    {
+        if ($request->ajax()) {
+            $prctcekpp2s = DB::connection('oracle-usrbaan')
+            ->table("prct_cek_pp2")
+            ->select(DB::raw("nm_item, nm_supp, nm_pic, nm_user, pp_st, pp_ket, po_st, po_ket, lpb_st, lpb_ket"))
+            // ->where("st_kel","<>", "REG")
+            ->where("st_kel", "KON")
+            ->where(DB::raw("thn||bln"), base64_decode($periode))
+            ->orderBy(DB::raw("to_number(no_cek_bpid,'9999999999')"));
+
+            return Datatables::of($prctcekpp2s)
+            ->addColumn('pp', function($prctcekpp2) {
+                if(!empty($prctcekpp2->pp_st)) {
+                    $loc_image = "";
+                    if ($prctcekpp2->pp_st == "1") {
+                        $loc_image = asset("images/red.png");
+                    } else if($prctcekpp2->pp_st == "2") {
+                        $loc_image = asset("images/green.png");
+                    } else if($prctcekpp2->pp_st == "3") {
+                        $loc_image = asset("images/greenred.png");
+                    } 
+                    if($loc_image !== "") {
+                        if(!empty($prctcekpp2->pp_ket)) {
+                            return '<center><img src="'. $loc_image .'" alt="X" data-toggle="tooltip" data-placement="top" title="'. $prctcekpp2->pp_ket .'"></center>';
+                        } else {
+                            return '<center><img src="'. $loc_image .'" alt="X"></center>';
+                        }
+                    } else {
+                        return "";
+                    }
+                } else {
+                    return "";
+                }
+            })
+            ->addColumn('po', function($prctcekpp2) {
+                if(!empty($prctcekpp2->po_st)) {
+                    $loc_image = "";
+                    if ($prctcekpp2->po_st == "1") {
+                        $loc_image = asset("images/red.png");
+                    } else if($prctcekpp2->po_st == "2") {
+                        $loc_image = asset("images/green.png");
+                    } else if($prctcekpp2->po_st == "3") {
+                        $loc_image = asset("images/greenred.png");
+                    } 
+                    if($loc_image !== "") {
+                        if(!empty($prctcekpp2->po_ket)) {
+                            return '<center><img src="'. $loc_image .'" alt="X" data-toggle="tooltip" data-placement="top" title="'. $prctcekpp2->po_ket .'"></center>';
+                        } else {
+                            return '<center><img src="'. $loc_image .'" alt="X"></center>';
+                        }
+                    } else {
+                        return "";
+                    }
+                } else {
+                    return "";
+                }
+            })
+            ->addColumn('lpb', function($prctcekpp2) {
+                if(!empty($prctcekpp2->lpb_st)) {
+                    $loc_image = "";
+                    if ($prctcekpp2->lpb_st == "1") {
+                        $loc_image = asset("images/red.png");
+                    } else if($prctcekpp2->lpb_st == "2") {
+                        $loc_image = asset("images/green.png");
+                    } else if($prctcekpp2->lpb_st == "3") {
+                        $loc_image = asset("images/greenred.png");
+                    } 
+                    if($loc_image !== "") {
+                        if(!empty($prctcekpp2->lpb_ket)) {
+                            return '<center><img src="'. $loc_image .'" alt="X" data-toggle="tooltip" data-placement="top" title="'. $prctcekpp2->lpb_ket .'"></center>';
+                        } else {
+                            return '<center><img src="'. $loc_image .'" alt="X"></center>';
+                        }
+                    } else {
+                        return "";
+                    }
+                } else {
+                    return "";
+                }
+            })
+            ->make(true);
+        }
+    }
+
+    public function monitoringlp(Request $request, $plant = "1", $displayStart = null)
+    {
+        $periode = Carbon::now();
+        $thn = $periode->format("Y");
+        $bln = $periode->format("m");
+        $period = $thn.$bln;
+        $xmlines = DB::connection('oracle-usrbrgcorp')
+            ->table("usrigpmfg.xmline")
+            ->select(DB::raw("xkd_line, xnm_line, xkd_plant, FGET_NOLP_TGLLINE('$period'||'01', xkd_line) satu, FGET_NOLP_TGLLINE('$period'||'02', xkd_line) dua, FGET_NOLP_TGLLINE('$period'||'03', xkd_line) tiga, FGET_NOLP_TGLLINE('$period'||'04', xkd_line) empat, FGET_NOLP_TGLLINE('$period'||'05', xkd_line) lima, FGET_NOLP_TGLLINE('$period'||'06', xkd_line) enam, FGET_NOLP_TGLLINE('$period'||'07', xkd_line) tujuh, FGET_NOLP_TGLLINE('$period'||'08', xkd_line) delapan, FGET_NOLP_TGLLINE('$period'||'09', xkd_line) sembilan, FGET_NOLP_TGLLINE('$period'||'10', xkd_line) sepuluh, FGET_NOLP_TGLLINE('$period'||'11', xkd_line) sebelas, FGET_NOLP_TGLLINE('$period'||'12', xkd_line) duabelas, FGET_NOLP_TGLLINE('$period'||'13', xkd_line) tigabelas, FGET_NOLP_TGLLINE('$period'||'14', xkd_line) empatbelas, FGET_NOLP_TGLLINE('$period'||'15', xkd_line) limabelas, FGET_NOLP_TGLLINE('$period'||'16', xkd_line) enambelas, FGET_NOLP_TGLLINE('$period'||'17', xkd_line) tujuhbelas, FGET_NOLP_TGLLINE('$period'||'18', xkd_line) delapanbelas, FGET_NOLP_TGLLINE('$period'||'19', xkd_line) sembilanbelas, FGET_NOLP_TGLLINE('$period'||'20', xkd_line) duapuluh, FGET_NOLP_TGLLINE('$period'||'21', xkd_line) duasatu, FGET_NOLP_TGLLINE('$period'||'22', xkd_line) duadua, FGET_NOLP_TGLLINE('$period'||'23', xkd_line) duatiga, FGET_NOLP_TGLLINE('$period'||'24', xkd_line) duaempat, FGET_NOLP_TGLLINE('$period'||'25', xkd_line) dualima, FGET_NOLP_TGLLINE('$period'||'26', xkd_line) duaenam, FGET_NOLP_TGLLINE('$period'||'27', xkd_line) duatujuh, FGET_NOLP_TGLLINE('$period'||'28', xkd_line) duadelapan, FGET_NOLP_TGLLINE('$period'||'29', xkd_line) duasembilan, FGET_NOLP_TGLLINE('$period'||'30', xkd_line) tigapuluh, FGET_NOLP_TGLLINE('$period'||'31', xkd_line) tigasatu"))
+            ->whereRaw("nvl(non_aktif,'F') = 'F'")
+            ->where("xkd_plant", $plant);
+
+        if($displayStart == null) {
+            $displayStart = 0;
+        } else {
+            if($xmlines->get()->count() <= $displayStart) {
+                if($plant === "1") {
+                    $plant = "2";
+                } else if($plant === "2") {
+                    $plant = "3";
+                } else if($plant === "3") {
+                    $plant = "4";
+                } else if($plant === "4") {
+                    $plant = "A";
+                } else if($plant === "A") {
+                    $plant = "B";
+                } else if($plant === "B") {
+                    $plant = "1";
+                } else {
+                    $plant = "1";
+                }
+                $url = "monitoringlp/".$plant;
+                return redirect($url);
+            }
+        }
+        return view('monitoring.mtc.dashboard.monlp', compact('plant', 'displayStart', 'xmlines', 'periode'));
+    }
+
+    public function monitoringwp(Request $request, $tgl = null, $displayStart = null)
+    {
+        if($tgl == null) {
+            $tgl = Carbon::now()->format("Ymd");
+            $tgl = base64_encode($tgl);
+        }
+
+        $ehstwp1s = DB::connection('pgsql')
+        ->table("ehst_wp1s")
+        ->select(DB::raw("'IGP' kd_pt, no_wp, kd_supp, coalesce((select nama from b_suppliers where kd_supp = ehst_wp1s.kd_supp),'-') nm_supp, kd_site, nm_proyek, lok_proyek, pic_pp, coalesce((select nama from v_mas_karyawan where npk = ehst_wp1s.pic_pp),'-') nm_pic, status, jns_pekerjaan, scan_sec_in_tgl, scan_sec_out_tgl, tgl_laksana1, tgl_laksana2, to_char(scan_sec_in_tgl + '12 hour'::interval, 'yyyymmddhh24miss') batas, to_char(coalesce(scan_sec_out_tgl,now()), 'yyyymmddhh24miss') skrg"))
+        ->whereRaw("(scan_sec_in_tgl is not null or scan_sec_out_tgl is not null)")
+        ->where(DB::raw("to_char(scan_sec_in_tgl,'yyyymmdd')"), "=", base64_decode($tgl));
+
+        $total = $ehstwp1s->get()->count();
+
+        if($displayStart == null) {
+            $displayStart = 0;
+        } else {
+            if($total <= $displayStart) {
+                $url = "monitoringwp/".$tgl;
+                return redirect($url);
+            }
+        }
+        return view('monitoring.ehs.dashboard.monwp', compact('tgl', 'displayStart', 'ehstwp1s'));
+    }
+
+    public function monitoringwpall(Request $request, $tgl = null, $displayStart = null)
+    {
+        if($tgl == null) {
+            $tgl = Carbon::now()->format("Ymd");
+            $tgl = base64_encode($tgl);
+        }
+
+        $ehstwp1sIGP = DB::connection('pgsql')
+        ->table("ehst_wp1s")
+        ->select(DB::raw("'IGP' kd_pt, no_wp, kd_supp, coalesce((select nama from b_suppliers where kd_supp = ehst_wp1s.kd_supp),'-') nm_supp, kd_site, nm_proyek, lok_proyek, pic_pp, coalesce((select nama from v_mas_karyawan where npk = ehst_wp1s.pic_pp),'-') nm_pic, status, jns_pekerjaan, scan_sec_in_tgl, scan_sec_out_tgl, tgl_laksana1, tgl_laksana2, to_char(scan_sec_in_tgl + '12 hour'::interval, 'yyyymmddhh24miss') batas, to_char(coalesce(scan_sec_out_tgl,now()), 'yyyymmddhh24miss') skrg"))
+        ->whereRaw("(scan_sec_in_tgl is not null or scan_sec_out_tgl is not null)")
+        ->where(DB::raw("to_char(scan_sec_in_tgl,'yyyymmdd')"), "=", base64_decode($tgl));
+
+        $ehstwp1sGKD = DB::connection('pgsql-gkd')
+        ->table("ehst_wp1s")
+        ->select(DB::raw("'GKD' kd_pt, no_wp, kd_supp, coalesce((select nama from b_suppliers where kd_supp = ehst_wp1s.kd_supp),'-') nm_supp, kd_site, nm_proyek, lok_proyek, pic_pp, coalesce((select nama from v_mas_karyawan where npk = ehst_wp1s.pic_pp),'-') nm_pic, status, jns_pekerjaan, scan_sec_in_tgl, scan_sec_out_tgl, tgl_laksana1, tgl_laksana2, to_char(scan_sec_in_tgl + '12 hour'::interval, 'yyyymmddhh24miss') batas, to_char(coalesce(scan_sec_out_tgl,now()), 'yyyymmddhh24miss') skrg"))
+        ->whereRaw("(scan_sec_in_tgl is not null or scan_sec_out_tgl is not null)")
+        ->where(DB::raw("to_char(scan_sec_in_tgl,'yyyymmdd')"), "=", base64_decode($tgl));
+        
+        $ehstwp1sAGI = DB::connection('pgsql-agi')
+        ->table("ehst_wp1s")
+        ->select(DB::raw("'AGI' kd_pt, no_wp, kd_supp, coalesce((select nama from b_suppliers where kd_supp = ehst_wp1s.kd_supp),'-') nm_supp, kd_site, nm_proyek, lok_proyek, pic_pp, coalesce((select nama from v_mas_karyawan where npk = ehst_wp1s.pic_pp),'-') nm_pic, status, jns_pekerjaan, scan_sec_in_tgl, scan_sec_out_tgl, tgl_laksana1, tgl_laksana2, to_char(scan_sec_in_tgl + '12 hour'::interval, 'yyyymmddhh24miss') batas, to_char(coalesce(scan_sec_out_tgl,now()), 'yyyymmddhh24miss') skrg"))
+        ->whereRaw("(scan_sec_in_tgl is not null or scan_sec_out_tgl is not null)")
+        ->where(DB::raw("to_char(scan_sec_in_tgl,'yyyymmdd')"), "=", base64_decode($tgl));
+
+        $total = $ehstwp1sIGP->get()->count() + $ehstwp1sGKD->get()->count() + $ehstwp1sAGI->get()->count();
+
+        if($displayStart == null) {
+            $displayStart = 0;
+        } else {
+            if($total <= $displayStart) {
+                $url = "monitoringwpall/".$tgl;
+                return redirect($url);
+            }
+        }
+        return view('monitoring.ehs.dashboard.monwpall', compact('tgl', 'displayStart', 'ehstwp1sIGP', 'ehstwp1sGKD', 'ehstwp1sAGI'));
+    }
+
+    public function monitoringmtc($kd_site = null)
+    {
+        if($kd_site == null) {
+            $kd_site = "IGPJ";
+        }
+
+        $tahun = Carbon::now()->format("Y");
+        $bulan = Carbon::now()->format("m");
+
+        if($kd_site === "IGPK") {
+            $plant = DB::connection('oracle-usrbrgcorp')
+            ->table("mtcm_npk")
+            ->selectRaw("distinct kd_plant, decode(kd_plant, '1', 'IGP-1', '2', 'IGP-2', '3', 'IGP-3', '4', 'IGP-4', 'A', 'KIM-1A', 'B', 'KIM-1B') nm_plant")
+            ->whereRaw("kd_plant in ('A', 'B')")
+            ->orderBy("kd_plant");
+
+            //pmsachievement
+            $list = DB::connection('oracle-usrbrgcorp')
+            ->table(DB::raw("(select thn_pms, kd_plant, count(no_pms) jml_plan, 0 jml_act
+                from mtct_pms
+                where thn_pms = '$tahun'
+                and bln_pms = '$bulan'
+                and to_date(tgl_pms||'-'||bln_pms||'-'||thn_pms,'dd-mm-yyyy') < trunc(sysdate)
+                and kd_plant in ('A', 'B')
+                and exists (select 1 from mtcm_npk where mtcm_npk.kd_plant = mtct_pms.kd_plant and rownum = 1)
+                and st_cek = 'T'
+                group by thn_pms, kd_plant
+                union all
+                select thn_pms, kd_plant, 0 jml_plan, count(no_pms) jml_act
+                from mtct_pms
+                where thn_pms = '$tahun'
+                and bln_pms = '$bulan'
+                and to_date(tgl_pms||'-'||bln_pms||'-'||thn_pms,'dd-mm-yyyy') < trunc(sysdate) 
+                and kd_plant in ('A', 'B')
+                and exists (select 1 from mtcm_npk where mtcm_npk.kd_plant = mtct_pms.kd_plant and rownum = 1)
+                and st_cek = 'T'
+                and tgl_tarik is not null
+                group by thn_pms, kd_plant) v"))
+            ->select(DB::raw("thn_pms, kd_plant, nvl(sum(jml_plan),0) j_plan, nvl(sum(jml_act),0) j_act"))
+            ->groupBy(DB::raw("thn_pms, kd_plant"))
+            ->get();
+
+            $label_pmsachievement = "";
+            $kd_plant_pmsachievement = [];
+            $plans = [];
+            $acts = [];
+            foreach ($list as $data) {
+                $nm_plant = "IGP-".$data->kd_plant;
+                if($data->kd_plant === "A" || $data->kd_plant === "B") {
+                  $nm_plant = "KIM-1".$data->kd_plant;
+                }
+                if($label_pmsachievement === "") {
+                  $label_pmsachievement = '<html>. Show Detail: <a target="_blank" href="'.route('mtctpmss.pmsachievement', [base64_encode($tahun), base64_encode($bulan), base64_encode($data->kd_plant)]).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $nm_plant .'">'.$nm_plant.'</a>';
+                } else {
+                  $label_pmsachievement .= ' | <a target="_blank" href="'.route('mtctpmss.pmsachievement', [base64_encode($tahun), base64_encode($bulan), base64_encode($data->kd_plant)]).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $nm_plant .'">'.$nm_plant.'</a>';
+                }
+                array_push($kd_plant_pmsachievement, $nm_plant);
+                array_push($plans, $data->j_plan);
+                array_push($acts, $data->j_act);
+            }
+
+            if($label_pmsachievement !== "") {
+                $label_pmsachievement .= '</html>';
+            }
+
+            //paretobreakdown
+            $list = DB::connection('oracle-usrbrgcorp')
+            ->table(DB::raw("tmtcwo1"))
+            ->select(DB::raw("to_char(tgl_wo,'yyyy') thn_wo, lok_pt kd_plant, sum(nvl(line_stop,0)) jml_ls"))
+            ->whereRaw("lok_pt in ('A', 'B')")
+            ->whereRaw("to_char(tgl_wo,'yyyymm') = '$tahun'||'$bulan' and trunc(tgl_wo) < trunc(sysdate) and pt = 'IGP' and exists (select 1 from mtcm_npk where mtcm_npk.kd_plant = tmtcwo1.lok_pt and rownum = 1) and info_kerja = 'ANDON'")
+            ->groupBy(DB::raw("to_char(tgl_wo,'yyyy'), lok_pt"))
+            ->orderByRaw("to_char(tgl_wo,'yyyy'), lok_pt")
+            ->get();
+
+            $label_paretobreakdown = "";
+            $kd_plant_paretobreakdown = [];
+            $sum_jml_ls = [];
+            foreach ($list as $data) {
+                $nm_plant = "IGP-".$data->kd_plant;
+                if($data->kd_plant === "A" || $data->kd_plant === "B") {
+                  $nm_plant = "KIM-1".$data->kd_plant;
+                }
+                if($label_paretobreakdown === "") {
+                  $label_paretobreakdown = '<html>. Show Detail: <a target="_blank" href="'.route('tmtcwo1s.paretobreakdown', [base64_encode($tahun), base64_encode($bulan), base64_encode($data->kd_plant)]).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $nm_plant .'">'.$nm_plant.'</a>';
+                } else {
+                  $label_paretobreakdown .= ' | <a target="_blank" href="'.route('tmtcwo1s.paretobreakdown', [base64_encode($tahun), base64_encode($bulan), base64_encode($data->kd_plant)]).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $nm_plant .'">'.$nm_plant.'</a>';
+                }
+                array_push($kd_plant_paretobreakdown, $nm_plant);
+                array_push($sum_jml_ls, $data->jml_ls);
+            }
+
+            if($label_paretobreakdown !== "") {
+                $label_paretobreakdown .= '</html>';
+            }
+
+            //ratiobreakdownpreventive
+            $list = DB::connection('oracle-usrbrgcorp')
+            ->table(DB::raw("(select to_char(tgl_wo,'yyyy') thn_wo, lok_pt kd_plant, sum(nvl(line_stop,0)) jml_ls, 0 jml_pms
+                from tmtcwo1
+                where to_char(tgl_wo,'yyyymm') = '$tahun'||'$bulan'
+                and trunc(tgl_wo) < trunc(sysdate)
+                and pt = 'IGP'
+                and lok_pt in ('A', 'B')
+                and exists (select 1 from mtcm_npk where mtcm_npk.kd_plant = tmtcwo1.lok_pt and rownum = 1)
+                and info_kerja = 'ANDON'
+                group by to_char(tgl_wo,'yyyy'), lok_pt
+                union all
+                select to_char(tgl_wo,'yyyy') thn_wo, lok_pt kd_plant, 0 jml_ls, sum(nvl(est_durasi,0)) jml_pms
+                from tmtcwo1
+                where to_char(tgl_wo,'yyyymm') = '$tahun'||'$bulan'
+                and trunc(tgl_wo) < trunc(sysdate)
+                and pt = 'IGP'
+                and lok_pt in ('A', 'B')
+                and exists (select 1 from mtcm_npk where mtcm_npk.kd_plant = tmtcwo1.lok_pt and rownum = 1)
+                and info_kerja = 'PMS'
+                group by to_char(tgl_wo,'yyyy'), lok_pt) v"))
+            ->select(DB::raw("thn_wo, kd_plant, sum(jml_ls) j_ls, sum(jml_pms) j_pms"))
+            ->groupBy(DB::raw("thn_wo, kd_plant"))
+            ->orderByRaw("thn_wo, kd_plant")
+            ->get();
+
+            $label_ratiobreakdownpreventive = "";
+            $kd_plant_ratiobreakdownpreventive = [];
+            $sum_jml_ls = [];
+            $sum_jml_pms = [];
+            foreach ($list as $data) {
+                $nm_plant = "IGP-".$data->kd_plant;
+                if($data->kd_plant === "A" || $data->kd_plant === "B") {
+                  $nm_plant = "KIM-1".$data->kd_plant;
+                }
+                if($label_ratiobreakdownpreventive === "") {
+                  $label_ratiobreakdownpreventive = '<html>. Show Detail: <a target="_blank" href="'.route('tmtcwo1s.ratiobreakdownpreventive', [base64_encode($tahun), base64_encode($bulan), base64_encode($data->kd_plant)]).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $nm_plant .'">'.$nm_plant.'</a>';
+                } else {
+                  $label_ratiobreakdownpreventive .= ' | <a target="_blank" href="'.route('tmtcwo1s.ratiobreakdownpreventive', [base64_encode($tahun), base64_encode($bulan), base64_encode($data->kd_plant)]).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $nm_plant .'">'.$nm_plant.'</a>';
+                }
+                array_push($kd_plant_ratiobreakdownpreventive, $nm_plant);
+                array_push($sum_jml_ls, $data->j_ls);
+                array_push($sum_jml_pms, $data->j_pms);
+            }
+
+            if($label_ratiobreakdownpreventive !== "") {
+                $label_ratiobreakdownpreventive .= '</html>';
+            }
+        } else {
+
+            $kd_site = "IGPJ";
+            
+            $plant = DB::connection('oracle-usrbrgcorp')
+            ->table("mtcm_npk")
+            ->selectRaw("distinct kd_plant, decode(kd_plant, '1', 'IGP-1', '2', 'IGP-2', '3', 'IGP-3', '4', 'IGP-4', 'A', 'KIM-1A', 'B', 'KIM-1B') nm_plant")
+            ->whereRaw("kd_plant in ('1', '2', '3')")
+            ->orderBy("kd_plant");
+
+            //pmsachievement
+            $list = DB::connection('oracle-usrbrgcorp')
+            ->table(DB::raw("(select thn_pms, kd_plant, count(no_pms) jml_plan, 0 jml_act
+                from mtct_pms
+                where thn_pms = '$tahun'
+                and bln_pms = '$bulan'
+                and to_date(tgl_pms||'-'||bln_pms||'-'||thn_pms,'dd-mm-yyyy') < trunc(sysdate)
+                and kd_plant in ('1', '2', '3')
+                and exists (select 1 from mtcm_npk where mtcm_npk.kd_plant = mtct_pms.kd_plant and rownum = 1)
+                and st_cek = 'T'
+                group by thn_pms, kd_plant
+                union all
+                select thn_pms, kd_plant, 0 jml_plan, count(no_pms) jml_act
+                from mtct_pms
+                where thn_pms = '$tahun'
+                and bln_pms = '$bulan'
+                and to_date(tgl_pms||'-'||bln_pms||'-'||thn_pms,'dd-mm-yyyy') < trunc(sysdate) 
+                and kd_plant in ('1', '2', '3')
+                and exists (select 1 from mtcm_npk where mtcm_npk.kd_plant = mtct_pms.kd_plant and rownum = 1)
+                and st_cek = 'T'
+                and tgl_tarik is not null
+                group by thn_pms, kd_plant) v"))
+            ->select(DB::raw("thn_pms, kd_plant, nvl(sum(jml_plan),0) j_plan, nvl(sum(jml_act),0) j_act"))
+            ->groupBy(DB::raw("thn_pms, kd_plant"))
+            ->get();
+
+            $label_pmsachievement = "";
+            $kd_plant_pmsachievement = [];
+            $plans = [];
+            $acts = [];
+            foreach ($list as $data) {
+                $nm_plant = "IGP-".$data->kd_plant;
+                if($data->kd_plant === "A" || $data->kd_plant === "B") {
+                  $nm_plant = "KIM-1".$data->kd_plant;
+                }
+                if($label_pmsachievement === "") {
+                  $label_pmsachievement = '<html>. Show Detail: <a target="_blank" href="'.route('mtctpmss.pmsachievement', [base64_encode($tahun), base64_encode($bulan), base64_encode($data->kd_plant)]).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $nm_plant .'">'.$nm_plant.'</a>';
+                } else {
+                  $label_pmsachievement .= ' | <a target="_blank" href="'.route('mtctpmss.pmsachievement', [base64_encode($tahun), base64_encode($bulan), base64_encode($data->kd_plant)]).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $nm_plant .'">'.$nm_plant.'</a>';
+                }
+                array_push($kd_plant_pmsachievement, $nm_plant);
+                array_push($plans, $data->j_plan);
+                array_push($acts, $data->j_act);
+            }
+
+            if($label_pmsachievement !== "") {
+                $label_pmsachievement .= '</html>';
+            }
+
+            //paretobreakdown
+            $list = DB::connection('oracle-usrbrgcorp')
+            ->table(DB::raw("tmtcwo1"))
+            ->select(DB::raw("to_char(tgl_wo,'yyyy') thn_wo, lok_pt kd_plant, sum(nvl(line_stop,0)) jml_ls"))
+            ->whereRaw("lok_pt in ('1', '2', '3')")
+            ->whereRaw("to_char(tgl_wo,'yyyymm') = '$tahun'||'$bulan' and trunc(tgl_wo) < trunc(sysdate) and pt = 'IGP' and exists (select 1 from mtcm_npk where mtcm_npk.kd_plant = tmtcwo1.lok_pt and rownum = 1) and info_kerja = 'ANDON'")
+            ->groupBy(DB::raw("to_char(tgl_wo,'yyyy'), lok_pt"))
+            ->orderByRaw("to_char(tgl_wo,'yyyy'), lok_pt")
+            ->get();
+
+            $label_paretobreakdown = "";
+            $kd_plant_paretobreakdown = [];
+            $sum_jml_ls = [];
+            foreach ($list as $data) {
+                $nm_plant = "IGP-".$data->kd_plant;
+                if($data->kd_plant === "A" || $data->kd_plant === "B") {
+                  $nm_plant = "KIM-1".$data->kd_plant;
+                }
+                if($label_paretobreakdown === "") {
+                  $label_paretobreakdown = '<html>. Show Detail: <a target="_blank" href="'.route('tmtcwo1s.paretobreakdown', [base64_encode($tahun), base64_encode($bulan), base64_encode($data->kd_plant)]).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $nm_plant .'">'.$nm_plant.'</a>';
+                } else {
+                  $label_paretobreakdown .= ' | <a target="_blank" href="'.route('tmtcwo1s.paretobreakdown', [base64_encode($tahun), base64_encode($bulan), base64_encode($data->kd_plant)]).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $nm_plant .'">'.$nm_plant.'</a>';
+                }
+                array_push($kd_plant_paretobreakdown, $nm_plant);
+                array_push($sum_jml_ls, $data->jml_ls);
+            }
+
+            if($label_paretobreakdown !== "") {
+                $label_paretobreakdown .= '</html>';
+            }
+
+            //ratiobreakdownpreventive
+            $list = DB::connection('oracle-usrbrgcorp')
+            ->table(DB::raw("(select to_char(tgl_wo,'yyyy') thn_wo, lok_pt kd_plant, sum(nvl(line_stop,0)) jml_ls, 0 jml_pms
+                from tmtcwo1
+                where to_char(tgl_wo,'yyyymm') = '$tahun'||'$bulan'
+                and trunc(tgl_wo) < trunc(sysdate)
+                and pt = 'IGP'
+                and lok_pt in ('1', '2', '3')
+                and exists (select 1 from mtcm_npk where mtcm_npk.kd_plant = tmtcwo1.lok_pt and rownum = 1)
+                and info_kerja = 'ANDON'
+                group by to_char(tgl_wo,'yyyy'), lok_pt
+                union all
+                select to_char(tgl_wo,'yyyy') thn_wo, lok_pt kd_plant, 0 jml_ls, sum(nvl(est_durasi,0)) jml_pms
+                from tmtcwo1
+                where to_char(tgl_wo,'yyyymm') = '$tahun'||'$bulan'
+                and trunc(tgl_wo) < trunc(sysdate)
+                and pt = 'IGP'
+                and lok_pt in ('1', '2', '3')
+                and exists (select 1 from mtcm_npk where mtcm_npk.kd_plant = tmtcwo1.lok_pt and rownum = 1)
+                and info_kerja = 'PMS'
+                group by to_char(tgl_wo,'yyyy'), lok_pt) v"))
+            ->select(DB::raw("thn_wo, kd_plant, sum(jml_ls) j_ls, sum(jml_pms) j_pms"))
+            ->groupBy(DB::raw("thn_wo, kd_plant"))
+            ->orderByRaw("thn_wo, kd_plant")
+            ->get();
+
+            $label_ratiobreakdownpreventive = "";
+            $kd_plant_ratiobreakdownpreventive = [];
+            $sum_jml_ls = [];
+            $sum_jml_pms = [];
+            foreach ($list as $data) {
+                $nm_plant = "IGP-".$data->kd_plant;
+                if($data->kd_plant === "A" || $data->kd_plant === "B") {
+                  $nm_plant = "KIM-1".$data->kd_plant;
+                }
+                if($label_ratiobreakdownpreventive === "") {
+                  $label_ratiobreakdownpreventive = '<html>. Show Detail: <a target="_blank" href="'.route('tmtcwo1s.ratiobreakdownpreventive', [base64_encode($tahun), base64_encode($bulan), base64_encode($data->kd_plant)]).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $nm_plant .'">'.$nm_plant.'</a>';
+                } else {
+                  $label_ratiobreakdownpreventive .= ' | <a target="_blank" href="'.route('tmtcwo1s.ratiobreakdownpreventive', [base64_encode($tahun), base64_encode($bulan), base64_encode($data->kd_plant)]).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $nm_plant .'">'.$nm_plant.'</a>';
+                }
+                array_push($kd_plant_ratiobreakdownpreventive, $nm_plant);
+                array_push($sum_jml_ls, $data->j_ls);
+                array_push($sum_jml_pms, $data->j_pms);
+            }
+
+            if($label_ratiobreakdownpreventive !== "") {
+                $label_ratiobreakdownpreventive .= '</html>';
+            }
+        }
+
+        $title1 = "PMS Achievement Per-Plant ".namaBulan((int) Carbon::now()->format('m'))." ".Carbon::now()->format('Y');
+        $title2 = "Pareto Breakdown Per-Plant ".namaBulan((int) Carbon::now()->format('m'))." ".Carbon::now()->format('Y');
+        $title3 = "Ratio Breakdown vs Preventive Per-Plant ".namaBulan((int) Carbon::now()->format('m'))." ".Carbon::now()->format('Y');
+          
+        return view('monitoring.mtc.dashboard.grafik', compact(['kd_plant_pmsachievement', 'plans', 'acts', 'kd_plant_paretobreakdown', 'sum_jml_ls', 'kd_plant_ratiobreakdownpreventive', 'sum_jml_ls', 'sum_jml_pms', 'label_pmsachievement', 'label_paretobreakdown', 'label_ratiobreakdownpreventive', 'title1', 'title2', 'title3', 'kd_site']));
+    }
+
+    public function monitoringasakai($kd_plant, $kd_line = null)
+    {
+        $tahun = Carbon::now()->subMonth()->format('Y');
+        $bulan = Carbon::now()->subMonth()->format('m');
+
+        $nm_tahun = $tahun;
+        $nm_bulan = namaBulan((int) $bulan);
+        $nm_plant = "IGP-".$kd_plant;
+        if($kd_plant === "A" || $kd_plant === "B") {
+            $nm_plant = "KIM-1".$kd_plant;
+        }
+
+        if($kd_line == null) {
+        
+            $list = DB::connection('oracle-usrbrgcorp')
+            ->table(DB::raw("mtct_asakai ma, usrigpmfg.xmline xl"))
+            ->select(DB::raw("ma.kd_plant, ma.kd_line, decode(nvl(xl.inisial,'-'), '-', xl.xnm_line, xl.inisial) nm_line, avg(ma.prs_bd_rate) prs_bd"))
+            ->whereRaw("ma.kd_line = xl.xkd_line")
+            ->where("ma.thn", $tahun)
+            ->where("ma.bln", $bulan)
+            ->where("ma.kd_plant", $kd_plant)
+            ->groupBy(DB::raw("ma.kd_plant, ma.kd_line, decode(nvl(xl.inisial,'-'), '-', xl.xnm_line, xl.inisial)"))
+            ->orderByRaw("ma.kd_line")
+            ->get();
+
+            $label_br = "";
+            $lines = [];
+            $prs_bds = [];
+            foreach ($list as $data) {
+                $link = url("monitoringasakai/".$kd_plant."/".$data->kd_line);
+                if($label_br === "") {
+                    $label_br = '. Show Detail: <a target="_blank" href="'.$link.'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $data->kd_line."-".$data->nm_line .'">'.$data->kd_line.'</a>';
+                } else {
+                    $label_br .= ' | <a target="_blank" href="'.$link.'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $data->kd_line."-".$data->nm_line .'">'.$data->kd_line.'</a>';
+                }
+                array_push($lines, $data->kd_line."-".$data->nm_line);
+                array_push($prs_bds, $data->prs_bd);
+            }
+
+            return view('monitoring.mtc.dashboard.grafik-asakai', compact('tahun','bulan','kd_plant','nm_tahun','nm_bulan','nm_plant','lines','prs_bds','label_br'));
+        } else {
+            $nm_line = DB::connection('oracle-usrbrgcorp')
+            ->table("dual")
+            ->selectRaw("nvl(usrigpmfg.fnm_linex('$kd_line'),'-') nm_line")
+            ->value("nm_line");
+
+            $label_bulans = [];
+            $load_times = [];
+            $bd_currents = [];
+            $bd_lasts = [];
+            $bd_stds = [];
+
+            $list = DB::connection('oracle-usrbrgcorp')
+            ->table(DB::raw("(
+                select ma.bln, ma.kd_plant, ma.kd_line, ma.load_time, ma.prs_bd_rate bd_current, 0 bd_last 
+                from mtct_asakai ma 
+                where ma.thn = '$tahun' 
+                and ma.bln <= '$bulan' 
+                and ma.kd_plant = '$kd_plant' 
+                union all 
+                select ma.bln, ma.kd_plant, ma.kd_line, 0 load_time, 0 bd_current, ma.prs_bd_rate bd_last 
+                from mtct_asakai ma 
+                where ma.thn = '$tahun'-1 
+                and ma.bln <= '$bulan' 
+                and ma.kd_plant = '$kd_plant' 
+            ) v"))
+            ->select(DB::raw("bln, kd_plant, kd_line, usrigpmfg.fnm_linex(kd_line) nm_line, sum(load_time) load_time, sum(bd_current) bd_current, sum(bd_last) bd_last"))
+            ->where("kd_line", $kd_line)
+            ->groupBy(DB::raw("bln, kd_plant, kd_line"))
+            ->orderByRaw("bln")
+            ->get();
+
+            foreach ($list as $data) {
+                array_push($label_bulans, $tahun."".$data->bln);
+                array_push($load_times, $data->load_time);
+                array_push($bd_currents, $data->bd_current);
+                array_push($bd_lasts, $data->bd_last);
+                array_push($bd_stds, 6);
+
+                if($nm_line == null) {
+                    $nm_line = $data->nm_line;
+                }
+            }
+
+            $label_tgls = [];
+            $label_schs = [];
+            $stds = [];
+            $jmls = [];
+
+            $list = DB::connection('oracle-usrbrgcorp')
+            ->table(DB::raw("(
+                select lpad(ms.tgl,2,'0') tgl, ms.ket, 50 plan_mnt, sum(t1.est_durasi) act_mnt
+                from tmtcwo1 t1, usrhrcorp.mschtgl ms
+                where trunc(t1.tgl_wo) = ms.dtgl
+                and t1.pt = 'IGP'
+                and t1.lok_pt = '$kd_plant'
+                and t1.kd_line = '$kd_line'
+                and to_char(t1.tgl_wo,'yyyymm') = '$tahun'||'$bulan'
+                and t1.info_kerja = 'ANDON'
+                group by lpad(ms.tgl,2,'0'), ms.ket
+                union all
+                select lpad(tgl,2,'0') tgl, ket, 0 plan_mnt, 0 act_mnt
+                from usrhrcorp.mschtgl
+                where bln = '$bulan'
+                and thn = '$tahun'
+            ) v"))
+            ->select(DB::raw("tgl, ket, sum(plan_mnt) plan_mnt, sum(act_mnt) act_mnt"))
+            ->groupBy(DB::raw("tgl, ket"))
+            ->orderByRaw("tgl")
+            ->get();
+
+            foreach ($list as $data) {
+                array_push($label_tgls, $data->tgl);
+                array_push($label_schs, $data->ket);
+                array_push($stds, $data->plan_mnt);
+                array_push($jmls, $data->act_mnt);
+            }
+
+            if($nm_line == null) {
+                $nm_line = "-";
+            }
+
+            return view('monitoring.mtc.dashboard.grafik-asakai2', compact('tahun','bulan','kd_plant','nm_tahun','nm_bulan','nm_plant','kd_line','nm_line','label_bulans','load_times','bd_currents','bd_lasts','bd_stds','label_tgls','label_schs','stds','jmls'));
+        }
+    }
+
+    public function testconnection(Request $request)
+    {
+        echo "Test Connections: ";
+        echo "<br>";
+
+        try {
+            echo "PostgreSQL: ";
+            DB::connection()->getPdo();
+            if(DB::connection()->getDatabaseName()){
+                echo "Yes! Successfully connected to the DB: " . DB::connection()->getDatabaseName();
+            } else{
+                echo "Could not find the database. Please check your configuration.";
+            }
+        } catch (Exception $ex) {
+            echo "Could not open connection to database server.  Please check your configuration: ".$ex;
+        }
+        echo "<br>";
+
+        try {
+            echo "Oracle - USRIGPMFG: ";
+            DB::connection('oracle-usrigpmfg')->getPdo();
+            if(DB::connection('oracle-usrigpmfg')->getDatabaseName()){
+                echo "Yes! Successfully connected to the DB: " . DB::connection('oracle-usrigpmfg')->getDatabaseName();
+            } else{
+                echo "Could not find the database. Please check your configuration.";
+            }
+        } catch (Exception $ex) {
+            echo "Could not open connection to database server.  Please check your configuration: ".$ex;
+        }
+        echo "<br>";
+
+        try {
+            echo "MySQL: ";
+            DB::connection('mysql-intranet')->getPdo();
+            if(DB::connection('mysql-intranet')->getDatabaseName()){
+                echo "Yes! Successfully connected to the DB: " . DB::connection('mysql-intranet')->getDatabaseName();
+            } else{
+                echo "Could not find the database. Please check your configuration.";
+            }
+        } catch (Exception $ex) {
+            echo "Could not open connection to database server.  Please check your configuration: ".$ex;
+        }
+        echo "<br>";
+
+        try {
+            echo "SQL Server: ";
+            DB::connection('sqlsrv')->getPdo();
+            if(DB::connection('sqlsrv')->getDatabaseName()){
+                echo "Yes! Successfully connected to the DB: " . DB::connection('sqlsrv')->getDatabaseName();
+            } else{
+                echo "Could not find the database. Please check your configuration.";
+            }
+        } catch (Exception $ex) {
+            echo "Could not open connection to database server.  Please check your configuration: ".$ex;
+        }
+        echo "<br>";
+    }
+}

@@ -1,0 +1,548 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="PO BAAN" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isSummaryWithPageHeaderAndFooter="true" uuid="a665f353-4b24-4b6b-badf-009a66a38cb3">
+	<property name="ireport.zoom" value="1.0000000000000022"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="504"/>
+	<parameter name="noPo" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="terbilang" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="barcode" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="ttd" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="nm_whs" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="supplier" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="alm1" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="alm2" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="notelp" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="nofax" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="contact" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="email" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="nm_top" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["/"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="nm_div" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select po1.no_po nopo, 'TGL: '||to_char(po1.tgl_po, 'DD-MM-YYYY') TGL_PO, po2.no_pp no_pp, coalesce(trim(po1.refa),'-') no_ref_a, trim(po1.refb) no_ref_b, to_char(po1.ddat,'DD-MM-YYYY') tgl_delivery, $P{nm_whs} nm_whs, $P{supplier} supplier, $P{alm1} alm1, $P{alm2} alm2, 'Telp : '||$P{notelp}||'   Fax : '||$P{nofax} notelpfax, 'Attn. '||$P{contact} contact, 'Email : '||$P{email} email, $P{nm_top} nm_top, po2.item_no item_no, po2.item_name item_name, po2.qty_po, po2.unit unit, 
+po1.kd_curr, po2.hrg_unit, (coalesce(po2.qty_po,0)*coalesce(po2.hrg_unit,0)) harga_total, po1.no_revisi, coalesce(po1.ket_revisi,'-') ket_revisi, to_char(po1.apr_pic_tgl,'DD-MM-YYYY') apr_pic_tgl, 
+$P{terbilang}||' '||po1.kd_curr||'.' terbilang
+from baan_po1s po1, baan_po2s po2
+where po1.no_po = po2.no_po 
+and po1.no_po = $P{noPo}
+limit 1]]>
+	</queryString>
+	<field name="nopo" class="java.lang.String"/>
+	<field name="tgl_po" class="java.lang.String"/>
+	<field name="no_pp" class="java.lang.String"/>
+	<field name="no_ref_a" class="java.lang.String"/>
+	<field name="no_ref_b" class="java.lang.String"/>
+	<field name="tgl_delivery" class="java.lang.String"/>
+	<field name="nm_whs" class="java.lang.String"/>
+	<field name="supplier" class="java.lang.String"/>
+	<field name="alm1" class="java.lang.String"/>
+	<field name="alm2" class="java.lang.String"/>
+	<field name="notelpfax" class="java.lang.String"/>
+	<field name="contact" class="java.lang.String"/>
+	<field name="email" class="java.lang.String"/>
+	<field name="nm_top" class="java.lang.String"/>
+	<field name="item_no" class="java.lang.String"/>
+	<field name="item_name" class="java.lang.String"/>
+	<field name="qty_po" class="java.math.BigDecimal"/>
+	<field name="unit" class="java.lang.String"/>
+	<field name="kd_curr" class="java.lang.String"/>
+	<field name="hrg_unit" class="java.math.BigDecimal"/>
+	<field name="harga_total" class="java.math.BigDecimal"/>
+	<field name="no_revisi" class="java.lang.Integer"/>
+	<field name="ket_revisi" class="java.lang.String"/>
+	<field name="apr_pic_tgl" class="java.lang.String"/>
+	<field name="terbilang" class="java.lang.String"/>
+	<variable name="total" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{harga_total}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="175" splitType="Stretch">
+			<frame>
+				<reportElement x="0" y="60" width="420" height="115" uuid="f3facff7-6cd3-4e42-91e1-8721f077a945"/>
+				<box topPadding="0">
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="0" y="0" width="200" height="30" uuid="8ef2dbdf-df62-4904-8699-53eedbbba1db"/>
+					<box leftPadding="2"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{supplier}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="30" width="200" height="13" uuid="98f58334-b527-414e-b64b-fbc305b44b9e"/>
+					<box leftPadding="4"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{alm1}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="43" width="200" height="13" uuid="3bf21eb4-ffe3-4a29-a804-bfbce6323873"/>
+					<box leftPadding="4"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{alm2}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="56" width="200" height="13" uuid="f5a6d124-7733-4d08-856e-01244cbd3381"/>
+					<box leftPadding="4"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{notelpfax}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="69" width="200" height="13" uuid="e1c350c3-c762-4a48-970c-25469fd6d4b2"/>
+					<box leftPadding="4"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{contact}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="82" width="200" height="13" uuid="109d9a25-8a5c-48ed-81e2-75820af13368"/>
+					<box leftPadding="4"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{email}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="200" y="0" width="216" height="15" uuid="4f618c71-db8b-4c9b-aede-d8763b65730d"/>
+					<box leftPadding="5">
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="false"/>
+					</textElement>
+					<text><![CDATA[FAKTUR KEPADA / INVOICE TO:]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="200" y="15" width="216" height="15" uuid="e86b1f32-e579-481e-a2b7-db58e91e9772"/>
+					<box leftPadding="5">
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="true"/>
+					</textElement>
+					<text><![CDATA[PT. INTI GANDA PERDANA]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="200" y="30" width="216" height="13" uuid="486b19d1-f8e8-4e22-aa94-57466ab0728e"/>
+					<box leftPadding="5">
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="true"/>
+					</textElement>
+					<text><![CDATA[NPWP : 01.060.617.6-007.000]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="200" y="43" width="216" height="13" uuid="fee4c661-5185-488b-a623-a79b0dd1e014"/>
+					<box leftPadding="5">
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="false"/>
+					</textElement>
+					<text><![CDATA[JL. RAYA PEGANGSAAN DUA BLOK A-3 KM 1,6]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="200" y="56" width="216" height="13" uuid="4abf38da-46c4-416e-9b05-1fe94fffa247"/>
+					<box leftPadding="5">
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="false"/>
+					</textElement>
+					<text><![CDATA[PEGANGSAAN DUA KELAPA GADING]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="200" y="69" width="216" height="13" uuid="b9983591-e602-4827-9f26-982a0d25dd7e"/>
+					<box leftPadding="5">
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="false"/>
+					</textElement>
+					<text><![CDATA[JAKARTA UTARA - 14250]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="200" y="82" width="216" height="13" uuid="bbb1d7a2-da43-4522-81dd-0689a6b3833f"/>
+					<box leftPadding="5">
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Phone: 021 - 4602755 (Hunting System)]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="200" y="95" width="216" height="13" uuid="e891f689-0f0b-4ee0-bec9-9f9b521ff66a"/>
+					<box leftPadding="5">
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Fax  : 021 - 4602765]]></text>
+				</staticText>
+			</frame>
+			<frame>
+				<reportElement x="420" y="60" width="135" height="115" uuid="fad9d11d-0a60-47c4-a5b7-386dcea58ff0"/>
+				<box>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<staticText>
+					<reportElement x="0" y="0" width="135" height="15" uuid="a2fea199-f2e6-4501-bf17-c6a328adbc2f"/>
+					<box leftPadding="2">
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="false"/>
+					</textElement>
+					<text><![CDATA[SYARAT PEMBAYARAN]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="15" width="135" height="15" uuid="812d6983-627c-4b72-9583-6390afebd4d6"/>
+					<box leftPadding="2">
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="false"/>
+					</textElement>
+					<text><![CDATA[TERMS OF PAYMENT:]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement x="5" y="30" width="125" height="52" uuid="ded18576-7876-404c-8079-d68cbc806ac2"/>
+					<box leftPadding="0"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{nm_top}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="0" y="82" width="135" height="33" uuid="1f44d678-de61-470e-b9fe-f6053dd9f572"/>
+					<box topPadding="2" leftPadding="2">
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Top">
+						<font fontName="Tahoma" size="9" isBold="false"/>
+					</textElement>
+					<text><![CDATA[JATUH TEMPO PEMBAYARAN: TGL. 15/30]]></text>
+				</staticText>
+			</frame>
+			<frame>
+				<reportElement x="0" y="0" width="420" height="60" uuid="22a6238a-8d76-4ab3-a17c-e7f472b4543a"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<staticText>
+					<reportElement x="0" y="0" width="121" height="30" uuid="fbdf9607-11d4-45e6-b5fb-650ce3caf255"/>
+					<box leftPadding="2"/>
+					<textElement verticalAlignment="Bottom">
+						<font fontName="Tahoma" size="9" isBold="true"/>
+					</textElement>
+					<text><![CDATA[PURCHASE ORDER]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="135" y="0" width="20" height="30" uuid="18e55e54-d25b-46df-bd6f-7e6891ff64d7"/>
+					<box leftPadding="2"/>
+					<textElement verticalAlignment="Bottom">
+						<font fontName="Tahoma" size="9" isBold="false"/>
+					</textElement>
+					<text><![CDATA[NO:]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="160" y="40" width="160" height="15" uuid="1b282423-d8e6-41bb-a5dc-b2554464ef3d"/>
+					<box leftPadding="0"/>
+					<textElement textAlignment="Center" verticalAlignment="Top">
+						<font fontName="Tahoma" size="11" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{nopo}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="330" y="0" width="90" height="30" uuid="9ea0aa01-ed8e-410d-ab66-f77f8d426b24"/>
+					<box leftPadding="0" rightPadding="0"/>
+					<textElement verticalAlignment="Bottom">
+						<font fontName="Tahoma" size="9" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{tgl_po}]]></textFieldExpression>
+				</textField>
+				<image scaleImage="FillFrame" onErrorType="Icon">
+					<reportElement isPrintRepeatedValues="false" x="160" y="5" width="160" height="30" uuid="7ba9681f-260c-469c-a7c9-8f82e1561778"/>
+					<imageExpression><![CDATA[$P{barcode}]]></imageExpression>
+				</image>
+			</frame>
+			<frame>
+				<reportElement x="420" y="0" width="135" height="60" uuid="8681edaf-8e3c-4587-9abd-3a3283b93551"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<staticText>
+					<reportElement x="0" y="0" width="135" height="30" uuid="12d376f0-5deb-4acf-acb5-dfa5009c2505"/>
+					<box leftPadding="2">
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Bottom">
+						<font fontName="Tahoma" size="9" isBold="false"/>
+					</textElement>
+					<text><![CDATA[KONFIRMASI DGN./TGL]]></text>
+				</staticText>
+			</frame>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="497" splitType="Stretch">
+			<frame>
+				<reportElement x="0" y="0" width="555" height="497" uuid="b2d49722-b23f-4242-b377-030b191d27d8"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<subreport>
+					<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="555" height="497" uuid="31cd8563-a30a-4c85-bc47-3b2dc8d6a55f"/>
+					<subreportParameter name="noPo">
+						<subreportParameterExpression><![CDATA[$P{noPo}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="terbilang">
+						<subreportParameterExpression><![CDATA[$P{terbilang}]]></subreportParameterExpression>
+					</subreportParameter>
+					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "PoPostgreWebSubPph.jasper"]]></subreportExpression>
+				</subreport>
+			</frame>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="130" splitType="Stretch">
+			<frame>
+				<reportElement x="0" y="0" width="295" height="55" uuid="4fdb09ce-e06c-41de-8d94-a564222f4452"/>
+				<box>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<staticText>
+					<reportElement x="0" y="0" width="216" height="15" uuid="8f260a0f-34fb-4467-9fad-872f6ad221ed"/>
+					<box leftPadding="2">
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="false"/>
+					</textElement>
+					<text><![CDATA[TANGGAL PENYERAHAN / DELIVERY DATE:]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="15" width="295" height="15" uuid="012dad14-637d-4982-8137-adfece0e5444"/>
+					<box leftPadding="2"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{tgl_delivery} + " / " + $F{no_ref_a}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="30" width="295" height="25" uuid="28eb3445-c2f5-47bf-aad8-ffd140787c78"/>
+					<box topPadding="2" leftPadding="2"/>
+					<textElement verticalAlignment="Top">
+						<font fontName="Tahoma" size="9" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{nm_whs}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement x="0" y="55" width="185" height="60" uuid="15ea1794-ca51-44cd-8d1a-736e87344dfc"/>
+				<box>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<staticText>
+					<reportElement x="0" y="0" width="185" height="60" uuid="00d2b0e7-64fe-4198-b6c6-ad155a9054e9"/>
+					<box topPadding="2" leftPadding="2">
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Top">
+						<font fontName="Tahoma" size="9" isBold="false"/>
+					</textElement>
+					<text><![CDATA[BILA SETUJU DENGAN ISI PO INI MOHON TTD DI KOLOM PERSETUJUAN PENJUAL & DIKIRIM ULANG SELAMBAT-LAMBATNYA 2 HARI STLH DITERIMA]]></text>
+				</staticText>
+			</frame>
+			<frame>
+				<reportElement x="185" y="55" width="110" height="60" uuid="b1269f82-bfe6-4de3-a0c3-2c1bf8ccb585"/>
+				<box>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="35" width="110" height="25" uuid="8612d7ea-54da-45b9-bf11-23b70125cd5b"/>
+					<box leftPadding="4"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{no_ref_b}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="0" y="0" width="110" height="35" uuid="ab4d5ab7-414c-4340-975c-5bf38820bef8"/>
+					<box topPadding="2" leftPadding="2">
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Top">
+						<font fontName="Tahoma" size="9" isBold="false"/>
+					</textElement>
+					<text><![CDATA[DOKUMEN INTERNAL/INTERNAL DOCUMENT]]></text>
+				</staticText>
+			</frame>
+			<frame>
+				<reportElement x="295" y="0" width="120" height="115" uuid="22819b01-2b0c-4edf-aceb-0c91fa892929"/>
+				<box>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<staticText>
+					<reportElement x="0" y="0" width="120" height="25" uuid="5204b438-780e-4f5f-b85e-e3afcbe5543c"/>
+					<box leftPadding="0">
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="false"/>
+					</textElement>
+					<text><![CDATA[PEMESAN/ORDERED BY:]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="5" y="25" width="110" height="65" forecolor="#FF0000" uuid="07175830-6657-4dd1-b450-9ffc30530e52">
+						<printWhenExpression><![CDATA[$P{ttd}.equals("")]]></printWhenExpression>
+					</reportElement>
+					<box leftPadding="0">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="true"/>
+					</textElement>
+					<text><![CDATA[PO DRAFT INI HANYA SEBAGAI SPK
+TIDAK BERLAKU UNTUK PENAGIHAN]]></text>
+				</staticText>
+				<image scaleImage="FillFrame" onErrorType="Icon">
+					<reportElement isPrintRepeatedValues="false" x="5" y="25" width="110" height="65" uuid="fe1cda61-f064-4310-912a-3f324ab5be6b">
+						<printWhenExpression><![CDATA[!$P{ttd}.equals("")]]></printWhenExpression>
+					</reportElement>
+					<imageExpression><![CDATA[$P{ttd}]]></imageExpression>
+				</image>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="90" width="120" height="25" uuid="19285551-2034-477b-b404-681f5d77c67f"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$P{nm_div}.toUpperCase()]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement x="415" y="0" width="140" height="115" uuid="4f4f28cc-4ab0-47f6-aa67-6bde6982ab3c"/>
+				<box>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<staticText>
+					<reportElement x="0" y="0" width="140" height="20" uuid="530af2ee-d612-4881-a153-505490c0d631"/>
+					<box leftPadding="5">
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="false"/>
+					</textElement>
+					<text><![CDATA[PERSETUJUAN PENJUAL/]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="20" width="140" height="20" uuid="a6acc660-1d58-4402-883d-991824a48ccc"/>
+					<box leftPadding="5">
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Top">
+						<font fontName="Tahoma" size="8" isBold="false"/>
+					</textElement>
+					<text><![CDATA[SUPPLIER'S CONFIRMATION]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="5" y="40" width="130" height="65" forecolor="#FF0000" uuid="c81a0d0a-d7a3-4956-8848-23598b160afe">
+						<printWhenExpression><![CDATA[$P{ttd}.equals("ANIANDA")]]></printWhenExpression>
+					</reportElement>
+					<box leftPadding="0">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Tahoma" size="9" isBold="true"/>
+					</textElement>
+					<text><![CDATA[PO ASLI DAPAT DIAMBIL 2 HARI SETELAH EMAIL DRAFT INI DIKIRIM]]></text>
+				</staticText>
+			</frame>
+			<staticText>
+				<reportElement x="0" y="115" width="45" height="15" uuid="0615a296-de6b-43ed-92c6-1988c65a2f91"/>
+				<box leftPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Tgl Cetak:]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy HH.mm.ss">
+				<reportElement x="45" y="115" width="250" height="15" uuid="f054dcb6-8c69-47b9-b18a-fb20f509ae91"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

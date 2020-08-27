@@ -1,0 +1,316 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Http\Requests;
+use App\Tlhpn01;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\File;
+use Intervention\Image\ImageManagerStatic as Image;
+use Carbon\Carbon;
+use DB;
+use Excel;
+use PDF;
+use JasperPHP\JasperPHP;
+use Exception;
+use Illuminate\Support\Facades\Input;
+
+class Tlhpn01Controller extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        if(Auth::user()->can('prod-lhp-view')) {                     
+            return view('prod.prodlhp.index');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        if(Auth::user()->can('prod-lhp-create')) {  
+            return view('prod.prodlhp.create');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        if(Auth::user()->can('prod-lhp-update')) {  
+            $id = base64_decode($id);      
+            $tlhpn01 = DB::connection('oracle-usrigpmfg')
+            ->table("tlhpn01")
+            ->where(DB::raw("no_doc"), '=', $id)
+            ->first();
+
+            $model = new Tlhpn01();   
+            return view('prod.prodlhp.edit')->with(compact(['tlhpn01', 'model']));
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        
+    }
+
+    public function dashboard(Request $request)
+    {
+     if(Auth::user()->can(['prod-lhp-view'])) {
+        $tahun = $request->get('tahun');
+        $bulan = $request->get('bulan');
+        $kd_plant = $request->get('plant');
+        if($bulan < 10){
+            $bulan = '0'.$bulan;
+        }        
+            if ($request->ajax()) {
+              $lists = DB::connection('oracle-usrigpmfg')
+              ->table("tlhpn01")
+              ->select(DB::raw("no_doc, tgl_doc, shift, fnm_line(kd_line) nm_line, fnm_proses(proses) nm_proses, fnm_plant(kd_plant) nm_plant"))
+              ->whereRaw("to_char(tgl_doc,'MMYYYY') = '".$bulan."".$tahun."' and kd_plant = '".$kd_plant."' ");
+
+              return Datatables::of($lists)
+              ->editColumn('no_doc', function($lists) {
+                return '<a href="'.route('prodlhp.edit',base64_encode($lists->no_doc)).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $lists->no_doc .'">'.$lists->no_doc.'</a>';
+            })
+              ->editColumn('tgl_doc', function($lists){
+                return Carbon::parse($lists->tgl_doc)->format('d/m/Y');            
+            })
+              ->filterColumn('tgl_doc', function ($query, $keyword) {
+                $query->whereRaw("to_char(tgl_doc,'dd/mm/yyyy') like ?", ["%$keyword%"]);
+            })
+              ->filterColumn('nm_line', function ($query, $keyword) {
+                $query->whereRaw("(select fnm_line(kd_line) from dual)  like ?", ["%$keyword%"]);
+            })
+              ->filterColumn('nm_proses', function ($query, $keyword) {
+                $query->whereRaw("(select fnm_proses(proses) from dual)  like ?", ["%$keyword%"]);
+            })
+              ->filterColumn('nm_plant', function ($query, $keyword) {
+                $query->whereRaw("(select fnm_plant(kd_plant) from dual)  like ?", ["%$keyword%"]);
+            })
+
+              ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+          return view('errors.403');
+      }
+    }
+
+    public function delete($id)
+    {
+            if(Auth::user()->can('prod-lhp-delete')) {
+              $no_doc = base64_decode($id);      
+              try {            
+                  DB::beginTransaction();
+                  DB::connection("oracle-usrigpmfg")
+                    ->table(DB::raw("tlhpn01"))
+                    ->where("no_doc", $no_doc)
+                    ->delete();
+
+                  DB::connection("oracle-usrigpmfg")
+                    ->table(DB::raw("tlhpn02"))
+                    ->where("no_doc", $no_doc)
+                    ->delete();
+
+                  DB::connection("oracle-usrigpmfg")
+                    ->table(DB::raw("tlhpn04"))
+                    ->where("no_doc", $no_doc)
+                    ->delete();
+
+                          //insert logs
+                  $log_keterangan = "Tlhpn01Controller.destroy: Delete LHP Berhasil. ";
+                  $log_ip = \Request::session()->get('client_ip');
+                  $created_at = Carbon::now();
+                  $updated_at = Carbon::now();
+                  DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                  DB::commit();
+                  Session::flash("flash_notification", [
+                    "level"=>"success",
+                    "message"=>"LHP berhasil dihapus."
+                  ]);
+                  return redirect()->route('prodlhp.index');
+                
+              } catch (Exception $ex) {            
+                  Session::flash("flash_notification", [
+                    "level"=>"danger",
+                    "message"=>"LHP gagal dihapus!"
+                  ]);
+                  return redirect()->route('prodlhp.index');            
+              }
+          } else {        
+              return view('errors.403');
+          }
+    }
+
+    //hapus detail
+    public function hapus(Request $request, $no_doc, $partno, $noseq)
+    { 
+        if(Auth::user()->can('prod-lhp-delete')) {
+            $no_doc = base64_decode($no_doc);
+            $partno = base64_decode($partno);
+            $noseq = base64_decode($noseq);                     
+                try {
+                    if ($request->ajax()) {
+                        DB::connection("oracle-usrigpmfg")
+                            ->table(DB::raw("tlhpn02"))
+                            ->where("no_doc", $no_doc)
+                            ->where("part_no", $partno)
+                            ->where("no_seq", $noseq)
+                            ->delete();
+
+                        $status = 'OK';
+                        $msg = 'Data berhasil dihapus.';
+                        //insert logs
+                        $log_keterangan = "Tlhpn01Controller.destroy: Hapus Detail LS Berhasil. ".$no_doc." Partno: ".$partno;
+                        $log_ip = \Request::session()->get('client_ip');
+                        $created_at = Carbon::now();
+                        $updated_at = Carbon::now();
+                        DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+                        DB::commit();
+                        return response()->json(['id' => $partno, 'status' => $status, 'message' => $msg]);
+                    } else {
+                        DB::connection("oracle-usrigpmfg")
+                            ->table(DB::raw("tlhpn02"))
+                            ->where("no_doc", $no_doc)
+                            ->where("part_no", $partno)
+                            ->where("no_seq", $noseq)
+                            ->delete();
+                        DB::commit();
+                        Session::flash("flash_notification", [
+                            "level"=>"success",
+                            "message"=>"Detail LS berhasil dihapus."
+                        ]);
+                        return redirect()->route('prodlhp.index');
+                    }
+                } catch (Exception $ex) {
+                    if ($request->ajax()) {
+                        return response()->json(['id' => $partno, 'status' => 'NG', 'message' => 'Data gagal dihapus! Detail LS tidak ditemukan.']);
+                    } else {
+                        Session::flash("flash_notification", [
+                            "level"=>"danger",
+                            "message"=>"Detail LS tidak ditemukan."
+                        ]);
+                        return redirect()->route('prodlhp.index');
+                    }
+                }
+        } else {
+            return view('errors.403');
+        }        
+    }
+
+    //hapus detail
+    public function hapusdetail(Request $request, $no_doc)
+    { 
+        if(Auth::user()->can('prod-lhp-delete')) {
+            $no_doc = base64_decode($no_doc);                   
+                try {
+                    if ($request->ajax()) {
+                        DB::connection("oracle-usrigpmfg")
+                            ->table(DB::raw("tlhpn02"))
+                            ->where("no_doc", $no_doc)
+                            ->delete();
+
+                        $status = 'OK';
+                        $msg = 'Data berhasil dihapus.';
+                        //insert logs
+                        $log_keterangan = "Tlhpn01Controller.destroy: Hapus Detail LS Berhasil. ".$no_doc;
+                        $log_ip = \Request::session()->get('client_ip');
+                        $created_at = Carbon::now();
+                        $updated_at = Carbon::now();
+                        DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+                        DB::commit();
+                        return response()->json(['id' => $partno, 'status' => $status, 'message' => $msg]);
+                    } else {
+                        DB::connection("oracle-usrigpmfg")
+                            ->table(DB::raw("tlhpn02"))
+                            ->where("no_doc", $no_doc)
+                            ->delete();
+                        DB::commit();
+                        Session::flash("flash_notification", [
+                            "level"=>"success",
+                            "message"=>"Detail LS berhasil dihapus."
+                        ]);
+                        return redirect()->route('prodlhp.index');
+                    }
+                } catch (Exception $ex) {
+                    if ($request->ajax()) {
+                        return response()->json(['id' => $partno, 'status' => 'NG', 'message' => 'Data gagal dihapus! Detail LS tidak ditemukan.']);
+                    } else {
+                        Session::flash("flash_notification", [
+                            "level"=>"danger",
+                            "message"=>"Detail LS tidak ditemukan."
+                        ]);
+                        return redirect()->route('prodlhp.index');
+                    }
+                }
+        } else {
+            return view('errors.403');
+        }        
+    }
+
+}

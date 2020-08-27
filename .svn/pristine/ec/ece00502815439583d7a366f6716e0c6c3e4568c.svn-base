@@ -1,0 +1,120 @@
+@extends('layouts.app')
+@section('content')
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <h1>
+        TRANSAKSI
+        <small>Pengajuan Cuti</small>
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="{{ url('/home') }}"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li class="active"><i class="fa fa-lock"></i> Pengajuan Cuti</li>
+      </ol>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      @include('layouts._flash')
+      <div class="row">
+        <div class="col-md-12">
+          <div class="box box-primary">
+            <div class="box-header">
+              <a class="btn btn-primary" href="javaScript:void(0);" onclick="checkAtasan()"><span class="fa fa-user-plus"></span> Add Pengajuan Cuti</a>
+              <a class="btn btn-success" href="javaScript:void(0);" onclick="Cetak()"><span class="glyphicon glyphicon-print"></span> Cetak </a>
+              <input type="text" id="inputchk" hidden>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+              <table id="tblMaster" class="table table-bordered table-striped" cellspacing="0" width="100%">
+                <thead>
+                  <tr>
+                    <th style="width:5px;">#</th>
+                    <th style="width: 21%;">Tanggal</th> 
+                    <th style="width: 17%;">Status </th>  
+                    <th style="width: 2%;">Cetak </th> 
+                    <th>&nbsp;</th> 
+                  </tr>
+                </thead>
+              </table>
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+        </div>
+        <!-- /.col -->
+      </div>
+      <!-- /.row -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+@endsection
+
+@section('scripts')
+<script type="text/javascript">
+  $(document).ready(function(){
+    var tableDetail = $('#tblMaster').DataTable({
+      "columnDefs": [{
+        "searchable": false,
+        "orderable": false,
+        "targets": 0,
+        render: function (data, type, row, meta) {
+          return meta.row + meta.settings._iDisplayStart + 1;
+        }
+      }],
+      //"aLengthMenu": [[5, 10, 25, 50, 75, 100, -1], [5, 10, 25, 50, 75, 100, "All"]],
+      "iDisplayLength": 10, 
+      processing: true,
+      serverSide: true,
+      responsive: false,
+      "bSort": false,
+      "lengthChange": false,
+      ajax: "{{ route('pengajuancuti.listpengajuancuti') }}",
+      columns: [
+        {data: null, name: null, orderable: false, searchable: false},
+        {data: 'tglpengajuan', name: 'tglpengajuan'},
+        {data: 'status', name: 'status'},
+        {data: 'cetak', name: 'cetak'},
+        {data: 'action'}
+      ]
+    });
+	
+  	/*Pengajuan cuti atasan validate*/
+  	checkAtasan = function()
+  	{  
+  		$.ajax( {
+  			type: "GET",
+  			url: "{{ route('pengajuancuti.checkAtasan') }}", 
+        success: function( response ) {
+          var json = $.parseJSON(response);
+
+  				if(json.success == false) {
+            swal("Error!", json.result , "error");
+  				} else {
+            window.location = "{{ route('pengajuancuti.formpengajuancuti') }}";
+          }
+  			 } 
+  		}); 
+  	}
+	
+  	//Tampung data checklist
+  	getInputChk = function(vals)
+  	{
+      $("#inputchk").val(vals);
+  	}
+	
+  	//Tombol Cetak diklik
+  	Cetak =  function()
+  	{
+      var pilih = $("#inputchk").val(); 
+  		//console.log(pecah)
+  		var req = pilih;  
+  		var url = "{{ route('pengajuancuti.cetak', ['req']) }}";
+  		url = url.replace('req', window.btoa(req)); 
+  		window.location.href = url;
+  	}
+  });
+</script>
+@endsection

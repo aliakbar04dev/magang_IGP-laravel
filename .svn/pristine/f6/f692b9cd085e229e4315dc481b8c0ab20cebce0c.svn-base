@@ -1,0 +1,165 @@
+<html>
+<head>
+<title>Print Lupa Prik</title>
+<style>
+@page { size: A5 }
+ 
+    h1 {
+        font-weight: bold;
+        font-size: 20pt;
+        text-align: center;
+    }
+ 
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+ 
+    .table th {
+        padding: 8px 8px;
+        border:1px solid #000000;
+        text-align: center;
+    }
+ 
+    .table td {
+        padding: 3px 3px;
+        border:1px solid #000000;
+    }
+ 
+    .text-center {
+        text-align: center;
+    }
+</style>
+</head>
+    <body>
+         <table style="margin-top-top: 1px; margin-left: 1px">
+                <thead >
+                    <tr> 
+                      <th rowspan="2" align="left" width="110px">
+                      <img src="images/logo.png" width="100" border="0"> 
+                      </th>
+
+                      <td align="center">
+                         <font size="25px" > <b> PT. Inti Ganda Perdana </b> </font> </td>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td align="center"><font size="9px" > Jl. Pegangsaan Dua Blok A-3, Km 1,6 Kelapa Gading,<br>Jakarta Utara, DKI Jakarta, 14250 - Indonesia <br>
+                      Phone: 021 - 4602755 (Ext. 184) <br>
+                      Fax: 021 - 4602765  </font>
+                      </td>
+                    </tr>
+                </thead>
+          </table>
+          <br>
+          <hr> 
+          <center> <h2>Bukti Persetujuan Lupa Prik</h2> </center>
+          <hr>
+        
+        <!-- form start -->
+ <div class="box-body">
+    <div class="form-group">
+  
+      <div class="table-responsive">
+        <form method="POST" accept-charset="UTF-8" style="display:inline">
+          {{ csrf_field() }}
+                            <table>
+                                <tbody>
+                                   <tr>
+                                        <th align="left"> No. Pengajuan </th>
+                                         <td>: <b> {{$LupaPPengajuans->no_lp}} <b> </td>
+                                   </tr>
+              
+                                   <tr>
+                                        <th  align="left"> NPK </th>
+                                        <td>: {{$LupaPPengajuans->npk}}</td>
+                                   </tr>
+
+                                   <tr>
+                                        <th align="left"> Nama Karyawan </th>
+                                        <td>: {{$kar->first()->nama}}  </td>
+                                   </tr>
+                  
+                                   <tr>
+                                        <th align="left"> Nama PT </th>
+                                        <td>: {{$kar->first()->kd_pt}}  </td>
+                                   </tr>
+                  
+                  
+                                   <tr>
+                                        <th align="left"> Nama Dept. </th>
+                                        <td>: {{$kar->first()->desc_dep}}  </td>
+                                    </tr>
+
+                                    <tr>
+                                        <th align="left"> Nama Atasan </th>
+                                        <td>: {{$namaatasan->first()->nama}} </td>
+                                    </tr> 
+                                    <tr>
+                                      <th align="left"> Tanggal Lupa </th>
+                                      <td>: {!! date('d F Y', strtotime($LupaPPengajuans->tgllupa)); !!} </td>
+                                   </tr>
+
+                                   @if ($LupaPPengajuans->jamin==null) 
+                                    <tr>
+                                      <th align="left"> Jam Keluar </th>
+                                      <td>: {{$LupaPPengajuans->jamout}} </td>
+                                   </tr>
+                                            
+                                   @elseif ($LupaPPengajuans->jamout==null) 
+                                    <tr>
+                                      <th align="left"> Jam Masuk </th>
+                                      <td>: {{$LupaPPengajuans->jamin}} </td>
+                                   </tr>
+
+                                   @else 
+                                     <tr>
+                                      <th align="left"> Jam Masuk </th>
+                                      <td>: {{$LupaPPengajuans->jamin}} </td>
+                                   </tr>
+
+                                   <tr>
+                                      <th align="left"> Jam Keluar </th>
+                                      <td>:  {{$LupaPPengajuans->jamout}}  
+                                       </td>
+                                   </tr>         
+                                  @endif
+
+                                   <tr>
+                                      <th align="left"> Alasan Lupa </th>
+                                      <td>: {{$LupaPPengajuans->alasanlupa}}</td>
+                                   </tr>
+                   
+                                   <tr>
+                                        <th align="left"> Status Permintaan </th>
+                                        <td>:  
+                                        @if ($LupaPPengajuans->status==1) 
+                                        <b style="color:green">  DISETUJUI </b>
+                                        @elseif ($LupaPPengajuans->status==2) 
+                                        <b class="btn-xs btn-danger btn-icon-pg"  > Ditolak  </b> 
+                                        @else 
+                                        <b class="btn-xs btn-info btn-icon-pg" action="disable"> Belum Approval </b> 
+                                        @endif 
+                                        pada tanggal {!! date('d-m-Y', strtotime($LupaPPengajuans->tglok)); !!}
+                                        </td>
+                                  </tr>
+
+                                  <tr>
+                                        <th> </th>
+                                  </tr>
+                                </tbody>
+                            </table>
+        
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      <!-- /.box -->
+      </section>
+    <!-- /.content -->
+    </div>
+  <!-- /.content-wrapper -->
+  </body>
+</html>

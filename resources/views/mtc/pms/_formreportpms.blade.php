@@ -1,0 +1,230 @@
+<div class="box-body form-horizontal">
+  <div class="form-group">
+    <div class="col-sm-2">
+      {!! Form::label('filter_tahun', 'Tahun') !!}
+      <select id="filter_tahun" name="filter_tahun" aria-controls="filter_status" 
+      class="form-control select2">
+        @for ($i = \Carbon\Carbon::now()->format('Y'); $i > \Carbon\Carbon::now()->format('Y')-5; $i--)
+          @if ($i == \Carbon\Carbon::now()->format('Y'))
+            <option value={{ $i }} selected="selected">{{ $i }}</option>
+          @else
+            <option value={{ $i }}>{{ $i }}</option>
+          @endif
+        @endfor
+      </select>
+    </div>
+    <div class="col-sm-2">
+      {!! Form::label('filter_bulan', 'Bulan') !!}
+      <select id="filter_bulan" name="filter_bulan" aria-controls="filter_status" class="form-control select2">
+        <option value="01" @if ("01" == \Carbon\Carbon::now()->format('m')) selected="selected" @endif>Januari</option>
+        <option value="02" @if ("02" == \Carbon\Carbon::now()->format('m')) selected="selected" @endif>Februari</option>
+        <option value="03" @if ("03" == \Carbon\Carbon::now()->format('m')) selected="selected" @endif>Maret</option>
+        <option value="04" @if ("04" == \Carbon\Carbon::now()->format('m')) selected="selected" @endif>April</option>
+        <option value="05" @if ("05" == \Carbon\Carbon::now()->format('m')) selected="selected" @endif>Mei</option>
+        <option value="06" @if ("06" == \Carbon\Carbon::now()->format('m')) selected="selected" @endif>Juni</option>
+        <option value="07" @if ("07" == \Carbon\Carbon::now()->format('m')) selected="selected" @endif>Juli</option>
+        <option value="08" @if ("08" == \Carbon\Carbon::now()->format('m')) selected="selected" @endif>Agustus</option>
+        <option value="09" @if ("09" == \Carbon\Carbon::now()->format('m')) selected="selected" @endif>September</option>
+        <option value="10" @if ("10" == \Carbon\Carbon::now()->format('m')) selected="selected" @endif>Oktober</option>
+        <option value="11" @if ("11" == \Carbon\Carbon::now()->format('m')) selected="selected" @endif>November</option>
+        <option value="12" @if ("12" == \Carbon\Carbon::now()->format('m')) selected="selected" @endif>Desember</option>
+      </select>
+    </div>
+    <div class="col-sm-2">
+      {!! Form::label('kd_plant', 'Plant') !!}
+      <select size="1" id="kd_plant" name="kd_plant" class="form-control select2" onchange="changeKdPlant()">
+        <option value="-" selected="selected">Pilih Plant</option>
+        @foreach($plant->get() as $kode)
+          <option value="{{ $kode->kd_plant }}">{{ $kode->nm_plant }}</option>
+        @endforeach
+      </select>
+    </div>
+  </div>
+  <!-- /.form-group -->
+  <div class="form-group">
+    <div class="col-sm-2">
+      {!! Form::label('kd_line', 'Line (F9)') !!}
+      <div class="input-group">
+        {!! Form::text('kd_line', null, ['class'=>'form-control','placeholder' => 'Line', 'maxlength' => 10, 'onkeydown' => 'keyPressedKdLine(event)', 'onchange' => 'validateKdLine()', 'id' => 'kd_line']) !!}
+        <span class="input-group-btn">
+          <button id="btnpopupline" type="button" class="btn btn-info" data-toggle="modal" data-target="#lineModal">
+            <span class="glyphicon glyphicon-search"></span>
+          </button>
+        </span>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      {!! Form::label('nm_line', 'Nama Line') !!}
+      {!! Form::text('nm_line', null, ['class'=>'form-control','placeholder' => 'Nama Line', 'disabled'=>'', 'id' => 'nm_line']) !!}
+    </div>
+  </div>
+  <!-- /.form-group -->
+</div>
+<!-- /.box-body -->
+
+<div class="box-footer">
+  <button id='btnprint' type='button' class='btn btn-primary' data-toggle='tooltip' data-placement='top' title='Print Report PMS' onclick='printReportPMS()'>
+    <span class='glyphicon glyphicon-print'></span> Print Report PMS
+  </button>
+  &nbsp;&nbsp;
+  <p class="help-block pull-right has-error">{!! Form::label('info', '(*) tidak boleh kosong', ['style'=>'color:red']) !!}</p>
+</div>
+
+<!-- Modal Line -->
+@include('mtc.lp.popup.lineModal')
+
+@section('scripts')
+<script type="text/javascript">
+  document.getElementById("filter_tahun").focus();
+
+  //Initialize Select2 Elements
+  $(".select2").select2();
+
+  function changeKdPlant() {
+    validateKdLine();
+  }
+
+  function keyPressedKdLine(e) {
+    if(e.keyCode == 120) { //F9
+      $('#btnpopupline').click();
+    } else if(e.keyCode == 9) { //TAB
+      e.preventDefault();
+      document.getElementById('btnprint').focus();
+    }
+  }
+
+  function popupKdLine() {
+    var myHeading = "<p>Popup Line</p>";
+    $("#lineModalLabel").html(myHeading);
+    var kd_plant = document.getElementById('kd_plant').value.trim();
+    var url = '{{ route('datatables.popupLines', 'param') }}';
+    url = url.replace('param', window.btoa(kd_plant));
+    var lookupLine = $('#lookupLine').DataTable({
+      processing: true, 
+      "oLanguage": {
+        'sProcessing': '<div id="processing" style="margin: 0px; padding: 0px; position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; background-color: rgb(102, 102, 102); z-index: 30001; opacity: 0.8;"><p style="position: absolute; color: White; top: 50%; left: 45%;"><img src="{{ asset('images/ajax-loader.gif') }}"></p></div>Processing...'
+      }, 
+      serverSide: true,
+      "pagingType": "numbers",
+      ajax: url,
+      "aLengthMenu": [[5, 10, 25, 50, 75, 100, -1], [5, 10, 25, 50, 75, 100, "All"]],
+      responsive: true,
+      // "scrollX": true,
+      // "scrollY": "500px",
+      // "scrollCollapse": true,
+      "order": [[1, 'asc']],
+      columns: [
+        { data: 'xkd_line', name: 'xkd_line'},
+        { data: 'xnm_line', name: 'xnm_line'}
+      ],
+      "bDestroy": true,
+      "initComplete": function(settings, json) {
+        // $('div.dataTables_filter input').focus();
+        $('#lookupLine tbody').on( 'dblclick', 'tr', function () {
+          var dataArr = [];
+          var rows = $(this);
+          var rowData = lookupLine.rows(rows).data();
+          $.each($(rowData),function(key,value){
+            document.getElementById("kd_line").value = value["xkd_line"];
+            document.getElementById("nm_line").value = value["xnm_line"];
+            $('#lineModal').modal('hide');
+            validateKdLine();
+          });
+        });
+        $('#lineModal').on('hidden.bs.modal', function () {
+          var kd_line = document.getElementById("kd_line").value.trim();
+          if(kd_line === '') {
+            document.getElementById("nm_line").value = "";
+            $('#kd_line').focus();
+          } else {
+            $('#btnprint').focus();
+          }
+        });
+      },
+    });
+  }
+
+  function validateKdLine() {
+    var kd_line = document.getElementById("kd_line").value.trim();
+    if(kd_line !== '') {
+      var kd_plant = document.getElementById('kd_plant').value.trim();
+      var url = '{{ route('datatables.validasiLine', ['param','param2']) }}';
+      url = url.replace('param2', window.btoa(kd_line));
+      url = url.replace('param', window.btoa(kd_plant));
+      //use ajax to run the check
+      $.get(url, function(result){  
+        if(result !== 'null'){
+          result = JSON.parse(result);
+          document.getElementById("kd_line").value = result["xkd_line"];
+          document.getElementById("nm_line").value = result["xnm_line"];
+        } else {
+          document.getElementById("kd_line").value = "";
+          document.getElementById("nm_line").value = "";
+          document.getElementById("btnprint").focus();
+          swal("Line tidak valid!", "Perhatikan inputan anda! tekan F9 untuk tampilkan data.", "error");
+        }
+      });
+    } else {
+      document.getElementById("kd_line").value = "";
+      document.getElementById("nm_line").value = "";
+    }
+  }
+
+  function printReportPMS()
+  {
+    var msg = 'Anda yakin print data ini?';
+    var txt = '';
+    //additional input validations can be done hear
+    swal({
+      title: msg,
+      text: txt,
+      type: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: '<i class="fa fa-thumbs-up"></i> Yes, print it!',
+      cancelButtonText: '<i class="fa fa-thumbs-down"></i> No, cancel!',
+      allowOutsideClick: true,
+      allowEscapeKey: true,
+      allowEnterKey: true,
+      reverseButtons: false,
+      focusCancel: true,
+    }).then(function () {
+      var tahun = $('select[name="filter_tahun"]').val();
+      var bulan = $('select[name="filter_bulan"]').val();
+      var kd_plant = document.getElementById('kd_plant').value.trim();
+      if(kd_plant == "") {
+        kd_plant = "-";
+      }
+      var kd_line = document.getElementById("kd_line").value.trim();
+      if(kd_line == "") {
+        kd_line = "-";
+      }
+      var urlRedirect = "{{ route('mtctpmss.printreportpms', ['param','param2','param3','param4']) }}";
+      urlRedirect = urlRedirect.replace('param4', window.btoa(kd_line));
+      urlRedirect = urlRedirect.replace('param3', window.btoa(kd_plant));
+      urlRedirect = urlRedirect.replace('param2', window.btoa(bulan));
+      urlRedirect = urlRedirect.replace('param', window.btoa(tahun));
+      // window.location.href = urlRedirect;
+      window.open(urlRedirect, '_blank');
+    }, function (dismiss) {
+      // dismiss can be 'cancel', 'overlay',
+      // 'close', and 'timer'
+      if (dismiss === 'cancel') {
+        // swal(
+        //   'Cancelled',
+        //   'Your imaginary file is safe :)',
+        //   'error'
+        // )
+      }
+    })
+  }
+
+  $(document).ready(function(){
+
+    $("#btnpopupline").click(function(){
+      popupKdLine();
+    });
+  });
+</script>
+@endsection

@@ -1,0 +1,981 @@
+@extends('monitoring.mtc.layouts.app3')
+<style type="text/css">
+  @media only screen and (min-width: 600px ) {
+      #footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 2.5rem;            /* Footer height */
+  }
+  
+  body{
+    height:500px;
+  }
+  
+  
+  #tblMaster{
+      min-height:293px; 
+      margin-left:0px;
+      margin-right:0px;
+      margin-bottom:0px;
+      margin-top:-20px;
+     }
+  
+     #tblChart{
+      height:350px !important;
+     }
+  
+    .chartGambar{
+      height:320px !important;
+     
+    }
+    .atasdashboard{
+      width: 100%; 
+      height:100px; 
+      padding:0px; 
+      margin-left:-50px;
+    }
+    /* .tampilbawah{
+      margin-bottom:20%;
+    } */
+  
+    .garisinfo{
+      margin-left:10px;
+    }
+  
+    .menu{
+      font-size: 30px;
+      color:white;
+    }
+  
+    
+  
+    .imagelogo{
+      margin-top:-10px;
+      margin-left:30px;
+      height:100px; 
+      width:100px;
+    }
+  
+  
+  
+    .huruf{
+      font-size: 25px;
+      margin-left: 20px;
+    }
+  }
+  
+  @media only screen and (max-width: 599px) {
+  
+    #footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 2.5rem;            /* Footer height */
+  }
+  
+  body{
+      height: 250px !important;
+     }
+  
+     #tblChart{
+      height:350px;
+     }
+  
+     .chartGambar{
+      height:350px !important;
+     
+    }
+  
+  .menu{
+    font-size: 14px;
+    color:white;
+  }
+  
+  .imagelogo{
+      margin-top:15px;
+      margin-left:30px;
+      height:50px; 
+      width:50px;
+    }
+  
+  
+    .huruf{
+      font-size: 14px;
+      margin-top:10px;
+      margin-left: 20px;
+    }
+  
+  }
+  @media only screen and (min-width: 1081px) {
+     body{
+      height: 710px !important;
+     }
+  
+     #tblMaster{
+      min-height:293px; 
+      margin-left:0px;
+      margin-right:0px;
+      margin-bottom:0px;
+      margin-top:30px;
+     }
+  
+     #tblChart{
+      height:350px !important;
+     }
+  
+    .chartGambar{
+      height:320px !important;
+     
+    }
+  
+    }
+  
+    .atasdashboard{
+      width: 100%; 
+      height:100px; 
+      padding:0px; 
+      margin-left:-10px;
+    }
+  
+    .box{
+      position: relative;
+    text-align: center;
+    background:none;
+          /* Make the width of box same as image */
+  }
+  
+    body {
+      background-image: url("{{ asset('images/warehouse_bg.jpg') }}");
+      /* background-color: #00001e !important; */
+      position:relative;
+    }
+    
+  .centered {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .backbutton{
+    float:right;
+    margin-top:5px !important;
+  }
+  
+  
+  
+    
+  
+    
+  </style>
+@section('content')
+  <div class="container4">
+    <div class="row" id="box-body" name="box-body">
+          {{-- <div class="box-header" style="margin-bottom:-30px;">
+            <center style="padding:0px; margin:0px;"> <img src="{{ asset('images/atas-db.png') }}" class="atasdashboard"></center> --}}
+            {{-- <center><h3 class="box-title" id="box-title" name="box-title" style="font-family:serif;font-size: 30px;color: white"><strong>DASHBOARD SMART MAINTENANCE</strong></h3></center> --}}
+          {{-- </div> --}}
+
+          
+          <!-- /.box-header -->
+
+          <div class="box-body tampilbawah" >
+                <div class="row">
+                    <div class="col-xl-12" >
+                        <img src="{{ asset('images/logosmart.png') }}" class="imagelogo" align="left">
+                        <br>
+                        <div class="alert alert-danger alert-dismissible" style="height:40px; width:100% ;  padding:0px 10px; background-color:#ff7701 !important;">
+                            <p class="huruf" >DAILY ACTIVITY <button type="button" onclick="onBack()" class="btn bg-navy margin backbutton" style="width:70px;"><i class="fa fa-chevron-circle-left"></i></button></p>
+                            
+                        </div>
+                    </div>
+                </div>
+                <center>
+                    <table id="tblMaster" width="85%"> 
+                        {{-- <tr>
+                            <td></td>
+                            <td colspan="2" style="color:white; padding-bottom:10px; font-size:20px; font-weight:bold;"><center>IGP 1</center></td>
+                            <td></td>
+                            <td colspan="2" style="color:white; padding-bottom:10px; font-size:20px; font-weight:bold;"><center>IGP 2</center></td>
+                            <td></td>
+                            <td colspan="2" style="color:white; padding-bottom:10px; font-size:20px; font-weight:bold;"><center>IGP 3</center></td>
+                            <td></td>
+                        </tr> --}}
+                      <tr >
+                        <td style="width: 10%;text-align: center;">
+                          <img  src="{{ asset('images/igp1zona1.png') }}" style="filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.8)); margin-bottom:20px; width: 100%;" id="btn-daz-igp1-zona1">
+                          <img  src="{{ asset('images/igp1zona2.png') }}" style="filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.8)); margin-bottom:20px; width: 100%;" id="btn-daz-igp2-zona1">
+                        </td>
+                        <td  style="width: 2%;"></td>
+                        <td style="width: 10%;text-align: center; margin-left:50px;">
+                            <img src="{{ asset('images/igp2zona1.png') }}" style=" filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.8)); margin-bottom:20px; width: 100%; " id="btn-daz-igp2-zona1">
+                            <img src="{{ asset('images/igp2zona2.png') }}" style=" filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.8)); margin-bottom:20px; width: 100%;" id="btn-daz-igp2-zona2">
+                        </td>
+                        <td style="width: 10%;text-align: center">
+                          <img src="{{ asset('images/igp2zona3.png') }}" style="filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.8)); width: 100%; margin-bottom:20px; width: 100%; " id="btn-daz-igp2-zona3">
+                        </td>
+                          <td style="width: 10%;text-align: center">
+                          <img src="{{ asset('images/igp3zona1.png') }}" style="filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.8)); margin-bottom:20px; width: 100%; " id="btn-daz-igp3-zona1">
+                          <img src="{{ asset('images/igp3zona2.png') }}" style="filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.8)); margin-bottom:20px; width: 100%;" id="btn-daz-igp3-zona2">
+                        </td>
+                        <td style="width: 10%;text-align: center">
+                            <img src="{{ asset('images/igp3zona3.png') }}" style="filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.8)); width: 100%; margin-bottom:20px; width: 100%; " id="btn-daz-igp3-zona3">
+                        </td>
+                      </tr>
+                    </table>
+            </center>
+            
+          </div>
+          <!-- ./box-body -->
+          
+      <!-- /.col -->
+    </div>
+    <!-- /.row -->
+  </div>
+  <footer id="footer">
+      <div class="row">
+          <div class="col-xl-12" style="height:40px;">
+                  <div class="alert alert-danger alert-dismissible" style="height:40px; padding:0px 10px; background-color:red !important; margin-bottom:0px;!important;">
+                          <p class="huruf" >OUT STANDING DAILY ACTIVITY</p>
+                  </div>
+                  <div class="table-responsive" style="background-color: white; height:auto; margin-bottom:0px;" >
+                      <table  width="100%" style="margin-top: -20px; margin-left:20px; margin-right:20px;" align="center"> 
+                          <tr >
+                            
+                            <td style="width: 25%;text-align: center; padding-top:0px;">
+                                    <div class="box-body m1">
+                                      <br>
+                                        {{-- <center>IGP 1</center> --}}
+                                          <table id="tblMaster1" class="table table-bordered table-striped" cellspacing="0" width="100%">
+                                              <thead>
+                                                <tr>
+                                                  <th style="width: 1%; font-size:14px;">No</th>
+                                                  <th style="width: 15%; font-size:14px;">Mesin</th>
+                                                  <th style="font-size:14px;">Item Pengerjaan</th>
+                                                  <th style="font-size:14px;">Tgl</th>
+                                                </tr>
+                                              </thead>
+                                            </table>
+                                    </div>
+                            </td>
+                            {{-- <td style="width: 2%;text-align: center;">
+                              <hr class="garistengah">
+                            </td> --}}
+                            <td style="width: 25%;text-align: center">
+                                    <div class="box-body m2">
+                                      <br>
+                                        {{-- <center>IGP 2</center> --}}
+                                          <table id="tblMaster2" class="table table-bordered table-striped" cellspacing="0" width="100%">
+                                              <thead>
+                                                <tr>
+                                                  <th style="width: 1%; font-size:14px;">No</th>
+                                                  <th style="width: 15%; font-size:14px;">Mesin</th>
+                                                  <th style="font-size:14px;">Item Pengerjaan</th>
+                                                  <th style="font-size:14px;">Tgl</th>
+                                                </tr>
+                                              </thead>
+                                            </table>
+                                    </div>
+                            </td>
+                            <td style="width: 25%;text-align: center">
+                                    <div class="box-body m3">
+                                      <br>
+                                        {{-- <center>IGP 3</center> --}}
+                                          <table id="tblMaster3" class="table table-bordered table-striped" cellspacing="0" width="100%">
+                                              <thead>
+                                                <tr>
+                                                  <th style="width: 1%; font-size:14px;">No</th>
+                                                  <th style="width: 15%; font-size:14px;">Mesin</th>
+                                                  <th style="font-size:14px;">Item Pengerjaan</th>
+                                                  <th style="font-size:14px;">Tgl</th>
+                                                </tr>
+                                              </thead>
+                                            </table>
+                                    </div>
+                            </td>
+                          </tr>
+                        </table>
+      
+                  </div>
+             
+          </div>
+  </div>
+  </footer>
+@endsection
+
+
+
+@section('scripts')
+
+<script type="text/javascript">
+
+  document.title = "DAILY ACTIVITY";
+
+  $(document).ready(function(){
+
+    var urlMaster1 = "{{ route('smartmtcs.dashdaily', '1') }}";
+    var tableMaster1 = $('#tblMaster1').DataTable({
+      "columnDefs": [{
+        "searchable": false,
+        "orderable": false,
+        "targets": 0,
+        render: function (data, type, row, meta) {
+          return meta.row + meta.settings._iDisplayStart + 1;
+        }
+      },
+      {
+                "targets": '_all',
+                "createdCell": function (td, cellData, rowData, row, col) {
+                    $(td).css('padding', '0px')
+                }
+            }],
+      // pagination:false,
+      // "aLengthMenu": [[5, 10, 25, 50, 75, 100, -1], [5, 10, 25, 50, 75, 100, "All"]],
+      // "iDisplayLength": -1,
+      responsive: true,
+      "scrollY":        "250px",
+      "scrollCollapse": true,
+      "order": [[3, 'asc']],
+      processing: true, 
+      // searching:false,
+      paging:false,
+      "oLanguage": {
+        "sInfoFiltered": " ",
+        "sInfo": "IGP 1 - Total _TOTAL_ ",
+        'sProcessing': '<div id="processing" style="margin: 0px; padding: 0px; position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; background-color: rgb(102, 102, 102); z-index: 30001; opacity: 0.8;"><p style="position: absolute; color: White; top: 50%; left: 45%;"><img src="{{ asset('images/ajax-loader.gif') }}"></p></div>Processing...'
+      }, 
+      // "dom": '<"top"fli>rt<"clear">', 
+      "dom": '<"top" ifrt><"clear">',
+      ajax: urlMaster1, 
+      columns: [
+        {data: null, name: null,searchable:false, className: "dt-center"},
+        {data: 'kd_mesin', name: 'kd_mesin'},
+        {data: 'nm_ic', name: 'nm_ic'},
+        {data: 'nm_tgl', name: 'nm_tgl', className: "dt-center"},
+      ], 
+      
+    });
+    $('#tblMaster1').on( 'draw.dt', function(){
+     if (!tableMaster1.data().any() ) {
+      $('#tblMaster1_wrapper').remove()
+      $('.m1').html('<center><b><h3>IGP 1 Sudah Kosong</h3></b></center>')
+     }
+    });
+
+    var urlMaster2 = "{{ route('smartmtcs.dashdaily', '2') }}";
+    var tableMaster2 = $('#tblMaster2').DataTable({
+      "columnDefs": [{
+        "searchable": false,
+        "orderable": false,
+        "targets": 0,
+        render: function (data, type, row, meta) {
+          return meta.row + meta.settings._iDisplayStart + 1;
+        }
+      },
+      {
+                "targets": '_all',
+                "createdCell": function (td, cellData, rowData, row, col) {
+                    $(td).css('padding', '0px')
+                }
+            }],
+      // pagination:false,
+      // "aLengthMenu": [[5, 10, 25, 50, 75, 100, -1], [5, 10, 25, 50, 75, 100, "All"]],
+      // "iDisplayLength": -1,
+      responsive: true,
+      "scrollY":        "250px",
+      "scrollCollapse": true,
+      "order": [[3, 'asc']],
+      processing: true, 
+      paging:false,
+      "oLanguage": {
+        "sInfoFiltered": " ",
+        "sInfo": "IGP 2 - Total _TOTAL_ ",
+        'sProcessing': '<div id="processing" style="margin: 0px; padding: 0px; position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; background-color: rgb(102, 102, 102); z-index: 30001; opacity: 0.8;"><p style="position: absolute; color: White; top: 50%; left: 45%;"><img src="{{ asset('images/ajax-loader.gif') }}"></p></div>Processing...'
+      }, 
+      // "dom": '<"top"fli>rt<"clear">', 
+      "dom": '<"top" ifrt><"clear">',
+      ajax: urlMaster2, 
+      columns: [
+        {data: null, name: null,searchable:false, className: "dt-center"},
+        {data: 'kd_mesin', name: 'kd_mesin'},
+        {data: 'nm_ic', name: 'nm_ic'},
+        {data: 'nm_tgl', name: 'nm_tgl', className: "dt-center"},
+      ], 
+      
+    });
+
+    $('#tblMaster2').on( 'draw.dt', function(){
+     if (!tableMaster2.data().any() ) {
+      $('#tblMaster2_wrapper').remove()
+      $('.m2').html('<center><b><h3>IGP 2 Sudah Kosong</h3></b></center>')
+     }
+    });
+
+    var urlMaster3 = "{{ route('smartmtcs.dashdaily', '3') }}";
+    var tableMaster3 = $('#tblMaster3').DataTable({
+      "columnDefs": [{
+        "searchable": false,
+        "orderable": false,
+        "targets": 0,
+        render: function (data, type, row, meta) {
+          return meta.row + meta.settings._iDisplayStart + 1;
+        }
+      },
+      {
+                "targets": '_all',
+                "createdCell": function (td, cellData, rowData, row, col) {
+                    $(td).css('padding', '0px')
+                }
+            }],
+      // pagination:false,
+      // "aLengthMenu": [[5, 10, 25, 50, 75, 100, -1], [5, 10, 25, 50, 75, 100, "All"]],
+      // "iDisplayLength": -1,
+      responsive: true,
+      "scrollY":        "250px",
+      "scrollCollapse": true,
+      "order": [[3, 'asc']],
+      processing: true, 
+      paging:false,
+      "oLanguage": {
+        "sInfo": "IGP 3 - Total _TOTAL_ ",
+        "sInfoFiltered": " ",
+        'sProcessing': '<div id="processing" style="margin: 0px; padding: 0px; position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; background-color: rgb(102, 102, 102); z-index: 30001; opacity: 0.8;"><p style="position: absolute; color: White; top: 50%; left: 45%;"><img src="{{ asset('images/ajax-loader.gif') }}"></p></div>Processing...'
+      }, 
+      // "dom": '<"top"fli>rt<"clear">', 
+      "dom": '<"top" ifrt><"clear">',
+      ajax: urlMaster3, 
+      columns: [
+        {data: null, name: null,searchable:false, className: "dt-center"},
+        {data: 'kd_mesin', name: 'kd_mesin'},
+        {data: 'nm_ic', name: 'nm_ic'},
+        {data: 'nm_tgl', name: 'nm_tgl', className: "dt-center"},
+      ], 
+    });
+
+    $('#tblMaster3').on( 'draw.dt', function(){
+     if (!tableMaster3.data().any() ) {
+      $('#tblMaster3_wrapper').remove()
+      $('.m3').html('<center><b><h3>IGP 3 Sudah Kosong</h3></b></center>')
+     }
+    });
+
+
+
+  })
+
+  $("#btn-daz-igp1-zona1").click(function(){
+    var kd_plant = "1";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.indexmtctpms', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-daz-igp1-zona2").click(function(){
+    var kd_plant = "1";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.indexmtctpms', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-daz-igp2-zona1").click(function(){
+    var kd_plant = "2";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.indexmtctpms', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-daz-igp2-zona2").click(function(){
+    var kd_plant = "2";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.indexmtctpms', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-daz-igp2-zona3").click(function(){
+    var kd_plant = "2";
+    var lok_zona = "3";
+    var urlRedirect = "{{ route('smartmtcs.indexmtctpms', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-daz-igp3-zona1").click(function(){
+    var kd_plant = "3";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.indexmtctpms', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-daz-igp3-zona2").click(function(){
+    var kd_plant = "3";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.indexmtctpms', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-daz-igp3-zona3").click(function(){
+    var kd_plant = "3";
+    var lok_zona = "3";
+    var urlRedirect = "{{ route('smartmtcs.indexmtctpms', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#preventive").on('click', function(){
+    var urlRedirect = "{{ route('smartmtcs.preventive') }}";
+    window.location = urlRedirect;
+  });
+
+  $("#btn-dm-igp1-zona1").click(function(){
+    var kd_plant = "1";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.indexdm', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-dm-igp1-zona2").click(function(){
+    var kd_plant = "1";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.indexdm', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-dm-igp2-zona1").click(function(){
+    var kd_plant = "2";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.indexdm', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-dm-igp2-zona2").click(function(){
+    var kd_plant = "2";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.indexdm', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-dm-igp2-zona3").click(function(){
+    var kd_plant = "2";
+    var lok_zona = "3";
+    var urlRedirect = "{{ route('smartmtcs.indexdm', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-dm-igp3-zona1").click(function(){
+    var kd_plant = "3";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.indexdm', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-dm-igp3-zona2").click(function(){
+    var kd_plant = "3";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.indexdm', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-dm-igp3-zona3").click(function(){
+    var kd_plant = "3";
+    var lok_zona = "3";
+    var urlRedirect = "{{ route('smartmtcs.indexdm', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-pms-igp1-zona1").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "1";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-pms-igp1-zona2").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "1";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-pms-igp2-zona1").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "2";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-pms-igp2-zona2").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "2";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-pms-igp2-zona3").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "2";
+    var lok_zona = "3";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-pms-igp3-zona1").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "3";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-pms-igp3-zona2").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "3";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-pms-igp3-zona3").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "3";
+    var lok_zona = "3";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-daz-igp1-zona1").click(function(){
+    var kd_plant = "1";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.indexmtctpms', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-daz-igp1-zona2").click(function(){
+    var kd_plant = "1";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.indexmtctpms', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-daz-igp2-zona1").click(function(){
+    var kd_plant = "2";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.indexmtctpms', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-daz-igp2-zona2").click(function(){
+    var kd_plant = "2";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.indexmtctpms', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-daz-igp2-zona3").click(function(){
+    var kd_plant = "2";
+    var lok_zona = "3";
+    var urlRedirect = "{{ route('smartmtcs.indexmtctpms', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-daz-igp3-zona1").click(function(){
+    var kd_plant = "3";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.indexmtctpms', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-daz-igp3-zona2").click(function(){
+    var kd_plant = "3";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.indexmtctpms', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-daz-igp3-zona3").click(function(){
+    var kd_plant = "3";
+    var lok_zona = "3";
+    var urlRedirect = "{{ route('smartmtcs.indexmtctpms', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', lok_zona);
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-stock-sparepart-mesin").click(function(){
+    var urlRedirect = "{{ route('smartmtcs.indexstockohigp') }}";
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-andon").click(function(){
+    var urlRedirect = "{{ route('smartmtcs.monitoringandon') }}";
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-lch").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var urlRedirect = "{{ route('smartmtcs.monitoringlch', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-lp-igp1").click(function(){
+    var kd_plant = "1";
+    var urlRedirect = "{{ route('smartmtcs.monitoringlp', 'param') }}";
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-lp-igp2").click(function(){
+    var kd_plant = "2";
+    var urlRedirect = "{{ route('smartmtcs.monitoringlp', 'param') }}";
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-lp-igp3").click(function(){
+    var kd_plant = "3";
+    var urlRedirect = "{{ route('smartmtcs.monitoringlp', 'param') }}";
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-breakdownrate-igp2").click(function(){
+    var kd_plant = "2";
+    var urlRedirect = "{{ route('smartmtcs.monitoringasakai', 'param') }}";
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-mtcj-performance").click(function(){
+    var kd_plant = "IGPJ";
+    var urlRedirect = "{{ route('smartmtcs.monitoringmtc', 'param') }}";
+    urlRedirect = urlRedirect.replace('param', kd_plant);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-dpm-1").click(function(){
+    var mdb = "1";
+    var urlRedirect = "{{ route('smartmtcs.dpm', 'param') }}";
+    urlRedirect = urlRedirect.replace('param', mdb);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-dpm-2").click(function(){
+    var mdb = "2";
+    var urlRedirect = "{{ route('smartmtcs.dpm', 'param') }}";
+    urlRedirect = urlRedirect.replace('param', mdb);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-dpm-3").click(function(){
+    var mdb = "3";
+    var urlRedirect = "{{ route('smartmtcs.dpm', 'param') }}";
+    urlRedirect = urlRedirect.replace('param', mdb);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-login").click(function(){
+    var urlRedirect = "{{ url('login') }}";
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-resumeoli").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var kd_site = "IGPJ";
+    var urlRedirect = "{{ route('smartmtcs.resumepengisianoli', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', window.btoa(tahun));
+    urlRedirect = urlRedirect.replace('param', kd_site);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-topoli-igp1").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "1";
+    var urlRedirect = "{{ route('smartmtcs.toppengisianoli', ['param','param2','param3']) }}";
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-topoli-igp2").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "2";
+    var urlRedirect = "{{ route('smartmtcs.toppengisianoli', ['param','param2','param3']) }}";
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-topoli-igp3").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "3";
+    var urlRedirect = "{{ route('smartmtcs.toppengisianoli', ['param','param2','param3']) }}";
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-kpi").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var urlRedirect = "{{ route('smartmtcs.kpi', ['param','param2']) }}";
+    urlRedirect = urlRedirect.replace('param2', "07217");
+    urlRedirect = urlRedirect.replace('param', tahun);
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-spm").click(function(){
+    var urlRedirect = "{{ route('smartmtcs.spm') }}";
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  });
+
+  function onBack() {
+    var urlRedirect = "{{ route('smartmtcs.dashboardmtc2') }}";
+    // window.location.href = urlRedirect;
+    window.location.href = urlRedirect;
+  }
+</script>
+@endsection

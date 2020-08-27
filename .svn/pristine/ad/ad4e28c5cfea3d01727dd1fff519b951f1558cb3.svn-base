@@ -1,0 +1,472 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\StoreEngtMdlLinesRequest;
+use App\Http\Requests\UpdateEngtMdlLinesRequest;
+use App\EngtMdlLines;
+use Carbon\Carbon;
+use DB;
+use Exception;
+use App\User;
+use Illuminate\Support\Facades\Input;
+
+class EngtMdlLinesController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        if(Auth::user()->can(['eng-msteng-view'])) {
+            return view('eng.master.mdlline.index');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+
+    public function dashboard(Request $request)
+    {
+        if(Auth::user()->can('eng-msteng-view')) {
+            if ($request->ajax()) {
+
+                $list = DB::table("engtv_mdl_line")
+                ->select(DB::raw("kd_model, kd_line, nm_line, st_aktif"));
+
+                return Datatables::of($list)
+                ->editColumn('st_aktif', function($engtmdllines){
+                    if(!empty($engtmdllines->st_aktif)) {
+                        if($engtmdllines->st_aktif == 'T') {
+                            return 'AKTIF';
+                        }else{
+                            return 'TIDAK AKTIF';
+                        }
+                    }
+                })
+                ->addColumn('action', function($engtmdllines){
+                    return view('datatable._action', [
+                        'model' => $engtmdllines,
+                        'form_url' => route('engtmdllines.destroy', [base64_encode($engtmdllines->kd_model), base64_encode($engtmdllines->kd_line)]),
+                        'edit_url' => route('engtmdllines.edit', base64_encode($engtmdllines->kd_model)),
+                        'class' => 'form-inline js-ajax-delete',
+                        'form_id' => 'form-'.$engtmdllines->kd_model,
+                        'id_table' => 'tblMaster',
+                        'confirm_message' => 'Anda yakin menghapus model: ' . $engtmdllines->kd_model . '?'
+                    ]);
+                })
+                ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        if(Auth::user()->can('eng-msteng-create')) {
+            return view('eng.master.mdlline.create');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(StoreEngtMdlLinesRequest $request)
+    {
+        if(Auth::user()->can('eng-msteng-create')) {
+            $data = $request->all();
+            $jml_line = trim($data['jml_line']) !== '' ? trim($data['jml_line']) : '0';
+            $kd_model = trim($data['kd_model']) !== '' ? trim($data['kd_model']) : null;
+            $st_aktif = trim($data['st_aktif']) !== '' ? trim($data['st_aktif']) : null;
+            $creaby = Auth::user()->username;
+            $dtcrea = Carbon::now();
+            $entity = new EngtMdlLines();
+
+            DB::beginTransaction();
+            try {
+               $cekModel = $entity->cekModel($kd_model);
+               if($cekModel->count() > 0) {
+                    Session::flash("flash_notification", [
+                        "level"=>"danger",
+                        "message"=>"Data dengan model " . $kd_model . " sudah pernah diinput!"
+                    ]);
+                    return redirect()->route('engtmdllines.edit', base64_encode($kd_model));
+               } else{
+                    if ($jml_line < 1) {
+                        Session::flash("flash_notification", [
+                            "level"=>"danger",
+                            "message"=>"jumlah Line tidak boleh kosong"
+                        ]);
+                        return redirect()->back();
+                    }
+                    for ($i = 1; $i <= $jml_line; $i++) {
+                        $kd_line = trim($data['kd_line_'.$i]) !== '' ? trim($data['kd_line_'.$i]) : '';
+                        if ($kd_line !== ''){
+                            DB::table(DB::raw("engt_mdl_lines"))
+                            ->insert(['kd_model' => $kd_model, 'kd_line' => $kd_line, 'st_aktif' => $st_aktif, 'creaby' => $creaby, 'dtcrea' => $dtcrea]);
+                        }
+                    }
+
+                    //insert logs
+                    $log_keterangan = "EngtMdlLinesController.store: Create MdlLine Berhasil. ".$kd_model;
+                    $log_ip = \Request::session()->get('client_ip');
+                    $created_at = Carbon::now();
+                    $updated_at = Carbon::now();
+                    DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                    DB::commit();
+                    Session::flash("flash_notification", [
+                        "level"=>"success",
+                        "message"=>"Data Model Line berhasil disimpan dengan Model: ".$kd_model]);
+
+                    return redirect()->route('engtmdllines.edit', base64_encode($kd_model));
+
+               }
+                
+            } catch (Exception $ex) {
+                DB::rollback();
+                Session::flash("flash_notification", [
+                    "level"=>"danger",
+                    "message"=>"Data gagal disimpan!".$ex
+                ]);
+                return redirect()->back();
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        if(Auth::user()->can(['eng-msteng-*'])) {
+            $id = base64_decode($id);      
+            $engtmdlline = DB::table('engt_mdl_lines')
+            ->where(DB::raw("kd_model"), '=', $id)
+            ->first();  
+
+            $entity = new EngtMdlLines();
+
+            return view('eng.master.mdlline.edit', compact('engtmdlline', 'entity'));
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(UpdateEngtMdlLinesRequest $request, $id)
+    {
+        if(Auth::user()->can('eng-msteng-update')) {
+            $data = $request->all();
+            $jml_line = trim($data['jml_line']) !== '' ? trim($data['jml_line']) : '0';
+            $kd_model = trim($data['kd_model']) !== '' ? trim($data['kd_model']) : null;
+            $st_aktif = trim($data['st_aktif']) !== '' ? trim($data['st_aktif']) : null;
+            $creaby = Auth::user()->username;
+            $dtcrea = Carbon::now();
+            $entity = new EngtMdlLines();
+
+            DB::beginTransaction();
+            try {
+                if ($jml_line < 1) {
+                    Session::flash("flash_notification", [
+                        "level"=>"danger",
+                        "message"=>"jumlah Line tidak boleh kosong"
+                    ]);
+                    return redirect()->back();
+                }
+                for ($i = 1; $i <= $jml_line; $i++) {
+                    $kd_line = trim($data['kd_line_'.$i]) !== '' ? trim($data['kd_line_'.$i]) : '';
+                        if ($kd_line !== ''){
+                            $cekModelLine = $entity->cekModelLine($kd_model,$kd_line);
+                            if($cekModelLine->count() > 0) {
+                                DB::table(DB::raw("engt_mdl_lines"))
+                                ->where("kd_model", $kd_model)
+                                ->where("kd_line", $kd_line)
+                                ->update(['st_aktif' => $st_aktif, 'modiby' => $creaby, 'dtmodi' => $dtcrea]);
+
+                       } else{
+                        DB::table(DB::raw("engt_mdl_lines"))->insert(['kd_model' => $kd_model, 'kd_line' => $kd_line, 'st_aktif' => $st_aktif, 'creaby' => $creaby, 'dtcrea' => $dtcrea]);
+                       }
+                    }
+                }
+
+                //insert logs
+                $log_keterangan = "EngtMdlLinesController.update: Update MdlLine Berhasil. ".$id;
+                $log_ip = \Request::session()->get('client_ip');
+                $created_at = Carbon::now();
+                $updated_at = Carbon::now();
+                DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                DB::commit();
+                Session::flash("flash_notification", [
+                    "level"=>"success",
+                    "message"=>"Data Model Line berhasil disimpan dengan Model: ".$kd_model]);
+
+                return redirect()->route('engtmdllines.edit', base64_encode($kd_model));
+                
+            } catch (Exception $ex) {
+                DB::rollback();
+                Session::flash("flash_notification", [
+                    "level"=>"danger",
+                    "message"=>"Data gagal diubah!".$ex
+                ]);
+                return redirect()->back();
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Request $request, $id, $kd_line)
+    {
+        if(Auth::user()->can(['eng-msteng-delete'])) {
+           try {
+            DB::beginTransaction();
+            $engtmdllines = DB::table('engt_mdl_lines')
+            ->where("kd_model", base64_decode($id))
+            ->where("kd_line", base64_decode($kd_line))
+            ->first();
+            if ($engtmdllines != null) {
+                if ($request->ajax()) {
+                    $status = 'OK';
+                    $msg = 'Model '.base64_decode($id).' dan line '.base64_decode($kd_line).' berhasil dihapus.';
+
+                    DB::table(DB::raw("engt_mdl_lines"))
+                    ->where("kd_model", base64_decode($id))
+                    ->where("kd_line", base64_decode($kd_line))
+                    ->delete();
+
+                            //insert logs
+                    $log_keterangan = "EngtMdlLinesController.destroy: Delete Model Line Berhasil. ".base64_decode($id);
+                    $log_ip = \Request::session()->get('client_ip');
+                    $created_at = Carbon::now();
+                    $updated_at = Carbon::now();
+                    DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                    DB::commit();
+
+
+                    return response()->json(['id' => base64_decode($id), 'status' => $status, 'message' => $msg]);
+                } else {
+                    DB::table(DB::raw("engt_mdl_lines"))
+                    ->where("kd_model", base64_decode($id))
+                    ->where("kd_line", base64_decode($kd_line))
+                    ->delete();
+
+                            //insert logs
+                    $log_keterangan = "EngtMdlLinesController.destroy: Delete Model Line Berhasil. ".base64_decode($id);
+                    $log_ip = \Request::session()->get('client_ip');
+                    $created_at = Carbon::now();
+                    $updated_at = Carbon::now();
+                    DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                    DB::commit();
+
+                    Session::flash("flash_notification", [
+                        "level"=>"success",
+                        "message"=>"Model: ".base64_decode($id)." dan Line: ".base64_decode($kd_line)." berhasil dihapus."
+                    ]);
+
+                    return redirect()->route('engtmdllines.index');
+                }
+                
+            } else {
+                if ($request->ajax()) {
+                    return response()->json(['id' => base64_decode($id), 'status' => 'NG', 'message' => 'Data gagal dihapus! Model tidak ditemukan.']);
+                } else {
+                    Session::flash("flash_notification", [
+                        "level"=>"danger",
+                        "message"=>"Line tidak ditemukan."
+                    ]);
+                    return redirect()->route('engtmdllines.index');
+                }
+            }
+            } catch (ModelNotFoundException $ex) {
+                DB::rollback();
+                if ($request->ajax()) {
+                    return response()->json(['id' => base64_decode($id), 'status' => 'NG', 'message' => 'Data gagal dihapus! Line tidak ditemukan.']);
+                } else {
+                    Session::flash("flash_notification", [
+                        "level"=>"danger",
+                        "message"=>"Line tidak ditemukan."
+                    ]);
+                    return redirect()->route('engtmdllines.index');
+                }
+            } catch (Exception $ex) {
+                DB::rollback();
+                if ($request->ajax()) {
+                    $status = 'NG';
+                    $msg = "Line gagal dihapus. $ex";
+                    return response()->json(['id' => base64_decode($id), 'status' => $status, 'message' => $msg]);
+                } else {
+                    Session::flash("flash_notification", [
+                        "level"=>"danger",
+                        "message"=>"Line gagal dihapus. $ex"
+                    ]);
+                    return redirect()->route('engtmdllines.index');
+                }
+            } 
+        } else {
+            if ($request->ajax()) {
+                return response()->json(['id' => base64_decode("0"), 'status' => 'NG', 'message' => 'Maaf, Anda tidak berhak menghapus data ini.']);
+            } else {
+                Session::flash("flash_notification", [
+                    "level"=>"danger",
+                    "message"=>"Maaf, Anda tidak berhak menghapus data ini."
+                ]);
+                return redirect()->route('engtmdllines.index');
+            }
+        }
+    }
+
+    public function deleteLine(Request $request, $kd_model, $kd_line)
+    {   
+        // echo $request;
+        if(Auth::user()->can('eng-msteng-delete')) {
+            if ($request->ajax()) {
+                $kd_model = base64_decode($kd_model);
+                $kd_line = base64_decode($kd_line);
+                try {
+                    DB::beginTransaction();
+                    $status = 'OK';
+                    $msg = 'Line berhasil dihapus.';
+
+                    DB::table(DB::raw("engt_mdl_lines"))
+                    ->where("kd_model", $kd_model)
+                    ->where("kd_line", $kd_line)
+                    ->delete();
+
+                    //insert logs
+                    $log_keterangan = "EngtMdlLinesController.deleteLine: Delete Line Berhasil. ".$kd_line;
+                    $log_ip = \Request::session()->get('client_ip');
+                    $created_at = Carbon::now();
+                    $updated_at = Carbon::now();
+                    DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                    DB::commit();
+
+                    return response()->json(['id' => $kd_line, 'status' => $status, 'message' => $msg]);
+                } catch (Exception $ex) {
+                    DB::rollback();
+                    $status = 'NG';
+                    $msg = "Line GAGAL dihapus.";
+                    return response()->json(['id' => $kd_model, 'status' => $status, 'message' => $msg]);
+                }
+            } else {
+
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function delete($id)
+    {
+        if(Auth::user()->can(['eng-msteng-delete'])) {
+            try {
+                DB::beginTransaction();
+                $engtmdllines = DB::table('engt_mdl_lines')
+                ->where("kd_model", base64_decode($id))
+                ->first();
+                if ($engtmdllines != null) {
+
+                    DB::table(DB::raw("engt_mdl_lines"))
+                    ->where("kd_model", base64_decode($id))
+                    ->delete();
+
+                            //insert logs
+                    $log_keterangan = "EngtMdlLinesController.destroy: Delete Model Berhasil. ".base64_decode($id);
+                    $log_ip = \Request::session()->get('client_ip');
+                    $created_at = Carbon::now();
+                    $updated_at = Carbon::now();
+                    DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                    DB::commit();
+
+                    Session::flash("flash_notification", [
+                        "level"=>"success",
+                        "message"=>"Model: ".base64_decode($id)." berhasil dihapus."
+                    ]);
+
+                    return redirect()->route('engtmdllines.index');
+
+                } else {
+                    Session::flash("flash_notification", [
+                        "level"=>"danger",
+                        "message"=>"Model Line tidak ditemukan."
+                    ]);
+                    return redirect()->route('engtmdllines.index');
+                }
+            } catch (ModelNotFoundException $ex) {
+                DB::rollback();
+                Session::flash("flash_notification", [
+                    "level"=>"danger",
+                    "message"=>"Model Line tidak ditemukan."
+                ]);
+                return redirect()->route('engtmdllines.index');
+            } catch (Exception $ex) {
+                DB::rollback();
+                Session::flash("flash_notification", [
+                    "level"=>"danger",
+                    "message"=>"Model Line gagal dihapus. $ex"
+                ]);
+                return redirect()->route('engtmdllines.index');
+            }
+        } else {
+            Session::flash("flash_notification", [
+                "level"=>"danger",
+                "message"=>"Maaf, Anda tidak berhak menghapus data ini."
+            ]);
+            return redirect()->route('engtmdllines.index');
+        }
+    }
+}

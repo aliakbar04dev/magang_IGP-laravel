@@ -1,0 +1,105 @@
+<?php
+
+namespace App\Model\Persetujuancuti;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Session;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Crypt;
+use DB;
+
+class Persetujuancuti extends Model
+{ 
+    
+    protected $connection = 'pgsql-mobile';
+
+    public static function boot()
+    {
+        parent::boot();
+    }
+    
+	/* fetch Data datatables*/
+    public function fetch($npkatasan)
+    { 
+    	$SQL = DB::connection("pgsql-mobile")
+    	->select("select distinct v_mas_karyawan.nama, 
+    		v_mas_karyawan.nama, v_mas_karyawan.desc_jab, 
+    		cuti01.no_cuti, cuti01.npk, cuti01.tglsubmit, cuti01.tglapprov, 
+    		cuti01.tglpengajuan, cuti01.status 
+    		from v_mas_karyawan join cuti01 on cuti01.npk = v_mas_karyawan.npk 
+    		where cuti01.tglpengajuan <= current_date 
+    		and cuti01.tglpengajuan >= date_trunc('month', current_date - interval '1' month) 
+    		and cuti01.npkatasan = '".$npkatasan."' 
+    		and cuti01.status is null 
+    		order by cuti01.status asc nulls first
+    		");
+    	$Result = collect($SQL);
+    	return $Result;
+    }  
+     
+	public function fetchEmployee($req)
+    {
+        $Result = DB::connection("pgsql-mobile")
+        ->table('v_mas_karyawan')
+        ->where('npk', Crypt::decrypt($req))->first(); 
+        return $Result;
+    }
+
+	public function fetchStatus($no_cuti)
+    {
+        $Result = DB::connection("pgsql-mobile")
+        ->table('cuti01')
+        ->where('no_cuti', Crypt::decrypt($no_cuti))
+        ->first();
+        return $Result;
+    }
+	
+	/*******************************************
+   	  Function : approval OR Rejected Pengajuan Cuti 
+    *******************************************/
+    public function getApprovalOrReject($req, $req2)
+    { 
+    	DB::connection("pgsql-mobile")->beginTransaction();
+    	try {  
+    		if(base64_decode($req) == 1) { //Approval
+    			DB::connection("pgsql-mobile")
+    			->table("cuti01")
+    			->where('no_cuti', base64_decode($req2))
+    			->update(['tglapprov' => date('Y-m-d'), 'status' => 1]);
+    		} else {
+    			DB::connection("pgsql-mobile")
+    			->table("cuti01")
+    			->where('no_cuti', base64_decode($req2))
+    			->update(['tglapprov' => date('Y-m-d'), 'status' => 2]);
+    		}
+    		DB::connection("pgsql-mobile")->commit(); 
+
+    		Session::flash("flash_notification", [
+    			"level"=>"success",
+    			"message"=>"No Doc Cuti ".base64_decode($req2)."  Proses ".(base64_decode($req) == 1 ? 'Approval' : 'Rejected')." Berhasil!"
+    			]);
+    		return true; 
+    	} catch (Exception $ex) {
+    		DB::connection("pgsql-mobile")->rollback();
+    		Session::flash("flash_notification", [
+    			"level"=>"danger",
+    			"message"=>"Data gagal disimpan!"
+    			]);
+    		return false;
+    	}
+    }
+	
+	/**********************************************************************
+    Function: Mendapatkan daftar pengajuan cuti oleh karyawan  
+    ***********************************************************************/
+	public function fetchpengajuancuti($no_cuti)
+    { 
+		$Result = DB::connection("pgsql-mobile")
+		->table('cuti02')
+		->join('kode_cuti', 'cuti02.kd_cuti', '=', 'kode_cuti.kd_cuti')
+		->select('cuti02.*','kode_cuti.desc_cuti as ket')
+		->where('cuti02.no_cuti', Crypt::decrypt($no_cuti))
+		->get();
+        return $Result;	 
+    }
+}

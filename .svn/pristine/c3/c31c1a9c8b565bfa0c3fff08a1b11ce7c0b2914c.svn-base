@@ -1,0 +1,128 @@
+<?php
+
+Route::group(['prefix'=>'ehs', 'middleware'=>['auth']], function () {
+	Route::get('ehstwp1s/all', [
+		'as' => 'ehstwp1s.all',
+		'uses'=>'EhstWp1sController@indexAll'
+	]);
+	Route::get('ehstwp1s/dashboard/all', [
+		'as' => 'dashboardall.ehstwp1s',
+		'uses'=>'EhstWp1sController@dashboardAll'
+	]);
+	Route::get('ehstwp1s/showall/{param}', [
+		'as' => 'ehstwp1s.showall',
+		'uses'=>'EhstWp1sController@showall'
+	]);
+	Route::post('ehstwp1s/reject', [
+		'as' => 'ehstwp1s.reject',
+		'uses' => 'EhstWp1sController@reject'
+	]);
+	Route::post('ehstwp1s/approve', [
+		'as' => 'ehstwp1s.approve',
+		'uses' => 'EhstWp1sController@approve'
+	]);
+	Route::post('ehstwp1s/approveehs', [
+		'as' => 'ehstwp1s.approveehs',
+		'uses' => 'EhstWp1sController@approveehs'
+	]);
+	Route::get('ehstwp1s/print/{param}', [
+		'as' => 'ehstwp1s.print',
+		'uses' => 'EhstWp1sController@print'
+	]);
+	Route::resource('ehsmwppics', 'EhsmWpPicsController');
+	Route::get('dashboard/ehsmwppics', [
+		'as'=>'dashboard.ehsmwppics',
+		'uses'=>'EhsmWpPicsController@dashboard'
+	]);
+	Route::get('ehsmwppics/delete/{param}', [
+		'as' => 'ehsmwppics.delete',
+		'uses' => 'EhsmWpPicsController@delete'
+	]);
+	Route::resource('mgmtgembaehss', 'MgmtGembaEhssController');
+	Route::get('dashboard/mgmtgembaehss', [
+		'as'=>'dashboard.mgmtgembaehss',
+		'uses'=>'MgmtGembaEhssController@dashboard'
+	]);
+	Route::get('mgmtgembaehss/cm/all', [
+		'as'=>'mgmtgembaehss.indexcm',
+		'uses'=>'MgmtGembaEhssController@indexcm'
+	]);
+	Route::get('dashboardcm/mgmtgembaehss', [
+		'as'=>'dashboardcm.mgmtgembaehss',
+		'uses'=>'MgmtGembaEhssController@dashboardcm'
+	]);
+	Route::get('mgmtgembaehss/{param}/cm', [
+		'as'=>'mgmtgembaehss.inputcm',
+		'uses'=>'MgmtGembaEhssController@inputcm'
+	]);
+	Route::get('mgmtgembaehss/showcm/{param}', [
+		'as' => 'mgmtgembaehss.showcm',
+		'uses'=>'MgmtGembaEhssController@showcm'
+	]);
+	Route::get('mgmtgembaehss/delete/{param}', [
+		'as' => 'mgmtgembaehss.delete',
+		'uses' => 'MgmtGembaEhssController@delete'
+	]);
+	Route::get('mgmtgembaehss/deleteimage/{param}/{param2}', [
+		'as' => 'mgmtgembaehss.deleteimage',
+		'uses' => 'MgmtGembaEhssController@deleteimage'
+	]);
+	Route::get('mgmtgembaehss/laporan/print', [
+		'as' => 'mgmtgembaehss.laporan',
+		'uses'=>'MgmtGembaEhssController@laporan'
+	]);
+	Route::get('mgmtgembaehss/printlaporan/{param}/{param2}/{param3}/{param4}', [
+		'as' => 'mgmtgembaehss.printlaporan',
+		'uses' => 'MgmtGembaEhssController@printlaporan'
+	]);
+
+	//MAGANG S
+	// ROUTE EHS SAFETY PERFORMANCE (ACCIDENT) //
+	Route::get('ehs/sp/accident/index', [
+		'as' => 'ehsspaccidents.index_sp_accident',
+		'uses'=>'EhsSpAccidentsController@index_sp_accident'
+	]);
+	Route::get('ehs/sp/accident/dashboard', [
+		'as' => 'ehsspaccidents.dashboard_sp_accident',
+		'uses'=>'EhsSpAccidentsController@dashboard_sp_accident'
+	]);
+	Route::post('ehs/sp/accident/store', [
+		'as' => 'ehsspaccidents.store_sp_accident',
+		'uses'=>'EhsSpAccidentsController@store_sp_accident'
+	]);
+	Route::get('ehs/sp/accident/monitoringal', [
+		'as' => 'ehsspaccidents.mon_airlimbah',
+		'uses'=>'EhsSpAccidentsController@mon_airlimbah'
+	]);
+	Route::get('ehs/sp/accident/monitoringbkimia', [
+		'as' => 'ehsspaccidents.mon_airlimbah',
+		'uses'=>'EhsSpAccidentsController@mon_airlimbah'
+	]);
+	// ROUTE SWAPANATU //
+	Route::get('ehs/ep/swapantau/index', [
+		'as' => 'ehsspaccidents.index_swapantau',
+		'uses'=>'EhsSpAccidentsController@index_swapantau'
+	]);
+	Route::post('ehs/ep/swapantau/store', [
+		'as' => 'ehsspaccidents.store_swapantau',
+		'uses'=>'EhsSpAccidentsController@store_swapantau'
+	]);
+	Route::get('ehs/ep/swapantau/dashboard', [
+		'as' => 'ehsspaccidents.dashboard_swapantau',
+		'uses'=>'EhsSpAccidentsController@dashboard_swapantau'
+	]);
+	// ROUTE INSTALASI AIR LIMBAH //
+	Route::get('ehs/ep/lvlairlimbah/index', [
+		'as' => 'ehsspaccidents.index_lvlairlimbah',
+		'uses'=>'EhsSpAccidentsController@index_lvlairlimbah'
+	]);
+	Route::post('ehs/ep/lvlairlimbah/store', [
+		'as' => 'ehsspaccidents.store_lvlairlimbah',
+		'uses'=>'EhsSpAccidentsController@store_lvlairlimbah'
+	]);
+	Route::get('ehs/ep/lvlairlimbah/dashboard', [
+		'as' => 'ehsspaccidents.dashboard_lvlairlimbah',
+		'uses'=>'EhsSpAccidentsController@dashboard_lvlairlimbah'
+	]);
+	//MAGANG E
+});

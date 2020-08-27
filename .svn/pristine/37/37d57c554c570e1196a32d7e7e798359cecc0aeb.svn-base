@@ -1,0 +1,2761 @@
+<div class="panel panel-default">
+	<div class="box-body">
+		<div class="box-body col-md-12">
+			<div class="col-sm-3">
+				<div class="form-group">
+					<div class="col-sm-12 {{ $errors->has('tgl_doc') ? ' has-error' : '' }}">
+						{!! Form::label('LOGO SUPPLIER:', '') !!}
+						{!! Form::file('cover') !!}
+						@if (isset($book) && $book->cover)
+						<p>
+							{!! Html::image(asset('img/'.$book->cover), null, ['class'=>'img-rounded img-responsive']) !!}
+						</p>
+						@endif
+						{!! $errors->first('cover', '<p class="help-block">:message</p>') !!}
+						@if (isset($book))
+						<p class="help-block">{{ $book->borrowed }} buku sedang dipinjam</p>
+						@endif
+					</div>
+				</div>
+			</div>
+
+			<div class="col-sm-3">
+				<div class="form-group">
+					<div class="col-sm-12 {{ $errors->has('tgl_doc') ? ' has-error' : '' }}">
+						{!! Form::label('MODEL:', '') !!}
+						{!! Form::text('model', null, ['class'=>'form-control']) !!}
+						{!! $errors->first('tgl_doc', '<p class="help-block">:message</p>') !!}
+					</div>
+				</div>
+			</div>
+
+			<div class="col-sm-3">
+				<div class="form-group{{ $errors->has('name') ? ' has-error' : '' }}">
+					<div class="col-md-12">
+						{!! Form::label('DATE OF ISSUED:', '') !!}
+					</div>
+					<div class="col-md-12">
+						@if(!empty($shift->date_issue)) 
+						{!! Form::date('date_issue', \Carbon\Carbon::parse($shift->date_issue), ['class'=>'form-control']) !!}
+						@else 
+						{!! Form::date('date_issue', \Carbon\Carbon::now(), ['class'=>'form-control']) !!}
+						@endif
+						{!! $errors->first('date_issue', '<p class="help-block">:message</p>') !!}
+					</div>
+
+				</div>
+			</div>
+			<div class="col-sm-3">
+				<div class="form-group{{ $errors->has('name') ? ' has-error' : '' }}">
+					<div class="col-md-12">
+						{!! Form::label('REFF. NO:', '') !!}
+					</div>
+					<div class="col-md-12">
+						{!! Form::text('reff_no', null, ['class'=>'form-control']) !!}
+						{!! $errors->first('reff_no', '<p class="help-block">:message</p>') !!}
+					</div>
+
+				</div>	
+			</div>
+		</div>
+	</div>
+
+	<div class="box-body">
+		<div class="box-body col-md-12">
+			<div class="col-sm-3">
+				<div class="form-group">
+					<div class="col-sm-12 {{ $errors->has('tgl_doc') ? ' has-error' : '' }}">
+						{!! Form::label('SUPPLIER NAME:', '') !!}
+						{!! Form::text('nama_supplier', null, ['class'=>'form-control']) !!}
+						{!! $errors->first('nama_supplier', '<p class="help-block">:message</p>') !!}
+					</div>
+				</div>
+			</div>
+
+			<div class="col-sm-3">
+				<div class="form-group">
+					<div class="col-sm-12 {{ $errors->has('tgl_doc') ? ' has-error' : '' }}">
+						{!! Form::label('MATERIAL:', '') !!}
+						{!! Form::text('material', null, ['class'=>'form-control']) !!}
+						{!! $errors->first('material', '<p class="help-block">:message</p>') !!}
+					</div>
+				</div>
+			</div>
+
+			<div class="col-sm-3">
+				<div class="form-group">
+					<div class="col-sm-12 {{ $errors->has('tgl_doc') ? ' has-error' : '' }}">
+						{!! Form::label('GENERAL TOL:', '') !!}
+						{!! Form::text('general_tol', null, ['class'=>'form-control']) !!}
+						{!! $errors->first('general_tol', '<p class="help-block">:message</p>') !!}
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-3">
+				<div class="form-group{{ $errors->has('name') ? ' has-error' : '' }}">
+					<div class="col-md-12">
+						{!! Form::label('WEIGHT:', '') !!}
+					</div>
+					<div class="col-md-12">
+						{!! Form::text('weight', null, ['class'=>'form-control']) !!}
+						{!! $errors->first('weight', '<p class="help-block">:message</p>') !!}
+					</div>
+
+				</div>	
+			</div>
+		</div>
+	</div>
+
+
+	<div class="box-body">
+		<div class="box-body col-md-12">
+			<div class="col-sm-3">
+				<div class="form-group">
+					<div class="col-sm-12 {{ $errors->has('tgl_doc') ? ' has-error' : '' }}">
+						{!! Form::label('PIS NO:', '') !!}
+						{!! Form::text('no_pis', null, ['class'=>'form-control']) !!}
+						{!! $errors->first('no_pis', '<p class="help-block">:message</p>') !!}
+					</div>
+				</div>
+			</div>
+
+			<div class="col-sm-3">
+				<div class="form-group{{ $errors->has('name') ? ' has-error' : '' }}">
+					<div class="col-md-12">
+						{!! Form::label('PART NO:', '') !!}
+					</div>
+					<div class="col-md-12">
+						{!! Form::text('part_no', null, ['class'=>'form-control']) !!}
+						{!! $errors->first('part_no', '<p class="help-block">:message</p>') !!}
+					</div>
+
+				</div>
+			</div>
+			<div class="col-sm-3">
+				<div class="form-group{{ $errors->has('name') ? ' has-error' : '' }}">
+					<div class="col-md-12">
+						{!! Form::label('PART NAME:', '') !!}
+					</div>
+					<div class="col-md-12">
+						{!! Form::text('part_name', null, ['class'=>'form-control']) !!}
+						{!! $errors->first('part_name', '<p class="help-block">:message</p>') !!}
+					</div>
+				</div>	
+			</div>
+		</div>
+	</div>
+
+	<div class="box-body">
+		<div class="box-body col-md-12">
+			<div class="col-sm-3">
+				<div class="form-group">
+				</div>
+			</div>
+
+			<div class="col-sm-2">
+				<div class="form-group{{ $errors->has('name') ? ' has-error' : '' }}">
+					<div class="col-md-6">
+						{!! Form::label('PT.IGP', '') !!}
+
+					</div>
+					<div class="col-md-12">
+						{!! Form::label('SUPPLIER DEPT.', '') !!}
+					</div>
+
+				</div>
+			</div>
+			<div class="col-sm-4">
+				<div class="form-group{{ $errors->has('name') ? ' has-error' : '' }}">
+					<div class="col-md-12">
+						{!! Form::label('QUALITY ASSURANCE DIVISION', '') !!}
+					</div>
+					<div class="col-md-12">
+						{!! Form::text('supp_dept', null, ['class'=>'form-control']) !!}
+						{!! $errors->first('supp_dept', '<p class="help-block">:message</p>') !!}
+					</div>
+
+				</div>	
+			</div>
+		</div>
+	</div>
+</div>
+<div class="box-body">
+	<div class="panel panel-default">
+		<div class="panel-heading" style="background-color:#F0F8FF">
+			<h2 class="panel-title" ><b>I. MATERIAL PERFORMANCE</b></h2>
+		</div>
+
+		<div class="panel-heading">
+			<h3 class="panel-title">A. CHEMICAL COMPOSITION</h3>
+		</div>
+		<div class="panel-body">
+			<div class="box-body col-md-12">
+				<!-- /.Table Input-->
+				<button type="button" name="add1" id="add1" class="btn btn-success">+</button>
+				<table class="table table-bordered" id="dynamic_field1">
+					<tr>
+						<th width="80px" rowspan="2" align="center" >NO</th>
+						<th align="middle-center" rowspan="2" width="220px" >INSPECTION ITEM</th>
+						<th colspan="2"><p align="center">STANDARD VALUE</p></th>
+						<th rowspan="2" width="200px">INSPECTION INSTRUMENT</th>
+						<th rowspan="2" width="60px"><p align="center">RANK</p></th>
+						<th colspan="2"><p align="center">SAMPLING PLAN</p></th>
+						<th rowspan="2" width="150px"><p align="center">REMARKS</p></th>
+						<th colspan="" width="20px"></th>
+					</tr>
+					
+					<tr>
+						<th width="150px">NOMINAL</th>
+						<th width="150px">TOLERANCE</th>
+						<th width="200px">IN PROSES</th>
+						<th width="220px">AT DELIVERY</th>
+						<th width="20px">Hapus</th>
+					</tr> 
+				</table>
+				{!! Form::hidden('jml_line1', 0, ['class'=>'form-control', 'readonly'=>'readonly', 'id' => 'jml_line1']) !!}
+			</div>
+		</div>
+
+		<div class="panel-heading">
+			<h3 class="panel-title">B.MECHANICAL PROPERTIES</h3>
+		</div>
+		<div class="panel-body">
+			<div class="box-body col-md-12">
+				<!-- /.Table Input-->
+				<button type="button" name="addd" id="addd" class="btn btn-success">+</button>
+				<table class="table table-bordered" id="dynamic_field2">
+					<tr>
+						<th width="80px" rowspan="2" align="center" >NO</th>
+						<th align="middle-center" rowspan="2" width="220px" >INSPECTION ITEM</th>
+						<th colspan="2"><p align="center">STANDARD VALUE</p></th>
+						<th rowspan="2" width="200px">INSPECTION INSTRUMENT</th>
+						<th rowspan="2" width="60px"><p align="center">RANK</p></th>
+						<th colspan="2"><p align="center">SAMPLING PLAN</p></th>
+						<th rowspan="2" width="150px"><p align="center">REMARKS</p></th>
+						<th colspan="" width="20px"></th>
+					</tr>
+					
+					<tr>
+						<th width="150px">NOMINAL</th>
+						<th width="150px">TOLERANCE</th>
+						<th width="200px">IN PROSES</th>
+						<th width="220px">AT DELIVERY</th>
+						<th width="20px">Hapus</th>
+					</tr> 
+				</table>
+				{!! Form::hidden('jml_linee', 0, ['class'=>'form-control', 'readonly'=>'readonly', 'id' => 'jml_linee']) !!}
+			</div>
+		</div>
+
+		<div class="panel-heading">
+			<h3 class="panel-title">C. WELDING PERFORMANCE (IF ANY)	</h3>
+		</div>
+		<div class="panel-body">
+			<div class="box-body col-md-12">
+				<!-- /.Table Input-->
+				<button type="button" name="add3" id="add3" class="btn btn-success">+</button>
+				<table class="table table-bordered" id="dynamic_field3">
+					<tr>
+						<th width="80px" rowspan="2" align="center" >NO</th>
+						<th align="middle-center" rowspan="2" width="220px" >INSPECTION ITEM</th>
+						<th colspan="2"><p align="center">STANDARD VALUE</p></th>
+						<th rowspan="2" width="200px">INSPECTION INSTRUMENT</th>
+						<th rowspan="2" width="60px"><p align="center">RANK</p></th>
+						<th colspan="2"><p align="center">SAMPLING PLAN</p></th>
+						<th rowspan="2" width="150px"><p align="center">REMARKS</p></th>
+						<th colspan="" width="20px"></th>
+					</tr>
+					
+					<tr>
+						<th width="150px">NOMINAL</th>
+						<th width="150px">TOLERANCE</th>
+						<th width="200px">IN PROSES</th>
+						<th width="220px">AT DELIVERY</th>
+						<th width="20px">Hapus</th>
+					</tr> 
+				</table>
+				{!! Form::hidden('jml_line3', 0, ['class'=>'form-control', 'readonly'=>'readonly', 'id' => 'jml_line3']) !!}
+			</div>
+		</div>
+
+		<div class="panel-heading">
+			<h3 class="panel-title">D. SURFACE TREATMENT (IF ANY)</h3>
+		</div>
+		<div class="panel-body">
+			<div class="box-body col-md-12">
+				<!-- /.Table Input-->
+				<button type="button" name="add4" id="add4" class="btn btn-success">+</button>
+				<table class="table table-bordered" id="dynamic_field4">
+					<tr>
+						<th width="80px" rowspan="2" align="center" >NO</th>
+						<th align="middle-center" rowspan="2" width="220px" >INSPECTION ITEM</th>
+						<th colspan="2"><p align="center">STANDARD VALUE</p></th>
+						<th rowspan="2" width="200px">INSPECTION INSTRUMENT</th>
+						<th rowspan="2" width="60px"><p align="center">RANK</p></th>
+						<th colspan="2"><p align="center">SAMPLING PLAN</p></th>
+						<th rowspan="2" width="150px"><p align="center">REMARKS</p></th>
+						<th colspan="" width="20px"></th>
+					</tr>
+					
+					<tr>
+						<th width="150px">NOMINAL</th>
+						<th width="150px">TOLERANCE</th>
+						<th width="200px">IN PROSES</th>
+						<th width="220px">AT DELIVERY</th>
+						<th width="20px">Hapus</th>
+					</tr> 
+				</table>
+				{!! Form::hidden('jml_line4', 0, ['class'=>'form-control', 'readonly'=>'readonly', 'id' => 'jml_line4']) !!}
+			</div>
+		</div>
+
+		<div class="panel-heading">
+			<h3 class="panel-title">E. HEAT TREATMENT (IF ANY)</h3>
+		</div>
+		<div class="panel-body">
+			<div class="box-body col-md-12">
+				<!-- /.Table Input-->
+				<button type="button" name="add5" id="add5" class="btn btn-success">+</button>
+				<table class="table table-bordered" id="dynamic_field5">
+					<tr>
+						<th width="80px" rowspan="2" align="center" >NO</th>
+						<th align="middle-center" rowspan="2" width="220px" >INSPECTION ITEM</th>
+						<th colspan="2"><p align="center">STANDARD VALUE</p></th>
+						<th rowspan="2" width="200px">INSPECTION INSTRUMENT</th>
+						<th rowspan="2" width="60px"><p align="center">RANK</p></th>
+						<th colspan="2"><p align="center">SAMPLING PLAN</p></th>
+						<th rowspan="2" width="150px"><p align="center">REMARKS</p></th>
+						<th colspan="" width="20px"></th>
+					</tr>
+					
+					<tr>
+						<th width="150px">NOMINAL</th>
+						<th width="150px">TOLERANCE</th>
+						<th width="200px">IN PROSES</th>
+						<th width="220px">AT DELIVERY</th>
+						<th width="20px">Hapus</th>
+					</tr> 
+				</table>
+				{!! Form::hidden('jml_line5', 0, ['class'=>'form-control', 'readonly'=>'readonly', 'id' => 'jml_line5']) !!}
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="box-body">
+	<div class="panel panel-default">
+		<div class="panel-heading" style="background-color:#F0F8FF">
+			<h3 class="panel-title"><b>II. APPEARENCE</b></h3>
+		</div>
+		<div class="panel-body">
+			<div class="box-body col-md-12">
+				<!-- /.Table Input-->
+				<button type="button" name="tambah" id="tambah" class="btn btn-success">+</button>
+				<table class="table table-bordered" id="dynamic_field6">
+					<tr>
+						<th width="80px" rowspan="2" align="center" >NO</th>
+						<th align="middle-center" rowspan="2" width="220px" >INSPECTION ITEM</th>
+						<th colspan="2"><p align="center">STANDARD VALUE</p></th>
+						<th rowspan="2" width="200px">INSPECTION INSTRUMENT</th>
+						<th rowspan="2" width="60px"><p align="center">RANK</p></th>
+						<th colspan="2"><p align="center">SAMPLING PLAN</p></th>
+						<th rowspan="2" width="150px"><p align="center">REMARKS</p></th>
+						<th colspan="" width="20px"></th>
+					</tr>
+					
+					<tr>
+						<th width="150px">NOMINAL</th>
+						<th width="150px">TOLERANCE</th>
+						<th width="200px">IN PROSES</th>
+						<th width="220px">AT DELIVERY</th>
+						<th width="20px">Hapus</th>
+					</tr> 
+				</table>
+				{!! Form::hidden('jml_rows', 0, ['class'=>'form-control', 'readonly'=>'readonly', 'id' => 'jml_rows']) !!}
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="box-body">
+	<div class="panel panel-default">
+		<div class="panel-heading" style="background-color:#F0F8FF">
+			<h3 class="panel-title"><b>III. DIMENSION</b></h3>
+		</div>
+		<div class="panel-body">
+			<div class="box-body col-md-12">
+				<!-- /.Table Input-->
+				<button type="button" name="dimention" id="dimention" class="btn btn-success">+</button>
+				<table class="table table-bordered" id="dynamic_field7">
+					<tr>
+						<th width="80px" rowspan="2" align="center" >NO</th>
+						<th align="middle-center" rowspan="2" width="220px" >INSPECTION ITEM</th>
+						<th colspan="2"><p align="center">STANDARD VALUE</p></th>
+						<th rowspan="2" width="200px">INSPECTION INSTRUMENT</th>
+						<th rowspan="2" width="60px"><p align="center">RANK</p></th>
+						<th colspan="2"><p align="center">SAMPLING PLAN</p></th>
+						<th rowspan="2" width="150px"><p align="center">REMARKS</p></th>
+						<th colspan="" width="20px"></th>
+					</tr>
+					
+					<tr>
+						<th width="150px">NOMINAL</th>
+						<th width="150px">TOLERANCE</th>
+						<th width="200px">IN PROSES</th>
+						<th width="220px">AT DELIVERY</th>
+						<th width="20px">Hapus</th>
+					</tr> 
+				</table>
+				{!! Form::hidden('jml_input1', 0, ['class'=>'form-control', 'readonly'=>'readonly', 'id' => 'jml_input1']) !!}
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="box-body">
+	<div class="panel panel-default">
+		<div class="panel-heading" style="background-color:#F0F8FF">
+			<h3 class="panel-title"><b>IV. SOC FREE</b></h3>
+		</div>
+		<div class="panel-body">
+			<div class="box-body col-md-12">
+				<!-- /.Table Input-->
+				<button type="button" name="socfree" id="socfree" class="btn btn-success">+</button>
+				<table class="table table-bordered" id="dynamic_field8">
+					<tr>
+						<th width="80px" rowspan="2" align="center" >NO</th>
+						<th align="middle-center" rowspan="2" width="220px" >INSPECTION ITEM</th>
+						<th colspan="2"><p align="center">STANDARD VALUE</p></th>
+						<th rowspan="2" width="200px">INSPECTION INSTRUMENT</th>
+						<th rowspan="2" width="60px"><p align="center">RANK</p></th>
+						<th colspan="2"><p align="center">SAMPLING PLAN</p></th>
+						<th rowspan="2" width="150px"><p align="center">REMARKS</p></th>
+						<th colspan="" width="20px"></th>
+					</tr>
+					
+					<tr>
+						<th width="150px">NOMINAL</th>
+						<th width="150px">TOLERANCE</th>
+						<th width="200px">IN PROSES</th>
+						<th width="220px">AT DELIVERY</th>
+						<th width="20px">Hapus</th>
+					</tr> 
+				</table>
+				{!! Form::hidden('inputhidden', 0, ['class'=>'form-control', 'readonly'=>'readonly', 'id' => 'inputhidden']) !!}
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div class="box-body">
+	<div class="panel panel-default">
+		<div class="panel-heading" style="background-color:#F0F8FF">
+			<h3 class="panel-title"><b>V. PART ROUTING</b></h3>
+		</div>
+		<div class="panel-body">
+			<div class="box-body">
+				<div class="box-body col-md-12">
+					<!-- /.Table Input-->
+					<button type="button" name="partrouting" id="partrouting" class="btn btn-success">+</button>
+					<table class="table table-bordered" id="dynamic_field9">
+						<tr>
+							<th width="70px">NO</th>
+							<th width="100px">LEVEL</th>
+							<th width="300px">PART NAME</th>
+							<th width="300px">PART NO</th>
+							<th width="300px">PROCESS</th>
+							<th width="300px">SUPPLIER</th>
+							<th width="50px">Hapus</th>
+						</tr> 
+					</table>
+					{!! Form::hidden('barishidden', 0, ['class'=>'form-control', 'readonly'=>'readonly', 'id' => 'barishidden']) !!}
+				</div>
+			</div>
+			<div class="box-body">
+				<div class="col-sm-12">
+					{!! Form::label('APPROVAL SUPPLIER', '') !!}
+				</div>
+			</div>
+			<br>
+			<br>
+			<div class="box-body col-md-12">
+				<div class="form-group col-md-4">
+					<div class="col-md-3">
+						{!! Form::label('cover', 'STAFF', ['class'=>'col-md-2 control-label']) !!}
+					</div>
+					<div class="col-md-3">
+						{!! Form::file('cover') !!}
+					</div>
+				</div>
+
+				<div class="form-group col-md-4">
+					<div class="col-md-4">
+						{!! Form::label('cover', 'SUPERVISOR', ['class'=>'col-md-2 control-label']) !!}
+					</div>
+					<div class="col-md-3">
+						{!! Form::file('cover') !!}
+					</div>
+				</div>
+
+				<div class="form-group col-md-4">
+					<div class="col-md-4">
+						{!! Form::label('cover', 'MANAGER', ['class'=>'col-md-2 control-label']) !!}
+					</div>
+					<div class="col-md-4">
+						{!! Form::file('cover') !!}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>	
+
+{{-- TEST --}}
+<div class="box-body">
+	<div class="panel panel-default">
+		<div class="panel-heading" style="background-color:#F0F8FF">
+			<h3 class="panel-title"><b>IV. Test</b></h3>
+		</div>
+		<div class="panel-body">
+			<div class="box-body col-md-12">
+				<!-- /.Table Input-->
+				<button type="button" name="test" id="test" class="btn btn-success">+</button>
+				<table class="table table-bordered" id="jajal">
+					<tr>
+						<th width="80px" rowspan="2" align="center" >NO</th>
+						<th align="middle-center" rowspan="2" width="220px" >INSPECTION ITEM</th>
+						<th colspan="2"><p align="center">STANDARD VALUE</p></th>
+						<th rowspan="2" width="200px">INSPECTION INSTRUMENT</th>
+						<th rowspan="2" width="60px"><p align="center">RANK</p></th>
+						<th colspan="2"><p align="center">SAMPLING PLAN</p></th>
+						<th rowspan="2" width="150px"><p align="center">REMARKS</p></th>
+						<th colspan="" width="20px"></th>
+					</tr>
+					
+					<tr>
+						<th width="150px">NOMINAL</th>
+						<th width="150px">TOLERANCE</th>
+						<th width="200px">IN PROSES</th>
+						<th width="220px">AT DELIVERY</th>
+						<th width="20px">Hapus</th>
+					</tr> 
+				</table>
+				{!! Form::hidden('test', 0, ['class'=>'form-control', 'readonly'=>'readonly', 'id' => 'inputhidden']) !!}
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="box-body">
+	<div class="panel panel-default">
+		<div class="panel-heading" style="background-color:#F0F8FF">
+			<h3 class="panel-title"><b>REVISION COLUMN (IF ANY)</b></h3>
+		</div>
+		<div class="panel-body">
+			<div class="box-body col-md-12">
+				<!-- /.Table Input-->
+				<button type="button" name="revisi" id="revisi" class="btn btn-success">+</button>
+				<table class="table table-bordered" id="dynamic_fieldd">
+					<tr>
+						<th width="100px">REVISI NO</th>
+						<th width="200px">DATE</th>
+						<th width="300px">REVISION RECORD / REMARKS</th>
+						<th width="300px">PCR/ECI/ECRNO.</th>
+						<th width="50px">Hapus</th>
+					</tr> 
+				</table>
+				{!! Form::hidden('jml_revisi', 0, ['class'=>'form-control', 'readonly'=>'readonly', 'id' => 'jml_revisi']) !!}
+			</div>
+			<div class="box-body col-md-12">
+				<div class="form-group col-md-4">
+					<div class="col-md-3">
+						{!! Form::label('cover', 'STAFF', ['class'=>'col-md-2 control-label']) !!}
+					</div>
+					<div class="col-md-3">
+						{!! Form::file('cover') !!}
+					</div>
+				</div>
+
+				<div class="form-group col-md-4">
+					<div class="col-md-4">
+						{!! Form::label('cover', 'SUPERVISOR', ['class'=>'col-md-2 control-label']) !!}
+					</div>
+					<div class="col-md-3">
+						{!! Form::file('cover') !!}
+					</div>
+				</div>
+
+				<div class="form-group col-md-4">
+					<div class="col-md-4">
+						{!! Form::label('cover', 'MANAGER', ['class'=>'col-md-2 control-label']) !!}
+					</div>
+					<div class="col-md-4">
+						{!! Form::file('cover') !!}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>	
+
+<div class="box-footer">
+	<form action="{{ route('pistandards.store') }}" method="POST">
+		<!-- fields -->
+		<button type="submit" name="action" value="save" class="btn btn-success">Save</button>
+		&nbsp;&nbsp;
+		&nbsp;&nbsp;
+		<button type="submit" name="action" value="save_draft" class="btn btn-primary">Save Draft</button>
+	</form>
+
+
+	&nbsp;&nbsp;
+	&nbsp;&nbsp;
+
+	{!! Form::submit('PRINT/PREVIW', ['class'=>'btn btn-info']) !!}
+	&nbsp;&nbsp;
+	&nbsp;&nbsp;
+	<a class="btn btn-danger" href="{{ route('pistandards.index') }}"  id="btn-cancel">Back</a>
+	&nbsp;&nbsp;
+
+</div>
+
+
+@section('scripts')
+<script type="text/javascript">
+
+
+		$("#test").click(function(){
+     		var test = document.getElementById("test").value.trim();
+     		test = Number(test) + 1;
+     		document.getElementById("test").value = test  ;
+
+     		var tno = 'tno_'+test;
+     		var titem = 'titem_'+test;
+     		var tnom = 'tnom_'+test;
+     		var ttol = 'ttol_'+test;
+     		var tins = 'tins_'+test;
+     		var trank = 'trank_'+test;
+     		var tpro = 'tpro_'+test;
+     		var tdel = 'tdel_'+test;
+     		var trem = 'trem_'+test;
+     		var tbtndelete = 'cline_btndelete_'+test;
+     		var id_test = 'line_id_test_'+test;
+
+     		$("#jajal").append(
+     			'<tr id="'+id_test+'">\
+     			<td>\
+     				<input type="text" id="' +tno+ '" name="' +tno+ '" placeholder="" class="form-control name_list" value="'+test+'" align="center"/>\
+     			</td>\
+     			<td>\
+     				<div class="input-group">\
+     					<input type="text" id="' +titem+ '" name="' +titem+ '" onchange="validatejam(this)" placeholder="" class="form-control name_list"  value="" />\
+     				</div>\
+     			</td>\
+     			<td>\
+     				<div class="input-group">\
+     					<input type="text" id="' +tnom+ '" name="' +tnom+ '" onchange="validatepart(this)" placeholder="" class="form-control name_list"  value=""/>\
+     				</div>\
+     			</td>\
+     			<td>\
+     				<input type="text" id="' +ttol+ '" name="' +ttol+ '" placeholder="" class="form-control name_list" />\
+     			</td>\
+     			<td>\
+     				<input type="text" id="' +tins+ '" name="' +tins+ '" placeholder="" class="form-control name_list" />\
+     			</td>\
+     			<td>\
+     				<input type="text" id="' +trank+ '" name="' +trank+ '" placeholder="" class="form-control name_list" />\
+     			</td>\
+     			<td>\
+     				<input type="text" id="' +tpro+ '" name="' +tpro+ '" placeholder="" class="form-control name_list" />\
+     			</td>\
+     			<td>\
+     				<input type="text" id="' +tdel+ '" name="' +tdel+ '" placeholder="" class="form-control name_list" />\
+     			</td>\
+     			<td>\
+     				<input type="text" id="' +trem+ '" name="' +trem+ '" placeholder="" class="form-control name_list" />\
+     			</td>\
+     			<td>\
+     				<button id="' + tbtndelete + '" name="' + tbtndelete + '" type="button" class="btn btn-danger btn-sm" onclick="deleteLine(this)">\
+     					<i class="fa fa-times"></i>\
+     				</button>\
+     			</td>\
+     		</tr>'
+     		);
+
+     	}); 
+
+     	function deleteLine(ths) {
+     		var msg = 'Anda yakin menghapus Line ini?';
+     		swal({
+     			title: msg,
+     			text: "",
+     			type: 'warning',
+     			showCancelButton: true,
+     			confirmButtonColor: '#3085d6',
+     			cancelButtonColor: '#d33',
+     			confirmButtonText: '<i class="fa fa-thumbs-up"></i> Yes, delete it!',
+     			cancelButtonText: '<i class="fa fa-thumbs-down"></i> No, cancel!',
+     			allowOutsideClick: true,
+     			allowEscapeKey: true,
+     			allowEnterKey: true,
+     			reverseButtons: false,
+     			focusCancel: true,
+     		}).then(function () {
+          //startcode
+          var row = ths.id.replace('line_btndelete_', '');
+          var info = "";
+          var info2 = "";
+          var info3 = "warning";
+          var no = document.getElementById("no_" + row).value.trim();
+          var no_doc = document.getElementById("no_doc").value.trim();
+          if(no === "" || no === "0" ||  no_doc === "" || no_doc === "0" ) {
+          	changeKdLine(row);
+          } else {
+            //DELETE DI DATABASE
+            // remove these events;
+            window.onkeydown = null;
+            window.onfocus = null;
+            var token = document.getElementsByName('_token')[0].value.trim();
+            // delete via ajax
+            // hapus data detail dengan ajax
+            var url = '{{ route('tlhpn01s.deleteLine', ['param','param2']) }}';
+            url = url.replace('param', window.btoa(no_doc));
+            url = url.replace('param2', window.btoa(no));
+
+            $.ajax({
+            	type     : 'POST',
+            	url      : url,
+            	dataType : 'json',
+            	data     : {
+            		_method : 'DELETE',
+            		_token  : token
+            	},
+            	success:function(data){
+            		if(data.status === 'OK'){
+            			changeKdLine(row);
+            			info = "Deleted!";
+            			info2 = data.message;
+            			info3 = "success";
+            			swal(info, info2, info3);
+            		} else {
+            			info = "Cancelled";
+            			info2 = data.message;
+            			info3 = "error";
+            			swal(info, info2, info3);
+            		}
+            	}, error:function(){ 
+            		info = "System Error!";
+            		info2 = "Maaf, terjadi kesalahan pada system kami. Silahkan hubungi Administrator. Terima Kasih.";
+            		info3 = "error";
+            		swal(info, info2, info3);
+            	}
+            });
+            //END DELETE DI DATABASE
+        }
+          //finishcode
+      }, function (dismiss) {
+          // dismiss can be 'cancel', 'overlay',
+          // 'close', and 'timer'
+          if (dismiss === 'cancel') {
+            // swal(
+            //   'Cancelled',
+            //   'Your imaginary file is safe :)',
+            //   'error'
+            // )
+        }
+    })
+     	}
+
+     	function changeKdLine(row) {
+     		var id_field1 = "#line_field_" + row;
+     		$(id_field1).remove();
+
+     		var jml_line = document.getElementById("jml_line").value.trim();
+     		jml_line = Number(jml_line);  
+     		nextRow = Number(row) + 1;
+     		for($i = nextRow; $i <= jml_line; $i++) {
+     			var no = '#no_' + $i;
+     			var no_new = 'no_' + ($i-1);
+     			$(no).attr({"id":no_new, "name":no_new});
+
+     			var jam = '#jam_' + $i;
+     			var jam_new = 'jam_' + ($i-1);
+     			$(jam).attr({"id":jam_new, "name":jam_new});
+
+     			var part_no = '#part_no_' + $i;
+     			var part_no_new = 'part_no_' + ($i-1);
+     			$(part_no).attr({"id":part_no_new, "name":part_no_new});
+
+     			var qty = '#qty_' + $i;
+     			var qty_new = 'qty_' + ($i-1);
+     			$(qty).attr({"id":qty_new, "name":qty_new});
+
+     			var btndelete = '#line_btndelete_' + $i;
+     			var btndelete_new = 'line_btndelete_' + ($i-1);
+     			$(btndelete).attr({"id":btndelete_new, "name":btndelete_new});
+
+     			var btnpopupshift = '#line_btnpopupshift_' + $i;
+     			var btnpopupshift_new = 'line_btnpopupshift_' + ($i-1);
+     			$(btnpopupshift).attr({"id":btnpopupshift_new, "name":btnpopupshift_new});
+
+     			var btnpopuppart = '#line_btnpopuppart_' + $i;
+     			var btnpopuppart_new = 'line_btnpopuppart_' + ($i-1);
+     			$(btnpopuppart).attr({"id":btnpopuppart_new, "name":btnpopuppart_new});
+
+     			var id_field1 = "#line_field_" + $i;
+     			var id_field_new = "line_field_" + ($i-1);
+     			$(id_field1).attr({"id":id_field_new, "name":id_field_new});
+
+     			var text = document.getElementById(no_new).innerHTML;
+     			text = text.replace($i, ($i-1));
+     			document.getElementById(no_new).innerHTML = text;
+
+     		}
+     		jml_line = jml_line - 1;
+     		document.getElementById("jml_line").value = jml_line;
+
+     	}
+
+		//SAMPAI SINI
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// A. CHEMICAL COMPOSITION
+
+
+     	// Initialize Select2 Elements
+
+     	$("#add1").click(function(){
+     		var jml_line1 = document.getElementById("jml_line1").value.trim();
+     		jml_line1 = Number(jml_line1) + 1;
+     		document.getElementById("jml_line1").value = jml_line1  ;
+
+     		var cno = 'cno_'+jml_line1;
+     		var citem = 'citem_'+jml_line1;
+     		var cnom = 'cnom_'+jml_line1;
+     		var ctol = 'ctol_'+jml_line1;
+     		var cins = 'cins_'+jml_line1;
+     		var crank = 'crank_'+jml_line1;
+     		var cpro = 'cpro_'+jml_line1;
+     		var cdel = 'cdel_'+jml_line1;
+     		var crem = 'crem_'+jml_line1;
+     		var cbtndelete = 'cline_btndelete_'+jml_line1;
+     		var id_field1 = 'line_field1_'+jml_line1;
+
+     		$("#dynamic_field1").append(
+     			'<tr id="'+id_field1+'">\
+     			<td>\
+     				<input type="text" id="' +cno+ '" name="' +cno+ '" placeholder="" class="form-control name_list" value="'+jml_line1+'" align="center"/>\
+     			</td>\
+     			<td>\
+     				<div class="input-group">\
+     					<input type="text" id="' +citem+ '" name="' +citem+ '" onchange="validatejam(this)" placeholder="" class="form-control name_list"  value="" />\
+     				</div>\
+     			</td>\
+     			<td>\
+     				<div class="input-group">\
+     					<input type="text" id="' +cnom+ '" name="' +cnom+ '" onchange="validatepart(this)" placeholder="" class="form-control name_list"  value=""/>\
+     				</div>\
+     			</td>\
+     			<td>\
+     				<input type="text" id="' +ctol+ '" name="' +ctol+ '" placeholder="" class="form-control name_list" />\
+     			</td>\
+     			<td>\
+     				<input type="text" id="' +cins+ '" name="' +cins+ '" placeholder="" class="form-control name_list" />\
+     			</td>\
+     			<td>\
+     				<input type="text" id="' +crank+ '" name="' +crank+ '" placeholder="" class="form-control name_list" />\
+     			</td>\
+     			<td>\
+     				<input type="text" id="' +cpro+ '" name="' +cpro+ '" placeholder="" class="form-control name_list" />\
+     			</td>\
+     			<td>\
+     				<input type="text" id="' +cdel+ '" name="' +cdel+ '" placeholder="" class="form-control name_list" />\
+     			</td>\
+     			<td>\
+     				<input type="text" id="' +crem+ '" name="' +crem+ '" placeholder="" class="form-control name_list" />\
+     			</td>\
+     			<td>\
+     				<button id="' + cbtndelete + '" name="' + cbtndelete + '" type="button" class="btn btn-danger btn-sm" onclick="deleteLine(this)">\
+     					<i class="fa fa-times"></i>\
+     				</button>\
+     			</td>\
+     		</tr>'
+     		);
+
+     	}); 
+
+     	function deleteLine(ths) {
+     		var msg = 'Anda yakin menghapus Line ini?';
+     		swal({
+     			title: msg,
+     			text: "",
+     			type: 'warning',
+     			showCancelButton: true,
+     			confirmButtonColor: '#3085d6',
+     			cancelButtonColor: '#d33',
+     			confirmButtonText: '<i class="fa fa-thumbs-up"></i> Yes, delete it!',
+     			cancelButtonText: '<i class="fa fa-thumbs-down"></i> No, cancel!',
+     			allowOutsideClick: true,
+     			allowEscapeKey: true,
+     			allowEnterKey: true,
+     			reverseButtons: false,
+     			focusCancel: true,
+     		}).then(function () {
+          //startcode
+          var row = ths.id.replace('line_btndelete_', '');
+          var info = "";
+          var info2 = "";
+          var info3 = "warning";
+          var no = document.getElementById("no_" + row).value.trim();
+          var no_doc = document.getElementById("no_doc").value.trim();
+          if(no === "" || no === "0" ||  no_doc === "" || no_doc === "0" ) {
+          	changeKdLine(row);
+          } else {
+            //DELETE DI DATABASE
+            // remove these events;
+            window.onkeydown = null;
+            window.onfocus = null;
+            var token = document.getElementsByName('_token')[0].value.trim();
+            // delete via ajax
+            // hapus data detail dengan ajax
+            var url = '{{ route('tlhpn01s.deleteLine', ['param','param2']) }}';
+            url = url.replace('param', window.btoa(no_doc));
+            url = url.replace('param2', window.btoa(no));
+
+            $.ajax({
+            	type     : 'POST',
+            	url      : url,
+            	dataType : 'json',
+            	data     : {
+            		_method : 'DELETE',
+            		_token  : token
+            	},
+            	success:function(data){
+            		if(data.status === 'OK'){
+            			changeKdLine(row);
+            			info = "Deleted!";
+            			info2 = data.message;
+            			info3 = "success";
+            			swal(info, info2, info3);
+            		} else {
+            			info = "Cancelled";
+            			info2 = data.message;
+            			info3 = "error";
+            			swal(info, info2, info3);
+            		}
+            	}, error:function(){ 
+            		info = "System Error!";
+            		info2 = "Maaf, terjadi kesalahan pada system kami. Silahkan hubungi Administrator. Terima Kasih.";
+            		info3 = "error";
+            		swal(info, info2, info3);
+            	}
+            });
+            //END DELETE DI DATABASE
+        }
+          //finishcode
+      }, function (dismiss) {
+          // dismiss can be 'cancel', 'overlay',
+          // 'close', and 'timer'
+          if (dismiss === 'cancel') {
+            // swal(
+            //   'Cancelled',
+            //   'Your imaginary file is safe :)',
+            //   'error'
+            // )
+        }
+    })
+     	}
+
+     	function changeKdLine(row) {
+     		var id_field1 = "#line_field_" + row;
+     		$(id_field1).remove();
+
+     		var jml_line = document.getElementById("jml_line").value.trim();
+     		jml_line = Number(jml_line);  
+     		nextRow = Number(row) + 1;
+     		for($i = nextRow; $i <= jml_line; $i++) {
+     			var no = '#no_' + $i;
+     			var no_new = 'no_' + ($i-1);
+     			$(no).attr({"id":no_new, "name":no_new});
+
+     			var jam = '#jam_' + $i;
+     			var jam_new = 'jam_' + ($i-1);
+     			$(jam).attr({"id":jam_new, "name":jam_new});
+
+     			var part_no = '#part_no_' + $i;
+     			var part_no_new = 'part_no_' + ($i-1);
+     			$(part_no).attr({"id":part_no_new, "name":part_no_new});
+
+     			var qty = '#qty_' + $i;
+     			var qty_new = 'qty_' + ($i-1);
+     			$(qty).attr({"id":qty_new, "name":qty_new});
+
+     			var btndelete = '#line_btndelete_' + $i;
+     			var btndelete_new = 'line_btndelete_' + ($i-1);
+     			$(btndelete).attr({"id":btndelete_new, "name":btndelete_new});
+
+     			var btnpopupshift = '#line_btnpopupshift_' + $i;
+     			var btnpopupshift_new = 'line_btnpopupshift_' + ($i-1);
+     			$(btnpopupshift).attr({"id":btnpopupshift_new, "name":btnpopupshift_new});
+
+     			var btnpopuppart = '#line_btnpopuppart_' + $i;
+     			var btnpopuppart_new = 'line_btnpopuppart_' + ($i-1);
+     			$(btnpopuppart).attr({"id":btnpopuppart_new, "name":btnpopuppart_new});
+
+     			var id_field1 = "#line_field_" + $i;
+     			var id_field_new = "line_field_" + ($i-1);
+     			$(id_field1).attr({"id":id_field_new, "name":id_field_new});
+
+     			var text = document.getElementById(no_new).innerHTML;
+     			text = text.replace($i, ($i-1));
+     			document.getElementById(no_new).innerHTML = text;
+
+     		}
+     		jml_line = jml_line - 1;
+     		document.getElementById("jml_line").value = jml_line;
+
+     	}
+
+      // B.MECHANICAL PROPERTIES\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+     // Initialize Select2 Elements
+
+     $("#addd").click(function(){
+     	var jml_linee = document.getElementById("jml_linee").value.trim();
+     	jml_linee = Number(jml_linee) + 1;
+     	document.getElementById("jml_linee").value = jml_linee  ;
+
+     	var mno = 'mno_'+jml_linee;
+     	var mitem = 'mitem_'+jml_linee;
+     	var mnom = 'mnom_'+jml_linee;
+     	var mtol = 'mtol_'+jml_linee;
+     	var mins = 'mins_'+jml_linee;
+     	var mrank = 'mrank_'+jml_linee;
+     	var mpro = 'mpro_'+jml_linee;
+     	var mdel = 'mdel_'+jml_linee;
+     	var mrem = 'mrem_'+jml_linee;
+     	var mbtndelete = 'mline_btndelete_'+jml_linee;
+     	var id_field2 = 'line_field_'+jml_linee;
+
+     	$("#dynamic_field2").append(
+     		'<tr id="'+id_field2+'">\
+     		<td>\
+     			<input type="text" id="' +mno+ '" name="' +mno+ '" placeholder="" class="form-control name_list" value="'+jml_linee+'" align="center"/>\
+     		</td>\
+     		<td>\
+     			<div class="input-group">\
+     				<input type="text" id="' +mitem+ '" name="' +mitem+ '" onchange="validatejam(this)" placeholder="" class="form-control name_list"  value="" />\
+     			</div>\
+     		</td>\
+     		<td>\
+     			<div class="input-group">\
+     				<input type="text" id="' +mnom+ '" name="' +mnom+ '" onchange="validatepart(this)" placeholder="" class="form-control name_list"  value=""/>\
+     			</div>\
+     		</td>\
+     		<td>\
+     			<input type="text" id="' +mtol+ '" name="' +mtol+ '" placeholder="" class="form-control name_list" />\
+     		</td>\
+     		<td>\
+     			<input type="text" id="' +mins+ '" name="' +mins+ '" placeholder="" class="form-control name_list" />\
+     		</td>\
+     		<td>\
+     			<input type="text" id="' +mrank+ '" name="' +mrank+ '" placeholder="" class="form-control name_list" />\
+     		</td>\
+     		<td>\
+     			<input type="text" id="' +mpro+ '" name="' +mpro+ '" placeholder="" class="form-control name_list" />\
+     		</td>\
+     		<td>\
+     			<input type="text" id="' +mdel+ '" name="' +mdel+ '" placeholder="" class="form-control name_list" />\
+     		</td>\
+     		<td>\
+     			<input type="text" id="' +mrem+ '" name="' +mrem+ '" placeholder="" class="form-control name_list" />\
+     		</td>\
+     		<td>\
+     			<button id="' + mbtndelete + '" name="' + mbtndelete + '" type="button" class="btn btn-danger btn-sm" onclick="deleteLine(this)">\
+     				<i class="fa fa-times"></i>\
+     			</button>\
+     		</td>\
+     	</tr>'
+     	);
+
+     }); 
+
+     function deleteLine(ths) {
+     	var msg = 'Anda yakin menghapus Line ini?';
+     	swal({
+     		title: msg,
+     		text: "",
+     		type: 'warning',
+     		showCancelButton: true,
+     		confirmButtonColor: '#3085d6',
+     		cancelButtonColor: '#d33',
+     		confirmButtonText: '<i class="fa fa-thumbs-up"></i> Yes, delete it!',
+     		cancelButtonText: '<i class="fa fa-thumbs-down"></i> No, cancel!',
+     		allowOutsideClick: true,
+     		allowEscapeKey: true,
+     		allowEnterKey: true,
+     		reverseButtons: false,
+     		focusCancel: true,
+     	}).then(function () {
+          //startcode
+          var row = ths.id.replace('line_btndelete_', '');
+          var info = "";
+          var info2 = "";
+          var info3 = "warning";
+          var no = document.getElementById("no_" + row).value.trim();
+          var no_doc = document.getElementById("no_doc").value.trim();
+          if(no === "" || no === "0" ||  no_doc === "" || no_doc === "0" ) {
+          	changeKdLine(row);
+          } else {
+            //DELETE DI DATABASE
+            // remove these events;
+            window.onkeydown = null;
+            window.onfocus = null;
+            var token = document.getElementsByName('_token')[0].value.trim();
+            // delete via ajax
+            // hapus data detail dengan ajax
+            var url = '{{ route('tlhpn01s.deleteLine', ['param','param2']) }}';
+            url = url.replace('param', window.btoa(no_doc));
+            url = url.replace('param2', window.btoa(no));
+
+            $.ajax({
+            	type     : 'POST',
+            	url      : url,
+            	dataType : 'json',
+            	data     : {
+            		_method : 'DELETE',
+            		_token  : token
+            	},
+            	success:function(data){
+            		if(data.status === 'OK'){
+            			changeKdLine(row);
+            			info = "Deleted!";
+            			info2 = data.message;
+            			info3 = "success";
+            			swal(info, info2, info3);
+            		} else {
+            			info = "Cancelled";
+            			info2 = data.message;
+            			info3 = "error";
+            			swal(info, info2, info3);
+            		}
+            	}, error:function(){ 
+            		info = "System Error!";
+            		info2 = "Maaf, terjadi kesalahan pada system kami. Silahkan hubungi Administrator. Terima Kasih.";
+            		info3 = "error";
+            		swal(info, info2, info3);
+            	}
+            });
+            //END DELETE DI DATABASE
+        }
+          //finishcode
+      }, function (dismiss) {
+          // dismiss can be 'cancel', 'overlay',
+          // 'close', and 'timer'
+          if (dismiss === 'cancel') {
+            // swal(
+            //   'Cancelled',
+            //   'Your imaginary file is safe :)',
+            //   'error'
+            // )
+        }
+    })
+     }
+
+     function changeKdLine(row) {
+     	var id_field1 = "#line_field_" + row;
+     	$(id_field1).remove();
+
+     	var jml_line = document.getElementById("jml_line").value.trim();
+     	jml_line = Number(jml_line);  
+     	nextRow = Number(row) + 1;
+     	for($i = nextRow; $i <= jml_line; $i++) {
+     		var no = '#no_' + $i;
+     		var no_new = 'no_' + ($i-1);
+     		$(no).attr({"id":no_new, "name":no_new});
+
+     		var jam = '#jam_' + $i;
+     		var jam_new = 'jam_' + ($i-1);
+     		$(jam).attr({"id":jam_new, "name":jam_new});
+
+     		var part_no = '#part_no_' + $i;
+     		var part_no_new = 'part_no_' + ($i-1);
+     		$(part_no).attr({"id":part_no_new, "name":part_no_new});
+
+     		var qty = '#qty_' + $i;
+     		var qty_new = 'qty_' + ($i-1);
+     		$(qty).attr({"id":qty_new, "name":qty_new});
+
+     		var btndelete = '#line_btndelete_' + $i;
+     		var btndelete_new = 'line_btndelete_' + ($i-1);
+     		$(btndelete).attr({"id":btndelete_new, "name":btndelete_new});
+
+     		var btnpopupshift = '#line_btnpopupshift_' + $i;
+     		var btnpopupshift_new = 'line_btnpopupshift_' + ($i-1);
+     		$(btnpopupshift).attr({"id":btnpopupshift_new, "name":btnpopupshift_new});
+
+     		var btnpopuppart = '#line_btnpopuppart_' + $i;
+     		var btnpopuppart_new = 'line_btnpopuppart_' + ($i-1);
+     		$(btnpopuppart).attr({"id":btnpopuppart_new, "name":btnpopuppart_new});
+
+     		var id_field1 = "#line_field_" + $i;
+     		var id_field_new = "line_field_" + ($i-1);
+     		$(id_field1).attr({"id":id_field_new, "name":id_field_new});
+
+     		var text = document.getElementById(no_new).innerHTML;
+     		text = text.replace($i, ($i-1));
+     		document.getElementById(no_new).innerHTML = text;
+
+     	}
+     	jml_line = jml_line - 1;
+     	document.getElementById("jml_line").value = jml_line;
+
+     }
+
+
+      // C. WELDING PERFORMANCE (IF ANY)
+
+
+     // Initialize Select2 Elements
+
+     $("#add3").click(function(){
+     	var jml_line3 = document.getElementById("jml_line3").value.trim();
+     	jml_line3 = Number(jml_line3) + 1;
+     	document.getElementById("jml_line3").value = jml_line3  ;
+
+     	var wno = 'wno_'+jml_line3;
+     	var witem = 'witem_'+jml_line3;
+     	var wnom = 'wnom_'+jml_line3;
+     	var wtol = 'wtol_'+jml_line3;
+     	var wins = 'wins_'+jml_line3;
+     	var wrank = 'wrank_'+jml_line3;
+     	var wpro = 'wpro_'+jml_line3;
+     	var wdel = 'wdel_'+jml_line3;
+     	var wrem = 'wrem_'+jml_line3;
+     	var wbtndelete = 'wline_btndelete_'+jml_line3;
+     	var id_field3 = 'line_field3_'+jml_line3;
+
+     	$("#dynamic_field3").append(
+     		'<tr id="'+id_field3+'">\
+     		<td>\
+     			<input type="text" id="' +wno+ '" name="' +wno+ '" placeholder="" class="form-control name_list" value="'+jml_line3+'" align="center"/>\
+     		</td>\
+     		<td>\
+     			<div class="input-group">\
+     				<input type="text" id="' +witem+ '" name="' +witem+ '" onchange="validatejam(this)" placeholder="" class="form-control name_list"  value="" />\
+     			</div>\
+     		</td>\
+     		<td>\
+     			<div class="input-group">\
+     				<input type="text" id="' +wnom+ '" name="' +wnom+ '" onchange="validatepart(this)" placeholder="" class="form-control name_list"  value=""/>\
+     			</div>\
+     		</td>\
+     		<td>\
+     			<input type="text" id="' +wtol+ '" name="' +wtol+ '" placeholder="" class="form-control name_list" />\
+     		</td>\
+     		<td>\
+     			<input type="text" id="' +wins+ '" name="' +wins+ '" placeholder="" class="form-control name_list" />\
+     		</td>\
+     		<td>\
+     			<input type="text" id="' +wrank+ '" name="' +wrank+ '" placeholder="" class="form-control name_list" />\
+     		</td>\
+     		<td>\
+     			<input type="text" id="' +wpro+ '" name="' +wpro+ '" placeholder="" class="form-control name_list" />\
+     		</td>\
+     		<td>\
+     			<input type="text" id="' +wdel+ '" name="' +wdel+ '" placeholder="" class="form-control name_list" />\
+     		</td>\
+     		<td>\
+     			<input type="text" id="' +wrem+ '" name="' +wrem+ '" placeholder="" class="form-control name_list" />\
+     		</td>\
+     		<td>\
+     			<button id="' + wbtndelete + '" name="' + wbtndelete + '" type="button" class="btn btn-danger btn-sm" onclick="deleteLine(this)">\
+     				<i class="fa fa-times"></i>\
+     			</button>\
+     		</td>\
+     	</tr>'
+     	);
+
+     });
+
+     function deleteLine(ths) {
+     	var msg = 'Anda yakin menghapus Line ini?';
+     	swal({
+     		title: msg,
+     		text: "",
+     		type: 'warning',
+     		showCancelButton: true,
+     		confirmButtonColor: '#3085d6',
+     		cancelButtonColor: '#d33',
+     		confirmButtonText: '<i class="fa fa-thumbs-up"></i> Yes, delete it!',
+     		cancelButtonText: '<i class="fa fa-thumbs-down"></i> No, cancel!',
+     		allowOutsideClick: true,
+     		allowEscapeKey: true,
+     		allowEnterKey: true,
+     		reverseButtons: false,
+     		focusCancel: true,
+     	}).then(function () {
+          //startcode
+          var row = ths.id.replace('line_btndelete_', '');
+          var info = "";
+          var info2 = "";
+          var info3 = "warning";
+          var no = document.getElementById("no_" + row).value.trim();
+          var no_doc = document.getElementById("no_doc").value.trim();
+          if(no === "" || no === "0" ||  no_doc === "" || no_doc === "0" ) {
+          	changeKdLine(row);
+          } else {
+            //DELETE DI DATABASE
+            // remove these events;
+            window.onkeydown = null;
+            window.onfocus = null;
+            var token = document.getElementsByName('_token')[0].value.trim();
+            // delete via ajax
+            // hapus data detail dengan ajax
+            var url = '{{ route('tlhpn01s.deleteLine', ['param','param2']) }}';
+            url = url.replace('param', window.btoa(no_doc));
+            url = url.replace('param2', window.btoa(no));
+
+            $.ajax({
+            	type     : 'POST',
+            	url      : url,
+            	dataType : 'json',
+            	data     : {
+            		_method : 'DELETE',
+            		_token  : token
+            	},
+            	success:function(data){
+            		if(data.status === 'OK'){
+            			changeKdLine(row);
+            			info = "Deleted!";
+            			info2 = data.message;
+            			info3 = "success";
+            			swal(info, info2, info3);
+            		} else {
+            			info = "Cancelled";
+            			info2 = data.message;
+            			info3 = "error";
+            			swal(info, info2, info3);
+            		}
+            	}, error:function(){ 
+            		info = "System Error!";
+            		info2 = "Maaf, terjadi kesalahan pada system kami. Silahkan hubungi Administrator. Terima Kasih.";
+            		info3 = "error";
+            		swal(info, info2, info3);
+            	}
+            });
+            //END DELETE DI DATABASE
+        }
+          //finishcode
+      }, function (dismiss) {
+          // dismiss can be 'cancel', 'overlay',
+          // 'close', and 'timer'
+          if (dismiss === 'cancel') {
+            // swal(
+            //   'Cancelled',
+            //   'Your imaginary file is safe :)',
+            //   'error'
+            // )
+        }
+    })
+     }
+
+     function changeKdLine(row) {
+     	var id_field3 = "#line_field3_" + row;
+     	$(id_field3).remove();
+
+     	var jml_line = document.getElementById("jml_line").value.trim();
+     	jml_line = Number(jml_line);  
+     	nextRow = Number(row) + 1;
+     	for($i = nextRow; $i <= jml_line; $i++) {
+     		var no = '#no_' + $i;
+     		var no_new = 'no_' + ($i-1);
+     		$(no).attr({"id":no_new, "name":no_new});
+
+     		var jam = '#jam_' + $i;
+     		var jam_new = 'jam_' + ($i-1);
+     		$(jam).attr({"id":jam_new, "name":jam_new});
+
+     		var part_no = '#part_no_' + $i;
+     		var part_no_new = 'part_no_' + ($i-1);
+     		$(part_no).attr({"id":part_no_new, "name":part_no_new});
+
+     		var qty = '#qty_' + $i;
+     		var qty_new = 'qty_' + ($i-1);
+     		$(qty).attr({"id":qty_new, "name":qty_new});
+
+     		var btndelete = '#line_btndelete_' + $i;
+     		var btndelete_new = 'line_btndelete_' + ($i-1);
+     		$(btndelete).attr({"id":btndelete_new, "name":btndelete_new});
+
+     		var btnpopupshift = '#line_btnpopupshift_' + $i;
+     		var btnpopupshift_new = 'line_btnpopupshift_' + ($i-1);
+     		$(btnpopupshift).attr({"id":btnpopupshift_new, "name":btnpopupshift_new});
+
+     		var btnpopuppart = '#line_btnpopuppart_' + $i;
+     		var btnpopuppart_new = 'line_btnpopuppart_' + ($i-1);
+     		$(btnpopuppart).attr({"id":btnpopuppart_new, "name":btnpopuppart_new});
+
+     		var id_field1 = "#line_field_" + $i;
+     		var id_field_new = "line_field_" + ($i-1);
+     		$(id_field1).attr({"id":id_field_new, "name":id_field_new});
+
+     		var text = document.getElementById(no_new).innerHTML;
+     		text = text.replace($i, ($i-1));
+     		document.getElementById(no_new).innerHTML = text;
+
+     	}
+     	jml_line = jml_line - 1;
+     	document.getElementById("jml_line").value = jml_line;
+
+     }
+
+      // D. SURFACE TREATMENT (IF ANY)\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+
+     // Initialize Select2 Elements
+
+     $("#add4").click(function(){
+     	var jml_line4 = document.getElementById("jml_line4").value.trim();
+     	jml_line4 = Number(jml_line4) + 1;
+     	document.getElementById("jml_line4").value = jml_line4  ;
+
+     	var sno = 'sno_'+jml_line4;
+     	var sitem = 'sitem_'+jml_line4;
+     	var snominal = 'snominal_'+jml_line4;
+     	var stolerance = 'stolerance_'+jml_line4;
+     	var sinstrument = 'sinstrument_'+jml_line4;
+     	var srank = 'srank_'+jml_line4;
+     	var sproses = 'sproses_'+jml_line4;
+     	var sdelivery = 'sdelivery_'+jml_line4;
+     	var sremarks = 'sremarks_'+jml_line4;
+     	var sbtndelete = 'sline_btndelete_'+jml_line4;
+     	var id_field4 = 'line_field4_'+jml_line4;
+
+     	$("#dynamic_field4").append(
+     		'<tr id="'+id_field4+'">\
+     		<td>\
+     			<input type="text" id="' +sno+ '" name="' +sno+ '" placeholder="" class="form-control name_list" value="'+jml_line4+'" align="center"/>\
+     		</td>\
+     		<td>\
+     			<div class="input-group">\
+     				<input type="text" id="' +sitem+ '" name="' +sitem+ '" onchange="validatejam(this)" placeholder="" class="form-control name_list"  value="" />\
+     			</div>\
+     		</td>\
+     		<td>\
+     			<div class="input-group">\
+     				<input type="text" id="' +snominal+ '" name="' +snominal+ '" onchange="validatepart(this)" placeholder="" class="form-control name_list"  value=""/>\
+     			</div>\
+     		</td>\
+     		<td>\
+     			<input type="text" id="' +stolerance+ '" name="' +stolerance+ '" placeholder="" class="form-control name_list" />\
+     		</td>\
+     		<td>\
+     			<input type="text" id="' +sinstrument+ '" name="' +sinstrument+ '" placeholder="" class="form-control name_list" />\
+     		</td>\
+     		<td>\
+     			<input type="text" id="' +srank+ '" name="' +srank+ '" placeholder="" class="form-control name_list" />\
+     		</td>\
+     		<td>\
+     			<input type="text" id="' +sproses+ '" name="' +sproses+ '" placeholder="" class="form-control name_list" />\
+     		</td>\
+     		<td>\
+     			<input type="text" id="' +sdelivery+ '" name="' +sdelivery+ '" placeholder="" class="form-control name_list" />\
+     		</td>\
+     		<td>\
+     			<input type="text" id="' +sremarks+ '" name="' +sremarks+ '" placeholder="" class="form-control name_list" />\
+     		</td>\
+     		<td>\
+     			<button id="' + sbtndelete + '" name="' + sbtndelete + '" type="button" class="btn btn-danger btn-sm" onclick="deleteLine(this)">\
+     				<i class="fa fa-times"></i>\
+     			</button>\
+     		</td>\
+     	</tr>'
+     	);
+     });
+
+
+
+
+     function deleteLine(ths) {
+     	var msg = 'Anda yakin menghapus Line ini?';
+     	swal({
+     		title: msg,
+     		text: "",
+     		type: 'warning',
+     		showCancelButton: true,
+     		confirmButtonColor: '#3085d6',
+     		cancelButtonColor: '#d33',
+     		confirmButtonText: '<i class="fa fa-thumbs-up"></i> Yes, delete it!',
+     		cancelButtonText: '<i class="fa fa-thumbs-down"></i> No, cancel!',
+     		allowOutsideClick: true,
+     		allowEscapeKey: true,
+     		allowEnterKey: true,
+     		reverseButtons: false,
+     		focusCancel: true,
+     	}).then(function () {
+          //startcode
+          var row = ths.id.replace('line_btndelete_', '');
+          var info = "";
+          var info2 = "";
+          var info3 = "warning";
+          var no = document.getElementById("no_" + row).value.trim();
+          var no_doc = document.getElementById("no_doc").value.trim();
+          if(no === "" || no === "0" ||  no_doc === "" || no_doc === "0" ) {
+          	changeKdLine(row);
+          } else {
+            //DELETE DI DATABASE
+            // remove these events;
+            window.onkeydown = null;
+            window.onfocus = null;
+            var token = document.getElementsByName('_token')[0].value.trim();
+            // delete via ajax
+            // hapus data detail dengan ajax
+            var url = '{{ route('tlhpn01s.deleteLine', ['param','param2']) }}';
+            url = url.replace('param', window.btoa(no_doc));
+            url = url.replace('param2', window.btoa(no));
+
+            $.ajax({
+            	type     : 'POST',
+            	url      : url,
+            	dataType : 'json',
+            	data     : {
+            		_method : 'DELETE',
+            		_token  : token
+            	},
+            	success:function(data){
+            		if(data.status === 'OK'){
+            			changeKdLine(row);
+            			info = "Deleted!";
+            			info2 = data.message;
+            			info3 = "success";
+            			swal(info, info2, info3);
+            		} else {
+            			info = "Cancelled";
+            			info2 = data.message;
+            			info3 = "error";
+            			swal(info, info2, info3);
+            		}
+            	}, error:function(){ 
+            		info = "System Error!";
+            		info2 = "Maaf, terjadi kesalahan pada system kami. Silahkan hubungi Administrator. Terima Kasih.";
+            		info3 = "error";
+            		swal(info, info2, info3);
+            	}
+            });
+            //END DELETE DI DATABASE
+        }
+          //finishcode
+      }, function (dismiss) {
+          // dismiss can be 'cancel', 'overlay',
+          // 'close', and 'timer'
+          if (dismiss === 'cancel') {
+            // swal(
+            //   'Cancelled',
+            //   'Your imaginary file is safe :)',
+            //   'error'
+            // )
+        }
+    })
+     }
+
+     function changeKdLine(row) {
+     	var id_field1 = "#line_field_" + row;
+     	$(id_field1).remove();
+
+     	var jml_line = document.getElementById("jml_line").value.trim();
+     	jml_line = Number(jml_line);  
+     	nextRow = Number(row) + 1;
+     	for($i = nextRow; $i <= jml_line; $i++) {
+     		var no = '#no_' + $i;
+     		var no_new = 'no_' + ($i-1);
+     		$(no).attr({"id":no_new, "name":no_new});
+
+     		var jam = '#jam_' + $i;
+     		var jam_new = 'jam_' + ($i-1);
+     		$(jam).attr({"id":jam_new, "name":jam_new});
+
+     		var part_no = '#part_no_' + $i;
+     		var part_no_new = 'part_no_' + ($i-1);
+     		$(part_no).attr({"id":part_no_new, "name":part_no_new});
+
+     		var qty = '#qty_' + $i;
+     		var qty_new = 'qty_' + ($i-1);
+     		$(qty).attr({"id":qty_new, "name":qty_new});
+
+     		var btndelete = '#line_btndelete_' + $i;
+     		var btndelete_new = 'line_btndelete_' + ($i-1);
+     		$(btndelete).attr({"id":btndelete_new, "name":btndelete_new});
+
+     		var btnpopupshift = '#line_btnpopupshift_' + $i;
+     		var btnpopupshift_new = 'line_btnpopupshift_' + ($i-1);
+     		$(btnpopupshift).attr({"id":btnpopupshift_new, "name":btnpopupshift_new});
+
+     		var btnpopuppart = '#line_btnpopuppart_' + $i;
+     		var btnpopuppart_new = 'line_btnpopuppart_' + ($i-1);
+     		$(btnpopuppart).attr({"id":btnpopuppart_new, "name":btnpopuppart_new});
+
+     		var id_field1 = "#line_field_" + $i;
+     		var id_field_new = "line_field_" + ($i-1);
+     		$(id_field1).attr({"id":id_field_new, "name":id_field_new});
+
+     		var text = document.getElementById(no_new).innerHTML;
+     		text = text.replace($i, ($i-1));
+     		document.getElementById(no_new).innerHTML = text;
+
+     	}
+     	jml_line = jml_line - 1;
+     	document.getElementById("jml_line").value = jml_line;
+
+     }
+
+
+      // E. HEAT TREATMENT (IF ANY)
+
+
+     // Initialize Select2 Elements
+
+     $("#add5").click(function(){
+     	var jml_line5 = document.getElementById("jml_line5").value.trim();
+     	jml_line5 = Number(jml_line5) + 1;
+     	document.getElementById("jml_line5").value = jml_line5  ;
+
+     	var hno = 'hno_'+jml_line5;
+     	var hitem = 'hitem_'+jml_line5;
+     	var hnominal = 'hnominal_'+jml_line5;
+     	var htolerance = 'htolerance_'+jml_line5;
+     	var hinstrument = 'hinstrument_'+jml_line5;
+     	var hrank = 'hrank_'+jml_line5;
+     	var hproses = 'hproses_'+jml_line5;
+     	var hdelivery = 'hdelivery_'+jml_line5;
+     	var hremarks = 'hremarks_'+jml_line5;
+     	var hbtndelete = 'hline_btndelete_'+jml_line5;
+     	var id_field5 = 'line_field5_'+jml_line5;
+
+     	$("#dynamic_field5").append(
+     		'<tr id="'+id_field5+'">\
+     		<td>\
+     			<input type="text" id="' +hno+ '" name="' +hno+ '" placeholder="" class="form-control name_list" value="'+jml_line5+'" align="center"/>\
+     		</td>\
+     		<td>\
+     			<div class="input-group">\
+     				<input type="text" id="' +hitem+ '" name="' +hitem+ '" onchange="validatejam(this)" placeholder="" class="form-control name_list"  value="" />\
+     			</div>\
+     		</td>\
+     		<td>\
+     			<div class="input-group">\
+     				<input type="text" id="' +hnominal+ '" name="' +hnominal+ '" onchange="validatepart(this)" placeholder="" class="form-control name_list"  value=""/>\
+     			</div>\
+     		</td>\
+     		<td>\
+     			<input type="text" id="' +htolerance+ '" name="' +htolerance+ '" placeholder="" class="form-control name_list" />\
+     		</td>\
+     		<td>\
+     			<input type="text" id="' +hinstrument+ '" name="' +hinstrument+ '" placeholder="" class="form-control name_list" />\
+     		</td>\
+     		<td>\
+     			<input type="text" id="' +hrank+ '" name="' +hrank+ '" placeholder="" class="form-control name_list" />\
+     		</td>\
+     		<td>\
+     			<input type="text" id="' +hproses+ '" name="' +hproses+ '" placeholder="" class="form-control name_list" />\
+     		</td>\
+     		<td>\
+     			<input type="text" id="' +hdelivery+ '" name="' +hdelivery+ '" placeholder="" class="form-control name_list" />\
+     		</td>\
+     		<td>\
+     			<input type="text" id="' +hremarks+ '" name="' +hremarks+ '" placeholder="" class="form-control name_list" />\
+     		</td>\
+     		<td>\
+     			<button id="' + hbtndelete + '" name="' + hbtndelete + '" type="button" class="btn btn-danger btn-sm" onclick="deleteLine(this)">\
+     				<i class="fa fa-times"></i>\
+     			</button>\
+     		</td>\
+     	</tr>'
+     	);
+     });
+
+
+
+
+     function deleteLine(ths) {
+     	var msg = 'Anda yakin menghapus Line ini?';
+     	swal({
+     		title: msg,
+     		text: "",
+     		type: 'warning',
+     		showCancelButton: true,
+     		confirmButtonColor: '#3085d6',
+     		cancelButtonColor: '#d33',
+     		confirmButtonText: '<i class="fa fa-thumbs-up"></i> Yes, delete it!',
+     		cancelButtonText: '<i class="fa fa-thumbs-down"></i> No, cancel!',
+     		allowOutsideClick: true,
+     		allowEscapeKey: true,
+     		allowEnterKey: true,
+     		reverseButtons: false,
+     		focusCancel: true,
+     	}).then(function () {
+          //startcode
+          var row = ths.id.replace('line_btndelete_', '');
+          var info = "";
+          var info2 = "";
+          var info3 = "warning";
+          var no = document.getElementById("no_" + row).value.trim();
+          var no_doc = document.getElementById("no_doc").value.trim();
+          if(no === "" || no === "0" ||  no_doc === "" || no_doc === "0" ) {
+          	changeKdLine(row);
+          } else {
+            //DELETE DI DATABASE
+            // remove these events;
+            window.onkeydown = null;
+            window.onfocus = null;
+            var token = document.getElementsByName('_token')[0].value.trim();
+            // delete via ajax
+            // hapus data detail dengan ajax
+            var url = '{{ route('tlhpn01s.deleteLine', ['param','param2']) }}';
+            url = url.replace('param', window.btoa(no_doc));
+            url = url.replace('param2', window.btoa(no));
+
+            $.ajax({
+            	type     : 'POST',
+            	url      : url,
+            	dataType : 'json',
+            	data     : {
+            		_method : 'DELETE',
+            		_token  : token
+            	},
+            	success:function(data){
+            		if(data.status === 'OK'){
+            			changeKdLine(row);
+            			info = "Deleted!";
+            			info2 = data.message;
+            			info3 = "success";
+            			swal(info, info2, info3);
+            		} else {
+            			info = "Cancelled";
+            			info2 = data.message;
+            			info3 = "error";
+            			swal(info, info2, info3);
+            		}
+            	}, error:function(){ 
+            		info = "System Error!";
+            		info2 = "Maaf, terjadi kesalahan pada system kami. Silahkan hubungi Administrator. Terima Kasih.";
+            		info3 = "error";
+            		swal(info, info2, info3);
+            	}
+            });
+            //END DELETE DI DATABASE
+        }
+          //finishcode
+      }, function (dismiss) {
+          // dismiss can be 'cancel', 'overlay',
+          // 'close', and 'timer'
+          if (dismiss === 'cancel') {
+            // swal(
+            //   'Cancelled',
+            //   'Your imaginary file is safe :)',
+            //   'error'
+            // )
+        }
+    })
+     }
+
+     function changeKdLine(row) {
+     	var id_field1 = "#line_field_" + row;
+     	$(id_field1).remove();
+
+     	var jml_line = document.getElementById("jml_line").value.trim();
+     	jml_line = Number(jml_line);  
+     	nextRow = Number(row) + 1;
+     	for($i = nextRow; $i <= jml_line; $i++) {
+     		var no = '#no_' + $i;
+     		var no_new = 'no_' + ($i-1);
+     		$(no).attr({"id":no_new, "name":no_new});
+
+     		var jam = '#jam_' + $i;
+     		var jam_new = 'jam_' + ($i-1);
+     		$(jam).attr({"id":jam_new, "name":jam_new});
+
+     		var part_no = '#part_no_' + $i;
+     		var part_no_new = 'part_no_' + ($i-1);
+     		$(part_no).attr({"id":part_no_new, "name":part_no_new});
+
+     		var qty = '#qty_' + $i;
+     		var qty_new = 'qty_' + ($i-1);
+     		$(qty).attr({"id":qty_new, "name":qty_new});
+
+     		var btndelete = '#line_btndelete_' + $i;
+     		var btndelete_new = 'line_btndelete_' + ($i-1);
+     		$(btndelete).attr({"id":btndelete_new, "name":btndelete_new});
+
+     		var btnpopupshift = '#line_btnpopupshift_' + $i;
+     		var btnpopupshift_new = 'line_btnpopupshift_' + ($i-1);
+     		$(btnpopupshift).attr({"id":btnpopupshift_new, "name":btnpopupshift_new});
+
+     		var btnpopuppart = '#line_btnpopuppart_' + $i;
+     		var btnpopuppart_new = 'line_btnpopuppart_' + ($i-1);
+     		$(btnpopuppart).attr({"id":btnpopuppart_new, "name":btnpopuppart_new});
+
+     		var id_field1 = "#line_field_" + $i;
+     		var id_field_new = "line_field_" + ($i-1);
+     		$(id_field1).attr({"id":id_field_new, "name":id_field_new});
+
+     		var text = document.getElementById(no_new).innerHTML;
+     		text = text.replace($i, ($i-1));
+     		document.getElementById(no_new).innerHTML = text;
+
+     	}
+     	jml_line = jml_line - 1;
+     	document.getElementById("jml_line").value = jml_line;
+
+     }
+
+
+
+     // Initialize Select2 Elements
+
+
+ </script>
+ <script type="text/javascript">
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     	// II. APPEARENCE
+		 // Initialize Select2 Elements
+
+		 $("#tambah").click(function(){
+		 	var jml_rows = document.getElementById("jml_rows").value.trim();
+		 	jml_rows = Number(jml_rows) + 1;
+		 	document.getElementById("jml_rows").value = jml_rows  ;
+		 	var apno = 'apno_'+jml_rows;
+		 	var apitem = 'apitem_'+jml_rows;
+		 	var apnominal = 'apnominal_'+jml_rows;
+		 	var aptolerance = 'aptolerance_'+jml_rows;
+		 	var apinstrument = 'apinstrument_'+jml_rows;
+		 	var aprank = 'aprank_'+jml_rows;
+		 	var approses = 'approses_'+jml_rows;
+		 	var apdelivery = 'apdelivery_'+jml_rows;
+		 	var apremarks = 'apremarks_'+jml_rows;
+		 	var apbtndelete = 'apline_btndelete_'+jml_rows;
+		 	var id_field6 = 'line_field6_'+jml_rows;
+		 	$("#dynamic_field6").append(
+		 		'<tr id="'+id_field6+'">\
+		 		<td>\
+		 			<input type="text" id="' +apno+ '" name="' +apno+ '" placeholder="" class="form-control name_list" value="'+jml_rows+'" align="center"/>\
+		 		</td>\
+		 		<td>\
+		 			<div class="input-group">\
+		 				<input type="text" id="' +apitem+ '" name="' +apitem+ '" onchange="validatejam(this)" placeholder="" class="form-control name_list"  value="" />\
+		 			</div>\
+		 		</td>\
+		 		<td>\
+		 			<div class="input-group">\
+		 				<input type="text" id="' +apnominal+ '" name="' +apnominal+ '" onchange="validatepart(this)" placeholder="" class="form-control name_list"  value=""/>\
+		 			</div>\
+		 		</td>\
+		 		<td>\
+		 			<input type="text" id="' +aptolerance+ '" name="' +aptolerance+ '" placeholder="" class="form-control name_list" />\
+		 		</td>\
+		 		<td>\
+		 			<input type="text" id="' +apinstrument+ '" name="' +apinstrument+ '" placeholder="" class="form-control name_list" />\
+		 		</td>\
+		 		<td>\
+		 			<input type="text" id="' +aprank+ '" name="' +aprank+ '" placeholder="" class="form-control name_list" />\
+		 		</td>\
+		 		<td>\
+		 			<input type="text" id="' +approses+ '" name="' +approses+ '" placeholder="" class="form-control name_list" />\
+		 		</td>\
+		 		<td>\
+		 			<input type="text" id="' +apdelivery+ '" name="' +apdelivery+ '" placeholder="" class="form-control name_list" />\
+		 		</td>\
+		 		<td>\
+		 			<input type="text" id="' +apremarks+ '" name="' +apremarks+ '" placeholder="" class="form-control name_list" />\
+		 		</td>\
+		 		<td>\
+		 			<button id="' + apbtndelete + '" name="' + apbtndelete + '" type="button" class="btn btn-danger btn-sm" onclick="deleteLine(this)">\
+		 				<i class="fa fa-times"></i>\
+		 			</button>\
+		 		</td>\
+		 	</tr>'
+		 	);
+		 });
+
+		 function deleteLine(ths) {
+		 	var msg = 'Anda yakin menghapus Line ini?';
+		 	swal({
+		 		title: msg,
+		 		text: "",
+		 		type: 'warning',
+		 		showCancelButton: true,
+		 		confirmButtonColor: '#3085d6',
+		 		cancelButtonColor: '#d33',
+		 		confirmButtonText: '<i class="fa fa-thumbs-up"></i> Yes, delete it!',
+		 		cancelButtonText: '<i class="fa fa-thumbs-down"></i> No, cancel!',
+		 		allowOutsideClick: true,
+		 		allowEscapeKey: true,
+		 		allowEnterKey: true,
+		 		reverseButtons: false,
+		 		focusCancel: true,
+		 	}).then(function () {
+         			 //startcode
+         			 var row = ths.id.replace('line_btndelete_', '');
+         			 var info = "";
+         			 var info2 = "";
+         			 var info3 = "warning";
+         			 var no = document.getElementById("no_" + row).value.trim();
+         			 var no_doc = document.getElementById("no_doc").value.trim();
+         			 if(no === "" || no === "0" ||  no_doc === "" || no_doc === "0" ) {
+         			 	changeKdLine(row);
+         			 } else {
+            		//DELETE DI DATABASE
+            		// remove these events;
+            		window.onkeydown = null;
+            		window.onfocus = null;
+            		var token = document.getElementsByName('_token')[0].value.trim();
+            		// delete via ajax
+            		// hapus data detail dengan ajax
+            		var url = '{{ route('tlhpn01s.deleteLine', ['param','param2']) }}';
+            		url = url.replace('param', window.btoa(no_doc));
+            		url = url.replace('param2', window.btoa(no));
+
+            		$.ajax({
+            			type     : 'POST',
+            			url      : url,
+            			dataType : 'json',
+            			data     : {
+            				_method : 'DELETE',
+            				_token  : token
+            			},
+            			success:function(data){
+            				if(data.status === 'OK'){
+            					changeKdLine(row);
+            					info = "Deleted!";
+            					info2 = data.message;
+            					info3 = "success";
+            					swal(info, info2, info3);
+            				} else {
+            					info = "Cancelled";
+            					info2 = data.message;
+            					info3 = "error";
+            					swal(info, info2, info3);
+            				}
+            			}, error:function(){ 
+            				info = "System Error!";
+            				info2 = "Maaf, terjadi kesalahan pada system kami. Silahkan hubungi Administrator. Terima Kasih.";
+            				info3 = "error";
+            				swal(info, info2, info3);
+            			}
+            		});
+            //END DELETE DI DATABASE
+        }
+          //finishcode
+      }, function (dismiss) {
+          // dismiss can be 'cancel', 'overlay',
+          // 'close', and 'timer'
+          if (dismiss === 'cancel') {
+            // swal(
+            //   'Cancelled',
+            //   'Your imaginary file is safe :)',
+            //   'error'
+            // )
+        }
+    })
+		 }
+		 function changeKdLine(row) {
+		 	var id_field1 = "#line_field_" + row;
+		 	$(id_field1).remove();
+
+		 	var jml_line = document.getElementById("jml_line").value.trim();
+		 	jml_line = Number(jml_line);  
+		 	nextRow = Number(row) + 1;
+		 	for($i = nextRow; $i <= jml_line; $i++) {
+		 		var no = '#no_' + $i;
+		 		var no_new = 'no_' + ($i-1);
+		 		$(no).attr({"id":no_new, "name":no_new});
+
+		 		var jam = '#jam_' + $i;
+		 		var jam_new = 'jam_' + ($i-1);
+		 		$(jam).attr({"id":jam_new, "name":jam_new});
+
+		 		var part_no = '#part_no_' + $i;
+		 		var part_no_new = 'part_no_' + ($i-1);
+		 		$(part_no).attr({"id":part_no_new, "name":part_no_new});
+
+		 		var qty = '#qty_' + $i;
+		 		var qty_new = 'qty_' + ($i-1);
+		 		$(qty).attr({"id":qty_new, "name":qty_new});
+
+		 		var btndelete = '#line_btndelete_' + $i;
+		 		var btndelete_new = 'line_btndelete_' + ($i-1);
+		 		$(btndelete).attr({"id":btndelete_new, "name":btndelete_new});
+
+		 		var btnpopupshift = '#line_btnpopupshift_' + $i;
+		 		var btnpopupshift_new = 'line_btnpopupshift_' + ($i-1);
+		 		$(btnpopupshift).attr({"id":btnpopupshift_new, "name":btnpopupshift_new});
+
+		 		var btnpopuppart = '#line_btnpopuppart_' + $i;
+		 		var btnpopuppart_new = 'line_btnpopuppart_' + ($i-1);
+		 		$(btnpopuppart).attr({"id":btnpopuppart_new, "name":btnpopuppart_new});
+
+		 		var id_field1 = "#line_field_" + $i;
+		 		var id_field_new = "line_field_" + ($i-1);
+		 		$(id_field1).attr({"id":id_field_new, "name":id_field_new});
+
+		 		var text = document.getElementById(no_new).innerHTML;
+		 		text = text.replace($i, ($i-1));
+		 		document.getElementById(no_new).innerHTML = text;
+
+		 	}
+		 	jml_line = jml_line - 1;
+		 	document.getElementById("jml_line").value = jml_line;
+
+		 }
+
+
+
+      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      /////III. DIMENSION
+
+      $("#dimention").click(function(){
+      	var jml_input1 = document.getElementById("jml_input1").value.trim();
+      	jml_input1 = Number(jml_input1) + 1;
+      	document.getElementById("jml_input1").value = jml_input1  ;
+
+      	var dno = 'dno_'+jml_input1;
+      	var ditem = 'ditem_'+jml_input1;
+      	var dnominal = 'dnominal_'+jml_input1;
+      	var dtolerance = 'dtolerance_'+jml_input1;
+      	var dinstrument = 'dinstrument_'+jml_input1;
+      	var drank = 'drank_'+jml_input1;
+      	var dproses = 'dproses_'+jml_input1;
+      	var ddelivery = 'ddelivery_'+jml_input1;
+      	var dremarks = 'dremarks_'+jml_input1;
+      	var dbtndelete = 'dline_btndelete_'+jml_input1;
+      	var id_field7 = 'line_field7_'+jml_input1;
+      	$("#dynamic_field7").append(
+      		'<tr id="'+id_field7+'">\
+      		<td>\
+      			<input type="text" id="' +dno+ '" name="' +dno+ '" placeholder="" class="form-control name_list" value="'+jml_input1+'" align="center"/>\
+      		</td>\
+      		<td>\
+      			<div class="input-group">\
+      				<input type="text" id="' +ditem+ '" name="' +ditem+ '" onchange="validatejam(this)" placeholder="" class="form-control name_list"  value="" />\
+      			</div>\
+      		</td>\
+      		<td>\
+      			<div class="input-group">\
+      				<input type="text" id="' +dnominal+ '" name="' +dnominal+ '" onchange="validatepart(this)" placeholder="" class="form-control name_list"  value=""/>\
+      			</div>\
+      		</td>\
+      		<td>\
+      			<input type="text" id="' +dtolerance+ '" name="' +dtolerance+ '" placeholder="" class="form-control name_list" />\
+      		</td>\
+      		<td>\
+      			<input type="text" id="' +dinstrument+ '" name="' +dinstrument+ '" placeholder="" class="form-control name_list" />\
+      		</td>\
+      		<td>\
+      			<input type="text" id="' +drank+ '" name="' +drank+ '" placeholder="" class="form-control name_list" />\
+      		</td>\
+      		<td>\
+      			<input type="text" id="' +dproses+ '" name="' +dproses+ '" placeholder="" class="form-control name_list" />\
+      		</td>\
+      		<td>\
+      			<input type="text" id="' +ddelivery+ '" name="' +ddelivery+ '" placeholder="" class="form-control name_list" />\
+      		</td>\
+      		<td>\
+      			<input type="text" id="' +dremarks+ '" name="' +dremarks+ '" placeholder="" class="form-control name_list" />\
+      		</td>\
+      		<td>\
+      			<button id="' + dbtndelete + '" name="' + dbtndelete + '" type="button" class="btn btn-danger btn-sm" onclick="deleteLine(this)">\
+      				<i class="fa fa-times"></i>\
+      			</button>\
+      		</td>\
+      	</tr>'
+      	);
+      });
+      function deleteLine(ths) {
+      	var msg = 'Anda yakin menghapus Line ini?';
+      	swal({
+      		title: msg,
+      		text: "",
+      		type: 'warning',
+      		showCancelButton: true,
+      		confirmButtonColor: '#3085d6',
+      		cancelButtonColor: '#d33',
+      		confirmButtonText: '<i class="fa fa-thumbs-up"></i> Yes, delete it!',
+      		cancelButtonText: '<i class="fa fa-thumbs-down"></i> No, cancel!',
+      		allowOutsideClick: true,
+      		allowEscapeKey: true,
+      		allowEnterKey: true,
+      		reverseButtons: false,
+      		focusCancel: true,
+      	}).then(function () {
+          //startcode
+          var row = ths.id.replace('line_btndelete_', '');
+          var info = "";
+          var info2 = "";
+          var info3 = "warning";
+          var no = document.getElementById("no_" + row).value.trim();
+          var no_doc = document.getElementById("no_doc").value.trim();
+          if(no === "" || no === "0" ||  no_doc === "" || no_doc === "0" ) {
+          	changeKdLine(row);
+          } else {
+            //DELETE DI DATABASE
+            // remove these events;
+            window.onkeydown = null;
+            window.onfocus = null;
+            var token = document.getElementsByName('_token')[0].value.trim();
+            // delete via ajax
+            // hapus data detail dengan ajax
+            var url = '{{ route('tlhpn01s.deleteLine', ['param','param2']) }}';
+            url = url.replace('param', window.btoa(no_doc));
+            url = url.replace('param2', window.btoa(no));
+
+            $.ajax({
+            	type     : 'POST',
+            	url      : url,
+            	dataType : 'json',
+            	data     : {
+            		_method : 'DELETE',
+            		_token  : token
+            	},
+            	success:function(data){
+            		if(data.status === 'OK'){
+            			changeKdLine(row);
+            			info = "Deleted!";
+            			info2 = data.message;
+            			info3 = "success";
+            			swal(info, info2, info3);
+            		} else {
+            			info = "Cancelled";
+            			info2 = data.message;
+            			info3 = "error";
+            			swal(info, info2, info3);
+            		}
+            	}, error:function(){ 
+            		info = "System Error!";
+            		info2 = "Maaf, terjadi kesalahan pada system kami. Silahkan hubungi Administrator. Terima Kasih.";
+            		info3 = "error";
+            		swal(info, info2, info3);
+            	}
+            });
+            //END DELETE DI DATABASE
+        }
+          //finishcode
+      }, function (dismiss) {
+          // dismiss can be 'cancel', 'overlay',
+          // 'close', and 'timer'
+          if (dismiss === 'cancel') {
+            // swal(
+            //   'Cancelled',
+            //   'Your imaginary file is safe :)',
+            //   'error'
+            // )
+        }
+    })
+      }
+
+      function changeKdLine(row) {
+      	var id_field1 = "#line_field_" + row;
+      	$(id_field1).remove();
+
+      	var jml_line = document.getElementById("jml_line").value.trim();
+      	jml_line = Number(jml_line);  
+      	nextRow = Number(row) + 1;
+      	for($i = nextRow; $i <= jml_line; $i++) {
+      		var no = '#no_' + $i;
+      		var no_new = 'no_' + ($i-1);
+      		$(no).attr({"id":no_new, "name":no_new});
+
+      		var jam = '#jam_' + $i;
+      		var jam_new = 'jam_' + ($i-1);
+      		$(jam).attr({"id":jam_new, "name":jam_new});
+
+      		var part_no = '#part_no_' + $i;
+      		var part_no_new = 'part_no_' + ($i-1);
+      		$(part_no).attr({"id":part_no_new, "name":part_no_new});
+
+      		var qty = '#qty_' + $i;
+      		var qty_new = 'qty_' + ($i-1);
+      		$(qty).attr({"id":qty_new, "name":qty_new});
+
+      		var btndelete = '#line_btndelete_' + $i;
+      		var btndelete_new = 'line_btndelete_' + ($i-1);
+      		$(btndelete).attr({"id":btndelete_new, "name":btndelete_new});
+
+      		var btnpopupshift = '#line_btnpopupshift_' + $i;
+      		var btnpopupshift_new = 'line_btnpopupshift_' + ($i-1);
+      		$(btnpopupshift).attr({"id":btnpopupshift_new, "name":btnpopupshift_new});
+
+      		var btnpopuppart = '#line_btnpopuppart_' + $i;
+      		var btnpopuppart_new = 'line_btnpopuppart_' + ($i-1);
+      		$(btnpopuppart).attr({"id":btnpopuppart_new, "name":btnpopuppart_new});
+
+      		var id_field1 = "#line_field_" + $i;
+      		var id_field_new = "line_field_" + ($i-1);
+      		$(id_field1).attr({"id":id_field_new, "name":id_field_new});
+
+      		var text = document.getElementById(no_new).innerHTML;
+      		text = text.replace($i, ($i-1));
+      		document.getElementById(no_new).innerHTML = text;
+
+      	}
+      	jml_line = jml_line - 1;
+      	document.getElementById("jml_line").value = jml_line;
+
+      }
+
+      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      /////IV. SOC FREE
+
+      $("#socfree").click(function(){
+      	var inputhidden = document.getElementById("inputhidden").value.trim();
+      	inputhidden = Number(inputhidden) + 1;
+      	document.getElementById("inputhidden").value = inputhidden  ;
+
+      	var scno = 'scno_'+inputhidden;
+      	var scitem = 'scitem_'+inputhidden;
+      	var scnominal = 'scnominal_'+inputhidden;
+      	var sctolerance = 'sctolerance_'+inputhidden;
+      	var scinstrument = 'scinstrument_'+inputhidden;
+      	var scrank = 'scrank_'+inputhidden;
+      	var scproses = 'scproses_'+inputhidden;
+      	var scdelivery = 'scdelivery_'+inputhidden;
+      	var scremarks = 'scremarks_'+inputhidden;
+      	var scbtndelete = 'scline_btndelete_'+inputhidden;
+      	var id_field8 = 'line_field8_'+inputhidden;
+
+      	$("#dynamic_field8").append(
+      		'<tr id="'+id_field8+'">\
+      		<td>\
+      			<input type="text" id="' +scno+ '" name="' +scno+ '" placeholder="" class="form-control name_list" value="'+inputhidden+'" align="center"/>\
+      		</td>\
+      		<td>\
+      			<div class="input-group">\
+      				<input type="text" id="' +scitem+ '" name="' +scitem+ '" onchange="validatejam(this)" placeholder="" class="form-control name_list"  value="" />\
+      			</div>\
+      		</td>\
+      		<td>\
+      			<div class="input-group">\
+      				<input type="text" id="' +scnominal+ '" name="' +scnominal+ '" onchange="validatepart(this)" placeholder="" class="form-control name_list"  value=""/>\
+      			</div>\
+      		</td>\
+      		<td>\
+      			<input type="text" id="' +sctolerance+ '" name="' +sctolerance+ '" placeholder="" class="form-control name_list" />\
+      		</td>\
+      		<td>\
+      			<input type="text" id="' +scinstrument+ '" name="' +scinstrument+ '" placeholder="" class="form-control name_list" />\
+      		</td>\
+      		<td>\
+      			<input type="text" id="' +scrank+ '" name="' +scrank+ '" placeholder="" class="form-control name_list" />\
+      		</td>\
+      		<td>\
+      			<input type="text" id="' +scproses+ '" name="' +scproses+ '" placeholder="" class="form-control name_list" />\
+      		</td>\
+      		<td>\
+      			<input type="text" id="' +scdelivery+ '" name="' +scdelivery+ '" placeholder="" class="form-control name_list" />\
+      		</td>\
+      		<td>\
+      			<input type="text" id="' +scremarks+ '" name="' +scremarks+ '" placeholder="" class="form-control name_list" />\
+      		</td>\
+      		<td>\
+      			<button id="' + scbtndelete + '" name="' + scbtndelete + '" type="button" class="btn btn-danger btn-sm" onclick="deleteLine(this)">\
+      				<i class="fa fa-times"></i>\
+      			</button>\
+      		</td>\
+      	</tr>'
+      	);
+      });
+
+      function deleteLine(ths) {
+      	var msg = 'Anda yakin menghapus Line ini?';
+      	swal({
+      		title: msg,
+      		text: "",
+      		type: 'warning',
+      		showCancelButton: true,
+      		confirmButtonColor: '#3085d6',
+      		cancelButtonColor: '#d33',
+      		confirmButtonText: '<i class="fa fa-thumbs-up"></i> Yes, delete it!',
+      		cancelButtonText: '<i class="fa fa-thumbs-down"></i> No, cancel!',
+      		allowOutsideClick: true,
+      		allowEscapeKey: true,
+      		allowEnterKey: true,
+      		reverseButtons: false,
+      		focusCancel: true,
+      	}).then(function () {
+          //startcode
+          var row = ths.id.replace('line_btndelete_', '');
+          var info = "";
+          var info2 = "";
+          var info3 = "warning";
+          var no = document.getElementById("no_" + row).value.trim();
+          var no_doc = document.getElementById("no_doc").value.trim();
+          if(no === "" || no === "0" ||  no_doc === "" || no_doc === "0" ) {
+          	changeKdLine(row);
+          } else {
+            //DELETE DI DATABASE
+            // remove these events;
+            window.onkeydown = null;
+            window.onfocus = null;
+            var token = document.getElementsByName('_token')[0].value.trim();
+            // delete via ajax
+            // hapus data detail dengan ajax
+            var url = '{{ route('tlhpn01s.deleteLine', ['param','param2']) }}';
+            url = url.replace('param', window.btoa(no_doc));
+            url = url.replace('param2', window.btoa(no));
+
+            $.ajax({
+            	type     : 'POST',
+            	url      : url,
+            	dataType : 'json',
+            	data     : {
+            		_method : 'DELETE',
+            		_token  : token
+            	},
+            	success:function(data){
+            		if(data.status === 'OK'){
+            			changeKdLine(row);
+            			info = "Deleted!";
+            			info2 = data.message;
+            			info3 = "success";
+            			swal(info, info2, info3);
+            		} else {
+            			info = "Cancelled";
+            			info2 = data.message;
+            			info3 = "error";
+            			swal(info, info2, info3);
+            		}
+            	}, error:function(){ 
+            		info = "System Error!";
+            		info2 = "Maaf, terjadi kesalahan pada system kami. Silahkan hubungi Administrator. Terima Kasih.";
+            		info3 = "error";
+            		swal(info, info2, info3);
+            	}
+            });
+            //END DELETE DI DATABASE
+        }
+          //finishcode
+      }, function (dismiss) {
+          // dismiss can be 'cancel', 'overlay',
+          // 'close', and 'timer'
+          if (dismiss === 'cancel') {
+            // swal(
+            //   'Cancelled',
+            //   'Your imaginary file is safe :)',
+            //   'error'
+            // )
+        }
+    })
+      }
+
+      function changeKdLine(row) {
+      	var id_field1 = "#line_field_" + row;
+      	$(id_field1).remove();
+
+      	var jml_line = document.getElementById("jml_line").value.trim();
+      	jml_line = Number(jml_line);  
+      	nextRow = Number(row) + 1;
+      	for($i = nextRow; $i <= jml_line; $i++) {
+      		var no = '#no_' + $i;
+      		var no_new = 'no_' + ($i-1);
+      		$(no).attr({"id":no_new, "name":no_new});
+
+      		var jam = '#jam_' + $i;
+      		var jam_new = 'jam_' + ($i-1);
+      		$(jam).attr({"id":jam_new, "name":jam_new});
+
+      		var part_no = '#part_no_' + $i;
+      		var part_no_new = 'part_no_' + ($i-1);
+      		$(part_no).attr({"id":part_no_new, "name":part_no_new});
+
+      		var qty = '#qty_' + $i;
+      		var qty_new = 'qty_' + ($i-1);
+      		$(qty).attr({"id":qty_new, "name":qty_new});
+
+      		var btndelete = '#line_btndelete_' + $i;
+      		var btndelete_new = 'line_btndelete_' + ($i-1);
+      		$(btndelete).attr({"id":btndelete_new, "name":btndelete_new});
+
+      		var btnpopupshift = '#line_btnpopupshift_' + $i;
+      		var btnpopupshift_new = 'line_btnpopupshift_' + ($i-1);
+      		$(btnpopupshift).attr({"id":btnpopupshift_new, "name":btnpopupshift_new});
+
+      		var btnpopuppart = '#line_btnpopuppart_' + $i;
+      		var btnpopuppart_new = 'line_btnpopuppart_' + ($i-1);
+      		$(btnpopuppart).attr({"id":btnpopuppart_new, "name":btnpopuppart_new});
+
+      		var id_field1 = "#line_field_" + $i;
+      		var id_field_new = "line_field_" + ($i-1);
+      		$(id_field1).attr({"id":id_field_new, "name":id_field_new});
+
+      		var text = document.getElementById(no_new).innerHTML;
+      		text = text.replace($i, ($i-1));
+      		document.getElementById(no_new).innerHTML = text;
+
+      	}
+      	jml_line = jml_line - 1;
+      	document.getElementById("jml_line").value = jml_line;
+
+      }
+
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+       //PART ROUTING
+       $("#partrouting").click(function(){
+       	var barishidden = document.getElementById("barishidden").value.trim();
+       	barishidden = Number(barishidden) + 1;
+       	document.getElementById("barishidden").value = barishidden  ;
+       	var pno = 'pno_'+barishidden;
+       	var plevel = 'plevel_'+barishidden;
+       	var ppart_no = 'ppart_no_'+barishidden;
+       	var ppart_name = 'ppart_name_'+barishidden;
+       	var pproses = 'pproses_'+barishidden;
+       	var psupplier = 'psupplier_'+barishidden;
+       	var pbtndelete = 'pline_btndelete_'+barishidden;
+       	var id_field9 = 'line_field9_'+barishidden;
+       	$("#dynamic_field9").append(
+       		'<tr id="'+id_field9+'">\
+       		<td>\
+       			<input type="text" id="' +pno+ '" name="' +pno+ '" placeholder="" class="form-control name_list" value="'+barishidden+'" align="center"/>\
+       		</td>\
+       		<td>\
+       			<input type="text" id="' +plevel+ '" name="' +plevel+ '" placeholder="" class="form-control name_list" value="" align="center"/>\
+       		</td>\
+       		<td>\
+       			<div class="input-group">\
+       				<input type="text" id="' +ppart_no+ '" name="' +ppart_no+ '" onchange="validatejam(this)" placeholder="" class="form-control name_list"  value="" />\
+       			</div>\
+       		</td>\
+       		<td>\
+       			<div class="input-group">\
+       				<input type="text" id="' +ppart_name+ '" name="' +ppart_name+ '" onchange="validatepart(this)" placeholder="" class="form-control name_list"  value=""/>\
+       			</div>\
+       		</td>\
+       		<td>\
+       			<input type="text" id="' +pproses+ '" name="' +pproses+ '" placeholder="" class="form-control name_list" />\
+       		</td>\
+       		<td>\
+       			<input type="text" id="' +psupplier+ '" name="' +psupplier+ '" placeholder="" class="form-control name_list" />\
+       		</td>\
+       		<td>\
+       			<button id="' + pbtndelete + '" name="' + pbtndelete + '" type="button" class="btn btn-danger btn-sm" onclick="deleteLine(this)">\
+       				<i class="fa fa-times"></i>\
+       			</button>\
+       		</td>\
+       	</tr>'
+       	);
+
+
+       });
+
+       function deleteLine(ths) {
+       	var msg = 'Anda yakin menghapus Line ini?';
+       	swal({
+       		title: msg,
+       		text: "",
+       		type: 'warning',
+       		showCancelButton: true,
+       		confirmButtonColor: '#3085d6',
+       		cancelButtonColor: '#d33',
+       		confirmButtonText: '<i class="fa fa-thumbs-up"></i> Yes, delete it!',
+       		cancelButtonText: '<i class="fa fa-thumbs-down"></i> No, cancel!',
+       		allowOutsideClick: true,
+       		allowEscapeKey: true,
+       		allowEnterKey: true,
+       		reverseButtons: false,
+       		focusCancel: true,
+       	}).then(function () {
+          //startcode
+          var row = ths.id.replace('line_btndelete_', '');
+          var info = "";
+          var info2 = "";
+          var info3 = "warning";
+          var no = document.getElementById("no_" + row).value.trim();
+          var no_doc = document.getElementById("no_doc").value.trim();
+          if(no === "" || no === "0" ||  no_doc === "" || no_doc === "0" ) {
+          	changeKdLine(row);
+          } else {
+            //DELETE DI DATABASE
+            // remove these events;
+            window.onkeydown = null;
+            window.onfocus = null;
+            var token = document.getElementsByName('_token')[0].value.trim();
+            // delete via ajax
+            // hapus data detail dengan ajax
+            var url = '{{ route('tlhpn01s.deleteLine', ['param','param2']) }}';
+            url = url.replace('param', window.btoa(no_doc));
+            url = url.replace('param2', window.btoa(no));
+
+            $.ajax({
+            	type     : 'POST',
+            	url      : url,
+            	dataType : 'json',
+            	data     : {
+            		_method : 'DELETE',
+            		_token  : token
+            	},
+            	success:function(data){
+            		if(data.status === 'OK'){
+            			changeKdLine(row);
+            			info = "Deleted!";
+            			info2 = data.message;
+            			info3 = "success";
+            			swal(info, info2, info3);
+            		} else {
+            			info = "Cancelled";
+            			info2 = data.message;
+            			info3 = "error";
+            			swal(info, info2, info3);
+            		}
+            	}, error:function(){ 
+            		info = "System Error!";
+            		info2 = "Maaf, terjadi kesalahan pada system kami. Silahkan hubungi Administrator. Terima Kasih.";
+            		info3 = "error";
+            		swal(info, info2, info3);
+            	}
+            });
+            //END DELETE DI DATABASE
+        }
+          //finishcode
+      }, function (dismiss) {
+          // dismiss can be 'cancel', 'overlay',
+          // 'close', and 'timer'
+          if (dismiss === 'cancel') {
+            // swal(
+            //   'Cancelled',
+            //   'Your imaginary file is safe :)',
+            //   'error'
+            // )
+        }
+    })
+       }
+
+       function changeKdLine(row) {
+       	var id_field = "#line_field_" + row;
+       	$(id_field).remove();
+
+       	var barishidden = document.getElementById("barishidden").value.trim();
+       	barishidden = Number(barishidden);  
+       	nextRow = Number(row) + 1;
+       	for($i = nextRow; $i <= barishidden; $i++) {
+       		var no = '#no_' + $i;
+       		var no_new = 'no_' + ($i-1);
+       		$(no).attr({"id":no_new, "name":no_new});
+
+       		var jam = '#jam_' + $i;
+       		var jam_new = 'jam_' + ($i-1);
+       		$(jam).attr({"id":jam_new, "name":jam_new});
+
+       		var part_no = '#part_no_' + $i;
+       		var part_no_new = 'part_no_' + ($i-1);
+       		$(part_no).attr({"id":part_no_new, "name":part_no_new});
+
+       		var qty = '#qty_' + $i;
+       		var qty_new = 'qty_' + ($i-1);
+       		$(qty).attr({"id":qty_new, "name":qty_new});
+
+       		var btndelete = '#line_btndelete_' + $i;
+       		var btndelete_new = 'line_btndelete_' + ($i-1);
+       		$(btndelete).attr({"id":btndelete_new, "name":btndelete_new});
+
+       		var btnpopupshift = '#line_btnpopupshift_' + $i;
+       		var btnpopupshift_new = 'line_btnpopupshift_' + ($i-1);
+       		$(btnpopupshift).attr({"id":btnpopupshift_new, "name":btnpopupshift_new});
+
+       		var btnpopuppart = '#line_btnpopuppart_' + $i;
+       		var btnpopuppart_new = 'line_btnpopuppart_' + ($i-1);
+       		$(btnpopuppart).attr({"id":btnpopuppart_new, "name":btnpopuppart_new});
+
+       		var id_field = "#line_field_" + $i;
+       		var id_field_new = "line_field_" + ($i-1);
+       		$(id_field).attr({"id":id_field_new, "name":id_field_new});
+
+       		var text = document.getElementById(no_new).innerHTML;
+       		text = text.replace($i, ($i-1));
+       		document.getElementById(no_new).innerHTML = text;
+
+       	}
+       	barishidden = barishidden - 1;
+       	document.getElementById("barishidden").value = barishidden;
+
+       }
+
+
+       ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+       /////REVISION COLUMN (IF ANY)
+
+       //Initialize Select2 Elements
+       $("#revisi").click(function(){
+       	var jml_revisi = document.getElementById("jml_revisi").value.trim();
+       	jml_revisi = Number(jml_revisi) + 1;
+       	document.getElementById("jml_revisi").value = jml_revisi  ;
+       	var level = 'supplier_name_'+jml_revisi;
+       	var part_no = 'material_'+jml_revisi;
+       	var part_name = 'general_tol_'+jml_revisi;
+       	var proses = 'weight_'+jml_revisi;
+       	var supplier = 'weight_'+jml_revisi;
+       	var btndelete = 'line_btndelete_'+jml_revisi;
+       	var id_tr = 'line_field_'+jml_revisi;
+       	$("#dynamic_fieldd").append(
+       		'<tr id="'+id_tr+'">\
+       		<td>\
+       			<input type="text" id="' +level+ '" name="' +level+ '" placeholder="" class="form-control name_list" value="" align="center"/>\
+       		</td>\
+       		<td>\
+       			<div class="input-group">\
+       				<input type="text" id="' +part_no+ '" name="' +part_no+ '" onchange="validatejam(this)" placeholder="" class="form-control name_list"  value="" />\
+       			</div>\
+       		</td>\
+       		<td>\
+       			<div class="input-group">\
+       				<input type="text" id="' +part_name+ '" name="' +part_name+ '" onchange="validatepart(this)" placeholder="" class="form-control name_list"  value=""/>\
+       			</div>\
+       		</td>\
+       		<td>\
+       			<input type="text" id="' +proses+ '" name="' +proses+ '" placeholder="" class="form-control name_list" />\
+       		</td>\
+       		<td>\
+       			<input type="text" id="' +supplier+ '" name="' +supplier+ '" placeholder="" class="form-control name_list" />\
+       		</td>\
+       		<td>\
+       			<button id="' + btndelete + '" name="' + btndelete + '" type="button" class="btn btn-danger btn-sm" onclick="deleteLine(this)">\
+       				<i class="fa fa-times"></i>\
+       			</button>\
+       		</td>\
+       	</tr>'
+       	);
+
+
+       });
+
+       function deleteLine(ths) {
+       	var msg = 'Anda yakin menghapus Line ini?';
+       	swal({
+       		title: msg,
+       		text: "",
+       		type: 'warning',
+       		showCancelButton: true,
+       		confirmButtonColor: '#3085d6',
+       		cancelButtonColor: '#d33',
+       		confirmButtonText: '<i class="fa fa-thumbs-up"></i> Yes, delete it!',
+       		cancelButtonText: '<i class="fa fa-thumbs-down"></i> No, cancel!',
+       		allowOutsideClick: true,
+       		allowEscapeKey: true,
+       		allowEnterKey: true,
+       		reverseButtons: false,
+       		focusCancel: true,
+       	}).then(function () {
+          //startcode
+          var row = ths.id.replace('line_btndelete_', '');
+          var info = "";
+          var info2 = "";
+          var info3 = "warning";
+          var no = document.getElementById("no_" + row).value.trim();
+          var no_doc = document.getElementById("no_doc").value.trim();
+          if(no === "" || no === "0" ||  no_doc === "" || no_doc === "0" ) {
+          	changeKdLine(row);
+          } else {
+            //DELETE DI DATABASE
+            // remove these events;
+            window.onkeydown = null;
+            window.onfocus = null;
+            var token = document.getElementsByName('_token')[0].value.trim();
+            // delete via ajax
+            // hapus data detail dengan ajax
+            var url = '{{ route('tlhpn01s.deleteLine', ['param','param2']) }}';
+            url = url.replace('param', window.btoa(no_doc));
+            url = url.replace('param2', window.btoa(no));
+
+            $.ajax({
+            	type     : 'POST',
+            	url      : url,
+            	dataType : 'json',
+            	data     : {
+            		_method : 'DELETE',
+            		_token  : token
+            	},
+            	success:function(data){
+            		if(data.status === 'OK'){
+            			changeKdLine(row);
+            			info = "Deleted!";
+            			info2 = data.message;
+            			info3 = "success";
+            			swal(info, info2, info3);
+            		} else {
+            			info = "Cancelled";
+            			info2 = data.message;
+            			info3 = "error";
+            			swal(info, info2, info3);
+            		}
+            	}, error:function(){ 
+            		info = "System Error!";
+            		info2 = "Maaf, terjadi kesalahan pada system kami. Silahkan hubungi Administrator. Terima Kasih.";
+            		info3 = "error";
+            		swal(info, info2, info3);
+            	}
+            });
+            //END DELETE DI DATABASE
+        }
+          //finishcode
+      }, function (dismiss) {
+          // dismiss can be 'cancel', 'overlay',
+          // 'close', and 'timer'
+          if (dismiss === 'cancel') {
+            // swal(
+            //   'Cancelled',
+            //   'Your imaginary file is safe :)',
+            //   'error'
+            // )
+        }
+    })
+       }
+
+       function changeKdLine(row) {
+       	var id_field = "#line_field_" + row;
+       	$(id_field).remove();
+
+       	var jml_revisi = document.getElementById("jml_revisi").value.trim();
+       	jml_revisi = Number(jml_revisi);  
+       	nextRow = Number(row) + 1;
+       	for($i = nextRow; $i <= jml_revisi; $i++) {
+       		var no = '#no_' + $i;
+       		var no_new = 'no_' + ($i-1);
+       		$(no).attr({"id":no_new, "name":no_new});
+
+       		var jam = '#jam_' + $i;
+       		var jam_new = 'jam_' + ($i-1);
+       		$(jam).attr({"id":jam_new, "name":jam_new});
+
+       		var part_no = '#part_no_' + $i;
+       		var part_no_new = 'part_no_' + ($i-1);
+       		$(part_no).attr({"id":part_no_new, "name":part_no_new});
+
+       		var qty = '#qty_' + $i;
+       		var qty_new = 'qty_' + ($i-1);
+       		$(qty).attr({"id":qty_new, "name":qty_new});
+
+       		var btndelete = '#line_btndelete_' + $i;
+       		var btndelete_new = 'line_btndelete_' + ($i-1);
+       		$(btndelete).attr({"id":btndelete_new, "name":btndelete_new});
+
+       		var btnpopupshift = '#line_btnpopupshift_' + $i;
+       		var btnpopupshift_new = 'line_btnpopupshift_' + ($i-1);
+       		$(btnpopupshift).attr({"id":btnpopupshift_new, "name":btnpopupshift_new});
+
+       		var btnpopuppart = '#line_btnpopuppart_' + $i;
+       		var btnpopuppart_new = 'line_btnpopuppart_' + ($i-1);
+       		$(btnpopuppart).attr({"id":btnpopuppart_new, "name":btnpopuppart_new});
+
+       		var id_field = "#line_field_" + $i;
+       		var id_field_new = "line_field_" + ($i-1);
+       		$(id_field).attr({"id":id_field_new, "name":id_field_new});
+
+       		var text = document.getElementById(no_new).innerHTML;
+       		text = text.replace($i, ($i-1));
+       		document.getElementById(no_new).innerHTML = text;
+
+       	}
+       	jml_revisi = jml_revisi - 1;
+       	document.getElementById("jml_revisi").value = jml_revisi;
+
+       }
+   </script>
+   @endsection

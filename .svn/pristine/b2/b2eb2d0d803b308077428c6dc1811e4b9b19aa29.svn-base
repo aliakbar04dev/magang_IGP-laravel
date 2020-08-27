@@ -1,0 +1,164 @@
+    <div id="header_form" class="col-md-12">
+        <div style="width:78%;display: inline-block;" class="alert alert-info" role="alert">
+            Item PICA ini masih sebuah draft!
+        </div>
+       <button style="line-height: 2.8;width:20%;margin-top: -2px;margin-left: 4px;" class="btn btn-md btn-primary">SUBMIT PICA</button>
+    </div>
+    <div id="pica_title">
+        <div class="col-md-6" style="margin-bottom:10px;">
+            <label>PICA TEMUAN NO.</label>
+            <input id="pica_temuan" class="form-control" type="text" value="{{ $get_pica_no }}" readonly>
+            <input id="pica_id" type="hidden" value="{{ $get_pica_id }}" readonly>
+        </div>
+        <div class="col-md-6" style="margin-bottom:10px;">
+            <label>AUDITOR</label>
+            <input id="pica_temuan" class="form-control" type="text" value="@foreach($get_audteetor as $auditor) @if($auditor->status == 'Auditor'){{$auditor->nama}}, @endif @endforeach" readonly>
+        </div>
+        <div class="col-md-6" style="margin-bottom:10px;">
+            <label>DEPT / PROCESS</label>
+            <input id="pica_temuan" class="form-control" type="text" value="">
+        </div>
+        <div class="col-md-6" style="margin-bottom:10px;">
+            <label>AUDITEE</label>
+            <input id="pica_temuan" class="form-control" type="text" value="@foreach($get_audteetor as $auditee) @if($auditee->status == 'Auditee'){{$auditee->nama}}, @endif @endforeach" readonly>
+        </div>
+    </div>
+    <div class="col-md-6" id="selector_audit" style="margin-bottom:10px;">
+    <label>DAFTAR TEMUAN AUDIT</label>
+    <table id="daftartemuan" class="table table-bordered table-hover"  style="width:100%;margin-top: -12px;">
+            <thead>
+                <tr>
+                    <th style="width:1%">NO.</th>
+                    <th>FINDING NO.</th>
+                    <th>ACTION</th>
+                </tr>
+            </thead>                           
+        </table>
+    </div>
+    <div class="col-md-6" id="added_pica" style="margin-bottom:10px;">
+        <label>DAFTAR TEMUAN AUDIT DITAMBAHKAN DALAM PICA</label>
+        <table id="daftarpica" class="table table-bordered table-hover"  style="width:100%;margin-top: -12px;">
+            <thead>
+                <tr>
+                    <th style="width:1%">NO.</th>
+                    <th>FINDING NO.</th>
+                    <th>ACTION</th>
+                </tr>
+            </thead>                           
+        </table>
+    </div>
+    {!! Form::open(['method' => 'post', 'id'=>'form_id', 'autocomplete' => 'off']) !!}    
+    <div id="part1" style="display:none;">
+            <input id="pica_no" name="pica_no" class="form-control" type="hidden" value="{{$get_pica_no}}" readonly>
+        <div class="form-group">
+            <div class="row">
+                <div class="col-md-1">
+            <button id="back_btn" class="btn btn-danger" type="button" style="margin-left:18px;line-height: 5;margin-bottom:8px;display:none;">CANCEL</button>
+        </div>
+            <div class="col-md-2" style="margin-bottom:8px;margin-left: 20px;">
+                <label class="bubble">REFF NO.</label>
+                <div class="bubble-content" id="finding_no"></div>
+                <input type="hidden" id="finding" name="finding" value="">
+                <div style="display:none;" id="finding_id"></div>
+            </div>
+            <div class="col-md-2" style="margin-bottom:8px;">
+                <label class="bubble">CLASS</label>
+                <div class="bubble-content" id="class"></div>
+            </div>
+            </div>
+            <div class="col-md-4" style="margin-bottom:8px;">
+                <label class="bubble">STATEMENT OF NC</label>
+                <div style="height:300px;overflow-y:scroll;" id="soc" class="bubble-content"></div>
+            </div>
+            <div class="col-md-4" style="margin-bottom:8px;">
+                <label class="bubble">SCALE OF PROBLEM</label>
+                <div style="height:300px;overflow-y:scroll;" id="dop" class="bubble-content"></div>
+            </div>
+            <div class="col-md-4" style="margin-bottom:8px;">
+
+            <div id="containment_container">
+                
+            </div>
+            </div>
+            <div class="col-md-12" style="margin-bottom:8px;">
+                <div id="rca_content">
+                    <div id="content_1">
+                        <input type="hidden" id="analysis_no" name="analysis_no[]" value="1">
+                <label style="background-color: #74bb7a;color:white;" class="bubble">ROOT CAUSE ANALYSIS</label>
+                <button onclick="add_rca()" type="button" class="btn btn-success btn-sm" style="margin-bottom: 5px;">Add Analysis</button>
+                    <div class="bubble-content">
+                        <div id="title_root" style="text-align: center;font-weight: bold;font-size: 40px;">
+                            <select class="form-control input-lg" id="selector_title" name="analysis_type[]" style="width:150px;margin-left:40%;">
+                                <option value="METHOD">METHOD</option>
+                                <option value="MAN">MAN</option>
+                                <option value="MATERIAL">MATERIAL</option>
+                                <option value="MACHINE">MACHINE</option>
+                            </select>
+                            <button id="p_1" onclick="prev_rca((this.id).substring(1))" type="button" class="btn btn-success btn-sm" style="margin-bottom: 5px;float:left;" disabled><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></button>
+                            <button id="n_1" onclick="next_rca((this.id).substring(1))" type="button" class="btn btn-success btn-sm" style="margin-bottom: 5px;float:right;"><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></button>
+                        </div>
+                        <table id="table_data" class="table-borderless" style="width:100%;">
+                            <tr class="why1_1">
+                                <td rowspan="2"><label>Why 1</label><textarea rows="6" class="form-control" name="why[]"></textarea></td>
+                                <td colspan="2"><label>Corrective & Preventive Action</label><textarea name="ca[]" class="form-control"></textarea></td>
+                                <td colspan="2"><label>Correction Action Impact (Yokoten)</label><textarea name="ya[]" class="form-control"></textarea></td>
+                            </tr>
+                            <tr class="why1_1">
+                                <td><label>PIC</label><input class="form-control" id="pic" name="pic_containment[]"></td>
+                                <td><label>DUE DATE</label><input type="date" class="form-control tgl" id="due_date" name="due_date_containment[]"></td>
+                                <td><label>PIC</label><input class="form-control" id="pic" name="pic_yokoten[]"></td>
+                                <td><label>DUE DATE</label><input type="date" class="form-control tgl" id="due_date" name="due_date_yokoten[]"></td>
+                            </tr>
+                            <tr class="why2_1" style="display:none;">
+                                <td rowspan="2"><label>Why 2</label><textarea rows="6" class="form-control" name="why[]"></textarea></td>
+                                <td colspan="2"><label>Corrective & Preventive Action</label><textarea name="ca[]" class="form-control"></textarea></td>
+                                <td colspan="2"><label>Correction Action Impact (Yokoten)</label><textarea name="ya[]" class="form-control"></textarea></td>
+                            </tr>
+                            <tr class="why2_1" style="display:none;">
+                                <td><label>PIC</label><input class="form-control" id="pic" name="pic_containment[]"></td>
+                                <td><label>DUE DATE</label><input type="date" class="form-control tgl" id="due_date" name="due_date_containment[]"></td>
+                                <td><label>PIC</label><input class="form-control" id="pic" name="pic_yokoten[]"></td>
+                                <td><label>DUE DATE</label><input type="date" class="form-control tgl" id="due_date" name="due_date_yokoten[]"></td>
+                            </tr>
+                            <tr class="why3_1" style="display:none;">
+                                <td rowspan="2"><label>Why 3</label><textarea rows="6" class="form-control" name="why[]"></textarea></td>
+                                <td colspan="2"><label>Corrective & Preventive Action</label><textarea name="ca[]" class="form-control"></textarea></td>
+                                <td colspan="2"><label>Correction Action Impact (Yokoten)</label><textarea name="ya[]" class="form-control"></textarea></td>
+                            </tr>
+                            <tr class="why3_1" style="display:none;">
+                                <td><label>PIC</label><input class="form-control" id="pic" name="pic_containment[]"></td>
+                                <td><label>DUE DATE</label><input type="date" class="form-control tgl" id="due_date" name="due_date_containment[]"></td>
+                                <td><label>PIC</label><input class="form-control" id="pic" name="pic_yokoten[]"></td>
+                                <td><label>DUE DATE</label><input type="date" class="form-control tgl" id="due_date" name="due_date_yokoten[]"></td>
+                            </tr>
+                            <tr class="why4_1" style="display:none;">
+                                <td rowspan="2"><label>Why 4</label><textarea rows="6" class="form-control" name="why[]"></textarea></td>
+                                <td colspan="2"><label>Corrective & Preventive Action</label><textarea name="ca[]" class="form-control"></textarea></td>
+                                <td colspan="2"><label>Correction Action Impact (Yokoten)</label><textarea name="ya[]" class="form-control"></textarea></td>
+                            </tr>
+                            <tr class="why4_1" style="display:none;">
+                                <td><label>PIC</label><input class="form-control" id="pic" name="pic_containment[]"></td>
+                                <td><label>DUE DATE</label><input type="date" class="form-control tgl" id="due_date" name="due_date_containment[]"></td>
+                                <td><label>PIC</label><input class="form-control" id="pic" name="pic_yokoten[]"></td>
+                                <td><label>DUE DATE</label><input type="date" class="form-control tgl" id="due_date" name="due_date_yokoten[]"></td>
+                            </tr>
+                            <tr class="why5_1" style="display:none;">
+                                <td rowspan="2"><label>Why 5</label><textarea rows="6" class="form-control" name="why[]"></textarea></td>
+                                <td colspan="2"><label>Corrective & Preventive Action</label><textarea name="ca[]" class="form-control"></textarea></td>
+                                <td colspan="2"><label>Correction Action Impact (Yokoten)</label><textarea name="ya[]" class="form-control"></textarea></td>
+                            </tr>
+                            <tr class="why5_1" style="display:none;">
+                                <td><label>PIC</label><input class="form-control" id="pic" name="pic_containment[]"></td>
+                                <td><label>DUE DATE</label><input type="date" class="form-control tgl" id="due_date" name="due_date_containment[]"></td>
+                                <td><label>PIC</label><input class="form-control" id="pic" name="pic_yokoten[]"></td>
+                                <td><label>DUE DATE</label><input type="date" class="form-control tgl" id="due_date" name="due_date_yokoten[]"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+                <button type="submit" class="btn btn-primary" style="float :right;margin-right:8px;">TAMBAHKAN</button>
+                </div>
+        {!! Form::close() !!}
+    </div>
+    

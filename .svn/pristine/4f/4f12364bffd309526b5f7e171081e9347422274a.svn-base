@@ -1,0 +1,122 @@
+@extends('layouts.app')
+@section('content')
+
+<style>
+
+td, th {
+    padding: 8px 10px 8px 0px;;
+}
+
+.tabledetail > thead > tr > th, .tabledetail > tbody > tr > th, .tabledetail > tfoot > tr > th, .tabledetail > thead > tr > td, .tabledetail > tbody > tr > td, .tabledetail > tfoot > tr > td {
+    border: 1px solid #130d0d;
+}
+
+.bubble{
+    background-color: #f2f2f2;
+    color:black;
+    padding: 8px;
+    /* box-shadow: 0px 0px 15px -5px gray; */
+    /* border-radius: 10px 10px 0px 0px; */
+}
+
+.bubble-content{
+    background-color: #fff;
+    padding: 10px;
+    margin-top: -5px;
+    /* border-radius: 0px 10px 10px 10px; */
+    /* box-shadow: 2px 2px #dfdfdf; */
+    box-shadow: 0px 0px 10px -5px gray;
+    margin-bottom:10px;
+}
+
+textarea{
+    resize:none;
+    background-color: white;
+}
+
+
+
+</style>
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            Internal Audit
+            <small>Detail PICA Audit</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="{{ url('/home') }}"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Detail PICA Audit</li>
+        </ol>
+    </section>
+    
+    <!-- Main content -->
+    <section class="content">
+        @include('layouts._flash')
+        <!-- Info boxes -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Detail PICA Audit</h3>
+                        <div class="box-tools pull-right">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        @include('audit.pica._detail')
+                    </div>
+                    <!-- ./box-body -->
+                </div>
+                <!-- /.box -->
+            </div>
+            <!-- /.col -->
+        </div>
+        <!-- /.row -->
+    </section>
+        <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+
+@endsection
+
+
+@section('scripts')
+<script type="text/javascript">
+$(document).ready(function(){
+      $(".select2").select2();
+});
+        var current = 1;
+        var total_coa = $('.next_coa').length
+        $('.next_coa').click(function(){
+            $('#containment_'+current).hide();
+                current++;
+            $('#containment_'+current).show();
+            if(current == total_coa){
+                $('.next_coa').attr('disabled', true);
+                $('.prev_coa').attr('disabled', false);
+            }
+        });
+
+        $('.prev_coa').click(function(){
+            $('#containment_'+current).hide();
+                current--;
+            $('#containment_'+current).show();
+
+            if(current == 1){
+                $('.next_coa').attr('disabled', false);
+                $('.prev_coa').attr('disabled', true);
+            }
+        });
+
+        $('.detail').click(function(){
+            $('html, body').animate({
+            scrollTop: $(this).offset().top -20
+        }, 500);
+            
+        });
+
+</script>
+
+@endsection

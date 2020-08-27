@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="385" pageHeight="802" whenNoDataType="AllSectionsNoDetail" columnWidth="385" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="b12e1461-f2c2-4eb5-91b6-f20b18705cbe">
+	<property name="ireport.zoom" value="1.4641000000000006"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="tgl" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="lok_pt" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="kd_line" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="kd_mesin" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="jns_oli" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT M2.KD_BRG, NVL(MM.NM_ALIAS,FNM_BRG(M2.KD_BRG)) NM_BRG, M2.JNS_OLI, M2.QTY, M2.JNS_ISI,
+       (SELECT SUM(SI.QTY) FROM MTCV_ISI_OLI2 SI
+        WHERE SI.KD_SITE = M2.KD_SITE
+        AND SI.KD_PLANT = M2.KD_PLANT
+        AND SI.TAHUN = M2.TAHUN
+        AND SI.BULAN = M2.BULAN
+        AND (SI.TGL >= '01' AND SI.TGL <= M2.TGL)
+        AND SI.KD_LINE = M2.KD_LINE
+        AND SI.KD_MESIN = M2.KD_MESIN
+        AND SI.KD_BRG = M2.KD_BRG) QTY_SD
+FROM MTCV_ISI_OLI2 M2, MTCT_M_OILING MM
+WHERE M2.KD_BRG = MM.KD_BRG
+AND M2.JNS_OLI = MM.JNS_OLI
+AND M2.KD_MESIN = MM.KD_MESIN
+AND M2.TAHUN||M2.BULAN||M2.TGL = TO_CHAR($P{tgl},'YYYYMMDD')
+AND M2.KD_PLANT = $P{lok_pt}
+AND M2.KD_LINE = $P{kd_line}
+AND M2.KD_MESIN = $P{kd_mesin}
+AND (M2.JNS_OLI = $P{jns_oli} OR $P{jns_oli} IS NULL)
+ORDER BY M2.JNS_OLI]]>
+	</queryString>
+	<field name="KD_BRG" class="java.lang.String"/>
+	<field name="NM_BRG" class="java.lang.String"/>
+	<field name="JNS_OLI" class="java.lang.String"/>
+	<field name="QTY" class="java.math.BigDecimal"/>
+	<field name="JNS_ISI" class="java.lang.String"/>
+	<field name="QTY_SD" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="255" y="0" width="30" height="15" uuid="aaefddf3-e264-4650-b927-af1f408d2ace"/>
+				<box topPadding="1" leftPadding="0" rightPadding="0">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["LTR"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="285" y="0" width="50" height="15" uuid="fde0707f-f533-4849-af14-8822c42686c7"/>
+				<box topPadding="1" leftPadding="0" rightPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{QTY}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="335" y="0" width="50" height="15" uuid="8d15a22e-559c-4f77-bc63-ddcdd146a6cc"/>
+				<box topPadding="1" leftPadding="0" rightPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{QTY_SD}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="50" height="15" uuid="1e6aebb6-7415-459e-8b6e-83f44eafae07"/>
+				<box topPadding="1" leftPadding="0">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{JNS_OLI}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="205" y="0" width="50" height="15" uuid="dbcc1b39-0a36-4bcf-938a-c4e3c488e3bb"/>
+				<box topPadding="1" leftPadding="0">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{JNS_ISI}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="50" y="0" width="155" height="15" uuid="b41a5f1b-51dc-4049-bd7d-9877cb765d4f"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{KD_BRG} + " - " + $F{NM_BRG}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

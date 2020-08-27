@@ -1,0 +1,1585 @@
+@extends('monitoring.mtc.layouts.app3')
+<style type="text/css">
+  body {
+    background-image: url("{{ asset('images/warehouse_bg.jpg') }}");
+  }
+
+  .atasdashboard{
+    width: 100%; 
+    height:100px; 
+    padding:0px; 
+    margin-left:-10px;
+  }
+
+  .box{
+    position: relative;
+  text-align: center;
+  background:none;
+        /* Make the width of box same as image */
+}
+.centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.garistengah{ 
+  
+  border:         none;
+  border-left:    2px solid white;
+  height:         150px;
+  width:          1px;     
+}
+
+.tampilbawah{
+    padding:0px !important;
+  }
+
+  .container4{
+    margin:10px 0px 0px 0px !important; 
+    padding:0px !important;
+  }
+
+
+  @media only screen and (min-width: 600px) {
+
+  .atasdashboard{
+    width: 100%; 
+    height:100px; 
+    padding:0px; 
+    margin-left:-50px;
+  }
+
+  
+  
+
+  .garisinfo{
+    margin-left:10px;
+  }
+
+  .menu{
+    font-size: 30px;
+    color:white;
+  }
+
+  .imagelogo{
+    margin-top:-10px;
+    margin-left:30px;
+    height:100px; 
+    width:100px;
+  }
+
+  #tblMaster{
+    margin-left: -20px;
+  }
+
+  .huruf{
+    font-size: 25px;
+    text-transform: uppercase;
+    margin-left:20px;
+  }
+
+ .backbutton{
+    font-size: 30px;
+    text-transform: uppercase;
+    float:right;
+    height:40px;
+    margin-top:-40px;
+  }
+  
+}
+
+@media only screen and (max-width: 599px) {
+
+
+.menu{
+  font-size: 14px;
+  color:white;
+}
+
+.imagelogo{
+    margin-top:15px;
+    margin-left:30px;
+    height:50px; 
+    width:50px;
+  }
+  .huruf{
+    font-size: 14px;
+    margin-top:10px;
+    text-transform: uppercase;
+    margin-left:20px;
+  }
+
+  .backbutton{
+    font-size: 30px;
+    text-transform: uppercase;
+    float:right;
+    height:40px;
+    margin-top:-35px;
+  }
+
+}
+
+
+
+  
+</style>
+@section('content')
+  <div class="container4" >
+          <!-- /.box-header -->
+
+          <div class="box-body tampilbawah" >
+                <div class="row">
+                    <div class="col-xl-12" >
+                        <img src="{{ asset('images/logosmart.png') }}" class="imagelogo" align="left">
+                        <br>
+                            <div class="alert alert-danger alert-dismissible" style="height:40px; padding:0px 10px; background-color:#ff7701 !important;">
+                                    <p class="huruf" >PREVENTIVE ACHIEVEMENT</p>
+                                    
+                                    <div class="backbutton" onclick="onBack()">
+                                        <button type="button" class="btn bg-navy margin" style="width:70px;"><i class="fa fa-chevron-circle-left"></i></button>
+                                      
+                                    </div>
+                            </div>
+                    </div>
+                </div>
+            <div class="row">
+              <div class="col-md-12">
+                  <table id="tblMaster" width="100%"> 
+                      <tr>
+                          <td></td>
+                          <td colspan="2" style="color:white; padding-bottom:10px; font-size:20px; font-weight:bold;"><center>IGP 1</center></td>
+                          <td></td>
+                          <td colspan="2" style="color:white; padding-bottom:10px; font-size:20px; font-weight:bold;"><center>IGP 2</center></td>
+                          <td></td>
+                          <td colspan="2" style="color:white; padding-bottom:10px; font-size:20px; font-weight:bold;"><center>IGP 3</center></td>
+                          <td></td>
+                      </tr>
+                    <tr >
+                      <td style="width: 2%;text-align: center">
+                        &nbsp;
+                      </td>
+                      <td style="width: 3%;text-align: center">
+                        <img id="btn-pms-igp1-zona1" src="{{ asset('images/igp1zona1.png') }}" style="width: 100%;" id="btn-dm-igp1-zona1">
+                        <img  id="btn-pms-igp1-zona2" src="{{ asset('images/igp1zona2.png') }}" style="width: 100%;" id="btn-dm-igp1-zona1">
+                      </td>
+                      <td style="width: 3%;text-align: center; border-right:2px;">
+                          {{-- <img src="{{ asset('images/oil.png') }}" style="width: 100%; " id="btn-dm-igp1-zona1"> --}}
+                      </td>
+                      <td style="width: 2%;text-align: center;">
+                        <hr class="garistengah">
+                      </td>
+                      <td style="width: 3%;text-align: center; margin-left:50px;">
+                          <img id="btn-pms-igp2-zona1" src="{{ asset('images/igp2zona1.png') }}" style="width: 100%; " id="btn-dm-igp1-zona1">
+                          <img id="btn-pms-igp2-zona2" src="{{ asset('images/igp2zona2.png') }}" style="width: 100%;" id="btn-dm-igp1-zona1">
+                      </td>
+                      <td style="width: 3%;text-align: center">
+                          <img id="btn-pms-igp2-zona3" src="{{ asset('images/igp2zona3.png') }}" style="width: 100%; " id="btn-dm-igp1-zona1">
+                      </td>
+                      <td style="width: 2%;text-align: center">
+                        <hr class="garistengah">
+                            </td>
+                        <td style="width: 3%;text-align: center">
+                            <img id="btn-pms-igp3-zona1" src="{{ asset('images/igp3zona1.png') }}" style="width: 100%; " id="btn-dm-igp1-zona1">
+                            <img id="btn-pms-igp3-zona2" src="{{ asset('images/igp3zona2.png') }}" style="width: 100%;" id="btn-dm-igp1-zona1">
+                          </td>
+                          <td style="width: 3%;text-align: center">
+                              <img id="btn-pms-igp3-zona3" src="{{ asset('images/igp3zona3.png') }}" style="width: 100%; " id="btn-dm-igp1-zona1">
+                          </td>
+                      <td style="width: 2%;text-align: center">
+                        &nbsp;
+                      </td>
+                    </tr>
+                  </table>
+              </div>
+            </div>
+            <div class="row">
+                    <div class="col-xl-12">
+                            <div class="alert alert-danger alert-dismissible" style="height:40px; padding:0px 10px; background-color:red !important;">
+                                    <p class="huruf" >{{date('F')}} PREVENTIVE ACHIEVEMENT</p>
+                            </div>
+                       
+                    </div>
+            </div>
+            <div class="table-responsive" style="background-color: white; margin-top:-20px; padding-bottom:8px !important;">
+                <table id="tblMaster2"  width="100%" > 
+                    <tr >
+                      <td style="width: 10%;text-align: center">
+                          <div class="col-md-2" style=" width:150px !important;">
+                                <div class="chart">
+                                  <canvas id="barChart11" style="height: 300px; width: 20%;" ></canvas>
+                                </div>
+                            </div>
+                      </td>
+                      <td style="width: 10%;text-align: center;">
+                          <div class="col-md-2" style=" width:150px !important;">
+                                <div class="chart">
+                                  <canvas id="barChart12" style="height: 300px; width: 20%;" ></canvas>
+                                </div>
+                            </div>
+                      </td>
+                        <td style="width: 10%;text-align: center">
+                            <div class="col-md-4" style=" width:150px !important;">
+                                  <div class="chart">
+                                    <canvas id="barChart21" style="height: 300px; width: 20%;" ></canvas>
+                                  </div>
+                              </div>
+                          </td>
+                          <td style="width: 10%;text-align: center">
+                            <div class="col-md-4" style=" width:150px !important;">
+                                  <div class="chart">
+                                    <canvas id="barChart22" style="height: 300px; width: 20%;" ></canvas>
+                                  </div>
+                              </div>
+                          </td>
+                          <td style="width: 10%;text-align: center">
+                            <div class="col-md-4" style=" width:150px !important;">
+                                  <div class="chart">
+                                    <canvas id="barChart23" style="height: 300px; width: 20%;" ></canvas>
+                                  </div>
+                              </div>
+                          </td>
+                          <td style="width: 10%;text-align: center">
+                            <div class="col-md-4" style=" width:150px !important;">
+                                  <div class="chart">
+                                    <canvas id="barChart31" style="height: 300px; width: 20%;" ></canvas>
+                                  </div>
+                              </div>
+                          </td>
+                          <td style="width: 10%;text-align: center">
+                            <div class="col-md-4" style=" width:150px !important;">
+                                  <div class="chart">
+                                    <canvas id="barChart32" style="height: 300px; width: 20%;" ></canvas>
+                                  </div>
+                              </div>
+                          </td>
+                          <td style="width: 10%;text-align: center">
+                            <div class="col-md-4" style=" width:150px !important;">
+                                  <div class="chart">
+                                    <canvas id="barChart33" style="height: 300px; width: 20%;" ></canvas>
+                                  </div>
+                              </div>
+                          </td>
+                          
+                    </tr>
+                  </table>
+
+            </div>
+          </div>
+          <!-- ./box-body -->
+          
+        <!-- /.box -->
+      <!-- /.col -->
+    <!-- /.row -->
+  </div>
+@endsection
+
+@section('scripts')
+<script src="{{ asset('chartjs/Chart.bundle.js') }}"></script>
+  <script src="{{ asset('chartjs/utils.js') }}"></script>
+<script type="text/javascript">
+
+  document.title = "PREVENTIVE ACHIEVEMENT";
+
+  
+  $(document).ready(function(){
+
+
+    var chartData11 = {
+      labels: ["IGP 1"],
+      datasets: 
+      [
+        {
+          type: 'bar',
+          label: 'Plan',
+          backgroundColor: window.chartColors.red,
+          data: {!! json_encode($plans11) !!},  
+          borderColor: 'white',
+          borderWidth: 2
+        }, 
+        {
+          type: 'bar',
+          label: 'Actual',
+          backgroundColor: window.chartColors.blue,
+          data: {!! json_encode($acts11) !!},  
+          borderColor: 'white',
+          borderWidth: 2
+        }
+      ]
+    };
+
+    var chartData12 = {
+      labels: ["IGP 1"],
+      datasets: 
+      [
+        {
+          type: 'bar',
+          label: 'Plan',
+          backgroundColor: window.chartColors.red,
+          data: {!! json_encode($plans12) !!},   
+          borderColor: 'white',
+          borderWidth: 2
+        }, 
+        {
+          type: 'bar',
+          label: 'Actual',
+          backgroundColor: window.chartColors.blue,
+          data: {!! json_encode($acts12) !!},   
+          borderColor: 'white',
+          borderWidth: 2
+        }
+      ]
+    };
+
+    var chartData21 = {
+      labels: ["IGP 2"],
+      datasets: 
+      [
+        {
+          type: 'bar',
+          label: 'Plan',
+          backgroundColor: window.chartColors.red,
+          data: {!! json_encode($plans21) !!},   
+          borderColor: 'white',
+          borderWidth: 2
+        }, 
+        {
+          type: 'bar',
+          label: 'Actual',
+          backgroundColor: window.chartColors.blue,
+          data: {!! json_encode($acts21) !!},  
+          borderColor: 'white',
+          borderWidth: 2
+        }
+      ]
+    };
+
+    var chartData22 = {
+      labels: ["IGP 2"],
+      datasets: 
+      [
+        {
+          type: 'bar',
+          label: 'Plan',
+          backgroundColor: window.chartColors.red,
+          data: {!! json_encode($plans22) !!},   
+          borderColor: 'white',
+          borderWidth: 2
+        }, 
+        {
+          type: 'bar',
+          label: 'Actual',
+          backgroundColor: window.chartColors.blue,
+          data: {!! json_encode($acts22) !!},   
+          borderColor: 'white',
+          borderWidth: 2
+        }
+      ]
+    };
+
+    var chartData23 = {
+      labels: ["IGP 2"],
+      datasets: 
+      [
+        {
+          type: 'bar',
+          label: 'Plan',
+          backgroundColor: window.chartColors.red,
+          data:{!! json_encode($plans23) !!},  
+          borderColor: 'white',
+          borderWidth: 2
+        }, 
+        {
+          type: 'bar',
+          label: 'Actual',
+          backgroundColor: window.chartColors.blue,
+          data: {!! json_encode($acts23) !!},  
+          borderColor: 'white',
+          borderWidth: 2
+        }
+      ]
+    };
+
+    var chartData31 = {
+      labels: ["IGP 3"],
+      datasets: 
+      [
+        {
+          type: 'bar',
+          label: 'Plan',
+          backgroundColor: window.chartColors.red,
+          data:{!! json_encode($plans31) !!},   
+          borderColor: 'white',
+          borderWidth: 2
+        }, 
+        {
+          type: 'bar',
+          label: 'Actual',
+          backgroundColor: window.chartColors.blue,
+          data: {!! json_encode($acts31) !!},  
+          borderColor: 'white',
+          borderWidth: 2
+        }
+      ]
+    };
+    var chartData32 = {
+      labels: ["IGP 3"],
+      datasets: 
+      [
+        {
+          type: 'bar',
+          label: 'Plan',
+          backgroundColor: window.chartColors.red,
+          data: {!! json_encode($plans32) !!},   
+          borderColor: 'white',
+          borderWidth: 2
+        }, 
+        {
+          type: 'bar',
+          label: 'Actual',
+          backgroundColor: window.chartColors.blue,
+          data: {!! json_encode($acts32) !!},  
+          borderColor: 'white',
+          borderWidth: 2
+        }
+      ]
+    };
+    var chartData33 = {
+      labels: ["IGP 3"],
+      datasets: 
+      [
+        {
+          type: 'bar',
+          label: 'Plan',
+          backgroundColor: window.chartColors.red,
+          data: {!! json_encode($plans33) !!},  
+          borderColor: 'white',
+          borderWidth: 2
+        }, 
+        {
+          type: 'bar',
+          label: 'Actual',
+          backgroundColor: window.chartColors.blue,
+          data: {!! json_encode($acts33) !!},  
+          borderColor: 'white',
+          borderWidth: 2
+        }
+      ]
+    };
+
+    var ctx = document.getElementById('barChart11').getContext('2d');
+      window.myMixedChart = new Chart(ctx, {
+        type: 'bar',
+        data: chartData11,
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero:true,
+                // max: 100, 
+                // stepSize: 50
+                callback: function(value, index, values) {
+                  // Remove the formatting to get integer data for summation
+                  var intVal = function (i) {
+                    return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                    i : 0;
+                  };
+                  value = intVal(value);
+
+                  var format = function formatNumber(num) {
+                    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                  };
+
+                  return format(value);
+                }
+              },
+              gridLines: {
+                display:true
+              }
+            }],
+            xAxes: [{
+              ticks: {
+                fontSize: 18
+              },
+              gridLines: {
+                display:true
+              }   
+            }]
+          },
+          "hover": {
+            "animationDuration": 0
+          },
+          "animation": {
+            // "duration": 1,
+            "onComplete": function() {
+              var chartInstance = this.chart,
+              ctx = chartInstance.ctx;
+
+              ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+              ctx.fillStyle = 'black';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'bottom';
+
+              this.data.datasets.forEach(function(dataset, i) {
+                var meta = chartInstance.controller.getDatasetMeta(i);
+                meta.data.forEach(function(bar, index) {
+                  var data = dataset.data[index];
+                  // Remove the formatting to get integer data for summation
+                  var intVal = function (i) {
+                    return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                    i : 0;
+                  };
+                  data = intVal(data);
+
+                  var format = function formatNumber(num) {
+                    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                  };
+
+                  data = format(data);
+                  ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                });
+              });
+            }
+          },
+          title: {
+            display: true,
+            position: 'top', 
+            text: 'Zona 1',
+            fontSize: 14,
+          },
+          legend: {
+            position: 'bottom', 
+            "display": true,
+            labels: {
+              // This more specific font property overrides the global property
+              fontColor: 'black',
+              boxWidth: 20,
+              //fontSize: 12,
+            }
+          },
+          tooltips: {
+            mode: 'index',
+            intersect: true, 
+            callbacks: {
+              title: function(tooltipItem, data) {
+                return data['labels'][tooltipItem[0].index];
+              },
+              label: function(tooltipItem, data) {
+                var label = tooltipItem.yLabel;
+                // Remove the formatting to get integer data for summation
+                var intVal = function (i) {
+                  return typeof i === 'string' ?
+                  i.replace(/[\$,]/g, '')*1 :
+                  typeof i === 'number' ?
+                  i : 0;
+                };
+                label = intVal(label);
+
+                var format = function formatNumber(num) {
+                  return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                };
+
+                label = format(label);
+                return data.datasets[tooltipItem.datasetIndex].label + ": " + label;
+              },
+            },
+          }
+        }
+      });
+    var ctx = document.getElementById('barChart12').getContext('2d');
+      window.myMixedChart = new Chart(ctx, {
+        type: 'bar',
+        data: chartData12,
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero:true,
+                // max: 100, 
+                // stepSize: 50
+                callback: function(value, index, values) {
+                  // Remove the formatting to get integer data for summation
+                  var intVal = function (i) {
+                    return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                    i : 0;
+                  };
+                  value = intVal(value);
+
+                  var format = function formatNumber(num) {
+                    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                  };
+
+                  return format(value);
+                }
+              },
+              gridLines: {
+                display:true
+              }
+            }],
+            xAxes: [{
+              ticks: {
+                fontSize: 18
+              },
+              gridLines: {
+                display:true
+              }   
+            }]
+          },
+          "hover": {
+            "animationDuration": 0
+          },
+          "animation": {
+            // "duration": 1,
+            "onComplete": function() {
+              var chartInstance = this.chart,
+              ctx = chartInstance.ctx;
+
+              ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+              ctx.fillStyle = 'black';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'bottom';
+
+              this.data.datasets.forEach(function(dataset, i) {
+                var meta = chartInstance.controller.getDatasetMeta(i);
+                meta.data.forEach(function(bar, index) {
+                  var data = dataset.data[index];
+                  // Remove the formatting to get integer data for summation
+                  var intVal = function (i) {
+                    return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                    i : 0;
+                  };
+                  data = intVal(data);
+
+                  var format = function formatNumber(num) {
+                    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                  };
+
+                  data = format(data);
+                  ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                });
+              });
+            }
+          },
+          title: {
+            display: true,
+            position: 'top', 
+            text: 'Zona 2',
+            fontSize: 14,
+          },
+          legend: {
+            position: 'bottom', 
+            "display": true,
+            labels: {
+              // This more specific font property overrides the global property
+              fontColor: 'black',
+              boxWidth: 20,
+              //fontSize: 12,
+            }
+          },
+          tooltips: {
+            mode: 'index',
+            intersect: true, 
+            callbacks: {
+              title: function(tooltipItem, data) {
+                return data['labels'][tooltipItem[0].index];
+              },
+              label: function(tooltipItem, data) {
+                var label = tooltipItem.yLabel;
+                // Remove the formatting to get integer data for summation
+                var intVal = function (i) {
+                  return typeof i === 'string' ?
+                  i.replace(/[\$,]/g, '')*1 :
+                  typeof i === 'number' ?
+                  i : 0;
+                };
+                label = intVal(label);
+
+                var format = function formatNumber(num) {
+                  return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                };
+
+                label = format(label);
+                return data.datasets[tooltipItem.datasetIndex].label + ": " + label;
+              },
+            },
+          }
+        }
+      });
+    var ctx = document.getElementById('barChart21').getContext('2d');
+      window.myMixedChart = new Chart(ctx, {
+        type: 'bar',
+        data: chartData21,
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero:true,
+                // max: 100, 
+                // stepSize: 50
+                callback: function(value, index, values) {
+                  // Remove the formatting to get integer data for summation
+                  var intVal = function (i) {
+                    return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                    i : 0;
+                  };
+                  value = intVal(value);
+
+                  var format = function formatNumber(num) {
+                    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                  };
+
+                  return format(value);
+                }
+              },
+              gridLines: {
+                display:true
+              }
+            }],
+            xAxes: [{
+              ticks: {
+                fontSize: 18
+              },
+              gridLines: {
+                display:true
+              }   
+            }]
+          },
+          "hover": {
+            "animationDuration": 0
+          },
+          "animation": {
+            // "duration": 1,
+            "onComplete": function() {
+              var chartInstance = this.chart,
+              ctx = chartInstance.ctx;
+
+              ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+              ctx.fillStyle = 'black';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'bottom';
+
+              this.data.datasets.forEach(function(dataset, i) {
+                var meta = chartInstance.controller.getDatasetMeta(i);
+                meta.data.forEach(function(bar, index) {
+                  var data = dataset.data[index];
+                  // Remove the formatting to get integer data for summation
+                  var intVal = function (i) {
+                    return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                    i : 0;
+                  };
+                  data = intVal(data);
+
+                  var format = function formatNumber(num) {
+                    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                  };
+
+                  data = format(data);
+                  ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                });
+              });
+            }
+          },
+          title: {
+            display: true,
+            position: 'top', 
+            text: 'Zona 1',
+            fontSize: 14,
+          },
+          legend: {
+            position: 'bottom', 
+            "display": true,
+            labels: {
+              // This more specific font property overrides the global property
+              fontColor: 'black',
+              boxWidth: 20,
+              //fontSize: 12,
+            }
+          },
+          tooltips: {
+            mode: 'index',
+            intersect: true, 
+            callbacks: {
+              title: function(tooltipItem, data) {
+                return data['labels'][tooltipItem[0].index];
+              },
+              label: function(tooltipItem, data) {
+                var label = tooltipItem.yLabel;
+                // Remove the formatting to get integer data for summation
+                var intVal = function (i) {
+                  return typeof i === 'string' ?
+                  i.replace(/[\$,]/g, '')*1 :
+                  typeof i === 'number' ?
+                  i : 0;
+                };
+                label = intVal(label);
+
+                var format = function formatNumber(num) {
+                  return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                };
+
+                label = format(label);
+                return data.datasets[tooltipItem.datasetIndex].label + ": " + label;
+              },
+            },
+          }
+        }
+      });
+    var ctx = document.getElementById('barChart22').getContext('2d');
+      window.myMixedChart = new Chart(ctx, {
+        type: 'bar',
+        data: chartData22,
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero:true,
+                // max: 100, 
+                // stepSize: 50
+                callback: function(value, index, values) {
+                  // Remove the formatting to get integer data for summation
+                  var intVal = function (i) {
+                    return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                    i : 0;
+                  };
+                  value = intVal(value);
+
+                  var format = function formatNumber(num) {
+                    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                  };
+
+                  return format(value);
+                }
+              },
+              gridLines: {
+                display:true
+              }
+            }],
+            xAxes: [{
+              ticks: {
+                fontSize: 18
+              },
+              gridLines: {
+                display:true
+              }   
+            }]
+          },
+          "hover": {
+            "animationDuration": 0
+          },
+          "animation": {
+            // "duration": 1,
+            "onComplete": function() {
+              var chartInstance = this.chart,
+              ctx = chartInstance.ctx;
+
+              ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+              ctx.fillStyle = 'black';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'bottom';
+
+              this.data.datasets.forEach(function(dataset, i) {
+                var meta = chartInstance.controller.getDatasetMeta(i);
+                meta.data.forEach(function(bar, index) {
+                  var data = dataset.data[index];
+                  // Remove the formatting to get integer data for summation
+                  var intVal = function (i) {
+                    return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                    i : 0;
+                  };
+                  data = intVal(data);
+
+                  var format = function formatNumber(num) {
+                    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                  };
+
+                  data = format(data);
+                  ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                });
+              });
+            }
+          },
+          title: {
+            display: true,
+            position: 'top', 
+            text: 'Zona 2',
+            fontSize: 14,
+          },
+          legend: {
+            position: 'bottom', 
+            "display": true,
+            labels: {
+              // This more specific font property overrides the global property
+              fontColor: 'black',
+              boxWidth: 20,
+              //fontSize: 12,
+            }
+          },
+          tooltips: {
+            mode: 'index',
+            intersect: true, 
+            callbacks: {
+              title: function(tooltipItem, data) {
+                return data['labels'][tooltipItem[0].index];
+              },
+              label: function(tooltipItem, data) {
+                var label = tooltipItem.yLabel;
+                // Remove the formatting to get integer data for summation
+                var intVal = function (i) {
+                  return typeof i === 'string' ?
+                  i.replace(/[\$,]/g, '')*1 :
+                  typeof i === 'number' ?
+                  i : 0;
+                };
+                label = intVal(label);
+
+                var format = function formatNumber(num) {
+                  return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                };
+
+                label = format(label);
+                return data.datasets[tooltipItem.datasetIndex].label + ": " + label;
+              },
+            },
+          }
+        }
+      });
+    var ctx = document.getElementById('barChart23').getContext('2d');
+      window.myMixedChart = new Chart(ctx, {
+        type: 'bar',
+        data: chartData23,
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero:true,
+                // max: 100, 
+                // stepSize: 50
+                callback: function(value, index, values) {
+                  // Remove the formatting to get integer data for summation
+                  var intVal = function (i) {
+                    return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                    i : 0;
+                  };
+                  value = intVal(value);
+
+                  var format = function formatNumber(num) {
+                    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                  };
+
+                  return format(value);
+                }
+              },
+              gridLines: {
+                display:true
+              }
+            }],
+            xAxes: [{
+              ticks: {
+                fontSize: 18
+              },
+              gridLines: {
+                display:true
+              }   
+            }]
+          },
+          "hover": {
+            "animationDuration": 0
+          },
+          "animation": {
+            // "duration": 1,
+            "onComplete": function() {
+              var chartInstance = this.chart,
+              ctx = chartInstance.ctx;
+
+              ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+              ctx.fillStyle = 'black';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'bottom';
+
+              this.data.datasets.forEach(function(dataset, i) {
+                var meta = chartInstance.controller.getDatasetMeta(i);
+                meta.data.forEach(function(bar, index) {
+                  var data = dataset.data[index];
+                  // Remove the formatting to get integer data for summation
+                  var intVal = function (i) {
+                    return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                    i : 0;
+                  };
+                  data = intVal(data);
+
+                  var format = function formatNumber(num) {
+                    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                  };
+
+                  data = format(data);
+                  ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                });
+              });
+            }
+          },
+          title: {
+            display: true,
+            position: 'top', 
+            text: 'Zona 3',
+            fontSize: 14,
+          },
+          legend: {
+            position: 'bottom', 
+            "display": true,
+            labels: {
+              // This more specific font property overrides the global property
+              fontColor: 'black',
+              boxWidth: 20,
+              //fontSize: 12,
+            }
+          },
+          tooltips: {
+            mode: 'index',
+            intersect: true, 
+            callbacks: {
+              title: function(tooltipItem, data) {
+                return data['labels'][tooltipItem[0].index];
+              },
+              label: function(tooltipItem, data) {
+                var label = tooltipItem.yLabel;
+                // Remove the formatting to get integer data for summation
+                var intVal = function (i) {
+                  return typeof i === 'string' ?
+                  i.replace(/[\$,]/g, '')*1 :
+                  typeof i === 'number' ?
+                  i : 0;
+                };
+                label = intVal(label);
+
+                var format = function formatNumber(num) {
+                  return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                };
+
+                label = format(label);
+                return data.datasets[tooltipItem.datasetIndex].label + ": " + label;
+              },
+            },
+          }
+        }
+      });
+    var ctx = document.getElementById('barChart31').getContext('2d');
+      window.myMixedChart = new Chart(ctx, {
+        type: 'bar',
+        data: chartData31,
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero:true,
+                // max: 100, 
+                // stepSize: 50
+                callback: function(value, index, values) {
+                  // Remove the formatting to get integer data for summation
+                  var intVal = function (i) {
+                    return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                    i : 0;
+                  };
+                  value = intVal(value);
+
+                  var format = function formatNumber(num) {
+                    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                  };
+
+                  return format(value);
+                }
+              },
+              gridLines: {
+                display:true
+              }
+            }],
+            xAxes: [{
+              ticks: {
+                fontSize: 18
+              },
+              gridLines: {
+                display:true
+              }   
+            }]
+          },
+          "hover": {
+            "animationDuration": 0
+          },
+          "animation": {
+            // "duration": 1,
+            "onComplete": function() {
+              var chartInstance = this.chart,
+              ctx = chartInstance.ctx;
+
+              ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+              ctx.fillStyle = 'black';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'bottom';
+
+              this.data.datasets.forEach(function(dataset, i) {
+                var meta = chartInstance.controller.getDatasetMeta(i);
+                meta.data.forEach(function(bar, index) {
+                  var data = dataset.data[index];
+                  // Remove the formatting to get integer data for summation
+                  var intVal = function (i) {
+                    return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                    i : 0;
+                  };
+                  data = intVal(data);
+
+                  var format = function formatNumber(num) {
+                    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                  };
+
+                  data = format(data);
+                  ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                });
+              });
+            }
+          },
+          title: {
+            display: true,
+            position: 'top', 
+            text: 'Zona 1',
+            fontSize: 14,
+          },
+          legend: {
+            position: 'bottom', 
+            "display": true,
+            labels: {
+              // This more specific font property overrides the global property
+              fontColor: 'black',
+              boxWidth: 20,
+              //fontSize: 12,
+            }
+          },
+          tooltips: {
+            mode: 'index',
+            intersect: true, 
+            callbacks: {
+              title: function(tooltipItem, data) {
+                return data['labels'][tooltipItem[0].index];
+              },
+              label: function(tooltipItem, data) {
+                var label = tooltipItem.yLabel;
+                // Remove the formatting to get integer data for summation
+                var intVal = function (i) {
+                  return typeof i === 'string' ?
+                  i.replace(/[\$,]/g, '')*1 :
+                  typeof i === 'number' ?
+                  i : 0;
+                };
+                label = intVal(label);
+
+                var format = function formatNumber(num) {
+                  return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                };
+
+                label = format(label);
+                return data.datasets[tooltipItem.datasetIndex].label + ": " + label;
+              },
+            },
+          }
+        }
+      });
+    var ctx = document.getElementById('barChart32').getContext('2d');
+      window.myMixedChart = new Chart(ctx, {
+        type: 'bar',
+        data: chartData32,
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero:true,
+                // max: 100, 
+                // stepSize: 50
+                callback: function(value, index, values) {
+                  // Remove the formatting to get integer data for summation
+                  var intVal = function (i) {
+                    return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                    i : 0;
+                  };
+                  value = intVal(value);
+
+                  var format = function formatNumber(num) {
+                    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                  };
+
+                  return format(value);
+                }
+              },
+              gridLines: {
+                display:true
+              }
+            }],
+            xAxes: [{
+              ticks: {
+                fontSize: 18
+              },
+              gridLines: {
+                display:true
+              }   
+            }]
+          },
+          "hover": {
+            "animationDuration": 0
+          },
+          "animation": {
+            // "duration": 1,
+            "onComplete": function() {
+              var chartInstance = this.chart,
+              ctx = chartInstance.ctx;
+
+              ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+              ctx.fillStyle = 'black';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'bottom';
+
+              this.data.datasets.forEach(function(dataset, i) {
+                var meta = chartInstance.controller.getDatasetMeta(i);
+                meta.data.forEach(function(bar, index) {
+                  var data = dataset.data[index];
+                  // Remove the formatting to get integer data for summation
+                  var intVal = function (i) {
+                    return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                    i : 0;
+                  };
+                  data = intVal(data);
+
+                  var format = function formatNumber(num) {
+                    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                  };
+
+                  data = format(data);
+                  ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                });
+              });
+            }
+          },
+          title: {
+            display: true,
+            position: 'top', 
+            text: 'Zona 2',
+            fontSize: 14,
+          },
+          legend: {
+            position: 'bottom', 
+            "display": true,
+            labels: {
+              // This more specific font property overrides the global property
+              fontColor: 'black',
+              boxWidth: 20,
+              //fontSize: 12,
+            }
+          },
+          tooltips: {
+            mode: 'index',
+            intersect: true, 
+            callbacks: {
+              title: function(tooltipItem, data) {
+                return data['labels'][tooltipItem[0].index];
+              },
+              label: function(tooltipItem, data) {
+                var label = tooltipItem.yLabel;
+                // Remove the formatting to get integer data for summation
+                var intVal = function (i) {
+                  return typeof i === 'string' ?
+                  i.replace(/[\$,]/g, '')*1 :
+                  typeof i === 'number' ?
+                  i : 0;
+                };
+                label = intVal(label);
+
+                var format = function formatNumber(num) {
+                  return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                };
+
+                label = format(label);
+                return data.datasets[tooltipItem.datasetIndex].label + ": " + label;
+              },
+            },
+          }
+        }
+      });
+    var ctx = document.getElementById('barChart33').getContext('2d');
+      window.myMixedChart = new Chart(ctx, {
+        type: 'bar',
+        data: chartData33,
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero:true,
+                // max: 100, 
+                // stepSize: 50
+                callback: function(value, index, values) {
+                  // Remove the formatting to get integer data for summation
+                  var intVal = function (i) {
+                    return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                    i : 0;
+                  };
+                  value = intVal(value);
+
+                  var format = function formatNumber(num) {
+                    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                  };
+
+                  return format(value);
+                }
+              },
+              gridLines: {
+                display:true
+              }
+            }],
+            xAxes: [{
+              ticks: {
+                fontSize: 18
+              },
+              gridLines: {
+                display:true
+              }   
+            }]
+          },
+          "hover": {
+            "animationDuration": 0
+          },
+          "animation": {
+            // "duration": 1,
+            "onComplete": function() {
+              var chartInstance = this.chart,
+              ctx = chartInstance.ctx;
+
+              ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+              ctx.fillStyle = 'black';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'bottom';
+
+              this.data.datasets.forEach(function(dataset, i) {
+                var meta = chartInstance.controller.getDatasetMeta(i);
+                meta.data.forEach(function(bar, index) {
+                  var data = dataset.data[index];
+                  // Remove the formatting to get integer data for summation
+                  var intVal = function (i) {
+                    return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                    i : 0;
+                  };
+                  data = intVal(data);
+
+                  var format = function formatNumber(num) {
+                    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                  };
+
+                  data = format(data);
+                  ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                });
+              });
+            }
+          },
+          title: {
+            display: true,
+            position: 'top', 
+            text: 'Zona 3',
+            fontSize: 14,
+          },
+          legend: {
+            position: 'bottom', 
+            "display": true,
+            labels: {
+              // This more specific font property overrides the global property
+              fontColor: 'black',
+              boxWidth: 20,
+              //fontSize: 12,
+            }
+          },
+          tooltips: {
+            mode: 'index',
+            intersect: true, 
+            callbacks: {
+              title: function(tooltipItem, data) {
+                return data['labels'][tooltipItem[0].index];
+              },
+              label: function(tooltipItem, data) {
+                var label = tooltipItem.yLabel;
+                // Remove the formatting to get integer data for summation
+                var intVal = function (i) {
+                  return typeof i === 'string' ?
+                  i.replace(/[\$,]/g, '')*1 :
+                  typeof i === 'number' ?
+                  i : 0;
+                };
+                label = intVal(label);
+
+                var format = function formatNumber(num) {
+                  return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                };
+
+                label = format(label);
+                return data.datasets[tooltipItem.datasetIndex].label + ": " + label;
+              },
+            },
+          }
+        }
+      });
+
+
+
+  $("#btn-pms-igp1-zona1").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "1";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-pms-igp1-zona2").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "1";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-pms-igp2-zona1").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "2";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-pms-igp2-zona2").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "2";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-pms-igp2-zona3").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "2";
+    var lok_zona = "3";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-pms-igp3-zona1").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "3";
+    var lok_zona = "1";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-pms-igp3-zona2").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "3";
+    var lok_zona = "2";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    window.location.href = urlRedirect;
+  });
+
+  $("#btn-pms-igp3-zona3").click(function(){
+    var tahun = "{{ \Carbon\Carbon::now()->format('Y') }}";
+    var bulan = "{{ \Carbon\Carbon::now()->format('m') }}";
+    var kd_plant = "3";
+    var lok_zona = "3";
+    var urlRedirect = "{{ route('smartmtcs.pmsachievement', ['param','param2','param3','param4']) }}";
+    urlRedirect = urlRedirect.replace('param4', lok_zona);
+    urlRedirect = urlRedirect.replace('param3', kd_plant);
+    urlRedirect = urlRedirect.replace('param2', bulan);
+    urlRedirect = urlRedirect.replace('param', tahun);
+    window.location.href = urlRedirect;
+  });
+
+  
+  });
+  function onBack() {
+
+    window.location.href = "{{ route('smartmtcs.dashboardmtc2') }}";
+}
+</script>
+@endsection

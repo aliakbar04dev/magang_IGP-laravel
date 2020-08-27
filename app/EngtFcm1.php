@@ -1,0 +1,164 @@
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+use DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+use Exception;
+
+class EngtFcm1 extends Model
+{
+    const CREATED_AT = 'dtcrea';
+    const UPDATED_AT = 'dtmodi';
+
+    protected $fillable = [
+    	'engt_tpfc2_id', 'pict_dim_position', 'dtcrea', 'creaby', 'dtmodi', 'modiby', 
+    ];
+
+    public static function boot()
+	{
+		parent::boot();
+
+        self::deleting(function($engtfcm1) {
+            $level = "danger";
+            $msg = "";
+            if($msg !== "") {
+                Session::flash("flash_notification", [
+                    "level"=>$level,
+                    "message"=>$msg
+                ]);
+                return false;
+            }
+        });
+	}
+
+    public function checkEdit() {
+        $valid = "T";
+        if(Auth::user()->can('eng-fcm-create')) {
+            
+        } else {
+            $valid = "F";
+        }
+        return $valid;
+    }
+
+    public function nama($username)
+    {
+        $nama = DB::table("v_mas_karyawan")
+        ->select(DB::raw("nama"))
+        ->where("npk", "=", $username)
+        ->value("nama");
+        return $nama;
+    }
+
+    public function engtTpfc1() {
+    	return EngtTpfc1::find($this->engtTpfc2()->engt_tpfc1_id);
+    }
+
+    public function engtTpfc2() {
+    	return DB::table('engt_tpfc2s')
+    	->select(DB::raw("id, engt_tpfc1_id, no_urut, no_op, kd_mesin, (select engt_mmesins.nm_proses from engt_mmesins where engt_mmesins.kd_mesin = engt_tpfc2s.kd_mesin limit 1) nm_proses, (select engt_mmesins.nm_mesin from engt_mmesins where engt_mmesins.kd_mesin = engt_tpfc2s.kd_mesin limit 1) nm_mesin, engt_msimbol_id, nm_pros, pros_draw_pict, nil_ct, st_mesin, st_tool, dtcrea, creaby, dtmodi, modiby"))
+    	->where("id", '=', $this->engt_tpfc2_id)
+    	->first();
+    }
+
+    public function engtFcm2s() {
+        return DB::table('engt_fcm2s')
+        ->select(DB::raw("id, engt_fcm1_id, no_urut, dim_st, pros_req, std, dtcrea, creaby, dtmodi, modiby"))
+        ->where("engt_fcm1_id", '=', $this->id);
+    }
+
+    public function engtFcm3s($engt_fcm2_id) {
+        return DB::table('engt_fcm3s')
+        ->select(DB::raw("id, engt_fcm2_id, tolerance, dim_note_st, st_pros_1, st_pros_2, st_pros_3, st_pros_4, st_pros_5, st_pros_6, st_pros_7, st_pros_8, st_pros_9, st_pros_10, st_pros_11, st_pros_12, st_pros_13, st_pros_14, st_pros_15, dtcrea, creaby, dtmodi, modiby"))
+        ->where("engt_fcm2_id", '=', $engt_fcm2_id);
+    }
+
+    public function stPros($engtfcm3, $no) {
+        $st_pros = null;
+        if($no == "1") {
+            $st_pros = $engtfcm3->st_pros_1;
+        } else if($no == "2") {
+            $st_pros = $engtfcm3->st_pros_2;
+        } else if($no == "3") {
+            $st_pros = $engtfcm3->st_pros_3;
+        } else if($no == "4") {
+            $st_pros = $engtfcm3->st_pros_4;
+        } else if($no == "5") {
+            $st_pros = $engtfcm3->st_pros_5;
+        } else if($no == "6") {
+            $st_pros = $engtfcm3->st_pros_6;
+        } else if($no == "7") {
+            $st_pros = $engtfcm3->st_pros_7;
+        } else if($no == "8") {
+            $st_pros = $engtfcm3->st_pros_8;
+        } else if($no == "9") {
+            $st_pros = $engtfcm3->st_pros_9;
+        } else if($no == "10") {
+            $st_pros = $engtfcm3->st_pros_10;
+        } else if($no == "11") {
+            $st_pros = $engtfcm3->st_pros_11;
+        } else if($no == "12") {
+            $st_pros = $engtfcm3->st_pros_12;
+        } else if($no == "13") {
+            $st_pros = $engtfcm3->st_pros_13;
+        } else if($no == "14") {
+            $st_pros = $engtfcm3->st_pros_14;
+        } else if($no == "15") {
+            $st_pros = $engtfcm3->st_pros_15;
+        }
+        return $st_pros;
+    }
+
+    public function getRegNoDocAttribute()
+    {
+        if($this->engtTpfc1() != null) {
+            return $this->engtTpfc1()->reg_no_doc;
+        } else {
+            return null;
+        }
+    }
+
+    public function getNoOpAttribute()
+    {
+        if($this->engtTpfc2() != null) {
+            return $this->engtTpfc2()->no_op;
+        } else {
+            return null;
+        }
+    }
+
+    public function getKdMesinAttribute()
+    {
+        if($this->engtTpfc2() != null) {
+            $kd_mesin = $this->engtTpfc2()->kd_mesin;
+            $nm_proses = $this->engtTpfc2()->nm_proses;
+            $nm_mesin = $this->engtTpfc2()->nm_mesin;
+            return $kd_mesin." # ".$nm_proses." # ".$nm_mesin;
+        } else {
+            return null;
+        }
+    }
+
+    public function pict($nm_pict) {
+        $file_temp = "";
+        if(config('app.env', 'local') === 'production') {
+        	$file_temp = DIRECTORY_SEPARATOR."serverh".DIRECTORY_SEPARATOR."Portal".DIRECTORY_SEPARATOR.config('app.kd_pt', 'XXX').DIRECTORY_SEPARATOR."eng".DIRECTORY_SEPARATOR."fcm".DIRECTORY_SEPARATOR.$nm_pict;
+        } else {
+        	$file_temp = "\\\\192.168.0.5\\Public2\\Portal\\".config('app.kd_pt', 'XXX')."\\eng\\fcm\\".$nm_pict;
+        }
+        if($file_temp != "") {
+            if (file_exists($file_temp)) {
+                $loc_image = file_get_contents('file:///'.str_replace("\\\\","\\",$file_temp));
+                $image_codes = "data:".mime_content_type($file_temp).";charset=utf-8;base64,".base64_encode($loc_image);
+                return $image_codes;
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+}

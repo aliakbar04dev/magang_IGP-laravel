@@ -1,0 +1,805 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use DB;
+use Exception;
+use App\User;
+use PDF;
+use JasperPHP\JasperPHP;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Mail;
+use DNS1D;
+
+class BaanDnSuppsController extends Controller
+{
+  /**
+   * Display a listing of the resource.
+   *
+   * @return \Illuminate\Http\Response
+   */
+  public function index()
+  {
+    if(Auth::user()->can(['ppc-dnsupp-view'])) {
+      if(strlen(Auth::user()->username) > 5) {
+        $suppliers = DB::table("b_suppliers")
+        ->select(DB::raw("kd_supp, nama"))
+        ->whereRaw("length(kd_supp) > 6")
+        ->where("kd_supp", "=", auth()->user()->kd_supp);
+      } else {
+        $suppliers = DB::table("b_suppliers")
+        ->select(DB::raw("kd_supp, nama"))
+        ->whereRaw("length(kd_supp) > 6")
+        ->whereRaw("substr(kd_supp,1,3) = 'BTL'")
+        ->orderBy('nama');
+      }
+      return view('ppc.dnsupp.index', compact('suppliers'));
+    } else {
+     return view('errors.403');
+   }
+  }
+
+  public function dashboard(Request $request)
+  {
+    if(Auth::user()->can(['ppc-dnsupp-view'])) {
+      if ($request->ajax()) {
+
+        $tgl_awal = "19700101";
+        if(!empty($request->get('tgl_awal'))) {
+          try {
+            $tgl_awal = Carbon::parse($request->get('tgl_awal'))->format('Ymd');
+          } catch (Exception $ex) {
+            return redirect('home');
+          }
+        }
+        $tgl_akhir = "19700101";
+        if(!empty($request->get('tgl_akhir'))) {
+          try {
+            $tgl_akhir = Carbon::parse($request->get('tgl_akhir'))->format('Ymd');
+          } catch (Exception $ex) {
+            return redirect('home');
+          }
+        }
+
+        $lists = DB::connection('oracle-usrbaan')
+        ->table(DB::raw("(select kd_bpid, fnm_bpid(kd_bpid) nm_bpid, no_po, item, fnm_item(item) item_name, no_dn, tgl_kirim, qty_dn, qty_re, qty_blc, no_re, no_sj, tgl_order, st_close, no_urut from baan_dn_supp) dn"))
+        ->select(DB::raw("kd_bpid, nm_bpid, no_po, item, item_name, no_dn, tgl_kirim, qty_dn, qty_re, qty_blc, no_re, no_sj, tgl_order, st_close, no_urut"))
+        ->whereRaw("to_char(tgl_kirim,'yyyymmdd') >= ?", $tgl_awal)
+        ->whereRaw("to_char(tgl_kirim,'yyyymmdd') <= ?", $tgl_akhir);
+
+        $kdsite = "";
+        if(!empty($request->get('site'))) {
+          if($request->get('site') !== "ALL") {
+            $kdsite = $request->get('site');
+            $lists->where(DB::raw("'IGP'||substr(dn.no_po,2,1)"), $kdsite);
+          }
+        }
+        $kdbpid = "";
+        if(!empty($request->get('supplier'))) {
+          if($request->get('supplier') !== "ALL") {
+            $kdbpid = $request->get('supplier');
+            $lists->where("dn.kd_bpid", $kdbpid);
+          }
+        }
+        $no_po = "";
+        if(!empty($request->get('no_po'))) {
+          $no_po = $request->get('no_po');
+          $lists->where("dn.no_po", $no_po);
+        }
+        $no_dn = "";
+        if(!empty($request->get('no_dn'))) {
+          $no_dn = $request->get('no_dn');
+          $lists->where("dn.no_dn", $no_dn);
+        }
+        if(!empty($request->get('status'))) {
+          if($request->get('status') !== "ALL") {
+            $st_close = $request->get('status');
+            $lists->where(DB::raw("nvl(dn.st_close,'F')"), $request->get('status'))
+            ->whereRaw("dn.no_urut = (select max(ba.no_urut)
+              from baan_dn_supp ba
+              where ba.no_po = dn.no_po
+              and ba.item = dn.item
+              and substr(ba.no_dn,1,9) = substr(dn.no_dn,1,9)
+              and (to_char(ba.tgl_kirim,'yyyymmdd') >= '$tgl_awal' and to_char(ba.tgl_kirim,'yyyymmdd') <= '$tgl_akhir')
+              and ('IGP'||substr(ba.no_po,2,1) = '$kdsite' or '$kdsite' is null)
+              and (ba.kd_bpid = '$kdbpid' or '$kdbpid' is null)
+              and (ba.no_po = '$no_po' or '$no_po' is null)
+              and (ba.no_dn = '$no_dn' or '$no_dn' is null)
+              and (ba.st_close = '$st_close'))");
+          }
+        }
+
+        return Datatables::of($lists)
+        ->editColumn('tgl_kirim', function($data){
+          return Carbon::parse($data->tgl_kirim)->format('d/m/y');
+        })
+        ->filterColumn('tgl_kirim', function ($query, $keyword) {
+          $query->whereRaw("to_char(tgl_kirim,'dd/mm/yy') like ?", ["%$keyword%"]);
+        })
+        ->editColumn('qty_dn', function($data){
+          return numberFormatter(0, 2)->format($data->qty_dn);
+        })
+        ->filterColumn('qty_dn', function ($query, $keyword) {
+          $query->whereRaw("trim(to_char(qty_dn,'999999999999999999.99')) like ?", ["%$keyword%"]);
+        })
+        ->editColumn('qty_re', function($data){
+          return numberFormatter(0, 2)->format($data->qty_re);
+        })
+        ->filterColumn('qty_re', function ($query, $keyword) {
+          $query->whereRaw("trim(to_char(qty_re,'999999999999999999.99')) like ?", ["%$keyword%"]);
+        })
+        ->editColumn('qty_blc', function($data){
+          return numberFormatter(0, 2)->format($data->qty_blc);
+        })
+        ->filterColumn('qty_blc', function ($query, $keyword) {
+          $query->whereRaw("trim(to_char(qty_blc,'999999999999999999.99')) like ?", ["%$keyword%"]);
+        })
+        ->editColumn('tgl_order', function($data){
+          return Carbon::parse($data->tgl_order)->format('d/m/Y');
+        })
+        ->filterColumn('tgl_order', function ($query, $keyword) {
+          $query->whereRaw("to_char(tgl_order,'dd/mm/yyyy') like ?", ["%$keyword%"]);
+        })
+        ->make(true);
+      } else {
+        return redirect('home');
+      }
+    } else {
+      return view('errors.403');
+    }
+  }
+
+  public function indexview()
+  {
+    if(Auth::user()->can(['ppc-dnsupp-view'])) {
+      if(strlen(Auth::user()->username) > 5) {
+        $suppliers = DB::table("b_suppliers")
+        ->select(DB::raw("kd_supp, nama"))
+        ->whereRaw("length(kd_supp) > 6")
+        ->where("kd_supp", "=", auth()->user()->kd_supp);
+      } else {
+        $suppliers = DB::table("b_suppliers")
+        ->select(DB::raw("kd_supp, nama"))
+        ->whereRaw("length(kd_supp) > 6")
+        ->whereRaw("substr(kd_supp,1,3) = 'BTL'")
+        ->orderBy('nama');
+      }
+      return view('ppc.dnsupp.indexview', compact('suppliers'));
+    } else {
+     return view('errors.403');
+    }
+  }
+
+  public function dashboardview(Request $request)
+  {
+    if(Auth::user()->can(['ppc-dnsupp-view'])) {
+      if ($request->ajax()) {
+
+        $tgl_awal = "19700101";
+        if(!empty($request->get('tgl_awal'))) {
+          try {
+            $tgl_awal = Carbon::parse($request->get('tgl_awal'))->format('Ymd');
+          } catch (Exception $ex) {
+            return redirect('home');
+          }
+        }
+        $tgl_akhir = "19700101";
+        if(!empty($request->get('tgl_akhir'))) {
+          try {
+            $tgl_akhir = Carbon::parse($request->get('tgl_akhir'))->format('Ymd');
+          } catch (Exception $ex) {
+            return redirect('home');
+          }
+        }
+
+        $lists = DB::table(DB::raw("(select kd_bpid, (select b_suppliers.nama from b_suppliers where b_suppliers.kd_supp = baan_dn_supps.kd_bpid) nm_bpid, no_po, no_dn, no_revisi, jns_dn, no_cycle, tgl_kirim, tgl_order, coalesce(st_close,'F') st_close, ket_revisi, pic_cetak, tgl_cetak from baan_dn_supps) dn"))
+        ->select(DB::raw("distinct kd_bpid, nm_bpid, no_po, no_dn, no_revisi, jns_dn, no_cycle, to_char(tgl_kirim,'dd-mm-yyyy') tgl_kirim, to_char(tgl_order,'dd-mm-yyyy') tgl_order, st_close, ket_revisi, pic_cetak, to_char(tgl_cetak,'dd-mm-yyyy hh24:mi') tgl_cetak"))
+        ->whereRaw("to_char(tgl_kirim,'yyyymmdd') >= ?", $tgl_awal)
+        ->whereRaw("to_char(tgl_kirim,'yyyymmdd') <= ?", $tgl_akhir);
+
+        if(!empty($request->get('site'))) {
+          if($request->get('site') !== "ALL") {
+            $lists->where(DB::raw("'IGP'||substr(dn.no_po,2,1)"), $request->get('site'));
+          }
+        }
+        if(!empty($request->get('supplier'))) {
+          if($request->get('supplier') !== "ALL") {
+            $lists->where("dn.kd_bpid", $request->get('supplier'));
+          }
+        }
+        if(!empty($request->get('no_po'))) {
+          $lists->where("dn.no_po", $request->get('no_po'));
+        }
+        if(!empty($request->get('no_dn'))) {
+          $lists->where("dn.no_dn", $request->get('no_dn'));
+        }
+        if(!empty($request->get('status'))) {
+          if($request->get('status') !== "ALL") {
+            $lists->where("dn.st_close", $request->get('status'));
+          }
+        }
+
+        return Datatables::of($lists)
+        ->editColumn('no_dn', function($data){
+          if(!empty($data->pic_cetak)) {
+            $no_dn = $data->no_dn;
+            return "<b><font color='#228B22'>$no_dn</font></b>";
+          } else {
+            $no_dn = $data->no_dn;
+            return $no_dn;
+          }
+        })
+        ->editColumn('kd_bpid', function($data){
+          return $data->kd_bpid." - ".$data->nm_bpid;
+        })
+        ->filterColumn('kd_bpid', function ($query, $keyword) {
+          $query->whereRaw("(kd_bpid||' - '||nm_bpid) like ?", ["%$keyword%"]);
+        })
+        ->editColumn('pic_cetak', function($data){
+          if(!empty($data->pic_cetak)) {
+            return $data->pic_cetak.' - '.Auth::user()->namaByUsername($data->pic_cetak);
+          } else {
+            return "";
+          }
+        })
+        ->filterColumn('pic_cetak', function ($query, $keyword) {
+          $query->whereRaw("(pic_cetak||' - '||(select name from users where users.username = dn.creaby limit 1)) like ?", ["%$keyword%"]);
+        })
+        ->make(true);
+      } else {
+        return redirect('home');
+      }
+    } else {
+      return view('errors.403');
+    }
+  }
+
+  public function indexAll()
+  {
+    if(Auth::user()->can('ppc-dnsupp-download')) {
+      return view('ppc.dnsupp.indexall');
+    } else {
+     return view('errors.403');
+   }
+  }
+
+  public function dashboardAll(Request $request)
+  {
+    if(Auth::user()->can('ppc-dnsupp-download')) {
+      if ($request->ajax()) {
+
+        $tgl_awal = "19700101";
+        if(!empty($request->get('tgl_awal'))) {
+          try {
+            $tgl_awal = Carbon::parse($request->get('tgl_awal'))->format('Ymd');
+          } catch (Exception $ex) {
+            return redirect('home');
+          }
+        }
+        $tgl_akhir = "19700101";
+        if(!empty($request->get('tgl_akhir'))) {
+          try {
+            $tgl_akhir = Carbon::parse($request->get('tgl_akhir'))->format('Ymd');
+          } catch (Exception $ex) {
+            return redirect('home');
+          }
+        }
+
+        $lists = DB::table(DB::raw("(select kd_bpid, (select b_suppliers.nama from b_suppliers where b_suppliers.kd_supp = baan_dn_supps.kd_bpid) nm_bpid, no_po, no_dn, no_revisi, jns_dn, no_cycle, tgl_kirim, tgl_order, coalesce(st_close,'F') st_close, ket_revisi, pic_cetak, tgl_cetak from baan_dn_supps) dn"))
+        ->select(DB::raw("distinct kd_bpid, nm_bpid, no_po, no_dn, no_revisi, jns_dn, no_cycle, to_char(tgl_kirim,'dd-mm-yyyy') tgl_kirim, to_char(tgl_order,'dd-mm-yyyy') tgl_order, st_close, ket_revisi, pic_cetak, to_char(tgl_cetak,'dd-mm-yyyy hh24:mi') tgl_cetak"))
+        ->whereRaw("to_char(tgl_kirim,'yyyymmdd') >= ?", $tgl_awal)
+        ->whereRaw("to_char(tgl_kirim,'yyyymmdd') <= ?", $tgl_akhir)
+        ->where("kd_bpid", Auth::user()->kd_supp);
+
+        if(!empty($request->get('site'))) {
+          if($request->get('site') !== "ALL") {
+            $lists->where(DB::raw("'IGP'||substr(dn.no_po,2,1)"), $request->get('site'));
+          }
+        }
+        if(!empty($request->get('supplier'))) {
+          if($request->get('supplier') !== "ALL") {
+            $lists->where("dn.kd_bpid", $request->get('supplier'));
+          }
+        }
+        if(!empty($request->get('no_po'))) {
+          $lists->where("dn.no_po", $request->get('no_po'));
+        }
+        if(!empty($request->get('no_dn'))) {
+          $lists->where("dn.no_dn", $request->get('no_dn'));
+        }
+        if(!empty($request->get('status'))) {
+          if($request->get('status') !== "ALL") {
+            $lists->where("dn.st_close", $request->get('status'));
+          }
+        }
+
+        return Datatables::of($lists)
+        ->editColumn('kd_bpid', function($data){
+          return $data->kd_bpid." - ".$data->nm_bpid;
+        })
+        ->filterColumn('kd_bpid', function ($query, $keyword) {
+          $query->whereRaw("(kd_bpid||' - '||nm_bpid) like ?", ["%$keyword%"]);
+        })
+        ->editColumn('pic_cetak', function($data){
+          if(!empty($data->pic_cetak)) {
+            return $data->pic_cetak.' - '.Auth::user()->namaByUsername($data->pic_cetak);
+          } else {
+            return "";
+          }
+        })
+        ->filterColumn('pic_cetak', function ($query, $keyword) {
+          $query->whereRaw("(pic_cetak||' - '||(select name from users where users.username = dn.creaby limit 1)) like ?", ["%$keyword%"]);
+        })
+        ->make(true);
+      } else {
+        return redirect('home');
+      }
+    } else {
+      return view('errors.403');
+    }
+  }
+
+  public function detail(Request $request, $no_dn)
+  {
+    if(Auth::user()->can(['ppc-dnsupp-view','ppc-dnsupp-download'])) {
+      if ($request->ajax()) {
+        $no_dn = base64_decode($no_dn);
+
+        $lists = DB::table(DB::raw("(select kd_bpid, no_po, item, (select baan_mpart.desc1||' ('||baan_mpart.itemdesc||')' from baan_mpart where baan_mpart.item = baan_dn_supps.item) item_name, no_dn, no_revisi, tgl_kirim, qty_per_kanban, qty_kanban, qty_dn, tgl_order, st_close, no_urut, ket_revisi from baan_dn_supps) dn"))
+        ->select(DB::raw("*"))
+        ->where("dn.no_dn", $no_dn);
+
+        if(strlen(Auth::user()->username) > 5) {
+          $lists->where("dn.kd_bpid", Auth::user()->kd_supp);
+        }
+
+        return Datatables::of($lists)
+        ->editColumn('qty_per_kanban', function($data){
+          return numberFormatter(0, 2)->format($data->qty_per_kanban);
+        })
+        ->filterColumn('qty_per_kanban', function ($query, $keyword) {
+          $query->whereRaw("trim(to_char(qty_per_kanban,'999999999999999999.99')) like ?", ["%$keyword%"]);
+        })
+        ->editColumn('qty_kanban', function($data){
+          return numberFormatter(0, 2)->format($data->qty_kanban);
+        })
+        ->filterColumn('qty_kanban', function ($query, $keyword) {
+          $query->whereRaw("trim(to_char(qty_kanban,'999999999999999999.99')) like ?", ["%$keyword%"]);
+        })
+        ->editColumn('qty_dn', function($data){
+          return numberFormatter(0, 2)->format($data->qty_dn);
+        })
+        ->filterColumn('qty_dn', function ($query, $keyword) {
+          $query->whereRaw("trim(to_char(qty_dn,'999999999999999999.99')) like ?", ["%$keyword%"]);
+        })
+        ->make(true);
+      } else {
+        return redirect('home');
+      }
+    } else {
+      return view('errors.403');
+    }
+  }
+
+  public function history(Request $request, $no_dn)
+  {
+    if(Auth::user()->can(['ppc-dnsupp-view','ppc-dnsupp-download'])) {
+      if ($request->ajax()) {
+        $no_dn = base64_decode($no_dn);
+
+        $lists = DB::table(DB::raw("baan_dn_supp_prints l, users u"))
+        ->select(DB::raw("u.username, u.name, l.action, l.keterangan, l.ip, l.print_tgl as tgl"))
+        ->whereRaw("l.print_pic = u.username")
+        ->where("l.no_dn", $no_dn);
+
+        return Datatables::of($lists)
+        ->addColumn('tgl', function($data){
+          return Carbon::parse($data->tgl)->format('d/m/Y H:i');
+        })
+        ->filterColumn('tgl', function ($query, $keyword) {
+          $query->whereRaw("to_char(l.print_tgl,'dd/mm/yyyy hh24:mi') like ?", ["%$keyword%"]);
+        })
+        ->make(true);
+      } else {
+        return redirect('home');
+      }
+    } else {
+      return view('errors.403');
+    }
+  }
+
+  /**
+   * Show the form for creating a new resource.
+   *
+   * @return \Illuminate\Http\Response
+   */
+  public function create()
+  {
+      //
+  }
+
+  /**
+   * Store a newly created resource in storage.
+   *
+   * @param  \Illuminate\Http\Request  $request
+   * @return \Illuminate\Http\Response
+   */
+  public function store(Request $request)
+  {
+      //
+  }
+
+  /**
+   * Display the specified resource.
+   *
+   * @param  int  $id
+   * @return \Illuminate\Http\Response
+   */
+  public function show($id)
+  {
+      //
+  }
+
+  /**
+   * Show the form for editing the specified resource.
+   *
+   * @param  int  $id
+   * @return \Illuminate\Http\Response
+   */
+  public function edit($id)
+  {
+      //
+  }
+
+  /**
+   * Update the specified resource in storage.
+   *
+   * @param  \Illuminate\Http\Request  $request
+   * @param  int  $id
+   * @return \Illuminate\Http\Response
+   */
+  public function update(Request $request, $id)
+  {
+      //
+  }
+
+  /**
+   * Remove the specified resource from storage.
+   *
+   * @param  int  $id
+   * @return \Illuminate\Http\Response
+   */
+  public function destroy($id)
+  {
+      //
+  }
+
+  public function revisi(Request $request) 
+  {
+    if ($request->ajax()) {
+      $data = $request->all();
+      $no_dn = trim($data['no_dn']) !== '' ? trim($data['no_dn']) : null;
+      $no_dn = base64_decode($no_dn);
+      $status = "OK";
+      $msg = "No. DN: ".$no_dn." Berhasil di-Revisi.";
+      $action_new = "";
+      if($no_dn != null) {
+        if(Auth::user()->can(['ppc-dnsupp-revisi'])) {
+
+          $baan_dn_supp_oracles = DB::connection('oracle-usrbaan')
+          ->table("baan_dn_supp")
+          ->where("no_dn", $no_dn);
+
+          $baan_dn_supp_postgre = DB::table("baan_dn_supps")
+          ->where("no_dn", $no_dn)
+          ->first();
+
+          if($baan_dn_supp_oracles->get()->count() < 1) {
+            $status = "NG";
+            $msg = "No. DN: ".$no_dn." Gagal di-Revisi. Data DN tidak ditemukan.";
+          } else if($baan_dn_supp_postgre == null) {
+            $status = "NG";
+            $msg = "Maaf, No. DN: ".$no_dn." tidak dapat di-Revisi karena belum pernah di-Sync ke Portal.";
+          } else {
+            $no_revisi_old = $baan_dn_supp_postgre->no_revisi;
+            $no_revisi = $no_revisi_old + 1;
+            $ket_revisi = trim($data['ket_revisi']) !== '' ? trim($data['ket_revisi']) : null;
+
+            DB::beginTransaction();
+            try {
+              DB::unprepared("insert into baan_dn_supp_rejects (no_dn, no_revisi, kd_bpid, tgl_order, tgl_kirim, no_cycle, no_po, jns_dn, item, dsca, seak, cean, kd_sat, qty_per_kanban, qty_kanban, qty_dn, creaby, no_pono, qty_re, no_re, no_sj, qty_blc, no_urut, st_close, kd_cwar, kd_seab, ket_revisi, pic_cetak, tgl_cetak) select no_dn, no_revisi, kd_bpid, tgl_order, tgl_kirim, no_cycle, no_po, jns_dn, item, dsca, seak, cean, kd_sat, qty_per_kanban, qty_kanban, qty_dn, creaby, no_pono, qty_re, no_re, no_sj, qty_blc, no_urut, st_close, kd_cwar, kd_seab, ket_revisi, pic_cetak, tgl_cetak from baan_dn_supps where no_dn = '$no_dn'");
+
+              DB::unprepared("delete from baan_dn_supps where no_dn = '$no_dn'");
+
+              foreach ($baan_dn_supp_oracles->get() as $oracle) {
+                $data_header = ['no_dn' => $oracle->no_dn, 'no_revisi' => $no_revisi, 'kd_bpid' => $oracle->kd_bpid, 'tgl_order' => $oracle->tgl_order, 'tgl_kirim' => $oracle->tgl_kirim, 'no_cycle' => $oracle->no_cycle, 'no_po' => $oracle->no_po, 'jns_dn' => $oracle->jns_dn, 'item' => $oracle->item, 'dsca' => $oracle->dsca, 'seak' => $oracle->seak, 'cean' => $oracle->cean, 'kd_sat' => $oracle->kd_sat, 'qty_per_kanban' => $oracle->qty_per_kanban, 'qty_kanban' => $oracle->qty_kanban, 'qty_dn' => $oracle->qty_dn, 'creaby' => $oracle->creaby, 'no_pono' => $oracle->no_pono, 'qty_re' => $oracle->qty_re, 'no_re' => $oracle->no_re, 'no_sj' => $oracle->no_sj, 'qty_blc' => $oracle->qty_blc, 'no_urut' => $oracle->no_urut, 'st_close' => $oracle->st_close, 'kd_cwar' => $oracle->kd_cwar, 'kd_seab' => $oracle->kd_seab, 'ket_revisi' => $ket_revisi, 'pic_cetak' => NULL, 'tgl_cetak' => NULL];
+
+                DB::table("baan_dn_supps")->insert($data_header);
+              }
+
+              //insert logs
+              $log_keterangan = "BaanDnSuppsController.revisi: ".$msg;
+              $log_ip = \Request::session()->get('client_ip');
+              $created_at = Carbon::now();
+              $updated_at = Carbon::now();
+              DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+              DB::commit();
+            } catch (Exception $ex) {
+              DB::rollback();
+              $status = "NG";
+              $msg = "No. DN: ".$no_dn." Gagal di-Revisi.";
+            }
+          }
+        } else {
+          $status = "NG";
+          $msg = "Maaf, Anda tidak memiliki akses untuk Revisi DN!";
+        }
+      } else {
+        $status = "NG";
+        $msg = "DN Gagal di-Revisi.";
+      }
+      return response()->json(['status' => $status, 'message' => $msg, 'action_new' => $action_new]);
+    } else {
+      return redirect('home');
+    }
+  }
+
+  public function print($no_dn, $status) 
+  { 
+    if(Auth::user()->can('ppc-dnsupp-download')) {
+
+      $no_dn = base64_decode($no_dn);
+      $status = base64_decode($status);
+      if($status === "DN") {
+        $baan_dn_supp = DB::table("baan_dn_supps")
+        ->where("no_dn", $no_dn)
+        ->first();
+
+        $valid = "F";
+        if ($baan_dn_supp != null) {
+          if ($baan_dn_supp->kd_bpid == Auth::user()->kd_supp) {
+            $valid = "T";
+          } else if(strlen(Auth::user()->username) == 5) {
+            $valid = "T";
+          }
+        } else {
+          return view('errors.404');
+        }
+
+        if($valid === "F") {
+          return view('errors.403');
+        } else {
+          DB::beginTransaction();
+          try {
+            $no_dn = $baan_dn_supp->no_dn;
+            $no_revisi = $baan_dn_supp->no_revisi;
+
+            $type = 'pdf';
+            $input = public_path(). DIRECTORY_SEPARATOR .'report'. DIRECTORY_SEPARATOR .'ppc'. DIRECTORY_SEPARATOR .'baan_dn_supps.jasper';
+            $input2 = public_path(). DIRECTORY_SEPARATOR .'report'. DIRECTORY_SEPARATOR .'ppc'. DIRECTORY_SEPARATOR .'baan_dn_supps_jasa.jasper';
+            $output = public_path(). DIRECTORY_SEPARATOR .'report'. DIRECTORY_SEPARATOR .'ppc'. DIRECTORY_SEPARATOR .base64_encode($no_dn);
+            $database = \Config::get('database.connections.postgres');
+
+            $path = public_path(). DIRECTORY_SEPARATOR .'report'. DIRECTORY_SEPARATOR .'barcode'. DIRECTORY_SEPARATOR . strtolower($no_dn). '.png';
+            //Cek barcode sudah ada atau belum
+            if (!file_exists($path)) {
+              DNS1D::getBarcodePNGPath($no_dn, "C39");
+            }
+
+            if(substr($baan_dn_supp->item,-3,1) === "S") {
+              $path2 = public_path().DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR.'report'.DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR.'barcode'.DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR;
+
+              $baan_dn_supps = DB::table("baan_dn_supps")
+              ->where("no_dn", $no_dn);
+
+              foreach ($baan_dn_supps->get() as $data) {
+                $barcode_pro = '12345'.$data->kd_seab.substr($data->item,-1).'54321';
+                $path_item = $path2 . strtolower($barcode_pro). '.png';
+                //Cek barcode sudah ada atau belum
+                if (!file_exists($path_item)) {
+                  DNS1D::getBarcodePNGPath($barcode_pro, "C39");
+                }
+              }
+
+              $jasper = new JasperPHP;
+              $jasper->process(
+                $input2,
+                $output,
+                array($type),
+                array('no_dn' => $no_dn, 'barcode' => $path, 'barcode2' => $path2),
+                $database,
+                'id_ID'
+              )->execute();
+            } else {
+              $jasper = new JasperPHP;
+              $jasper->process(
+                $input,
+                $output,
+                array($type),
+                array('no_dn' => $no_dn, 'barcode' => $path),
+                $database,
+                'id_ID'
+              )->execute();
+            }
+
+            //insert logs
+            $log_keterangan = "BaanDnSuppsController.print: ".$no_dn;
+            $log_ip = \Request::session()->get('client_ip');
+            $created_at = Carbon::now();
+            $updated_at = Carbon::now();
+            DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+            $action = "Print DN";
+            $keterangan = "Berhasil di-print";
+
+            if(strlen(Auth::user()->username) > 5) {
+              //update st_cetak
+              DB::table("baan_dn_supps")
+              ->where("no_dn", $no_dn)
+              ->update(["pic_cetak" => Auth::user()->username, "tgl_cetak" => $created_at]);
+            }
+
+            DB::table("baan_dn_supp_prints")->insert(['no_dn' => $no_dn, 'no_revisi' => $no_revisi, 'print_pic' => Auth::user()->username, 'print_tgl' => $created_at, 'action' => $action, 'keterangan' => $keterangan, 'ip' => $log_ip]);
+
+            DB::commit();
+
+            ob_end_clean();
+            ob_start();
+            if(strlen(Auth::user()->username) > 5) {
+              $headers = array(
+                'Content-Description: File Transfer',
+                'Content-Type: application/pdf',
+                'Content-Disposition: attachment; filename='.base64_encode($no_dn).$type,
+                'Content-Transfer-Encoding: binary',
+                'Expires: 0',
+                'Cache-Control: must-revalidate, post-check=0, pre-check=0',
+                'Pragma: public',
+                'Content-Length: ' . filesize($output.'.'.$type)
+                );
+              return response()->download($output.'.'.$type, str_replace('/', '', $no_dn).'.'.$type, $headers)->deleteFileAfterSend(true);
+            } else {
+              ob_end_clean();
+              ob_start();
+              $headers = array(
+                'Content-Description: File Transfer',
+                'Content-Type: application/pdf',
+                'Content-Disposition: attachment; filename='.base64_encode($no_dn).$type,
+                'Content-Transfer-Encoding: binary',
+                'Expires: 0',
+                'Cache-Control: must-revalidate, post-check=0, pre-check=0',
+                'Pragma: public',
+                'Content-Length: ' . filesize($output.'.'.$type)
+                );
+              return response()->file($output.'.'.$type, $headers)->deleteFileAfterSend(true);
+            }
+          } catch (Exception $ex) {
+            DB::rollback();
+            Session::flash("flash_notification", [
+              "level"=>"danger",
+              "message"=>"Print DN ".$baan_dn_supp->no_dn." gagal!"
+              ]);
+            return redirect()->route('baandnsupps.index');
+          }
+        }
+      } else if($status === "KANBAN") {
+        $baan_dn_supp = DB::table("baan_dn_supps")
+        ->where("no_dn", $no_dn)
+        ->first();
+
+        $valid = "F";
+        if ($baan_dn_supp != null) {
+          if ($baan_dn_supp->kd_bpid == Auth::user()->kd_supp) {
+            $valid = "T";
+          } else if(strlen(Auth::user()->username) == 5) {
+            $valid = "T";
+          }
+        } else {
+          return view('errors.404');
+        }
+
+        if($valid === "F") {
+          return view('errors.403');
+        } else {
+          DB::beginTransaction();
+          try {
+            $no_dn = $baan_dn_supp->no_dn;
+            $no_revisi = $baan_dn_supp->no_revisi;
+
+            $type = 'pdf';
+            $input = public_path(). DIRECTORY_SEPARATOR .'report'. DIRECTORY_SEPARATOR .'ppc'. DIRECTORY_SEPARATOR .'kanban.jasper';
+            $output = public_path(). DIRECTORY_SEPARATOR .'report'. DIRECTORY_SEPARATOR .'ppc'. DIRECTORY_SEPARATOR .base64_encode($no_dn);
+            $database = \Config::get('database.connections.postgres');
+
+            $SUBREPORT_DIR = public_path().DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR.'report'.DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR.'ppc'.DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR;
+            $path = public_path().DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR.'report'.DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR.'barcode'.DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR;
+
+            $baan_dn_supps = DB::table("baan_dn_supps")
+            ->where("no_dn", $no_dn);
+
+            foreach ($baan_dn_supps->get() as $data) {
+              $path_item = $path . strtolower($data->item). '.png';
+              //Cek barcode sudah ada atau belum
+              if (!file_exists($path_item)) {
+                DNS1D::getBarcodePNGPath($data->item, "C39");
+              }
+            }
+
+            $jasper = new JasperPHP;
+            $jasper->process(
+              $input,
+              $output,
+              array($type),
+              array('no_dn' => $no_dn, 'barcode' => $path, 'SUBREPORT_DIR' => $SUBREPORT_DIR),
+              $database,
+              'id_ID'
+            )->execute();
+
+            //insert logs
+            $log_keterangan = "BaanDnSuppsController.print: ".$no_dn;
+            $log_ip = \Request::session()->get('client_ip');
+            $created_at = Carbon::now();
+            $updated_at = Carbon::now();
+            DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+            $action = "Print KANBAN";
+            $keterangan = "Berhasil di-print";
+
+            DB::table("baan_dn_supp_prints")->insert(['no_dn' => $no_dn, 'no_revisi' => $no_revisi, 'print_pic' => Auth::user()->username, 'print_tgl' => $created_at, 'action' => $action, 'keterangan' => $keterangan, 'ip' => $log_ip]);
+
+            DB::commit();
+
+            ob_end_clean();
+            ob_start();
+            if(strlen(Auth::user()->username) > 5) {
+              $headers = array(
+                'Content-Description: File Transfer',
+                'Content-Type: application/pdf',
+                'Content-Disposition: attachment; filename='.base64_encode($no_dn).$type,
+                'Content-Transfer-Encoding: binary',
+                'Expires: 0',
+                'Cache-Control: must-revalidate, post-check=0, pre-check=0',
+                'Pragma: public',
+                'Content-Length: ' . filesize($output.'.'.$type)
+                );
+              return response()->download($output.'.'.$type, str_replace('/', '', $no_dn).'.'.$type, $headers)->deleteFileAfterSend(true);
+            } else {
+              ob_end_clean();
+              ob_start();
+              $headers = array(
+                'Content-Description: File Transfer',
+                'Content-Type: application/pdf',
+                'Content-Disposition: attachment; filename='.base64_encode($no_dn).$type,
+                'Content-Transfer-Encoding: binary',
+                'Expires: 0',
+                'Cache-Control: must-revalidate, post-check=0, pre-check=0',
+                'Pragma: public',
+                'Content-Length: ' . filesize($output.'.'.$type)
+                );
+              return response()->file($output.'.'.$type, $headers)->deleteFileAfterSend(true);
+            }
+          } catch (Exception $ex) {
+            DB::rollback();
+            Session::flash("flash_notification", [
+              "level"=>"danger",
+              "message"=>"Print KANBAN ".$baan_dn_supp->no_dn." gagal!"
+              ]);
+            return redirect()->route('baandnsupps.index');
+          }
+        }
+      } else {
+        return view('errors.403');
+      }
+    } else {
+      return view('errors.403');
+    }
+  }
+}

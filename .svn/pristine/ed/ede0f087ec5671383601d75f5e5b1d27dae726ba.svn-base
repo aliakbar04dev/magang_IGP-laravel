@@ -1,0 +1,441 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use DB;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\File;
+use App\User;
+
+class LalinsController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        //
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexksracc()
+    {
+        if(Auth::user()->can(['faco-lalin-ksr-acc', 'faco-lalin-ksr-acc-approve'])) {
+            return view('faco.lalin.indexksracc');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function dashboardksracc(Request $request)
+    {
+        if(Auth::user()->can(['faco-lalin-ksr-acc', 'faco-lalin-ksr-acc-approve'])) {
+            if ($request->ajax()) {
+
+                $list = DB::connection('oracle-usrbaan')
+                ->table("lalin_ksr_acc1")
+                ->selectRaw("no_lka, tgl_lka, ket_lka, dtcrea, creaby, dtmodi, modiby");
+
+                return Datatables::of($list)
+                ->editColumn('no_lka', function($data) {
+                    return '<a href="'.route('lalins.show', base64_encode($data->no_lka)).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $data->no_lka .'">'.$data->no_lka.'</a>';
+                })
+                ->editColumn('tgl_lka', function($data){
+                    return Carbon::parse($data->tgl_lka)->format('d/m/Y');
+                })
+                ->filterColumn('tgl_lka', function ($query, $keyword) {
+                    $query->whereRaw("to_char(tgl_lka,'dd/mm/yyyy') like ?", ["%$keyword%"]);
+                })
+                ->editColumn('creaby', function($data){
+                    if(!empty($data->creaby)) {
+                        $name = Auth::user()->namaByNpk($data->creaby);
+                        if(!empty($data->dtcrea)) {
+                            $tgl = Carbon::parse($data->dtcrea)->format('d/m/Y H:i');
+                            return $data->creaby.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->creaby.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('creaby', function ($query, $keyword) {
+                    $query->whereRaw("(creaby||' - '||(select nama from usrhrcorp.v_mas_karyawan v where v.npk = lalin_ksr_acc1.creaby limit 1)||nvl(' - '||to_char(dtcrea,'dd/mm/yyyy hh24:mi'),'')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('creaby', 'creaby $1')
+                ->editColumn('modiby', function($data){
+                    if(!empty($data->modiby)) {
+                        $name = Auth::user()->namaByNpk($data->modiby);
+                        if(!empty($data->dtmodi)) {
+                            $tgl = Carbon::parse($data->dtmodi)->format('d/m/Y H:i');
+                            return $data->modiby.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->modiby.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('modiby', function ($query, $keyword) {
+                    $query->whereRaw("(modiby||' - '||(select nama from usrhrcorp.v_mas_karyawan v where v.npk = lalin_ksr_acc1.modiby limit 1)||nvl(' - '||to_char(dtmodi,'dd/mm/yyyy hh24:mi'),'')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('modiby', 'modiby $1')
+                ->addColumn('action', function($data){
+                    return "";
+                })
+                ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function detailksracc(Request $request, $no_lka)
+    {
+        if(Auth::user()->can(['faco-lalin-ksr-acc', 'faco-lalin-ksr-acc-approve'])) {
+            if ($request->ajax()) {
+
+                $list = DB::connection('oracle-usrbaan')
+                ->table("vw_lalin_ksr_acc2")
+                ->selectRaw("no_lka, no_voucher, nm_bpid, tgl_jtempo, ccur, amnt, vath1, no_batch, creaby, nm_serah, dtcrea, pic_terima, nm_terima, tgl_terima, no_laf")
+                ->where("no_lka", base64_decode($no_lka));
+
+                return Datatables::of($list)
+                ->editColumn('amnt', function($data){
+                    return numberFormatter(0, 2)->format($data->amnt);
+                })
+                ->filterColumn('amnt', function ($query, $keyword) {
+                    $query->whereRaw("trim(to_char(amnt,'999999999999999999.99')) like ?", ["%$keyword%"]);
+                })
+                ->editColumn('vath1', function($data){
+                    return numberFormatter(0, 2)->format($data->vath1);
+                })
+                ->filterColumn('vath1', function ($query, $keyword) {
+                    $query->whereRaw("trim(to_char(vath1,'999999999999999999.99')) like ?", ["%$keyword%"]);
+                })
+                ->editColumn('no_batch', function($data){
+                    return numberFormatter(0, 2)->format($data->no_batch);
+                })
+                ->filterColumn('no_batch', function ($query, $keyword) {
+                    $query->whereRaw("trim(to_char(no_batch,'999999999999999999.99')) like ?", ["%$keyword%"]);
+                })
+                ->editColumn('creaby', function($data){
+                    if(!empty($data->creaby)) {
+                        $name = $data->nm_serah;
+                        if(!empty($data->dtcrea)) {
+                            $tgl = Carbon::parse($data->dtcrea)->format('d/m/Y H:i');
+                            return $data->creaby.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->creaby.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('creaby', function ($query, $keyword) {
+                    $query->whereRaw("(creaby||' - '||nm_serah||' - '||dtcrea) like ?", ["%$keyword%"]);
+                })
+                ->editColumn('pic_terima', function($data){
+                    if(!empty($data->pic_terima)) {
+                        $name = $data->nm_terima;
+                        if(!empty($data->tgl_terima)) {
+                            $tgl = Carbon::parse($data->tgl_terima)->format('d/m/Y H:i');
+                            return $data->pic_terima.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->pic_terima.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('pic_terima', function ($query, $keyword) {
+                    $query->whereRaw("(pic_terima||' - '||nm_terima||' - '||tgl_terima) like ?", ["%$keyword%"]);
+                })
+                ->editColumn('no_laf', function($data) {
+                    if(Auth::user()->can(['faco-lalin-acc-fin', 'faco-lalin-acc-fin-approve'])) {
+                        return '<a href="'.route('lalins.show', base64_encode($data->no_laf)).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $data->no_laf .'">'.$data->no_laf.'</a>';
+                    } else {
+                        return $data->no_laf;
+                    }
+                })
+                ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexaccfin()
+    {
+        if(Auth::user()->can(['faco-lalin-acc-fin', 'faco-lalin-acc-fin-approve'])) {
+            return view('faco.lalin.indexaccfin');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function dashboardaccfin(Request $request)
+    {
+        if(Auth::user()->can(['faco-lalin-acc-fin', 'faco-lalin-acc-fin-approve'])) {
+            if ($request->ajax()) {
+
+                $list = DB::connection('oracle-usrbaan')
+                ->table("lalin_acc_fin1")
+                ->selectRaw("no_laf, tgl_laf, ket_laf, dtcrea, creaby, dtmodi, modiby");
+
+                return Datatables::of($list)
+                ->editColumn('no_laf', function($data) {
+                    return '<a href="'.route('lalins.show', base64_encode($data->no_laf)).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $data->no_laf .'">'.$data->no_laf.'</a>';
+                })
+                ->editColumn('tgl_laf', function($data){
+                    return Carbon::parse($data->tgl_laf)->format('d/m/Y');
+                })
+                ->filterColumn('tgl_laf', function ($query, $keyword) {
+                    $query->whereRaw("to_char(tgl_laf,'dd/mm/yyyy') like ?", ["%$keyword%"]);
+                })
+                ->editColumn('creaby', function($data){
+                    if(!empty($data->creaby)) {
+                        $name = Auth::user()->namaByNpk($data->creaby);
+                        if(!empty($data->dtcrea)) {
+                            $tgl = Carbon::parse($data->dtcrea)->format('d/m/Y H:i');
+                            return $data->creaby.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->creaby.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('creaby', function ($query, $keyword) {
+                    $query->whereRaw("(creaby||' - '||(select nama from usrhrcorp.v_mas_karyawan v where v.npk = lalin_acc_fin1.creaby limit 1)||nvl(' - '||to_char(dtcrea,'dd/mm/yyyy hh24:mi'),'')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('creaby', 'creaby $1')
+                ->editColumn('modiby', function($data){
+                    if(!empty($data->modiby)) {
+                        $name = Auth::user()->namaByNpk($data->modiby);
+                        if(!empty($data->dtmodi)) {
+                            $tgl = Carbon::parse($data->dtmodi)->format('d/m/Y H:i');
+                            return $data->modiby.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->modiby.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('modiby', function ($query, $keyword) {
+                    $query->whereRaw("(modiby||' - '||(select nama from usrhrcorp.v_mas_karyawan v where v.npk = lalin_acc_fin1.modiby limit 1)||nvl(' - '||to_char(dtmodi,'dd/mm/yyyy hh24:mi'),'')) like ?", ["%$keyword%"]);
+                })
+                ->orderColumn('modiby', 'modiby $1')
+                ->addColumn('action', function($data){
+                    return "";
+                })
+                ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    public function detailaccfin(Request $request, $no_laf)
+    {
+        if(Auth::user()->can(['faco-lalin-acc-fin', 'faco-lalin-acc-fin-approve'])) {
+            if ($request->ajax()) {
+
+                $list = DB::connection('oracle-usrbaan')
+                ->table("vw_lalin_acc_fin2")
+                ->selectRaw("no_laf, no_voucher, nm_bpid, tgl_jtempo, ccur, amnt, vath1, creaby, nm_serah, dtcrea, pic_terima, nm_terima, tgl_terima, no_lka, no_lfk")
+                ->where("no_laf", base64_decode($no_laf));
+
+                return Datatables::of($list)
+                ->editColumn('amnt', function($data){
+                    return numberFormatter(0, 2)->format($data->amnt);
+                })
+                ->filterColumn('amnt', function ($query, $keyword) {
+                    $query->whereRaw("trim(to_char(amnt,'999999999999999999.99')) like ?", ["%$keyword%"]);
+                })
+                ->editColumn('vath1', function($data){
+                    return numberFormatter(0, 2)->format($data->vath1);
+                })
+                ->filterColumn('vath1', function ($query, $keyword) {
+                    $query->whereRaw("trim(to_char(vath1,'999999999999999999.99')) like ?", ["%$keyword%"]);
+                })
+                ->editColumn('creaby', function($data){
+                    if(!empty($data->creaby)) {
+                        $name = $data->nm_serah;
+                        if(!empty($data->dtcrea)) {
+                            $tgl = Carbon::parse($data->dtcrea)->format('d/m/Y H:i');
+                            return $data->creaby.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->creaby.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('creaby', function ($query, $keyword) {
+                    $query->whereRaw("(creaby||' - '||nm_serah||' - '||dtcrea) like ?", ["%$keyword%"]);
+                })
+                ->editColumn('pic_terima', function($data){
+                    if(!empty($data->pic_terima)) {
+                        $name = $data->nm_terima;
+                        if(!empty($data->tgl_terima)) {
+                            $tgl = Carbon::parse($data->tgl_terima)->format('d/m/Y H:i');
+                            return $data->pic_terima.' - '.$name.' - '.$tgl;
+                        } else {
+                            return $data->pic_terima.' - '.$name;
+                        }
+                    } else {
+                        return "";
+                    }
+                })
+                ->filterColumn('pic_terima', function ($query, $keyword) {
+                    $query->whereRaw("(pic_terima||' - '||nm_terima||' - '||tgl_terima) like ?", ["%$keyword%"]);
+                })
+                ->editColumn('no_lka', function($data) {
+                    if(Auth::user()->can(['faco-lalin-ksr-acc', 'faco-lalin-ksr-acc-approve'])) {
+                        return '<a href="'.route('lalins.show', base64_encode($data->no_lka)).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $data->no_lka .'">'.$data->no_lka.'</a>';
+                    } else {
+                        return $data->no_lka;
+                    }
+                })
+                ->editColumn('no_lfk', function($data) {
+                    if(Auth::user()->can(['faco-lalin-fin-ksr', 'faco-lalin-fin-ksr-approve'])) {
+                        return '<a href="'.route('lalins.show', base64_encode($data->no_lfk)).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $data->no_lfk .'">'.$data->no_lfk.'</a>';
+                    } else {
+                        return $data->no_lfk;
+                    }
+                })
+                ->make(true);
+            } else {
+                return redirect('home');
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        if (substr(base64_decode($id),0,3) === "LKA") {
+            if(Auth::user()->can(['faco-lalin-ksr-acc', 'faco-lalin-ksr-acc-approve'])) {
+                $data = DB::connection('oracle-usrbaan')
+                ->table("lalin_ksr_acc1")
+                ->selectRaw("no_lka, tgl_lka, ket_lka, dtcrea, creaby, dtmodi, modiby")
+                ->where("no_lka", base64_decode($id))
+                ->first();
+                if ($data != null) {
+                    return view('faco.lalin.showksracc', compact('data'));
+                } else {
+                    return view('errors.403');
+                }
+            } else {
+                return view('errors.403');
+            }
+        } else if (substr(base64_decode($id),0,3) === "LAF") {
+            if(Auth::user()->can(['faco-lalin-acc-fin', 'faco-lalin-acc-fin-approve'])) {
+                $data = DB::connection('oracle-usrbaan')
+                ->table("lalin_acc_fin1")
+                ->selectRaw("no_laf, tgl_laf, ket_laf, dtcrea, creaby, dtmodi, modiby")
+                ->where("no_laf", base64_decode($id))
+                ->first();
+                if ($data != null) {
+                    return view('faco.lalin.showaccfin', compact('data'));
+                } else {
+                    return view('errors.403');
+                }
+            } else {
+                return view('errors.403');
+            }
+        } else {
+            return view('errors.404');
+        }        
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        //
+    }
+}

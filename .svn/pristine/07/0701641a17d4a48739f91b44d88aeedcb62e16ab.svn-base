@@ -1,0 +1,83 @@
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Session;
+use DB;
+use Illuminate\Support\Facades\Auth;
+
+class IzinTelat extends Model
+{
+    protected $connection = 'pgsql-mobile';
+
+    public function masKaryawan($username)
+    {
+        $mas_karyawan = DB::connection('pgsql-mobile')
+        ->table("v_mas_karyawan")
+        ->select(DB::raw("npk, nama, kd_pt, desc_dep, desc_div, email, kode_dep, kode_div, npk_atasan, kode_gol, desc_jab, tgl_lahir, tgl_masuk_gkd, coalesce(substr(foto,18),'-.jpg') foto, npk_sec_head, npk_dep_head, npk_div_head, tgl_keluar, kode_site, kelamin"))
+        ->where("npk", "=", $username)
+        ->first();
+        return $mas_karyawan;
+    }
+
+    public function namaByNpk($npk)
+    {
+        $nama = DB::table("v_mas_karyawan")
+            ->select("nama")
+            ->where("npk", "=", $npk)
+            ->value("nama");
+
+        return $nama;
+    }
+
+    public function namaDivisi($kode_div)
+    {
+        $nama = DB::table("v_mas_karyawan")
+            ->select("desc_div")
+            ->where("kode_div", "=", $kode_div)
+            ->value("desc_div");
+        if($nama == null) {
+            $nama = "-";
+        }
+        return $nama;
+    }
+
+    public function namaDepartemen($kode_dep)
+    {
+        $nama = DB::table("v_mas_karyawan")
+            ->select("desc_dep")
+            ->where("kode_dep", "=", $kode_dep)
+            ->value("desc_dep");
+        if($nama == null) {
+            $nama = "-";
+        }
+        return $nama;
+    }
+
+    // App_IK6
+    public function listApprovalTelat($username)
+    {                                                                       
+        $lat_karyawan = DB::connection('pgsql-mobile')
+        ->table("itelatpengajuan")
+            ->select('itelatpengajuan.*','v_mas_karyawan.nama','v_mas_karyawan.desc_dep', 'v_mas_karyawan.desc_div')
+            ->join('v_mas_karyawan','itelatpengajuan.npk','=','v_mas_karyawan.npk')
+            ->where('itelatpengajuan.statuscetak', 'like', '0')
+            ->where('v_mas_karyawan.npk_sec_head', 'like', $username);
+    
+        return $lat_karyawan;
+    }
+
+    public function iTelatData($username)
+    {                                                                       
+        $itd_karyawan = DB::connection('pgsql-mobile')
+        ->table("itelatpengajuan")
+            ->select('itelatpengajuan.*','v_mas_karyawan.nama', 'v_mas_karyawan.npk_sec_head','v_mas_karyawan.desc_dep', 'v_mas_karyawan.desc_div')
+            ->join('v_mas_karyawan','itelatpengajuan.npk','=','v_mas_karyawan.npk')
+            ->where('itelatpengajuan.npk', 'like', $username);
+    
+        return $itd_karyawan;
+    }
+
+}

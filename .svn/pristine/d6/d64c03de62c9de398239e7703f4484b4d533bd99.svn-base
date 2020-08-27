@@ -1,0 +1,156 @@
+<div class="col-md-2" style="margin-bottom:8px;">
+    <label class="bubble">REFF NO.</label>
+    <input type="hidden" id="finding_no" value="{{ $get_detail->first()->finding_no }}">
+    <div class="bubble-content" id="finding_no">{{ $get_detail->first()->finding_no }}</div>
+</div>
+<div class="col-md-2" style="margin-bottom:8px;">
+    <label class="bubble">CLASS</label>
+    <div class="bubble-content" id="class">{{ $get_detail->first()->cat }}</div>
+</div>
+<div class="col-md-8" style="margin-bottom:8px;">
+        <label class="bubble">DIV / DEP / SIE</label>
+        <div class="bubble-content" id="class">{{ $get_detail->first()->desc_div }} / {{ $get_detail->first()->desc_dep }} / {{ $get_detail->first()->desc_sie }} </div>
+    </div>
+    <div class="col-md-6" style="margin-bottom:8px;">
+            <label class="bubble">AUDITOR</label>
+            <div class="bubble-content" id="class">@if ($get_audteetor->count() != 0) @foreach($get_audteetor as $auditor) @if($auditor->status == 'Auditor'){{$auditor->nama}}, @endif @endforeach @else Temuan audit belum dipilih! @endif</div>
+        </div>
+        <div class="col-md-6" style="margin-bottom:8px;">
+                <label class="bubble">AUDITEE</label>
+                <div class="bubble-content" id="class">@if ($get_audteetor->count() != 0) @foreach($get_audteetor as $auditee) @if($auditee->status == 'Auditee'){{$auditee->nama}}, @endif @endforeach @else Temuan audit belum dipilih! @endif </div>
+            </div>
+<div class="col-md-12" style="margin-bottom:8px;">
+    <label class="bubble">STATEMENT OF NC</label>
+    <div style="height:150px;overflow-y:scroll;" id="soc" class="bubble-content">{{ $get_detail->first()->statement_of_nc }}</div>
+</div>
+<div class="col-md-6" style="margin-bottom:8px;">
+    <label class="bubble">SCALE OF PROBLEM</label>
+    <div style="height:300px;overflow-y:scroll;" id="dop" class="bubble-content">{{ $get_detail->first()->detail_problem }}</div>
+</div>
+
+@foreach ($get_containment as $coa)
+    @if ($loop->iteration == 1)
+    <div id="containment_{{ $loop->iteration }}" class="col-md-6" style="margin-bottom:8px;">
+    @else
+    <div id="containment_{{ $loop->iteration }}" class="col-md-6" style="margin-bottom:8px;display:none;">
+    @endif
+    <div id="containment_container">
+        <label class="bubble">CONT. OF ACTION &nbsp; <small class="ind">{{ $loop->iteration }} of {{ $loop->count }}</small></label>
+        <button type="button" style="margin-left: 10px;margin-bottom: 4px;cursor: pointer;line-height: 1.3;" class="prev_coa btn btn-sm btn-primary" disabled="disabled"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></button>
+        <button type="button" style="margin-bottom: 4px;line-height: 1.3;cursor: pointer;" class="next_coa btn btn-sm btn-primary"><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></button>
+        <div style="height:300px;overflow-y:scroll;" class="bubble-content">
+            <div id="coa" name="coa">{{ $coa->containment_of_action }}</div>
+            <label>PIC</label>
+            <input class="form-control" id="pic" name="pic" value="{{ $coa->pic }}" readonly>
+            <label>DUE DATE</label>
+            <input class="form-control" id="due_date" name="due_date" value="{{ $coa->due_date }}" readonly>
+            <input type="hidden" id="pic{{ $coa->index }}" value="{{ $coa->index }}">
+            @if (Auth::user()->masKaryawan()->kode_div === "Q")
+            <label style="margin-top:5px;">STATUS BY QA</label><br>
+            <label class="switch">
+            @if ($coa->status_qa == 1)
+            <input autocomplete="off" class="statusqa1" type="checkbox" finding_no="{{ $coa->finding_no }}" index="{{ $coa->index }}" value="1" checked>
+            @else
+            <input autocomplete="off" class="statusqa1" type="checkbox" finding_no="{{ $coa->finding_no }}" index="{{ $coa->index }}" value="1">
+            @endif
+            <span class="slider round"></span>
+            </label>
+            @endif
+        </div>
+    </div>
+    </div>
+    @endforeach
+
+    @foreach ($get_detail as $detail)
+    @if ($detail->why_no = $loop->iteration)
+        @php
+            $total = $loop->count / 5;
+        @endphp
+    @endif
+        @for ($i = 0; $i < $total; $i++)
+        @php
+            $get = DB::table('ia_pica2')
+            ->where('pica_no', 'like', $detail->finding_no)
+            ->where('rca_no', '=', ($i + 1))
+            ->get();
+            $get_type = DB::table('ia_pica2')
+            ->select('rca_type')
+            ->where('pica_no', 'like', $detail->finding_no)
+            ->where('rca_no', '=', ($i + 1))
+            ->value('rca_type')
+        @endphp
+        <div class="col-md-12" style="margin-bottom:8px;">
+            <label style="font-size:20px;" class="bubble">{{$get_type}} <button class="detail btn btn-primary btn-sm" data-toggle="collapse" data-target="#collapse_{{$i}}">DETAIL</button></label>
+            <div id="collapse_{{$i}}" class="bubble-content collapse" id="finding_no">
+                    <table class="table-borderless" style="font-size: 13px;vertical-align: top;">
+            @foreach ($get as $getitem)
+            @if ($getitem->why_value <> null)
+            <tr>
+                <td width="20%;">
+                    <label>Why {{ $getitem->why_no }}</label>
+                    <textarea rows="1" style="font-size: 13px;background-color: white;height: 100px;" class="form-control" readonly>{{ $getitem->why_value }}</textarea>
+                </td>
+                <td>
+                    <label>Corrective Action</label>
+                    <textarea rows="1" style="font-size: 13px;background-color: white;height: 100px;" class="form-control" readonly>{{ $getitem->corrective_action }}</textarea>
+                    
+                </td>
+                <td>
+                    <label>PIC & DUE DATE</label><br>
+                    @if ($getitem->corrective_pic != null)
+                    {{ substr($getitem->corrective_pic, 8) }} <br> {{ $getitem->corrective_due_date }}
+                    @else
+                    -
+                    @endif
+                </td>      
+                <td>
+                    <label>Yokoten</label>
+                    <textarea rows="1" style="font-size: 13px;background-color: white;height: 100px;" class="form-control" readonly>{{ $getitem->yokoten_action }}</textarea>
+                </td>
+                <td>
+                    <label>PIC & DUE DATE</label><br>
+                    @if ($getitem->yokoten_pic != null)
+                    {{ substr($getitem->yokoten_pic, 8) }} <br> {{ $getitem->yokoten_due_date }}
+                    @else
+                    -
+                    @endif
+                </td>
+                @if (Auth::user()->masKaryawan()->kode_div === "Q")
+                <td>
+                <label style="margin-top: 0px;font-size: 13px;position: absolute;margin-left: -8px;">STATUS BY QA</label><br>
+                <label style="margin-top:4px;font-size:10px;position: absolute;margin-left: -8px;">CORRECTIVE ACT.</label><br>
+            <label class="switch">
+                @if ($getitem->corrective_action != null)
+                @if ($getitem->status_qa == 1)
+                <input autocomplete="off" class="statusqa2" type="checkbox" pica_id="{{ $getitem->id }}" rca="{{ $getitem->rca_no }}" why="{{ $getitem->why_no }}" value="1" checked>
+                @else
+                <input autocomplete="off" class="statusqa2" type="checkbox" pica_id="{{ $getitem->id }}" rca="{{ $getitem->rca_no }}" why="{{ $getitem->why_no }}" value="1">
+                @endif
+                @endif
+            <span class="slider round"></span>
+            <label style="margin-top:20px;font-size:10px;position: absolute;display: block ruby;margin-left: 8px;">YOKOTEN</label><br>
+            <label class="switch" style="margin-top: 35px;">
+            @if ($getitem->corrective_action != null)
+                @if ($getitem->yokoten_action != null)
+                    @if ($getitem->status_qa_yokoten == 1)
+                    <input autocomplete="off" class="statusqa3" type="checkbox" pica_id="{{ $getitem->id }}" rca="{{ $getitem->rca_no }}" why="{{ $getitem->why_no }}" value="1" checked>
+                    @else
+                    <input autocomplete="off" class="statusqa3" type="checkbox" pica_id="{{ $getitem->id }}" rca="{{ $getitem->rca_no }}" why="{{ $getitem->why_no }}" value="1">
+                    @endif
+                @endif
+            @endif
+            <span class="slider round"></span>
+            </label>
+                </td>
+                @endif
+            </tr>
+            @endif
+            @endforeach
+        </table>
+        </div>
+    </div>
+        @endfor
+    @break
+    @endforeach
+    <button type="button" class="btn btn-danger" style="float :right;margin-right:8px;" onclick="window.history.go(-1); return false;">KEMBALI</button>
+

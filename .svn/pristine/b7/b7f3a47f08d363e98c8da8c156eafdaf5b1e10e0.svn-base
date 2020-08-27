@@ -1,0 +1,27 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+
+class ProdLhpController extends Controller
+{
+	public function index()
+    {
+    	// $kd_plant = $param1;
+    	// $nm_plant = "IGP-".$param1;	
+    	// if($kd_plant === "A" || $kd_plant === "B") {
+     //        $nm_plant = "KIM-1".$kd_plant;
+     //        $lok_zona = " BLOCK ".$param2;
+     //    }
+        $title ="produksi";
+    	return view('prod.prodlhp.index', compact('title'));
+    }
+
+}

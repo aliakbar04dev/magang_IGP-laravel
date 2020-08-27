@@ -1,0 +1,10 @@
+<?php
+
+namespace App;
+
+use Laratrust\LaratrustPermission;
+
+class DummyClass extends LaratrustPermission
+{
+    //
+}

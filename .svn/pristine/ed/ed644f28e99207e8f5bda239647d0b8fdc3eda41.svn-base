@@ -1,0 +1,899 @@
+@extends('layouts.app')
+@section('content')
+<style>
+  .table-bordered>thead>tr>th, .table-bordered>tbody>tr>th, .table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td, .table-bordered>tbody>tr>td, .table-bordered>tfoot>tr>td {
+    border: 1px solid #000000;
+  }
+</style>
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <section class="content-header">
+    <h1>
+      PART INSPECTION STANDARD (PIS)
+      <small>Staff Approval</small>
+    </h1>
+    <ol class="breadcrumb">
+      <li><a href="{{ url('/home') }}"><i class="fa fa-dashboard"></i> Home</a></li>
+      <li><i class="fa fa-files-o"></i> Master</li>
+      <li><a href="{{ route('pistandards.index') }}"><i class="fa fa-files-o"></i> PART INSPECTION STANDARD (PIS)</a></li>
+      
+    </ol>
+  </section>
+
+  <!-- Main content -->
+  <section class="content">
+    @include('layouts._flash')
+    <div class="row">
+      <div class="col-md-12">
+        <div class="box box-primary">
+          <div class="box-header with-border" style="background-color: #FF6347">
+            <h3 class="box-title">DETAIL PART INSPECTION STANDARD (PIS). NO.{{ $pistandards->no_pis }}</h3>
+          </div>
+          <!-- /.box-header -->
+          <div class="box-body">
+            <table class="table table-striped" cellspacing="0" width="100%">
+              <tbody>
+               <tr>
+                <td style="width: 15%;"><b>LOGO SUPPLIER</b></td>
+                <td style="width: 1%;"><b>:</b></td>
+
+                @if($pistandards->logo_supplier!="")
+                <td><img src="/img/logospy/{{$pistandards->logo_supplier }}" width="10%"></td>
+                @else()
+                <td><img src="/images/no_image.png" width="90" border="0"></td>
+
+                @endif
+                
+              </tr>
+              <tr>
+                <td style="width: 5%;"><b>NO PIS</b></td>
+                <td style="width: 1%;"><b>:</b></td>
+                <td>{{ $pistandards->no_pis }}</td>
+              </tr>
+              <tr>
+                <td style="width: 9%;"><b>DATE ISSUE</b></td>
+                <td style="width: 1%;"><b>:</b></td>
+                <td>{{ $pistandards->date_issue }}</td>
+              </tr>
+              <tr>
+                <td style="width: 9%;"><b>REFF. NO:</b></td>
+                <td style="width: 1%;"><b>:</b></td>
+                <td>{{ $pistandards->reff_no }}</td>
+              </tr>
+              <tr>
+                <td style="width: 5%;"><b>MODEL</b></td>
+                <td style="width: 1%;"><b>:</b></td>
+                <td>{{ $pistandards->model }}</td>
+              </tr>
+              <tr>
+                <td style="width: 5%;"><b>NAMA SUPPLIER</b></td>
+                <td style="width: 1%;"><b>:</b></td>
+                <td>{{ $pistandards->nama_supplier }}</td>
+              </tr>
+              <tr>
+                <td style="width: 5%;"><b>MATERIAL</b></td>
+                <td style="width: 1%;"><b>:</b></td>
+                <td>{{ $pistandards->material }}</td>
+              </tr>
+              <tr>
+                <td style="width: 5%;"><b>WEIGHT</b></td>
+                <td style="width: 1%;"><b>:</b></td>
+                <td>{{ $pistandards->weight }}</td>
+              </tr>
+              <tr>
+                <td style="width: 5%;"><b>GENERAL TOL</b></td>
+                <td style="width: 1%;"><b>:</b></td>
+                <td>
+                  @foreach(json_decode($pistandards->general_tol) as $key => $value)
+                  {{$value}}&nbsp;&nbsp;
+                  @endforeach
+                </td>
+              </tr>
+              <tr>
+                <td style="width: 5%;"><b>PART NO</b></td>
+                <td style="width: 1%;"><b>:</b></td>
+                <td>{{ $pistandards->part_no }}</td>
+              </tr>
+              <tr>
+                <td style="width: 5%;"><b>PART NAME</b></td>
+                <td style="width: 1%;"><b>:</b></td>
+                <td>{{ $pistandards->part_name }}</td>
+              </tr>
+              <tr>
+                <td style="width: 15%;"><b>DEPARTEMEN SUPPLIER</b></td>
+                <td style="width: 1%;"><b>:</b></td>
+                <td>{{ $pistandards->supp_dept }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <br>
+        <br>
+
+
+
+        <div class="panel-heading" style="background-color:#FF6347">
+          <h3 class="panel-title"><b>I. MATERIAL PERFORMANCE</b></h3>
+        </div>
+        <div class="panel-heading" style="background-color:#F0F8FF">
+          <h3 class="panel-title"><b>A. CHEMICAL COMPOSITION</b></h3>
+        </div>
+        <div class="panel-body">
+          <div class="box-body col-md-12" style="padding:3px;overflow:auto;width:auto;height:200px;">
+            <!-- /.Table Input-->
+            <table class="table table-bordered" id="area1">
+              <body>
+                <tr>
+                  <th width="80px" rowspan="2" align="center"><br>NO</th>
+                  <th align="center" rowspan="2" width="220px" ><br><p align="center">INSPECTION ITEM</p></th>
+                  <th colspan="2"><p align="center">STANDARD VALUE</p></th>
+                  <th rowspan="2" align="midle-center" width="200px"><br><p align="center">I.INSTRUMENT</p></th>
+                  <th rowspan="2" width="60px"><p align="center"><br>RANK</p></th>
+                  <th colspan="2"><p align="center">SAMPLING PLAN</p></th>
+                  <th rowspan="2" width="150px"><p align="center"><br>REMARKS</p></th>
+                </tr>
+                <tr>
+                  <th width="150px"><p align="center">NOMINAL</p></th>
+                  <th width="150px"><p align="center">TOLERANCE</p></th>
+                  <th width="200px"><p align="center">IN PROSES</p></th>
+                  <th width="220px"><p align="center">AT DELIVERY</p></th>
+                </tr> 
+                @if (!empty($composition->no_pisigp))
+                @foreach ($entity->getLines($composition->no_pisigp)->get() as $model)
+                <tr id="line_field1_{{ $loop->iteration }}">
+                  <div class="box-body col-md-3">
+                    <div class="form-group"> 
+                      <td>{{ $model->no }}</td>
+                      <td>{{ $model->item }}</td>
+                      <td>{{ $model->nominal }}</td>
+                      <td>{{ $model->tolerance }}</td>
+                      <td>{{ $model->instrument }}</td>
+                      <td>{{ $model->rank }}</td>
+                      <td>{{ $model->proses }}</td>
+                      <td>{{ $model->delivery }} </td>
+                      <td>{{ $model->remarks }} </td>
+                    </div>
+                  </div>      
+                </tr>
+                @endforeach
+                @endif
+                <tr >
+                  <td  height="35px"></td>
+                  <td  height="35px"></td>
+                  <td  height="35px"></td>
+                  <td  height="35px"></td>
+                  <td  height="35px"></td>
+                  <td  height="35px"></td>
+                  <td  height="35px"></td>
+                  <td  height="35px"></td>
+                  <td  height="35px"></td>
+                </tr> 
+                 <tr >
+                  <td  height="35px"></td>
+                  <td  height="35px"></td>
+                  <td  height="35px"></td>
+                  <td  height="35px"></td>
+                  <td  height="35px"></td>
+                  <td  height="35px"></td>
+                  <td  height="35px"></td>
+                  <td  height="35px"></td>
+                  <td  height="35px"></td>
+                </tr> 
+              </body>
+            </table>
+          </div>
+        </div>
+        
+        <div class="panel-heading" style="background-color:#F0F8FF">
+          <h3 class="panel-title"><b>B.MECHANICAL PROPERTIES</b></h3>
+        </div>
+        <div class="panel-body">
+          <div class="box-body col-md-12" style="padding:3px;overflow:auto;width:auto;height:200px;">
+            <!-- /.Table Input-->
+            <table class="table table-bordered">
+              <body>
+               <tr>
+                <th width="80px" rowspan="2" align="center"><br>NO</th>
+                <th align="center" rowspan="2" width="220px" ><br><p align="center">INSPECTION ITEM</p></th>
+                <th colspan="2"><p align="center">STANDARD VALUE</p></th>
+                <th rowspan="2" align="midle-center" width="200px"><br><p align="center">I.INSTRUMENT</p></th>
+                <th rowspan="2" width="60px"><p align="center"><br>RANK</p></th>
+                <th colspan="2"><p align="center">SAMPLING PLAN</p></th>
+                <th rowspan="2" width="150px"><p align="center"><br>REMARKS</p></th>
+              </tr>
+              <tr>
+                <th width="150px"><p align="center">NOMINAL</p></th>
+                <th width="150px"><p align="center">TOLERANCE</p></th>
+                <th width="200px"><p align="center">IN PROSES</p></th>
+                <th width="220px"><p align="center">AT DELIVERY</p></th>
+              </tr>  
+              @if (!empty($properties->no_pisigp))
+              @foreach ($entity->getLines1($properties->no_pisigp)->get() as $model)
+              <tr>
+               <td>{{ $model->no }}</td>
+               <td>{{ $model->item }}</td>
+               <td>{{ $model->nominal }}</td>
+               <td>{{ $model->tolerance }}</td>
+               <td>{{ $model->instrument }}</td>
+               <td>{{ $model->rank }}</td>
+               <td>{{ $model->proses }}</td>
+               <td>{{ $model->delivery }} </td>
+               <td>{{ $model->remarks }}
+               </td>
+               @endforeach
+               @endif
+             </tr>
+             <tr >
+              <td  height="35px"></td>
+              <td  height="35px"></td>
+              <td  height="35px"></td>
+              <td  height="35px"></td>
+              <td  height="35px"></td>
+              <td  height="35px"></td>
+              <td  height="35px"></td>
+              <td  height="35px"></td>
+              <td  height="35px"></td>
+            </tr> 
+            <tr >
+              <td  height="35px"></td>
+              <td  height="35px"></td>
+              <td  height="35px"></td>
+              <td  height="35px"></td>
+              <td  height="35px"></td>
+              <td  height="35px"></td>
+              <td  height="35px"></td>
+              <td  height="35px"></td>
+              <td  height="35px"></td>
+            </tr> 
+          </body>
+        </table>
+      </div>
+    </div>
+
+
+    
+    <div class="panel-heading" style="background-color:#F0F8FF">
+      <h3 class="panel-title"><b>C. WELDING PERFORMANCE (IF ANY)</b></h3>
+    </div>
+    <div class="panel-body">
+      <div class="box-body col-md-12" style="padding:3px;overflow:auto;width:auto;height:200px;">
+        <!-- /.Table Input-->
+        <table class="table table-bordered">
+          <body>
+           <tr>
+            <th width="80px" rowspan="2" align="center"><br>NO</th>
+            <th align="center" rowspan="2" width="220px" ><br><p align="center">INSPECTION ITEM</p></th>
+            <th colspan="2"><p align="center">STANDARD VALUE</p></th>
+            <th rowspan="2" align="midle-center" width="200px"><br><p align="center">I.INSTRUMENT</p></th>
+            <th rowspan="2" width="60px"><p align="center"><br>RANK</p></th>
+            <th colspan="2"><p align="center">SAMPLING PLAN</p></th>
+            <th rowspan="2" width="150px"><p align="center"><br>REMARKS</p></th>
+          </tr>
+          <tr>
+            <th width="150px"><p align="center">NOMINAL</p></th>
+            <th width="150px"><p align="center">TOLERANCE</p></th>
+            <th width="200px"><p align="center">IN PROSES</p></th>
+            <th width="220px"><p align="center">AT DELIVERY</p></th>
+          </tr> 
+
+          @if (!empty($performances->no_pisigp))
+          @foreach ($entity->getLines2($performances->no_pisigp)->get() as $model)
+          <tr>
+           <td>{{ $model->no }}</td>
+           <td>{{ $model->item }}</td>
+           <td>{{ $model->nominal }}</td>
+           <td>{{ $model->tolerance }}</td>
+           <td>{{ $model->instrument }}</td>
+           <td>{{ $model->rank }}</td>
+           <td>{{ $model->proses }}</td>
+           <td>{{ $model->delivery }} </td>
+           <td>{{ $model->remarks }}
+           </td>
+           @endforeach
+           @endif
+         </tr>
+         <tr >
+          <td  height="35px"></td>
+          <td  height="35px"></td>
+          <td  height="35px"></td>
+          <td  height="35px"></td>
+          <td  height="35px"></td>
+          <td  height="35px"></td>
+          <td  height="35px"></td>
+          <td  height="35px"></td>
+          <td  height="35px"></td>
+        </tr> 
+        <tr >
+          <td  height="35px"></td>
+          <td  height="35px"></td>
+          <td  height="35px"></td>
+          <td  height="35px"></td>
+          <td  height="35px"></td>
+          <td  height="35px"></td>
+          <td  height="35px"></td>
+          <td  height="35px"></td>
+          <td  height="35px"></td>
+        </tr> 
+      </body>
+    </table>
+  </div>
+</div>
+
+
+
+<div class="panel-heading" style="background-color:#F0F8FF">
+  <h3 class="panel-title"><b>D. SURFACE TREATMENT (IF ANY)</b></h3>
+</div>
+<div class="panel-body">
+  <div class="box-body col-md-12" style="padding:3px;overflow:auto;width:auto;height:200px;">
+    <!-- /.Table Input-->
+    <table class="table table-bordered">
+      <body>
+       <tr>
+        <th width="80px" rowspan="2" align="center"><br>NO</th>
+        <th align="center" rowspan="2" width="220px" ><br><p align="center">INSPECTION ITEM</p></th>
+        <th colspan="2"><p align="center">STANDARD VALUE</p></th>
+        <th rowspan="2" align="midle-center" width="200px"><br><p align="center">I.INSTRUMENT</p></th>
+        <th rowspan="2" width="60px"><p align="center"><br>RANK</p></th>
+        <th colspan="2"><p align="center">SAMPLING PLAN</p></th>
+        <th rowspan="2" width="150px"><p align="center"><br>REMARKS</p></th>
+      </tr>
+      <tr>
+        <th width="150px"><p align="center">NOMINAL</p></th>
+        <th width="150px"><p align="center">TOLERANCE</p></th>
+        <th width="200px"><p align="center">IN PROSES</p></th>
+        <th width="220px"><p align="center">AT DELIVERY</p></th>
+      </tr> 
+      @if (!empty($treatements->no_pisigp))
+      @foreach ($entity->getLines3($treatements->no_pisigp)->get() as $model)
+      <tr>
+        <td>{{ $model->no }}</td>
+        <td>{{ $model->item }}</td>
+        <td>{{ $model->nominal }}</td>
+        <td>{{ $model->tolerance }}</td>
+        <td>{{ $model->instrument }}</td>
+        <td>{{ $model->rank }}</td>
+        <td>{{ $model->proses }}</td>
+        <td>{{ $model->delivery }} </td>
+        <td>{{ $model->remarks }}
+        </td>
+      </tr>
+      @endforeach
+      @endif
+      <tr >
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+      </tr> 
+      <tr >
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+      </tr> 
+    </body>
+  </table>
+</div>
+</div>
+
+
+
+<div class="panel-heading" style="background-color:#F0F8FF">
+  <h3 class="panel-title"><b>E. HEAT TREATMENT (IF ANY)</b></h3>
+</div>
+<div class="panel-body">
+  <div class="box-body col-md-12" style="padding:3px;overflow:auto;width:auto;height:200px;">
+    <!-- /.Table Input-->
+    <table class="table table-bordered">
+      <body>
+       <tr>
+        <th width="80px" rowspan="2" align="center"><br>NO</th>
+        <th align="center" rowspan="2" width="220px" ><br><p align="center">INSPECTION ITEM</p></th>
+        <th colspan="2"><p align="center">STANDARD VALUE</p></th>
+        <th rowspan="2" align="midle-center" width="200px"><br><p align="center">I.INSTRUMENT</p></th>
+        <th rowspan="2" width="60px"><p align="center"><br>RANK</p></th>
+        <th colspan="2"><p align="center">SAMPLING PLAN</p></th>
+        <th rowspan="2" width="150px"><p align="center"><br>REMARKS</p></th>
+      </tr>
+      <tr>
+        <th width="150px"><p align="center">NOMINAL</p></th>
+        <th width="150px"><p align="center">TOLERANCE</p></th>
+        <th width="200px"><p align="center">IN PROSES</p></th>
+        <th width="220px"><p align="center">AT DELIVERY</p></th>
+      </tr>
+      @if (!empty($htreatements->no_pisigp))
+      @foreach ($entity->getLines4($htreatements->no_pisigp)->get() as $model)  
+      <tr>
+        <td>{{ $model->no }}</td>
+        <td>{{ $model->item }}</td>
+        <td>{{ $model->nominal }}</td>
+        <td>{{ $model->tolerance }}</td>
+        <td>{{ $model->instrument }}</td>
+        <td>{{ $model->rank }}</td>
+        <td>{{ $model->proses }}</td>
+        <td>{{ $model->delivery }} </td>
+        <td>{{ $model->remarks }}
+        </td>
+      </tr>
+      @endforeach
+      @endif
+      <tr >
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+      </tr> 
+      <tr >
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+      </tr> 
+    </body>
+  </table>
+</div>
+</div>
+
+<br>
+<br>
+<div class="panel-heading" style="background-color:#FF6347">
+ <h3 class="panel-title"><b>II. APPEARENCE</b></h3>
+</div>
+<div class="panel-body">
+  <div class="box-body col-md-12" style="padding:3px;overflow:auto;width:auto;height:200px;">
+   <!-- /.Table Input-->
+   <table class="table table-bordered">
+    <body>
+     <tr>
+      <th width="80px" rowspan="2" align="center"><br>NO</th>
+      <th align="center" rowspan="2" width="220px" ><br><p align="center">INSPECTION ITEM</p></th>
+      <th colspan="2"><p align="center">STANDARD VALUE</p></th>
+      <th rowspan="2" align="midle-center" width="200px"><br><p align="center">I.INSTRUMENT</p></th>
+      <th rowspan="2" width="60px"><p align="center"><br>RANK</p></th>
+      <th colspan="2"><p align="center">SAMPLING PLAN</p></th>
+      <th rowspan="2" width="150px"><p align="center"><br>REMARKS</p></th>
+    </tr>
+    <tr>
+      <th width="150px"><p align="center">NOMINAL</p></th>
+      <th width="150px"><p align="center">TOLERANCE</p></th>
+      <th width="200px"><p align="center">IN PROSES</p></th>
+      <th width="220px"><p align="center">AT DELIVERY</p></th>
+    </tr> 
+    @if (!empty($appearences->no_pisigp))
+    @foreach ($entity->getLines5($appearences->no_pisigp)->get() as $model)
+    <tr>
+     <td>{{ $model->no }}</td>
+     <td>{{ $model->item }}</td>
+     <td>{{ $model->nominal }}</td>
+     <td>{{ $model->tolerance }}</td>
+     <td>{{ $model->instrument }}</td>
+     <td>{{ $model->rank }}</td>
+     <td>{{ $model->proses }}</td>
+     <td>{{ $model->delivery }} </td>
+     <td>{{ $model->remarks }}
+     </td>
+   </tr>
+   @endforeach
+   @endif
+    <tr >
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+      </tr> 
+      <tr >
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+      </tr> 
+</body>
+</table>
+</div>
+</div>
+<br>
+<br>
+<div >
+ <div class="panel-heading" style="background-color:#FF6347">
+  <h3 class="panel-title"><b>III. DIMENSION</b></h3>
+</div>
+<div class="panel-body">
+  <div class="box-body col-md-12" style="padding:3px;overflow:auto;width:auto;height:200px;">
+    <!-- /.Table Input-->
+    <table class="table table-bordered">
+      <body>
+       <tr>
+        <th width="80px" rowspan="2" align="center"><br>NO</th>
+        <th align="center" rowspan="2" width="220px" ><br><p align="center">INSPECTION ITEM</p></th>
+        <th colspan="2"><p align="center">STANDARD VALUE</p></th>
+        <th rowspan="2" align="midle-center" width="200px"><br><p align="center">I.INSTRUMENT</p></th>
+        <th rowspan="2" width="60px"><p align="center"><br>RANK</p></th>
+        <th colspan="2"><p align="center">SAMPLING PLAN</p></th>
+        <th rowspan="2" width="150px"><p align="center"><br>REMARKS</p></th>
+      </tr>
+      <tr>
+        <th width="150px"><p align="center">NOMINAL</p></th>
+        <th width="150px"><p align="center">TOLERANCE</p></th>
+        <th width="200px"><p align="center">IN PROSES</p></th>
+        <th width="220px"><p align="center">AT DELIVERY</p></th>
+      </tr> 
+      @if (!empty($dimentions->no_pisigp))
+      @foreach ($entity->getLines6($dimentions->no_pisigp)->get() as $model)
+      <tr>
+       <td>{{ $model->no }}</td>
+       <td>{{ $model->item }}</td>
+       <td>{{ $model->nominal }}</td>
+       <td>{{ $model->tolerance }}</td>
+       <td>{{ $model->instrument }}</td>
+       <td>{{ $model->rank }}</td>
+       <td>{{ $model->proses }}</td>
+       <td>{{ $model->delivery }} </td>
+       <td>{{ $model->remarks }}
+       </td>
+     </tr>
+     @endforeach
+     @endif
+      <tr >
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+      </tr> 
+      <tr >
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+      </tr> 
+  </body>
+</table>
+</div>
+</div>
+<br>
+<br>
+
+ <div class="panel-heading" style="background-color:#FF6347">
+  <h3 class="panel-title"><b>SKETCH DRAWING</b></h3>
+</div>
+<div class="panel-body">
+  <div class="box-body col-md-12" style="padding:3px;overflow:auto;width:auto;height:300px;">
+    <!-- /.Table Input-->
+    <table class="table table-bordered table-striped">
+      <body>
+        <tr>
+          <th width="300px"><font size="1px"><p align="center">SKETCH DRAWING  WITH BALON</p></font></th>
+          <th width="300px"><font size="1px"><p align="center">SKETCH SPECIAL MEASURING METHODE (IF ANY) </p></font></th>
+          <th width="300px"><font size="1px"><p align="center">SKETCH APPEARANCE / PRODUCTION CODE</p></font></th>
+        </tr> 
+        <tr>
+          <td><img src="/img/gambar1/{{$pistandards->sketchdrawing }}" width="100%" height="200px"></td>
+          <td><img src="/img/gambar2/{{$pistandards->sketchmmethode }}" width="100%" height="200px"></td>
+          <td><img src="/img/gambar3/{{$pistandards->sketchappearance }}" width="100%" height="200px"></td>
+        </tr>
+      </body>
+    </table>
+  </div>
+</div>
+
+
+<br>
+<br>
+<div >
+  <div class="panel-heading" style="background-color:#FF6347">
+    <h3 class="panel-title"><b>IV. SOC FREE</b></h3>
+  </div>
+  <div class="panel-body">
+    <div class="box-body col-md-12" style="padding:3px;overflow:auto;width:auto;height:200px;">
+      <!-- /.Table Input-->
+      <table class="table table-bordered" >
+        <body>
+          <tr>
+            <th width="80px" rowspan="2" align="center"><br>NO</th>
+            <th align="center" rowspan="2" width="220px" ><br><p align="center">INSPECTION ITEM</p></th>
+            <th colspan="2"><p align="center">STANDARD VALUE</p></th>
+            <th rowspan="2" align="midle-center" width="200px"><br><p align="center">I.INSTRUMENT</p></th>
+            <th rowspan="2" width="60px"><p align="center"><br>RANK</p></th>
+            <th colspan="2"><p align="center">SAMPLING PLAN</p></th>
+            <th rowspan="2" width="150px"><p align="center"><br>REMARKS</p></th>
+          </tr>
+          <tr>
+            <th width="150px"><p align="center">NOMINAL</p></th>
+            <th width="150px"><p align="center">TOLERANCE</p></th>
+            <th width="200px"><p align="center">IN PROSES</p></th>
+            <th width="220px"><p align="center">AT DELIVERY</p></th>
+          </tr>
+          @if (!empty($socfs->no_pisigp))
+          @foreach ($entity->getLines7($socfs->no_pisigp)->get() as $model) 
+          <tr>
+           <td>{{ $model->no }}</td>
+           <td>{{ $model->item }}</td>
+           <td>{{ $model->nominal }}</td>
+           <td>{{ $model->tolerance }}</td>
+           <td>{{ $model->instrument }}</td>
+           <td>{{ $model->rank }}</td>
+           <td>{{ $model->proses }}</td>
+           <td>{{ $model->delivery }} </td>
+           <td>{{ $model->remarks }}
+           </td>
+         </tr>
+         @endforeach
+         @endif
+         <tr >
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+      </tr> 
+      <tr >
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+        <td  height="35px"></td>
+      </tr> 
+      </body>
+    </table>
+  </div>
+</div>
+</div>
+
+<br>
+<br>
+
+<div >
+  <div class="panel-heading" style="background-color:#FF6347">
+    <h3 class="panel-title"><b>V. PART ROUTING</b></h3>
+  </div>
+  <div class="panel-body">
+    <div class="box-body col-md-12" style="padding:3px;overflow:auto;width:auto;height:200px;">
+      <!-- /.Table Input-->
+      <table class="table table-bordered ">
+        <body>
+          <tr>
+            <th width="100px"><p align="center">LEVEL</p></th>
+            <th width="300px"><p align="center">PART NAME</p></th>
+            <th width="300px"><p align="center">PART NO</p></th>
+            <th width="300px"><p align="center">PROSES</p></th>
+            <th width="300px"><p align="center">SUPPLIER</p></th>
+          </tr> 
+          @if (!empty($routs->no_pisigp))
+          @foreach ($entity->getLines8($routs->no_pisigp)->get() as $model)
+          <tr>
+            <td>{{ $model->level}}</td>
+            <td>{{ $model->part_no}}</td>
+            <td>{{ $model->part_name}}</td>
+            <td>{{ $model->proses}}</td>
+            <td>{{ $model->supplier}}</td>
+          </tr>
+          @endforeach
+          @endif
+          <tr >
+            <td  height="35px"></td>
+            <td  height="35px"></td>
+            <td  height="35px"></td>
+            <td  height="35px"></td>
+            <td  height="35px"></td>
+          </tr> 
+          <tr >
+            <td  height="35px"></td>
+            <td  height="35px"></td>
+            <td  height="35px"></td>
+            <td  height="35px"></td>
+            <td  height="35px"></td>
+          </tr> 
+        </body>
+      </table>
+    </div>
+  </div>
+</div>
+
+<br>
+<br>
+
+<div class="panel panel-default">
+  <div class="panel-heading" style="background-color:#FF6347">
+    <h3 class="panel-title"><b>REVISION COLUMN</b></h3>
+  </div>
+  <div class="panel-body">
+    <div class="box-body col-md-12" style="padding:3px;overflow:auto;width:auto;height:200px;">
+      <!-- /.Table Input-->
+      <table class="table table-bordered ">
+        <body>
+          <tr>
+            <th width="110px"><p align="center">REV NO</p></th>
+            <th width="300px"><p align="center">DATE</p></th>
+            <th width="300px"><p align="center">REVISION RECORD</p></th>
+            <th width="300px"><p align="center">PCR/ECI/ECRNO.</p></th>
+          </tr> 
+          @if (!empty($routs->no_pisigp))
+          @foreach ($entity->getLines9($routs->no_pisigp)->get() as $model)
+          <tr>
+            <td>{{ $model->rev_no}}</td>
+            <td>{{ $model->tanggal}}</td>
+            <td>{{ $model->rev_doc}}</td>
+            <td>{{ $model->ecrno}}</td>
+          </tr>
+          @endforeach
+          @endif
+          <tr>
+            <td  height="35px"></td>
+            <td  height="35px"></td>
+            <td  height="35px"></td>
+            <td  height="35px"></td>
+          </tr>
+          <tr>
+            <td  height="35px"></td>
+            <td  height="35px"></td>
+            <td  height="35px"></td>
+            <td  height="35px"></td>
+          </tr>
+        </body>
+      </table>
+    </div>
+  </div>
+
+<div >
+  <div class="panel-heading" style="background-color:#FF6347">
+    <h3 class="panel-title"><b>APPROVAL SUPPLIER</b></h3>
+  </div>
+  <div class="panel-body">
+    <div class="box-body col-md-12" style="padding:3px;overflow:auto;width:auto;height:200px;">
+      <!-- /.Table Input-->
+      <table class="table table-bordered table-striped">
+        <body>
+          <tr>
+            <th width="300px"><p align="center">STAFF</p></th>
+            <th width="300px"><p align="center">SUPERVISOR</p></th>
+            <th width="300px"><p align="center">DIVISION</p></th>
+          </tr> 
+          <tr>
+            <td><img src="/img/staffspy/{{$pistandards->staff_spy }}" width="100%" height="100px"></td>
+            <td><img src="/img/supervisorspy/{{$pistandards->supervisor_spy }}" width="100%" height="100px"></td>
+            <td><img src="/img/menejerspy/{{$pistandards->manager_spy }}" width="100%" height="100px"></td>
+          </tr>
+        </body>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+
+
+</div>
+
+
+<table class="table table-striped" cellspacing="0" width="100%">
+  <tbody>
+    <tr>
+      <td style="width: 15%;"><b>CATATAN STAFF</b></td>
+      <td style="width: 1%;"><b>:</b></td>
+      @if($pistandards->notestaff == "") 
+      <td><b class="btn-xs btn-info btn-icon-pg" action="disable">Tidak ada catatan</b></td>
+      @else()
+      <td>{{ $pistandards->notestaff }}</td>
+      @endif
+    </tr>
+    <tr>
+      <td style="width: 15%;"><b>TANDATANGAN STAFF</b></td>
+      <td style="width: 1%;"><b>:</b></td>
+      @if($pistandards->approve_staff!="")
+      <td><img src="/img/{{$pistandards->approve_staff }}" width="10%"></td>
+      @else()
+      <td><b class="btn-xs btn-info btn-icon-pg" action="disable">Belum ditandatangani staff</b></td>
+      @endif
+    </tr>
+    <tr>
+      <td style="width: 15%;"><b>CATATAN SECT</b></td>
+      <td style="width: 1%;"><b>:</b></td>
+      @if($pistandards->notesect == "") 
+      <td><b class="btn-xs btn-info btn-icon-pg" action="disable">Tidak ada catatan</b></td>
+      @else()
+      <td>{{ $pistandards->notesect }}</td>
+      @endif
+    </tr>
+    <tr>
+      <td style="width: 15%;"><b>TANDATANGAN SECT</b></td>
+      <td style="width: 1%;"><b>:</b></td>
+      @if($pistandards->approve_sect!="")
+      <td><img src="/img/{{$pistandards->approve_sect }}" width="10%"></td>
+      @else()
+      <td><b class="btn-xs btn-info btn-icon-pg" action="disable">Belum ditandatangani sect head</b></td>
+      @endif
+    </tr>
+    <tr>
+      <td style="width: 15%;"><b>CATATAN DEPT</b></td>
+      <td style="width: 1%;"><b>:</b></td>
+      @if($pistandards->notedept == "") 
+      <td><b class="btn-xs btn-info btn-icon-pg" action="disable">Tidak ada catatan</b></td>
+      @else()
+      <td>{{ $pistandards->notedept }}</td>
+      @endif
+    </tr>
+    <tr>
+      <td style="width: 15%;"><b>TANDATANGAN DEPT</b></td>
+      <td style="width: 1%;"><b>:</b></td>
+      @if($pistandards->approve_dept!="")
+      <td><img src="/img/{{$pistandards->approve_dept }}" width="10%"></td>
+      @else()
+      <td><b class="btn-xs btn-info btn-icon-pg" action="disable">Belum ditandatangani dept head</b></td>
+      @endif
+    </tr>
+  </tbody>
+</table>
+</div>
+<!-- /.box-body -->
+
+<!-- /.row -->
+<div class="box-footer">
+
+  <a class="btn btn-primary" href="{{route('pisstaff.edit', [base64_encode($pistandards->no_pisigp),base64_encode($pistandards->norev)])}}" data-toggle="tooltip" data-placement="top" title="Next To Upload Electronic Sign/Note ">Next</a>
+  &nbsp;&nbsp;
+
+  &nbsp;&nbsp;
+
+  <a class="btn btn-danger" href="{{ route('pisstaff.aprovalstaf') }}" data-toggle="tooltip" data-placement="top" title="Kembali ke Staff Approval" id="btn-cancel">Back</a>
+
+
+</div>
+</section>
+<!-- /.content -->
+</div>
+<!-- /.content-wrapper -->
+@endsection
+
+@section('scripts')
+
+</script>
+@endsection

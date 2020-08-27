@@ -1,0 +1,509 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\StoreProdParamHardensRequest;
+use App\Http\Requests\UpdateProdParamHardensRequest;
+// use App\EngtMdlLines;
+use Carbon\Carbon;
+use DB;
+use Exception;
+use App\User;
+use Illuminate\Support\Facades\Input;
+
+class ProdParamHardensController extends Controller
+{
+  /**
+   * Display a listing of the resource.
+   *
+   * @return \Illuminate\Http\Response
+   */
+  public function index()
+  {
+      //
+      if(Auth::user()->can(['prod-param-hardening'])) {
+          return view('prod.paramharden.index');
+      } else {
+          return view('errors.403');
+      }
+  }
+
+  public function dashboard(Request $request)
+  {
+      if(Auth::user()->can('prod-param-hardening')) {
+          if ($request->ajax()) {
+
+              $list = DB::table("qct_par_harden01")
+              ->select(DB::raw("*"));
+
+              return Datatables::of($list)
+              ->addColumn('action', function($prodparamharden){
+
+                $form_id = str_replace('/', '', $prodparamharden->no_doc);
+                $form_id = str_replace('-', '', $form_id);
+                $form_id = str_replace(' ', '', $form_id);
+
+                // penggunaan $form_id digunakan untuk yang IDnya mempunyai symbol 
+
+                return view('datatable._action', [
+                    'model' => $prodparamharden,
+                    'form_url' => route('prodparamharden.destroy', base64_encode($prodparamharden->no_doc)),
+                    'edit_url' => route('prodparamharden.edit', base64_encode($prodparamharden->no_doc)),
+                    'class' => 'form-inline js-ajax-delete',
+                    'form_id' => 'form-'.$form_id,
+                    'id_table' => 'tblMaster',
+                    'confirm_message' => 'Anda yakin menghapus model: ' . $prodparamharden->no_doc . '?'
+                ]);
+              })
+              ->make(true);
+          } else {
+              return redirect('home');
+          }
+      } else {
+          return view('errors.403');
+      }
+  }
+
+  public function getDataSqlServ(Request $request){
+
+      $data = DB::connection("sqlsrv")
+          ->table("Harden_3A")
+          ->select(DB::raw("Date_Time, (CAST(T_Q_LOWER_LIM as char(2)) + ' - ' + CAST(T_Q_UPPER_LIM as char(2))) qw_temp_std, Q_LIQUID_TANK qw_temp_act, (CAST(T_C_LOWER_LIM as char(2)) + ' - ' + CAST(T_C_UPPER_LIM as char(2))) cw_temp_std, C_WATER_TANK cw_temp_act, CYCLE_TIME ct_act, OVER_TIME ct_std, Q_FLOW qfr_act, Q_ALLOWENCE qfr_std, HOME_POSITION home_pos, START_POSITION start_pos, STROKE_UPPER_LIM upper_lim, STROKE_LOWER_LIM lower_lim"))
+          ->where("DANDORY", '=', 1)
+          ->orderBy("Date_Time")->get()->first();
+    $dataret['master'] = $data;
+
+      $data = DB::connection("sqlsrv")
+          ->table("view_detail_harden_3A")
+          ->select(DB::raw("*"))
+          ->get();
+    $dataret['detail'] = $data->toArray();
+
+    return json_encode($dataret);
+  }
+  /**
+   * Show the form for creating a new resource.
+   *
+   * @return \Illuminate\Http\Response
+   */
+  public function create()
+  {
+      //
+      if(Auth::user()->can('prod-param-hardening')) {
+          return view('prod.paramharden.create');
+      } else {
+          return view('errors.403');
+      }
+  }
+
+  /**
+   * Store a newly created resource in storage.
+   *
+   * @param  \Illuminate\Http\Request  $request
+   * @return \Illuminate\Http\Response
+   */
+  public function store(Request $request)
+  {
+    if(Auth::user()->can('prod-param-hardening')) {
+
+      //cara mengeluarkan functionnya.
+      $no_doc = DB::select('SELECT fno_par_harden(current_date) as no_doc');
+      $no_doc = json_encode($no_doc);
+      $no_doc = json_decode($no_doc, true);
+      $no_doc = $no_doc[0]["no_doc"];
+      // echo($no_doc);
+      // die();
+
+      $data = $request->all();
+      $mesin = trim($data['mesin']) !== '' ? trim($data['mesin']) : null;
+      $partno = trim($data['partno']) !== '' ? trim($data['partno']) : null;
+      $tanggal = trim($data['tanggal']) !== '' ? trim($data['tanggal']) : null;
+      $shift = trim($data['shift']) !== '' ? trim($data['shift']) : null;
+      $coil_rh = trim($data['coil_rh']) !== '' ? trim($data['coil_rh']) : null;
+      $coil_lh = trim($data['coil_lh']) !== '' ? trim($data['coil_lh']) : null;
+      $qty = trim($data['qty']) !== '' ? trim($data['qty']) : null;
+      $posisi = trim($data['posisi']) !== '' ? trim($data['posisi']) : null;
+      $qw_pressure_act = trim($data['qw_pressure_act']) !== '' ? trim($data['qw_pressure_act']) : null;
+      $home_pos = trim($data['home_pos']) !== '' ? trim($data['home_pos']) : null;
+      $qw_temp_std = trim($data['qw_temp_std']) !== '' ? trim($data['qw_temp_std']) : null;
+      $qw_temp_act = trim($data['qw_temp_act']) !== '' ? trim($data['qw_temp_act']) : null;
+      $start_pos = trim($data['start_pos']) !== '' ? trim($data['start_pos']) : null;
+      $cw_temp_std = trim($data['cw_temp_std']) !== '' ? trim($data['cw_temp_std']) : null;
+      $cw_temp_act = trim($data['cw_temp_act']) !== '' ? trim($data['cw_temp_act']) : null;
+      $cw_pressure_act = trim($data['cw_pressure_act']) !== '' ? trim($data['cw_pressure_act']) : null;
+      $upper_lim = trim($data['upper_lim']) !== '' ? trim($data['upper_lim']) : null;
+      $lower_lim = trim($data['lower_lim']) !== '' ? trim($data['lower_lim']) : null;
+      $coil_gap = trim($data['coil_gap']) !== '' ? trim($data['coil_gap']) : null;
+      $ct_std = trim($data['ct_std']) !== '' ? trim($data['ct_std']) : null;
+      $ct_act = trim($data['ct_act']) !== '' ? trim($data['ct_act']) : null;
+      $qfr_std = trim($data['qfr_std']) !== '' ? trim($data['qfr_std']) : null;
+      $qfr_act = trim($data['qfr_act']) !== '' ? trim($data['qfr_act']) : null;
+      $qfl_std = trim($data['qfl_std']) !== '' ? trim($data['qfl_std']) : null;
+      $qfl_act = trim($data['qfl_act']) !== '' ? trim($data['qfl_act']) : null;
+      $consentration_act = trim($data['consentration_act']) !== '' ? trim($data['consentration_act']) : null;
+      $UpdatedData = trim($data['UpdatedData']) !== '' ? trim($data['UpdatedData']) : null;
+
+
+      $creaby = Auth::user()->username;
+      $dtcrea = Carbon::now();
+
+      DB::connection("pgsql")->beginTransaction();
+      try {
+
+        DB::table(DB::raw("qct_par_harden01"))
+        ->insert(['no_doc' => $no_doc, 'mesin' => $mesin, 'partno' => $partno, 'tanggal' => $tanggal, 'shift' => $shift, 'coil_lh' => $coil_lh, 'coil_rh' => $coil_rh, 'qty' => $qty, 'posisi' => $posisi, 'qw_temp_std' => $qw_temp_std, 'qw_temp_act' => $qw_temp_act, 'qw_pressure_act' => $qw_pressure_act, 'cw_temp_std' => $cw_temp_std, 'cw_temp_act' => $cw_temp_act, 'cw_pressure_act' => $cw_pressure_act, 'ct_std' => $ct_std, 'ct_act' => $ct_act, 'qfr_std' => $qfr_std, 'qfr_act' => $qfr_act, 'qfl_std' => $qfl_std, 'qfl_act' => $qfl_act, 'consentration_act' => $consentration_act, 'home_pos' => $home_pos, 'start_pos' => $start_pos, 'lower_lim' => $lower_lim, 'upper_lim' => $upper_lim, 'coil_gap' => $coil_gap]);
+
+        if ($UpdatedData != '' ){
+
+          for ($i = 0; $i < 14; $i++) {
+
+            $timer_std = trim($data['timer_std_'.$i]) !== '' ? trim($data['timer_std_'.$i]) : '';
+            $timer_act = trim($data['timer_act_'.$i]) !== '' ? trim($data['timer_act_'.$i]) : '';
+            $pos = trim($data['pos_'.$i]) !== '' ? trim($data['pos_'.$i]) : '';
+            $speed_std = trim($data['speed_std_'.$i]) !== '' ? trim($data['speed_std_'.$i]) : '';
+            $speed_act = trim($data['speed_act_'.$i]) !== '' ? trim($data['speed_act_'.$i]) : '';
+            $power_std = trim($data['power_std_'.$i]) !== '' ? trim($data['power_std_'.$i]) : '';
+            $power_act = trim($data['power_act_'.$i]) !== '' ? trim($data['power_act_'.$i]) : '';
+
+            DB::table(DB::raw("qct_par_harden02"))
+            ->insert(['no_doc' => $no_doc, 'no_seq' => $i, 'timer_std' => $timer_std, 'timer_act' => $timer_act, 'pos' => $pos, 'speed_std' => $speed_std, 'speed_act' => $speed_act, 'power_std' => $power_std, 'power_act' => $power_act]);
+
+          }
+
+          DB::connection("sqlsrv")
+          ->table("Harden_3A")
+          ->where("DANDORY", "1")
+          ->update(['DANDORY' => "2"]);
+
+        }
+
+        //insert logs
+        $log_keterangan = "ProdParamHardensController.store: Create qct_par_harden01 Berhasil. ".$no_doc;
+        $log_ip = \Request::session()->get('client_ip');
+        $created_at = Carbon::now();
+        $updated_at = Carbon::now();
+        DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+        DB::connection("pgsql")->commit();
+        Session::flash("flash_notification", [
+            "level"=>"success",
+            "message"=>"Data berhasil disimpan dengan No Doc: ".$no_doc]);
+
+        return redirect()->route('prodparamharden.edit', base64_encode($no_doc));
+            
+      } catch (Exception $ex) {
+          DB::connection("pgsql")->rollback();
+          Session::flash("flash_notification", [
+              "level"=>"danger",
+              "message"=>"Data gagal disimpan!".$ex
+          ]);
+          return redirect()->back();
+      }
+    } else {
+      return view('errors.403');
+    }
+  }
+
+  /**
+   * Display the specified resource.
+   *
+   * @param  int  $id
+   * @return \Illuminate\Http\Response
+   */
+  public function show($id)
+  {
+      //
+  }
+
+  /**
+   * Show the form for editing the specified resource.
+   *
+   * @param  int  $id
+   * @return \Illuminate\Http\Response
+   */
+  public function edit($id)
+  {
+      //
+      if(Auth::user()->can(['prod-param-hardening'])) {
+          $id = base64_decode($id);
+          $qct_par_harden01 = DB::table('qct_par_harden01')
+          ->select("*")
+          ->where(DB::raw("no_doc"), '=', $id)
+          ->get()
+          ->first();
+
+          
+          $qct_par_harden02 = DB::table('qct_par_harden02')
+          ->select("*")
+          ->where(DB::raw("no_doc"), '=', $id)
+          ->orderBy("no_seq", "asc")
+          ->get();
+
+          return view('prod.paramharden.edit', compact('qct_par_harden01', 'qct_par_harden02'));
+      } else {
+          return view('errors.403');
+      }
+  }
+
+  /**
+   * Update the specified resource in storage.
+   *
+   * @param  \Illuminate\Http\Request  $request
+   * @param  int  $id
+   * @return \Illuminate\Http\Response
+   */
+  public function update(Request $request, $id)
+  {
+    if(Auth::user()->can('prod-param-hardening')) {
+
+      $data = $request->all();
+      $no_doc = trim($data['no_doc']) !== '' ? trim($data['no_doc']) : null;
+      $mesin = trim($data['mesin']) !== '' ? trim($data['mesin']) : null;
+      $partno = trim($data['partno']) !== '' ? trim($data['partno']) : null;
+      $tanggal = trim($data['tanggal']) !== '' ? trim($data['tanggal']) : null;
+      $shift = trim($data['shift']) !== '' ? trim($data['shift']) : null;
+      $coil_rh = trim($data['coil_rh']) !== '' ? trim($data['coil_rh']) : null;
+      $coil_lh = trim($data['coil_lh']) !== '' ? trim($data['coil_lh']) : null;
+      $qty = trim($data['qty']) !== '' ? trim($data['qty']) : null;
+      $posisi = trim($data['posisi']) !== '' ? trim($data['posisi']) : null;
+      $qw_pressure_act = trim($data['qw_pressure_act']) !== '' ? trim($data['qw_pressure_act']) : null;
+      $home_pos = trim($data['home_pos']) !== '' ? trim($data['home_pos']) : null;
+      $qw_temp_std = trim($data['qw_temp_std']) !== '' ? trim($data['qw_temp_std']) : null;
+      $qw_temp_act = trim($data['qw_temp_act']) !== '' ? trim($data['qw_temp_act']) : null;
+      $start_pos = trim($data['start_pos']) !== '' ? trim($data['start_pos']) : null;
+      $cw_temp_std = trim($data['cw_temp_std']) !== '' ? trim($data['cw_temp_std']) : null;
+      $cw_temp_act = trim($data['cw_temp_act']) !== '' ? trim($data['cw_temp_act']) : null;
+      $cw_pressure_act = trim($data['cw_pressure_act']) !== '' ? trim($data['cw_pressure_act']) : null;
+      $upper_lim = trim($data['upper_lim']) !== '' ? trim($data['upper_lim']) : null;
+      $lower_lim = trim($data['lower_lim']) !== '' ? trim($data['lower_lim']) : null;
+      $coil_gap = trim($data['coil_gap']) !== '' ? trim($data['coil_gap']) : null;
+      $ct_std = trim($data['ct_std']) !== '' ? trim($data['ct_std']) : null;
+      $ct_act = trim($data['ct_act']) !== '' ? trim($data['ct_act']) : null;
+      $qfr_std = trim($data['qfr_std']) !== '' ? trim($data['qfr_std']) : null;
+      $qfr_act = trim($data['qfr_act']) !== '' ? trim($data['qfr_act']) : null;
+      $qfl_std = trim($data['qfl_std']) !== '' ? trim($data['qfl_std']) : null;
+      $qfl_act = trim($data['qfl_act']) !== '' ? trim($data['qfl_act']) : null;
+      $consentration_act = trim($data['consentration_act']) !== '' ? trim($data['consentration_act']) : null;
+      $UpdatedData = trim($data['UpdatedData']) !== '' ? trim($data['UpdatedData']) : null;
+
+
+      $creaby = Auth::user()->username;
+      $dtcrea = Carbon::now();
+
+      DB::connection("pgsql")->beginTransaction();
+      try {
+
+        DB::table(DB::raw("qct_par_harden01"))
+        ->where("no_doc", $no_doc)
+        ->update(['mesin' => $mesin, 'partno' => $partno, 'tanggal' => $tanggal, 'shift' => $shift, 'coil_lh' => $coil_lh, 'coil_rh' => $coil_rh, 'qty' => $qty, 'posisi' => $posisi, 'qw_temp_std' => $qw_temp_std, 'qw_temp_act' => $qw_temp_act, 'qw_pressure_act' => $qw_pressure_act, 'cw_temp_std' => $cw_temp_std, 'cw_temp_act' => $cw_temp_act, 'cw_pressure_act' => $cw_pressure_act, 'ct_std' => $ct_std, 'ct_act' => $ct_act, 'qfr_std' => $qfr_std, 'qfr_act' => $qfr_act, 'qfl_std' => $qfl_std, 'qfl_act' => $qfl_act, 'consentration_act' => $consentration_act, 'home_pos' => $home_pos, 'start_pos' => $start_pos, 'lower_lim' => $lower_lim, 'upper_lim' => $upper_lim, 'coil_gap' => $coil_gap]);
+
+        if ($UpdatedData != '' ){
+
+          for ($i = 0; $i < 14; $i++) {
+
+            $timer_std = trim($data['timer_std_'.$i]) !== '' ? trim($data['timer_std_'.$i]) : '';
+            $timer_act = trim($data['timer_act_'.$i]) !== '' ? trim($data['timer_act_'.$i]) : '';
+            $pos = trim($data['pos_'.$i]) !== '' ? trim($data['pos_'.$i]) : '';
+            $speed_std = trim($data['speed_std_'.$i]) !== '' ? trim($data['speed_std_'.$i]) : '';
+            $speed_act = trim($data['speed_act_'.$i]) !== '' ? trim($data['speed_act_'.$i]) : '';
+            $power_std = trim($data['power_std_'.$i]) !== '' ? trim($data['power_std_'.$i]) : '';
+            $power_act = trim($data['power_act_'.$i]) !== '' ? trim($data['power_act_'.$i]) : '';
+
+            DB::table(DB::raw("qct_par_harden02"))
+            ->insert(['no_doc' => $no_doc, 'no_seq' => $i, 'timer_std' => $timer_std, 'timer_act' => $timer_act, 'pos' => $pos, 'speed_std' => $speed_std, 'speed_act' => $speed_act, 'power_std' => $power_std, 'power_act' => $power_act]);
+
+          }
+
+          DB::connection("sqlsrv")
+          ->table("Harden_3A")
+          ->where("DANDORY", "1")
+          ->update(['DANDORY' => "2"]);
+
+        }
+
+        //insert logs
+        $log_keterangan = "ProdParamHardensController.store: Update qct_par_harden01 Berhasil. ".$no_doc;
+        $log_ip = \Request::session()->get('client_ip');
+        $created_at = Carbon::now();
+        $updated_at = Carbon::now();
+        DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+        DB::connection("pgsql")->commit();
+        Session::flash("flash_notification", [
+            "level"=>"success",
+            "message"=>"Data berhasil disimpan dengan No Doc: ".$no_doc]);
+
+        return redirect()->route('prodparamharden.edit', base64_encode($no_doc));
+            
+      } catch (Exception $ex) {
+          DB::connection("pgsql")->rollback();
+          Session::flash("flash_notification", [
+              "level"=>"danger",
+              "message"=>"Data gagal disimpan!".$ex
+          ]);
+          return redirect()->back();
+      }
+    } else {
+      return view('errors.403');
+    }
+  }
+
+  /**
+   * Remove the specified resource from storage.
+   *
+   * @param  int  $id
+   * @return \Illuminate\Http\Response
+   */
+  public function destroy(Request $request, $id)
+  { 
+    $no_doc = base64_decode($id);
+    $form_id = str_replace('/', '', $no_doc);
+    $form_id = str_replace('-', '', $form_id);
+    $form_id = str_replace(' ', '', $form_id);
+          
+    if(Auth::user()->can(['prod-param-hardening'])) {
+      try {
+        DB::connection("pgsql")->beginTransaction();
+        if ($request->ajax()) {
+          $status = 'OK';
+          $msg = 'no_doc '.$no_doc.' berhasil dihapus.';
+
+          DB::table(DB::raw("qct_par_harden01"))
+          ->where("no_doc", $no_doc)
+          ->delete();
+
+          DB::table(DB::raw("qct_par_harden02"))
+          ->where("no_doc", $no_doc)
+          ->delete();
+
+          //insert logs
+          $log_keterangan = "ProdParamHardensController.destroy: Delete No Doc Berhasil. ".$no_doc;
+          $log_ip = \Request::session()->get('client_ip');
+          $created_at = Carbon::now();
+          $updated_at = Carbon::now();
+          DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+          DB::connection("pgsql")->commit();
+
+          return response()->json(['id' => $form_id, 'status' => $status, 'message' => $msg]);
+
+        } else {
+
+          DB::table(DB::raw("qct_par_harden01"))
+          ->where("no_doc", $no_doc)
+          ->delete();
+
+          DB::table(DB::raw("qct_par_harden02"))
+          ->where("no_doc", $no_doc)
+          ->delete();
+
+          //insert logs
+          $log_keterangan = "ProdParamHardensController.destroy: Delete No Doc Berhasil. ".$no_doc;
+          $log_ip = \Request::session()->get('client_ip');
+          $created_at = Carbon::now();
+          $updated_at = Carbon::now();
+          DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+          DB::connection("pgsql")->commit();
+
+          Session::flash("flash_notification", [
+              "level"=>"success",
+              "message"=>"no_doc: ".$no_doc." berhasil dihapus."
+          ]);
+
+          return redirect()->route('prodparamharden.index');
+        }
+      } catch (ModelNotFoundException $ex) {
+        DB::connection("pgsql")->rollback();
+        if ($request->ajax()) {
+            return response()->json(['id' => $form_id, 'status' => 'NG', 'message' => 'Data gagal dihapus! Line tidak ditemukan.']);
+        } else {
+            Session::flash("flash_notification", [
+                "level"=>"danger",
+                "message"=>"Line tidak ditemukan."
+            ]);
+            return redirect()->route('prodparamharden.index');
+        }
+      } catch (Exception $ex) {
+        DB::connection("pgsql")->rollback();
+        if ($request->ajax()) {
+          $status = 'NG';
+          $msg = "Line gagal dihapus. $ex";
+          return response()->json(['id' => $form_id, 'status' => $status, 'message' => $msg]);
+        } else {
+          Session::flash("flash_notification", [
+              "level"=>"danger",
+              "message"=>"Line gagal dihapus. $ex"
+          ]);
+          return redirect()->route('prodparamharden.index');
+        }
+      } 
+    } else {
+      if ($request->ajax()) {
+          return response()->json(['id' => base64_decode("0"), 'status' => 'NG', 'message' => 'Maaf, Anda tidak berhak menghapus data ini.']);
+      } else {
+          Session::flash("flash_notification", [
+              "level"=>"danger",
+              "message"=>"Maaf, Anda tidak berhak menghapus data ini."
+          ]);
+          return redirect()->route('prodparamharden.index');
+      }
+    }
+  }
+
+  public function deletenodoc($id)
+  {
+    $no_doc = base64_decode($id);
+          
+    if(Auth::user()->can(['prod-param-hardening'])) {
+      try {
+        DB::connection("pgsql")->beginTransaction();
+
+        DB::table(DB::raw("qct_par_harden01"))
+        ->where("no_doc", $no_doc)
+        ->delete();
+
+        DB::table(DB::raw("qct_par_harden02"))
+        ->where("no_doc", $no_doc)
+        ->delete();
+
+        //insert logs
+        $log_keterangan = "ProdParamHardensController.destroy: Delete No Doc Berhasil. ".$no_doc;
+        $log_ip = \Request::session()->get('client_ip');
+        $created_at = Carbon::now();
+        $updated_at = Carbon::now();
+        DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+        DB::connection("pgsql")->commit();
+
+        Session::flash("flash_notification", [
+            "level"=>"success",
+            "message"=>"no_doc: ".$no_doc." berhasil dihapus."
+        ]);
+
+        return redirect()->route('prodparamharden.index');
+
+      } catch (Exception $ex) {
+        DB::connection("pgsql")->rollback();
+        Session::flash("flash_notification", [
+            "level"=>"danger",
+            "message"=>"Line gagal dihapus. $ex"
+        ]);
+        return redirect()->route('prodparamharden.index');
+      } 
+    } else {
+    Session::flash("flash_notification", [
+        "level"=>"danger",
+        "message"=>"Maaf, Anda tidak berhak menghapus data ini."
+    ]);
+    return redirect()->route('prodparamharden.index');
+    }
+  }
+}

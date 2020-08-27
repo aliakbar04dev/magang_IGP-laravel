@@ -1,0 +1,372 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use App\Mcalserti;
+use Yajra\Datatables\Html\Builder;
+use Yajra\Datatables\Facades\Datatables;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\File;
+use Intervention\Image\ImageManagerStatic as Image;
+use Carbon\Carbon;
+use DB;
+use Excel;
+use PDF;
+use JasperPHP\JasperPHP;
+use Exception;
+use DNS1D;
+
+class McalsertiController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        if(Auth::user()->can('qa-alatukur-view')) {             
+            return view('eqa.kalserti.index');
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+            if(Auth::user()->can('qa-alatukur-create')) {   
+               return view('eqa.kalserti.create');
+           } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        if(Auth::user()->can('qa-alatukur-create')) {
+            $mcalserti = new Mcalserti(); 
+            $no_serti=$request->no_serti;   
+            $tgl_serti=$request->tgl_serti;
+            $no_wdo=$request->no_wdo;
+            $tgl_kalibrasi=$request->tgl_kalibrasi;
+            $lab_pelaksana=$request->lab_pelaksana;
+            $kd_brg=$request->kd_brg;
+            $nm_alat=$request->nm_alat;
+            $nm_type=$request->nm_type;
+            $nm_merk=$request->nm_merk;
+            $kd_cust=$request->kd_cust;
+            $nm_cust=$request->nm_cust;
+            $alamat=$request->alamat;
+            $no_seri=$request->no_seri;
+            $lain2x=$request->lain2x; 
+            $npk = Auth::user()->username;
+            
+            DB::beginTransaction();
+            try {            
+
+                DB::connection("oracle-usrklbr")
+                ->unprepared("insert into mcalserti(no_serti,tgl_serti,no_wdo,tgl_kalibrasi,lab_pelaksana,kd_brg,nm_alat,nm_type,nm_merk,kd_cust,nm_cust,alamat,no_seri,lain2x)  values ('$no_serti',to_date('$tgl_serti','yyyy/mm/dd'),'$no_wdo',to_date('$tgl_kalibrasi','yyyy/mm/dd'),'$lab_pelaksana','$kd_brg','$nm_alat','$nm_type','$nm_merk','$kd_cust','$nm_cust','$alamat','$no_seri','$lain2x')");
+
+                DB::beginTransaction();
+                DB::connection("oracle-usrklbr")
+                ->unprepared("update tcalorder2 set tgl_tarik=sysdate, pic_tarik='$npk' where no_serti='$no_serti'");
+                
+                Session::flash("flash_notification", [
+                    "level"=>"success",
+                    "message"=>"Data Berhasil Disimpan dengan Nomor Sertifikat : ".$no_serti
+                ]);
+                        //insert logs
+                $log_keterangan = "McalsertiController.store: Create Sertifikat Berhasil. ".$no_serti;
+                $log_ip = \Request::session()->get('client_ip');
+                $created_at = Carbon::now();
+                $updated_at = Carbon::now();
+                DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+                DB::commit();
+                return redirect()->route('kalserti.edit', base64_encode($no_serti));
+            } catch (Exception $ex) {
+                DB::rollback();
+                Session::flash("flash_notification", [
+                    "level"=>"danger",
+                    "message"=>"Data Gagal Disimpan!".$ex
+                ]);
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        if(Auth::user()->can('qa-alatukur-update')) {  
+            $id = base64_decode($id);      
+            $mcalserti = DB::connection("oracle-usrklbr")
+            ->table('mcalserti')
+            ->where(DB::raw("no_serti"), '=', $id)
+            ->first();
+
+            $model = new Mcalserti();   
+            return view('eqa.kalserti.edit')->with(compact(['mcalserti', 'model']));
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        if(Auth::user()->can('qa-alatukur-update')) {
+            $mcalserti = new Mcalserti(); 
+            $no_serti=$request->no_serti;   
+            $tgl_serti=$request->tgl_serti;
+            $no_wdo=$request->no_wdo;
+            $tgl_kalibrasi=$request->tgl_kalibrasi;
+            $lab_pelaksana=$request->lab_pelaksana;
+            $kd_brg=$request->kd_brg;
+            $nm_alat=$request->nm_alat;
+            $nm_type=$request->nm_type;
+            $nm_merk=$request->nm_merk;
+            $kd_cust=$request->kd_cust;
+            $nm_cust=$request->nm_cust;
+            $alamat=$request->alamat;
+            $no_seri=$request->no_seri;
+            $lain2x=$request->lain2x; 
+            $npk = Auth::user()->username;
+            
+            DB::beginTransaction();
+            try {            
+
+                DB::connection("oracle-usrklbr")
+                ->unprepared("update mcalserti set tgl_serti=to_date('$tgl_serti','yyyy/mm/dd'), tgl_kalibrasi=to_date('$tgl_kalibrasi','yyyy/mm/dd'), lain2x='$lain2x'where no_serti='$no_serti'");
+
+                Session::flash("flash_notification", [
+                    "level"=>"success",
+                    "message"=>"Data Berhasil Disimpan dengan Nomor Sertifikat : ".$no_serti
+                ]);
+                        //insert logs
+                $log_keterangan = "McalsertiController.update: Update Sertifikat Berhasil. ".$no_serti;
+                $log_ip = \Request::session()->get('client_ip');
+                $created_at = Carbon::now();
+                $updated_at = Carbon::now();
+                DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+                DB::commit();
+                return redirect()->route('kalserti.edit', base64_encode($no_serti));
+            } catch (Exception $ex) {
+                DB::rollback();
+                Session::flash("flash_notification", [
+                    "level"=>"danger",
+                    "message"=>"Data Gagal Disimpan!".$ex
+                ]);
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Request $request, $id)
+    {
+        $no_serti = base64_decode($id);
+        if(Auth::user()->can('qa-alatukur-delete')) {
+
+            try {
+                if ($request->ajax()) {
+                    $status = 'OK';
+                    $msg = 'Sertifikat berhasil dihapus.';
+
+                    DB::beginTransaction();
+                    DB::connection("oracle-usrklbr")
+                    ->unprepared("delete mcalserti where no_serti='$no_serti'");
+
+                    //insert logs
+                    $log_keterangan = "McalsertiController.destroy: Delete Sertifikat Berhasil. ";
+                    $log_ip = \Request::session()->get('client_ip');
+                    $created_at = Carbon::now();
+                    $updated_at = Carbon::now();
+                    DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                    DB::commit();
+                    return response()->json(['id' => base64_decode($no_serti), 'status' => $status, 'message' => $msg]);
+                } else {
+                    DB::beginTransaction();
+                    DB::connection("oracle-usrklbr")
+                    ->unprepared("delete mcalserti where no_serti='$no_serti'");
+
+                    //insert logs
+                    $log_keterangan = "McalsertiController.destroy: Delete Sertifikat Berhasil. ";
+                    $log_ip = \Request::session()->get('client_ip');
+                    $created_at = Carbon::now();
+                    $updated_at = Carbon::now();
+                    DB::table("logs")->insert(['user_id' => Auth::user()->id, 'keterangan' => $log_keterangan, 'ip' => $log_ip, 'created_at' => $created_at, 'updated_at' => $updated_at]);
+
+                    DB::commit();
+                    Session::flash("flash_notification", [
+                        "level"=>"success",
+                        "message"=>"Sertifikat berhasil dihapus."
+                    ]);
+                    return redirect()->route('kalserti.index');
+                }
+            } catch (Exception $ex) {
+                if ($request->ajax()) {
+                    return response()->json(['id' => base64_decode($no_serti), 'status' => 'NG', 'message' => 'Sertifikat gagal dihapus!']);
+                } else {
+                    Session::flash("flash_notification", [
+                        "level"=>"danger",
+                        "message"=>"Sertifikat gagal dihapus!"
+                    ]);
+                    return redirect()->route('kalserti.index');
+                }
+            }
+
+        } else {
+            if ($request->ajax()) {
+                return response()->json(['id' => base64_decode($no_serti), 'status' => 'NG', 'message' => 'Anda tidak memiliki AKSES untuk MENGHAPUS Sertifikat!']);
+            } else {
+                return view('errors.403');
+            }
+        }
+    }
+
+    public function dashboard(Request $request)
+    {
+         if(Auth::user()->can(['qa-alatukur-view'])) {
+            $tahun = $request->get('tahun');
+            $bulan = $request->get('bulan');
+            if($bulan < 10){
+                $bulan = '0'.$bulan;
+            }        
+                if ($request->ajax()) {
+                  $lists = DB::connection('oracle-usrklbr')
+                  ->table("mcalserti")
+                  ->select(DB::raw("no_serti, tgl_serti, kd_brg, no_seri, nm_alat, nm_type, nm_merk, nm_cust, no_wdo, tgl_kalibrasi"))
+                  ->whereRaw("to_char(tgl_serti,'MMYYYY') = '".$bulan."".$tahun."'");
+
+                  return Datatables::of($lists)
+                  ->addColumn('action',function($lists){
+                    return '<center><a target="_blank" class="btn btn-xs btn-success" data-toggle="tooltip" data-placement="top" title="Print Sertifikat '. $lists->no_serti .'" href="'.route('kalserti.print', [base64_encode($lists->no_serti),base64_encode('jenisReport')]).'"><span class="glyphicon glyphicon-print"></span></a></center>';  
+                        })
+                          ->editColumn('no_serti', function($lists) {
+                            return '<a href="'.route('kalserti.edit',base64_encode($lists->no_serti)).'" data-toggle="tooltip" data-placement="top" title="Show Detail '. $lists->no_serti .'">'.$lists->no_serti.'</a>';
+                        })
+
+                          ->editColumn('tgl_serti', function($lists){
+                            return Carbon::parse($lists->tgl_serti)->format('d/m/Y');            
+                        })->editColumn('tgl_kalibrasi', function($lists){
+                            return Carbon::parse($lists->tgl_kalibrasi)->format('d/m/Y');            
+                        })
+                        ->make(true);
+                    } else {
+                      return redirect('home');
+                  }
+            } else {
+                return view('errors.403');
+            }
+    }
+
+    public function print($noSerti, $jenisReport) 
+    { 
+        if(Auth::user()->can('qa-alatukur-view')) {
+            try {
+
+                    $noSerti = base64_decode($noSerti);
+                    $jenisReport = base64_decode($jenisReport);
+                    $manager = 'ANISA BELGIS';
+
+                    $logo = public_path(). DIRECTORY_SEPARATOR .'images'. DIRECTORY_SEPARATOR .'logo_ori.png';
+                    $logoKan = public_path(). DIRECTORY_SEPARATOR .'images'. DIRECTORY_SEPARATOR .'kan.bmp';
+
+                    $type = 'pdf';
+
+                    $input = public_path(). DIRECTORY_SEPARATOR .'report'. DIRECTORY_SEPARATOR .'eqc'. DIRECTORY_SEPARATOR .'sertifikatKalibrasi.jasper';
+                    $output = public_path(). DIRECTORY_SEPARATOR .'report'. DIRECTORY_SEPARATOR .'eqc'. DIRECTORY_SEPARATOR .'Sertifikat Kalibrasi';
+                    $database = \Config::get('database.connections.oracle-usrklbr');
+
+                    $path = public_path(). DIRECTORY_SEPARATOR .'report'. DIRECTORY_SEPARATOR .'barcode'. DIRECTORY_SEPARATOR . strtolower($noSerti). '.png';
+                    //Cek barcode sudah ada atau belum
+                    if (!file_exists($path)) {
+                      DNS1D::getBarcodePNGPath($noSerti, "C39");
+                  }
+
+                  $jasper = new JasperPHP;
+                  $jasper->process(
+                    $input,
+                    $output,
+                    array($type),
+                    array('noSerti' => $noSerti, 'nmManager' => $manager, 'logoPt' => $logo, 'logoKan' => $logoKan, 'logoBarcode' => $path),
+                    $database,
+                    'id_ID'
+                )->execute();
+
+                  $headers = array(
+                    'Content-Description: File Transfer',
+                    'Content-Type: application/pdf',
+                    'Content-Disposition: attachment; filename=Sertifikat Kalibrasi .'.$type,
+                    'Content-Transfer-Encoding: binary',
+                    'Expires: 0',
+                    'Cache-Control: must-revalidate, post-check=0, pre-check=0',
+                    'Pragma: public',
+                    'Content-Length: ' . filesize($output.'.'.$type)
+                );
+                  //update tgl cetak
+                  DB::connection("oracle-usrklbr")
+                  ->unprepared("update mcalserti set tgl_cetak=sysdate where no_serti='$noSerti'");
+                  DB::commit();
+
+                ob_end_clean();
+                ob_start();
+                return response()->file($output.'.'.$type, $headers);
+              } catch (Exception $ex) {
+                Session::flash("flash_notification", [
+                    "level"=>"danger",
+                    "message"=>"Print Report Gagal!"
+                ]);
+                return $ex;
+            }
+        } else {
+            return view('errors.403');
+        }
+    }
+
+}

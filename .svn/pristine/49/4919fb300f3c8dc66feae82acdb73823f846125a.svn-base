@@ -1,0 +1,284 @@
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Crypt;
+use Carbon\Carbon;
+use DB;
+
+class PengajuanCuti extends Model
+{
+  protected $connection = 'pgsql-mobile';
+
+  public static function boot()
+  {
+    parent::boot();
+  }
+
+  /* fetch Data datatables*/
+  public function fetch($npk)
+  {
+    $SQL = DB::connection("pgsql-mobile")
+      ->select("select distinct v_mas_karyawan.nama, v_mas_karyawan.nama, v_mas_karyawan.desc_jab, cuti01.no_cuti, cuti01.npk, cuti01.tglsubmit, cuti01.tglapprov, cuti01.tglpengajuan, cuti01.status 
+      from v_mas_karyawan join cuti01 on cuti01.npk = v_mas_karyawan.npk 
+      where cuti01.npk ='" . $npk . "' 
+      order by cuti01.status asc nulls first
+      ");
+    $Result = collect($SQL);
+    return $Result;
+  }
+
+  public function fetchEmployee($req)
+  {
+    $Result = DB::connection("pgsql-mobile")
+      ->table('v_mas_karyawan')->where('npk', Crypt::decrypt($req))
+      ->first();
+    return $Result;
+  }
+
+  public function fetchCuti($no_cuti)
+  {
+    $Result = DB::connection("pgsql-mobile")
+      ->table('cuti01')
+      ->where('no_cuti', Crypt::decrypt($no_cuti))
+      ->first();
+    return $Result;
+  }
+
+  /* Mendapatkan data atasan karyawan*/
+  public function getHeadEmployee($req)
+  {
+    $emp = DB::connection("pgsql-mobile")
+      ->select('select npk_atasan from v_mas_karyawan where npk = ?', [Crypt::decrypt($req)]);
+
+    $heademp = DB::connection("pgsql-mobile")
+      ->select('select npk, nama from v_mas_karyawan where npk = ?', [$emp[0]->npk_atasan]);
+    return $heademp;
+  }
+
+  public function getSaldoCuti($req)
+  {
+    $saldoCuti = DB::connection("pgsql-mobile")
+      ->select('select ct_akhir,cb_akhir from v_cuti where npk = ?', [Crypt::decrypt($req)]);
+
+    return $saldoCuti;
+  }
+
+  /* Mendapatkan data Master Kode Cuti*/
+  public function fetchkdCuti()
+  {
+    $Result = DB::connection("pgsql-mobile")
+      ->table('kode_cuti')
+      ->where('mobile', 1)
+      ->orderBy('kd_cuti', 'desc')
+      ->get();
+    return $Result;
+  }
+
+  function isWeekend($date)
+  {
+    $timestamp = strtotime($date);
+
+    $weekday = date("l", $timestamp);
+
+    if ($weekday == "Saturday" or $weekday == "Sunday") {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  function isDayOff($date)
+  {
+    $timestamp = strtotime($date);
+    $DaysOff = DB::connection("oracle-usrintra")
+      ->table('usrhrcorp.mschtgl')
+      ->select('dtgl', 'ket')
+      ->where('ket', '=', 'LR')
+      ->orWhere('ket', '=', 'LA')->get();
+
+
+    $day = date("d/m/Y", $timestamp);
+
+    $error = false;
+    foreach ($DaysOff as $key => $value) {
+      if ($value->dtgl == $day) {
+        $error = true;
+        break;
+      } else {
+        $error = false;
+      }
+    }
+
+    if ($error) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  function arrayIsUnique($array)
+  {
+    return array_unique($array) == $array;
+  }
+
+  public function submit($request)
+  {
+    DB::connection("pgsql-mobile")->beginTransaction();
+    try {
+      unset($request['_token']);
+      if ($this->arrayIsUnique($request['tgl'])) {
+        //print_r($request['Tgl']);die;
+        $nodoc = $this->getCode();
+        $data['no_cuti']   = $nodoc;
+        $data['npk']       = $request['npk'];
+        $data['npkatasan'] = $request['npkatasan'];
+        $data['tglpengajuan'] = $this->convertTgl($request['tglpengajuan']);
+        $data['tglsubmit'] = date("Y-m-d H:i:s");
+
+
+
+        $minus = 0;
+        foreach ($request["tgl"] as $key => $value) {
+          if ($this->isWeekend($this->convertTgl($value))) {
+            array_splice($request["tgl"], ($key - $minus), 1);
+            array_splice($request["kd_cuti"], ($key - $minus), 1);
+            $minus++;
+          }
+        }
+
+        $minusDaysOff = 0;
+        foreach ($request["tgl"] as $key => $value) {
+          if ($this->isDayOff($this->convertTgl($value))) {
+            array_splice($request["tgl"], ($key - $minusDaysOff), 1);
+            array_splice($request["kd_cuti"], ($key - $minusDaysOff), 1);
+            $minusDaysOff++;
+          }
+        }
+
+        $kodeCuti = DB::connection("pgsql-mobile")->table("kode_cuti")->get();
+        $hari = array();
+        $error = false;
+        for ($d = 0; $d < count($kodeCuti); $d++) {
+          $jumlahhari = $kodeCuti[$d]->hari;
+          $hari[$d] = 0;
+
+          foreach ($request["kd_cuti"] as $value) {
+            if ($value == strval($kodeCuti[$d]->kd_cuti)) {
+              $hari[$d]++;
+            }
+            if ($jumlahhari == ($hari[$d] - 1)) {
+              $error = true;
+              break 2;
+            }
+          }
+        }
+
+        if ($error == false) {
+
+          DB::connection("pgsql-mobile")->table("cuti01")->insert($data);
+
+
+          foreach ($request["tgl"] as $key => $value) {
+            //Save into Cuti 02
+            $data2['no_cuti']    = $nodoc;
+            $data2['tglcuti']   = $this->convertTgl($request['tgl'][$key], '/');
+            $data2['kd_cuti']   = $request['kd_cuti'][$key];
+            DB::connection("pgsql-mobile")->table("cuti02")->insert($data2);
+          }
+
+
+
+          DB::connection("pgsql-mobile")->commit();
+
+          $returnArray['isMessage'] = true;
+          $returnArray['pesan'] = 'sukses';
+          $returnArray['nodoc'] = $nodoc;
+          $returnArray['message'] = "Segera info atasan Anda untuk Approval cuti ini. \n Anda tidak disarankan Cuti sebelum Atasan Anda tidak menyetujui cuti ini.Cek Selalu status cuti. Jangan khawatir hari sabtu dan minggu otomatis tidak masuk database.";
+
+          return $returnArray;
+        } else {
+          $returnArray['isMessage'] = true;
+          $returnArray['pesan'] = 'gagal';
+          $returnArray['nodoc'] = 'gagal';
+          $returnArray['message'] = "Data gagal disimpan! Jumlah hari cuti melebihi jumlah batas hari cuti yang telah ditentukan! periksa data kembali";
+
+          return $returnArray;
+        }
+      } else {
+        $returnArray['isMessage'] = true;
+        $returnArray['pesan'] = 'gagal';
+        $returnArray['nodoc'] = 'gagal';
+        $returnArray['message'] = "Tanggal pengajuan cuti ada yang double, periksa kembali!";
+
+        return $returnArray;
+      }
+    } catch (Exception $ex) {
+      DB::connection("pgsql-mobile")->rollback();
+      Session::flash("flash_notification", [
+        "level" => "danger",
+        "message" => "Data gagal disimpan!"
+      ]);
+      return false;
+    }
+  }
+
+  function convertTgl($dt, $f = '/')
+  {
+    $t = explode($f, $dt);
+    return $t[2] . '-' . $t[1] . '-' . $t[0];
+  }
+
+  /****************************************************
+	Function: Generate AutoNumber No Doc 
+   *****************************************************/
+  public function setNumberDigit($number, $digit)
+  {
+    $number = (int) $number;
+    $panjang = strlen($number);
+    if ($panjang >= $digit) {
+      return $number;
+    } else {
+      $batas = $digit - $panjang;
+      for ($i = 0; $i < $batas; $i++) {
+        $number = "0" . $number;
+      }
+    }
+    return $number;
+  }
+
+  public function getCode()
+  {
+    $sql = "select coalesce(count(*) + 1, 1) as transactionnumber from cuti01";
+    $emp = collect(DB::connection("pgsql-mobile")->select($sql))->first();
+    $kode = 'CT' . substr(date('Y'), 2) . $this->setNumberDigit($emp->transactionnumber, 6);
+    return $kode;
+  }
+
+  /**********************************************************************
+  Function: Mendapatkan daftar pengajuan cuti oleh karyawan  
+   ***********************************************************************/
+  public function fetchpengajuancuti($no_cuti)
+  {
+    $Result = DB::connection("pgsql-mobile")
+      ->table('cuti02')
+      ->join('kode_cuti', 'cuti02.kd_cuti', '=', 'kode_cuti.kd_cuti')
+      ->select('cuti02.*', 'kode_cuti.desc_cuti as ket')
+      ->where('cuti02.no_cuti', Crypt::decrypt($no_cuti))
+      ->get();
+    return $Result;
+  }
+
+  /*************************************
+    Function : Update Status = 1 Cetak
+   **************************************/
+  public function setStatusCetak($no_cuti)
+  {
+    DB::connection("pgsql-mobile")
+      ->table("cuti01")
+      ->where('no_cuti', $no_cuti)
+      ->update(['status' => 1]);
+  }
+}

@@ -1,0 +1,526 @@
+@extends('layouts.app')
+@section('content')
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <section class="content-header">
+    <h1>
+      Truck Control
+      <small>Truck Control Delivery Warehouse Part</small>
+    </h1>
+    <ol class="breadcrumb">
+      <li><a href="{{ url('/home') }}"><i class="fa fa-dashboard"></i> Home</a></li>
+      <li><i class="fa fa-files-o"></i> PPC - Monitoring</li>
+      <li class="active"><i class="fa fa-files-o"></i> Truck Control Delivery Warehouse Part</li>
+    </ol>
+  </section>
+
+  <!-- Main content -->
+  <section class="content">
+    @include('layouts._flash')
+    <div class="row">
+      <div class="col-md-12">
+        <div class="box box-primary">
+          <div class="box-header">
+            <div class="col-md-12">
+              <div class="col-md-2">
+                {!! Form::label('tgl', 'Dari') !!}
+                {!! Form::date('tgl', \Carbon\Carbon::now(), ['class'=>'form-control','placeholder' => \Carbon\Carbon::now()]) !!}
+                {!! $errors->first('tgl', '<p class="help-block">:message</p>') !!}
+              </div>
+              <div class="col-md-2">
+                {!! Form::label('tglEnd', 'Sampai') !!}
+                {!! Form::date('tglEnd', \Carbon\Carbon::now(), ['class'=>'form-control','placeholder' => \Carbon\Carbon::now()]) !!}
+                {!! $errors->first('tglEnd', '<p class="help-block">:message</p>') !!}
+              </div>
+              <div class="col-md-2">
+               {!! Form::label('cust', 'Customer (F9)') !!}  
+               <div class="input-group">
+                {!! Form::text('cust', null, ['class'=>'form-control','placeholder' => 'Customer','onkeydown' => 'btnpopupCustClick(event)', 'onchange' => 'autoUpperCase(this);validateCust();']) !!}     
+                <span class="input-group-btn">
+                  <button id="btnpopupCust" type="button" class="btn btn-info" data-toggle="modal" data-target="#custModal">
+                    <label class="glyphicon glyphicon-search"></label>
+                  </button>
+                </span>
+                {!! $errors->first('cust', '<p class="help-block">:message</p>') !!}
+              </div>   
+            </div>
+            <div class="col-md-2">
+             {!! Form::label('remark', 'Remark (F9)') !!}  
+             <div class="input-group">
+              {!! Form::text('remark', null, ['class'=>'form-control', 'placeholder' => 'Remark', 'onkeydown' => 'btnpopupRemarkClick(event)', 'onchange' => 'autoUpperCase(this);validateRemark();']) !!}     
+              <span class="input-group-btn">
+                <button id="btnpopupRemark" type="button" class="btn btn-info" data-toggle="modal" data-target="#remarkModal">
+                  <label class="glyphicon glyphicon-search"></label>
+                </button>
+              </span>
+              {!! $errors->first('remark', '<p class="help-block">:message</p>') !!}         
+            </div> 
+          </div>                    
+      </div>
+      <div class="col-md-12">
+        <br>
+        <div class="col-md-4">
+           {!! Form::label('dest', 'Dest (F9)') !!}  
+           <div class="input-group">
+            {!! Form::text('dest', null, ['class'=>'form-control', 'placeholder' => 'Dest', 'onkeydown' => 'btnpopupDestClick(event)', 'onchange' => 'autoUpperCase(this);validateDest()']) !!}     
+            <span class="input-group-btn">
+              <button id="btnpopupDest" type="button" class="btn btn-info" data-toggle="modal" data-target="#destModal">
+                <label class="glyphicon glyphicon-search"></label>
+              </button>
+            </span>
+            {!! $errors->first('dest', '<p class="help-block">:message</p>') !!}   
+          </div>                               
+        </div> 
+        <div class="col-md-4">
+          {!! Form::label('kd_plant', 'Plant (*)') !!}
+          <div class="input-group">
+            {!! Form::select('kd_plant', array('1' => 'IGP-1', '2' => 'IGP-2', '3' => 'IGP-3'), null, ['class'=>'form-control']) !!}     
+          </div>
+        </div>
+      </div>
+      <div class="col-md-12">
+        <br>
+        <div class="col-md-1">
+          {!! Form::button('Display', ['class'=>'btn btn-primary', 'id' => 'btn-display']) !!}
+        </div>
+        <div class="col-md-1">
+         {!! Form::button('Print Report', ['class'=>'btn btn-primary', 'id' => 'btn-print']) !!}
+       </div>  
+     </div> 
+   </div>
+
+
+   <!-- /.box-header -->
+   <div class="box-body">
+    <table id="tblMaster" class="table table-bordered table-striped" cellspacing="0" width="100%">
+      <thead>
+        <tr>
+          <th style="width: 10%;" rowspan="2">Supplier</th>
+          <th style="width: 5%;" rowspan="2">Cycle</th>
+          <th colspan="3">Jam In IGP</th>
+          <th colspan="2">Jam In Dock</th>
+          <th colspan="2">Jam Out Dock</th>
+          <th colspan="2">Jam Out IGP</th>
+          <th rowspan="2">Remark</th>
+          <th style="width: 5%;" rowspan="2">Action</th>
+        </tr>
+        <tr>
+          <th>Plan</th>
+          <th>Act</th>
+          <th>Status</th>
+          <th>Plan</th>
+          <th>Act</th>
+          <th>Plan</th>
+          <th>Act</th>
+          <th>Plan</th>
+          <th>Act</th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+  <!-- /.box-body -->
+</div>
+<!-- /.box -->
+</div>
+<!-- /.col -->
+</div>
+<!-- /.row -->
+</section>
+<!-- /.content -->
+</div>
+<!-- /.content-wrapper -->
+@endsection
+<!-- Popup Cust Modal -->
+@include('ppc.mtruck.popup.custModal')                
+<!-- Popup Remark Modal -->
+@include('ppc.mtruck.popup.remarkModal')    
+<!-- Popup Dest Modal -->
+@include('ppc.mtruck.popup.destModal')    
+
+@section('scripts')
+<script type="text/javascript">
+ function btnpopupCustClick(e) {
+  if(e.keyCode == 120) {
+    $('#btnpopupCust').click();
+  }
+}
+
+function btnpopupRemarkClick(e) {
+  if(e.keyCode == 120) {
+    $('#btnpopupRemark').click();
+  }
+}
+
+function btnpopupDestClick(e) {
+  if(e.keyCode == 120) {
+    $('#btnpopupDest').click();
+  }
+}
+
+function autoUpperCase(a){
+  a.value = a.value.toUpperCase();
+} 
+
+$(document).ready(function(){  
+  $("#btnpopupCust").click(function(){
+    popupCust();
+  });  
+
+  $("#btnpopupRemark").click(function(){
+    popupRemark();
+  });
+
+  $("#btnpopupDest").click(function(){
+    popupDest();
+  });
+
+  $("#btn-display").click(function(){
+    refreshTable();
+  });
+
+  $('#btn-print').click( function () {
+    swal({
+      title: "Cetak",
+      text: "Apakah anda ingin mencetak Report Truck Control Delivery?",
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: "Yes",
+      cancelButtonText: "No",
+      allowOutsideClick: true,
+      allowEscapeKey: true,
+      allowEnterKey: true,
+      reverseButtons: false,
+      focusCancel: true,
+    }).then(function () {
+      printPdf();
+    }, function (dismiss) {
+        // dismiss can be 'cancel', 'overlay',
+        // 'close', and 'timer'
+        if (dismiss === 'cancel') {
+        }
+      })
+
+  });  
+});
+
+function refreshTable(){
+  var url = '{{ route('mtruck.dashboardwhs') }}';
+  var tblMaster = $('#tblMaster').DataTable({   
+    createdRow: function( row, data, dataIndex){
+      if( data.st1 ==  'DELAY'){
+       $('td:eq(4)', row).css('color', 'Red');
+       $('td:eq(4)', row).css('font-weight', 'bold');
+      } 
+      else if( data.st1 ==  'ADVANCE'){
+        $('td:eq(4)', row).css('color', 'orange');
+        $('td:eq(4)', row).css('font-weight', 'bold');
+      } 
+      else{
+        $('td:eq(4)', row).css('color', 'green');
+        $('td:eq(4)', row).css('font-weight', 'bold');
+      }
+      
+      if( data.st2 ==  'DELAY'){
+        $('td:eq(6)', row).css('color', 'Red');
+        $('td:eq(6)', row).css('font-weight', 'bold');
+      } 
+      else if( data.st2 ==  'ADVANCE'){
+        $('td:eq(6)', row).css('color', 'orange');
+        $('td:eq(6)', row).css('font-weight', 'bold');
+      } 
+      else{
+        $('td:eq(6)', row).css('color', 'green');
+        $('td:eq(6)', row).css('font-weight', 'bold');
+      }
+  
+      if( data.st3 ==  'DELAY'){
+       $('td:eq(8)', row).css('color', 'Red');
+       $('td:eq(8)', row).css('font-weight', 'bold');
+      } 
+      else if( data.st3 ==  'ADVANCE'){
+       $('td:eq(8)', row).css('color', 'orange');
+       $('td:eq(8)', row).css('font-weight', 'bold');
+      } 
+      else{
+        $('td:eq(8)', row).css('color', 'green');
+        $('td:eq(8)', row).css('font-weight', 'bold');
+      }
+
+      if( data.st4 ==  'DELAY'){
+        $('td:eq(10)', row).css('color', 'Red');
+        $('td:eq(10)', row).css('font-weight', 'bold');
+      } 
+      else if( data.st4 ==  'ADVANCE'){
+        $('td:eq(10)', row).css('color', 'orange');
+        $('td:eq(10)', row).css('font-weight', 'bold');
+      } 
+      else{
+        $('td:eq(10)', row).css('color', 'green');
+        $('td:eq(10)', row).css('font-weight', 'bold');
+      }
+  },
+"aLengthMenu": [[5, 10, 25, 50, 75, 100, -1], [5, 10, 25, 50, 75, 100, "All"]],
+"iDisplayLength": 10,
+responsive: true,
+"order": [],
+processing: true,
+serverSide: true,
+ajax: url,
+columns: [
+{ data: 'nm', name: 'nm'},
+{ data: 'no_cycle', name: 'no_cycle'},
+{ data: 'jam_in_igp_plan', name: 'jam_in_igp_plan', searchable: false},
+{ data: 'jam_in_igp_act', name: 'jam_in_igp_act', searchable: false},
+{ data: 'st1', name: 'st1', searchable: false, className: "dt-center"},
+{ data: 'jam_in_dock_plan', name: 'jam_in_dock_plan', searchable: false},
+{ data: 'jam_in_dock_act', name: 'jam_in_dock_act', searchable: false},
+{ data: 'jam_out_dock_plan', name: 'jam_out_dock_plan', searchable: false},
+{ data: 'jam_out_dock_act', name: 'jam_out_dock_act', searchable: false},
+{ data: 'jam_out_igp_plan', name: 'jam_out_igp_plan', searchable: false},
+{ data: 'jam_out_igp_act', name: 'jam_out_igp_act', searchable: false},
+{ data: 'remark', name: 'remark', orderable: false, searchable: false},
+{ data: 'action', name: 'action', className: "dt-center", orderable: false, searchable: false}
+],
+"bDestroy": true,            
+});
+  $("#tblMaster").on('preXhr.dt', function(e, settings, data) {
+    data.tgl = $('input[name="tgl"]').val();
+    data.cust = $('input[name="cust"]').val();
+    data.remark = $('input[name="remark"]').val();
+    data.dest = $('input[name="dest"]').val();
+    data.plant = $('select[name="kd_plant"]').val();
+  });
+  $('#tblMaster').DataTable().ajax.reload(null, false);
+}
+
+  //POPUP CUSTOMER
+  function popupCust() {
+    var myHeading = "<p>Popup Cust</p>";
+    $("#custModalLabel").html(myHeading);
+
+    var url = '{{ route('datatables.popupSuppTruck') }}';
+    
+    var lookupCust = $('#lookupCust').DataTable({
+      processing: true,
+      serverSide: true,
+          //responsive: true,
+          "scrollX": true,
+          "scrollY": "500px",
+          "scrollCollapse": true,
+          iDisplayLength: 10,
+          pagingType: "simple",
+          ajax: url,
+          columns: [
+          { data: 'kd_cust', name: 'kd_cust'},
+          { data: 'nm', name: 'nm'}
+          ],
+          "bDestroy": true,
+          "initComplete": function(settings, json) {
+            $('div.dataTables_filter input').focus();
+            $('#lookupCust tbody').on( 'dblclick', 'tr', function () {
+              var dataArr = [];
+              var rows = $(this);
+              var rowData = lookupCust.rows(rows).data();
+              $.each($(rowData),function(key,value){
+                document.getElementById("cust").value = value["kd_cust"];
+                $('#custModal').modal('hide');
+                validateCust();
+              });
+            });
+            $('#custModal').on('hidden.bs.modal', function () {
+              var kode = document.getElementById("cust").value.trim();
+              if(kode === '') {
+                $('#cust').focus();
+              } else {
+                $('#cust').focus();
+              }
+            });
+          },
+        });
+  }
+
+  //VALIDASI CUSTOMER
+  function validateCust() {
+    var kode = document.getElementById("cust").value.trim();     
+    if(kode !== '') {
+      var url = '{{ route('datatables.validasiCustTruck', ['param']) }}';
+      url = url.replace('param', window.btoa(kode));
+          //use ajax to run the check
+          $.get(url, function(result){  
+            if(result !== 'null'){
+              result = JSON.parse(result);
+              document.getElementById("cust").value = result["kd_cust"];
+            } else {
+              document.getElementById("cust").value = "";
+              document.getElementById("cust").focus();
+              swal("Customer tidak valid!", "Perhatikan inputan anda! tekan F9 untuk tampilkan data.", "error");
+            }
+          });
+        } else {
+          document.getElementById("cust").value = "";
+        }   
+      }
+
+  //POPUP REMARK
+  function popupRemark() {
+    var myHeading = "<p>Popup Remark</p>";
+    $("#remarkModalLabel").html(myHeading);
+    var url = '{{ route('datatables.popupRemarkTruck') }}';    
+    var lookupRemark = $('#lookupRemark').DataTable({
+      processing: true,
+      serverSide: true,
+      //responsive: true,
+      "scrollX": true,
+      "scrollY": "500px",
+      "scrollCollapse": true,
+      iDisplayLength: 10,
+      pagingType: "simple",
+      ajax: url,
+      columns: [
+      { data: 'remark', name: 'remark'}
+      ],
+      "bDestroy": true,
+      "initComplete": function(settings, json) {
+        $('div.dataTables_filter input').focus();
+        $('#lookupRemark tbody').on( 'dblclick', 'tr', function () {
+          var dataArr = [];
+          var rows = $(this);
+          var rowData = lookupRemark.rows(rows).data();
+          $.each($(rowData),function(key,value){
+            document.getElementById("remark").value = value["remark"];
+            $('#remarkModal').modal('hide');
+            validateRemark();
+          });
+        });
+        $('#remarkModal').on('hidden.bs.modal', function () {
+          var kode = document.getElementById("remark").value.trim();
+          if(kode === '') {
+            $('#remark').focus();
+          } else {
+            $('#remark').focus();
+          }
+        });
+      },
+    });
+  }
+
+  //VALIDASI REMARK
+  function validateRemark() {
+    var kode = document.getElementById("remark").value.trim();     
+    if(kode !== '') {
+      var url = '{{ route('datatables.validasiRemarkTruck', ['param']) }}';
+      url = url.replace('param', window.btoa(kode));
+          //use ajax to run the check
+          $.get(url, function(result){  
+            if(result !== 'null'){
+              result = JSON.parse(result);
+              document.getElementById("remark").value = result["remark"];
+            } else {
+              document.getElementById("remark").value = "";
+              document.getElementById("remark").focus();
+              swal("Remark tidak valid!", "Perhatikan inputan anda! tekan F9 untuk tampilkan data.", "error");
+            }
+          });
+        } else {
+          document.getElementById("remark").value = "";
+        }   
+      }
+
+       //POPUP DEST
+       function popupDest() {
+        var myHeading = "<p>Popup Dest</p>";
+        $("#destModalLabel").html(myHeading);
+        var url = '{{ route('datatables.popupDestTruckSupp') }}';    
+        var lookupDest = $('#lookupDest').DataTable({
+          processing: true,
+          serverSide: true,
+      //responsive: true,
+      "scrollX": true,
+      "scrollY": "500px",
+      "scrollCollapse": true,
+      iDisplayLength: 10,
+      pagingType: "simple",
+      ajax: url,
+      columns: [
+      { data: 'kd_dest', name: 'kd_dest'}
+      ],
+      "bDestroy": true,
+      "initComplete": function(settings, json) {
+        $('div.dataTables_filter input').focus();
+        $('#lookupDest tbody').on( 'dblclick', 'tr', function () {
+          var dataArr = [];
+          var rows = $(this);
+          var rowData = lookupDest.rows(rows).data();
+          $.each($(rowData),function(key,value){
+            document.getElementById("dest").value = value["kd_dest"];
+            $('#destModal').modal('hide');
+            validateDest();
+          });
+        });
+        $('#destModal').on('hidden.bs.modal', function () {
+          var kode = document.getElementById("dest").value.trim();
+          if(kode === '') {
+            $('#dest').focus();
+          } else {
+            $('#dest').focus();
+          }
+        });
+      },
+    });
+      }
+
+  //VALIDASI DEST
+  function validateDest() {
+    var kode = document.getElementById("dest").value.trim();     
+    if(kode !== '') {
+      var url = '{{ route('datatables.validasiDestTruckSupp', ['param']) }}';
+      url = url.replace('param', window.btoa(kode));
+          //use ajax to run the check
+          $.get(url, function(result){  
+            if(result !== 'null'){
+              result = JSON.parse(result);
+              document.getElementById("dest").value = result["kd_dest"];
+            } else {
+              document.getElementById("dest").value = "";
+              document.getElementById("dest").focus();
+              swal("Dest tidak valid!", "Perhatikan inputan anda! tekan F9 untuk tampilkan data.", "error");
+            }
+          });
+        } else {
+          document.getElementById("dest").value = "";
+        }   
+      }
+
+  //CETAK DOKUMEN
+  function printPdf(){
+    var param = document.getElementById("cust").value.trim();
+    var param1 = document.getElementById("dest").value.trim();
+    var param2 = document.getElementById("remark").value.trim();
+    var param3 = document.getElementById("tgl").value;
+    var param4 = document.getElementById("tglEnd").value;
+    var param5 = document.getElementById("kd_plant").value;
+    if(param == ''){
+      param = '-';
+    }
+    if(param1 == ''){
+      param1 = '-';
+    }
+    if(param2 == ''){
+      param2 = '-';
+    }
+
+    var url = '{{ route('mtruck.printWhs', ['param', 'param1', 'param2', 'param3', 'param4', 'param5']) }}';
+    url = url.replace('param', window.btoa(param));
+    url = url.replace('param1', window.btoa(param1));
+    url = url.replace('param2', window.btoa(param2));
+    url = url.replace('param3', window.btoa(param3));
+    url = url.replace('param4', window.btoa(param4));
+    url = url.replace('param5', window.btoa(param5));
+    window.open(url);
+  }
+</script>
+@endsection
+

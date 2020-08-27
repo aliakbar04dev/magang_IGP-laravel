@@ -1,0 +1,34 @@
+<p>
+	{{ salam() }},
+</p>
+
+<p>
+	Kepada: <strong>{{ $pica->namaSupp($pica->kd_supp) }}</strong>
+</p>
+
+<p>
+	Mohon maaf, {{ $pica->nama($pica->reject_pic) }} ({{ $pica->reject_pic }}) telah menolak PICA dengan No: <strong>{{ $pica->no_pica }}</strong> karena <strong>{{ $pica->status_reject }} - {{ $pica->reject_ket }}</strong>.
+</p>
+
+<p>
+	Silahkan kunjungi <a href="{{ $login = url('login') }}">{{ $login }}</a> untuk melakukan revisi.
+</p>
+
+<p>
+	Jika Anda membutuhkan informasi yang lebih detail, silahkan hubungi {{ $pica->nama($pica->reject_pic) }} ({{ $pica->reject_pic }}).
+</p>
+
+<p>
+	Terima kasih atas perhatian dan kerjasamanya.
+</p>
+
+<p>
+	Salam,<br><br>
+	{{ Auth::user()->name }} ({{ Auth::user()->username }})
+</p>
+
+<p>
+	********************************************************************************************************<br>
+	<strong>Note: Mohon untuk tidak membalas email ini, karena email ini dikirim dari Aplikasi.</strong><br>
+	********************************************************************************************************
+</p>

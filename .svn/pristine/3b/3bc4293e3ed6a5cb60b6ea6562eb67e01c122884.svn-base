@@ -1,0 +1,38 @@
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Session;
+use Carbon\Carbon;
+use DB;
+
+class QatTrCpp01 extends Model
+{
+	public function getKategori($no_doc, $id_kat)
+	{     
+		$kategori = DB::table("vqa_checksheet")
+		->select(DB::raw("kategori"))
+		->whereRaw("no_doc = '".$no_doc."' and id_kat = '".$id_kat."'")
+		->value('kategori');    
+		return $kategori;
+	}
+
+	public function getStatus($no_doc, $id_kat)
+	{     
+		$status = DB::table("vqa_checksheet")
+		->select(DB::raw("status"))
+		->whereRaw("no_doc = '".$no_doc."' and id_kat = '".$id_kat."'")
+		->value('status');    
+		return $status;
+	}
+
+	public function getItem($no_doc, $id_kat)
+	{     
+		$item = DB::table("vqa_checksheet")
+		->select(DB::raw("check_item"))
+		->whereRaw("no_doc = '".$no_doc."' and id_kat = '".$id_kat."'")
+		->value('check_item');    
+		return $item;
+	}
+}

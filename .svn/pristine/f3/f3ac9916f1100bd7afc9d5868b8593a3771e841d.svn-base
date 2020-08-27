@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="544" pageHeight="802" columnWidth="544" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="0c16c5b7-504e-4128-87a8-4bc80231de82">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["/"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select 1]]>
+	</queryString>
+	<field name="?column?" class="java.lang.Integer"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="20" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="272" height="20" uuid="08859eed-a0ce-452c-bd8e-f4cf413eff7e"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Strength]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="272" y="0" width="272" height="20" uuid="6fdeaecc-c65e-4f2b-878b-32647f439c12"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Development Area]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="35" splitType="Stretch">
+			<frame>
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="272" height="35" uuid="f4f9952b-7d67-42db-a5b4-cc01d616293c"/>
+				<box>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<subreport>
+					<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="272" height="30" uuid="dc8d67fb-facf-4e41-bfa9-c56352f222da"/>
+					<subreportParameter name="status">
+						<subreportParameterExpression><![CDATA["S"]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="hrdt_idp1">
+						<subreportParameterExpression><![CDATA[$P{id}]]></subreportParameterExpression>
+					</subreportParameter>
+					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "idprev_sub2.jasper"]]></subreportExpression>
+				</subreport>
+			</frame>
+			<frame>
+				<reportElement stretchType="RelativeToBandHeight" x="272" y="0" width="272" height="35" uuid="3d9ce1ce-b507-4eda-b5b0-269c46422dc1"/>
+				<box>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<subreport>
+					<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="272" height="30" uuid="8435e2eb-2115-40b2-9b46-889eddeb9809"/>
+					<subreportParameter name="hrdt_idp1">
+						<subreportParameterExpression><![CDATA[$P{id}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="status">
+						<subreportParameterExpression><![CDATA["W"]]></subreportParameterExpression>
+					</subreportParameter>
+					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "idprev_sub2.jasper"]]></subreportExpression>
+				</subreport>
+			</frame>
+		</band>
+	</detail>
+</jasperReport>

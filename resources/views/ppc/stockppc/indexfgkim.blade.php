@@ -1,0 +1,154 @@
+@extends('layouts.app')
+@section('content')
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <section class="content-header">
+    <h1>
+      Inventory Level 
+      <small>Finish Good</small>
+    </h1>
+    <ol class="breadcrumb">
+      <li><a href="{{ url('/home') }}"><i class="fa fa-dashboard"></i> Home</a></li>
+      <li><i class="fa fa-truck"></i> PPC - Laporan - Inventory Level</li>
+      <li class="active"><i class="fa fa-files-o"></i> Finish Good</li>
+    </ol>
+  </section>
+
+  <!-- Main content -->
+  <section class="content">
+    @include('layouts._flash')
+    <div class="box box-primary">
+      <div class="box-header with-border">
+        <h3 class="box-title">Finish Good</h3>
+      </div>
+      <!-- /.box-header -->
+      
+      <div class="box-body form-horizontal">
+        <div class="form-group">
+          <div class="col-sm-4">
+            {!! Form::label('lblwhs', 'Warehouse') !!}
+            <select id="filter_whs" name="filter_whs" aria-controls="filter_status" class="form-control select2">
+              <option value="KFMCA" selected="selected">KFMCA-Finish Good KIM 1A</option>
+              <option value="KFRAB" >KFRAB-Finish Good KIM 1B</option>
+            </select>
+          </div>
+        </div>
+        <!-- /.form-group -->
+        <div class="form-group">
+          <div class="col-sm-4">
+            {!! Form::label('lblstatus', 'Status') !!}
+            <select id="filter_stok" name="filter_stok" aria-controls="filter_status" class="form-control select2">
+              <option value="ALL" selected="selected">ALL</option>
+              <option value="OVER" >OVER</option>
+              <option value="SAFE" >SAFE</option>
+              <option value="WARNING" >WARNING</option>
+              <option value="CRITICAL" selected="selected">CRITICAL</option>
+            </select>
+          </div>
+        </div>
+        <!-- /.form-group -->
+        <div class="form-group">
+          <div class="col-sm-2">
+            <button id="display" type="button" class="form-control btn btn-primary" data-toggle="tooltip" data-placement="top" title="Display">Display</button>
+          </div>
+          <div class="col-sm-2">
+            <img src="../../images/blue.png" alt="X" data-toggle="tooltip" data-placement="top" title="OVER">OVER
+          </div>
+          <div class="col-sm-2">
+            <img src="../../images/green.png" alt="X" data-toggle="tooltip" data-placement="top" title="NORMAL">NORMAL
+          </div>
+          <div class="col-sm-2">
+            <img src="../../images/yellow.png" alt="X" data-toggle="tooltip" data-placement="top" title="WARNING">WARNING
+          </div>
+          <div class="col-sm-2">
+            <img src="../../images/red.png" alt="X" data-toggle="tooltip" data-placement="top" title="CRITICAL">CRITICAL
+          </div>
+        </div>
+        <!-- /.form-group -->
+      </div>
+      <!-- /.box-body -->
+
+      <div class="box-body">
+        <table id="tblMaster" class="table table-bordered table-striped" cellspacing="0" width="100%">
+          <thead>
+            <tr>
+              <th style="width: 1%;">No</th>
+              <th>Description</th>
+              <th style="width: 5%;">Stock</th>
+              <th style="width: 5%;">Min</th>
+              <th style="width: 5%;">Max</th>
+              <th style="width: 15%;">Partno</th>
+              <th style="width: 15%;">Partno Cust</th>
+              <th style="width: 7%;">Cust</th>
+              <th style="width: 7%;">WHS</th>
+              <th style="width: 5%;">Status</th>
+            </tr>
+          </thead>
+        </table>
+      </div>
+      <!-- /.box-body -->
+    </div>
+    <!-- /.box -->
+  </section>
+  <!-- /.content -->
+</div>
+<!-- /.content-wrapper -->
+@endsection
+
+@section('scripts')
+<script type="text/javascript">
+
+  document.getElementById("filter_whs").focus();
+
+  //Initialize Select2 Elements
+  $(".select2").select2();
+
+  $(document).ready(function(){
+
+    var tableMaster = $('#tblMaster').DataTable({
+      "columnDefs": [{
+        "searchable": false,
+        "orderable": false,
+        "targets": 0,
+        render: function (data, type, row, meta) {
+          return meta.row + meta.settings._iDisplayStart + 1;
+        }
+      }],
+      "aLengthMenu": [[5, 10, 25, 50, 75, 100, -1], [5, 10, 25, 50, 75, 100, "All"]],
+      "iDisplayLength": 10,
+      responsive: true,
+      "order": [[1, 'asc'],[3, 'asc']],
+      processing: true, 
+      "oLanguage": {
+        'sProcessing': '<div id="processing" style="margin: 0px; padding: 0px; position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; background-color: rgb(102, 102, 102); z-index: 30001; opacity: 0.8;"><p style="position: absolute; color: White; top: 50%; left: 45%;"><img src="{{ asset('images/ajax-loader.gif') }}"></p></div>Processing...'
+      }, 
+      serverSide: true,
+      ajax: "{{ route('stockohigps.dashboardfinishgood') }}",
+      columns: [
+      {data: null, name: null},
+      {data: 'nm_item', name: 'nm_item'},
+      {data: 'qty', name: 'qty', className: "dt-right"},
+      {data: 'qty_min', name: 'qty_min', className: "dt-right"},
+      {data: 'qty_max', name: 'qty_max', className: "dt-right"},
+      {data: 'item', name: 'item'},
+      {data: 'part_no_cust', name: 'part_no_cust'},
+      {data: 'cust', name: 'cust'},
+      {data: 'whse', name: 'whse'},        
+      {data: 'st_stock', name: 'st_stock', className: "dt-center"},
+      ],
+    });
+
+    $("#tblMaster").on('preXhr.dt', function(e, settings, data) {
+      data.whs = $('select[name="filter_whs"]').val();
+      data.stok = $('select[name="filter_stok"]').val();
+    });
+
+    $('#display').click( function () {
+      tableMaster.ajax.reload();
+    });
+
+    //$('#display').click();
+  });
+</script>
+@endsection

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="b12e1461-f2c2-4eb5-91b6-f20b18705cbe">
+	<property name="ireport.zoom" value="1.4641000000000006"/>
+	<property name="ireport.x" value="304"/>
+	<property name="ireport.y" value="545"/>
+	<parameter name="logo" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["/"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="bulan" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="tahun" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="kd_plant" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="kd_line" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="nm_bulan" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="npk" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT DISTINCT PMS.THN_PMS, PMS.BLN_PMS, PMS.KD_PLANT, USRIGPMFG.FNM_PLANT(PMS.KD_PLANT) NM_PLANT, 
+PMS.KD_LINE, USRIGPMFG.fnm_linex(PMS.KD_LINE) NM_LINE
+FROM MTCT_PMS_HDR PMS, MMTCMESIN MT
+WHERE PMS.KD_MESIN = MT.KD_MESIN
+AND PMS.THN_PMS = $P{tahun}
+AND PMS.BLN_PMS = $P{bulan}
+AND (PMS.KD_PLANT = $P{kd_plant} OR $P{kd_plant} IS NULL)
+AND (PMS.KD_LINE = $P{kd_line} OR $P{kd_line} IS NULL)
+AND (TGL01 = 'T' OR TGL02 = 'T' OR TGL03 = 'T' OR TGL04 = 'T' OR TGL05 = 'T' OR TGL06 = 'T' OR TGL07 = 'T' OR TGL08 = 'T' OR TGL09 = 'T' OR TGL10 = 'T' OR
+     TGL11 = 'T' OR TGL12 = 'T' OR TGL13 = 'T' OR TGL14 = 'T' OR TGL15 = 'T' OR TGL16 = 'T' OR TGL17 = 'T' OR TGL18 = 'T' OR TGL19 = 'T' OR TGL20 = 'T' OR
+     TGL21 = 'T' OR TGL22 = 'T' OR TGL23 = 'T' OR TGL24 = 'T' OR TGL25 = 'T' OR TGL26 = 'T' OR TGL27 = 'T' OR TGL28 = 'T' OR TGL29 = 'T' OR TGL30 = 'T' OR TGL31 = 'T')
+AND EXISTS (SELECT 1 FROM MTCM_NPK WHERE MTCM_NPK.NPK = $P{npk} AND MTCM_NPK.KD_PLANT = PMS.KD_PLANT AND ROWNUM = 1)
+ORDER BY PMS.KD_PLANT, PMS.KD_LINE]]>
+	</queryString>
+	<field name="THN_PMS" class="java.lang.String"/>
+	<field name="BLN_PMS" class="java.lang.String"/>
+	<field name="KD_PLANT" class="java.lang.String"/>
+	<field name="NM_PLANT" class="java.lang.String"/>
+	<field name="KD_LINE" class="java.lang.String"/>
+	<field name="NM_LINE" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="573" splitType="Stretch">
+			<subreport>
+				<reportElement x="0" y="0" width="842" height="573" uuid="e9086c45-a003-4a85-a24c-b8de2dc25479"/>
+				<subreportParameter name="logo">
+					<subreportParameterExpression><![CDATA[$P{logo}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="kd_line">
+					<subreportParameterExpression><![CDATA[$F{KD_LINE}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="nm_line">
+					<subreportParameterExpression><![CDATA[$F{NM_LINE}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="nm_plant">
+					<subreportParameterExpression><![CDATA[$F{NM_PLANT}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="npk">
+					<subreportParameterExpression><![CDATA[$P{npk}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="bulan">
+					<subreportParameterExpression><![CDATA[$P{bulan}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="nm_bulan">
+					<subreportParameterExpression><![CDATA[$P{nm_bulan}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="kd_plant">
+					<subreportParameterExpression><![CDATA[$F{KD_PLANT}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="tahun">
+					<subreportParameterExpression><![CDATA[$P{tahun}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "ReportPMS_Sub.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="22" splitType="Stretch">
+			<textField pattern="dd/MM/yyyy HH:mm:ss">
+				<reportElement x="15" y="0" width="223" height="12" uuid="c9075fc9-e935-4a9c-87e9-00d834e808e6"/>
+				<box leftPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="708" y="0" width="80" height="12" uuid="70f15471-273e-4369-9b61-55d668f532eb"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="788" y="0" width="40" height="12" uuid="8da8e2ca-f485-4b9c-b430-adc76c8e12d1"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

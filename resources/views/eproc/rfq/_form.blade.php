@@ -1,0 +1,665 @@
+<div class="box-body">
+  <div class="form-group">
+    <div class="col-sm-3 {{ $errors->has('no_ssr') ? ' has-error' : '' }}">
+      {!! Form::label('no_ssr', 'No. SSR (*)') !!}
+      <div class="input-group">
+        @if (!empty($prctrfq->no_ssr))
+          <input type="text" id="no_ssr" name="no_ssr" class="form-control" placeholder="No. SSR" maxlength="20" required onkeydown="keyPressedNoSsr(event)" onchange="validateNoSsr()" readonly="readonly" value="{{ $prctrfq->no_ssr }}">
+          <span class="input-group-btn">
+            <button id="btnpopupnossr" name="btnpopupnossr" type="button" class="btn btn-info" onclick="popupNoSsr()" data-toggle="modal" data-target="#ssrModal" disabled="">
+              <span class="glyphicon glyphicon-search"></span>
+            </button>
+          </span>
+        @else 
+          <input type="text" id="no_ssr" name="no_ssr" class="form-control" placeholder="No. SSR" maxlength="20" required onkeydown="keyPressedNoSsr(event)" onchange="validateNoSsr()">
+          <span class="input-group-btn">
+            <button id="btnpopupnossr" name="btnpopupnossr" type="button" class="btn btn-info" onclick="popupNoSsr()" data-toggle="modal" data-target="#ssrModal">
+              <span class="glyphicon glyphicon-search"></span>
+            </button>
+          </span>
+        @endif
+      </div>
+      {!! Form::hidden('st_submit', null, ['class' => 'form-control', 'readonly' => 'readonly', 'id' => 'st_submit']) !!}
+      {!! $errors->first('no_ssr', '<p class="help-block">:message</p>') !!}
+    </div>
+    
+  </div>
+  <!-- /.form-group -->
+  <div class="form-group">
+    <div class="col-sm-3 {{ $errors->has('part_no') ? ' has-error' : '' }}">
+      {!! Form::label('part_no', 'Part No (*)') !!}
+      {!! Form::text('part_no', null, ['class' => 'form-control','placeholder' => 'Part No', 'maxlength' => '40', 'required', 'id' => 'part_no', 'readonly' => 'readonly']) !!}
+      {!! $errors->first('part_no', '<p class="help-block">:message</p>') !!}
+    </div>
+    <div class="col-sm-5 {{ $errors->has('nm_part') ? ' has-error' : '' }}">
+      {!! Form::label('nm_part', 'Part Name') !!}
+      {!! Form::text('nm_part', null, ['class' => 'form-control', 'placeholder' => 'Part Name', 'maxlength' => '100', 'id' => 'nm_part', 'readonly' => 'readonly']) !!}
+      {!! $errors->first('nm_part', '<p class="help-block">:message</p>') !!}
+    </div>
+    <div class="col-sm-4 {{ $errors->has('nm_proses') ? ' has-error' : '' }}">
+      {!! Form::label('nm_proses', 'Condition (*)') !!}
+      {!! Form::text('nm_proses', null, ['class' => 'form-control', 'placeholder' => 'Condition', 'maxlength' => '20', 'id' => 'nm_proses', 'readonly' => 'readonly']) !!}
+      {!! $errors->first('nm_proses', '<p class="help-block">:message</p>') !!}
+    </div>
+  </div>
+  <!-- /.form-group -->
+</div>
+<!-- /.box-body -->
+
+<div class="box-body" id="field-detail">
+  @if (!empty($prctrfq->no_ssr))
+    @foreach ($prctrfq->prctRfqsDetail()->orderBy("dtcrea")->get() as $model)
+      <div class="row" id="field_{{ $loop->iteration }}">
+        <div class="col-md-12">
+          <div class="box box-primary">
+            <div class="box-header with-border">
+              <h3 class="box-title" id="box_{{ $loop->iteration }}">BPID Ke-{{ $loop->iteration }} ({{ $model->kd_bpid }} - {{ $model->nm_supp }})</h3>
+              <div class="box-tools pull-right">
+                <button type="button" class="btn btn-success btn-sm" data-widget="collapse">
+                  <i class="fa fa-minus"></i>
+                </button>
+                <button id="btndelete_{{ $loop->iteration }}" name="btndelete_{{ $loop->iteration }}" type="button" class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="top" title="Hapus BPID" onclick="deleteDetail(this)" @if ($prctrfq->tgl_send_supp != null) disabled="" @endif>
+                  <i class="fa fa-times"></i>
+                </button>
+              </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+              <div class="row form-group">
+                <div class="col-sm-3">
+                  <label name="kd_bpid_{{ $loop->iteration }}">BPID (*)</label>
+                  <div class="input-group">
+                    <input type="text" id="kd_bpid_{{ $loop->iteration }}" name="kd_bpid_{{ $loop->iteration }}" required class="form-control" placeholder="BPID" onkeydown="keyPressedSupplier(this, event)" onchange="validateSupplier(this)" required maxlength="10" value="{{ $model->kd_bpid }}" @if ($prctrfq->tgl_send_supp != null) readonly="readonly" @endif>
+                    <span class="input-group-btn">
+                      <button id="btnpopupsupplier_{{ $loop->iteration }}" name="btnpopupsupplier_{{ $loop->iteration }}" type="button" class="btn btn-info" onclick="popupSupplier(this)" data-toggle="modal" data-target="#supplierModal" @if ($prctrfq->tgl_send_supp != null) disabled="" @endif>
+                        <span class="glyphicon glyphicon-search"></span>
+                      </button>
+                    </span>
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <label name="nm_bpid_{{ $loop->iteration }}">Nama BPID</label>
+                  <input type="text" id="nm_bpid_{{ $loop->iteration }}" name="nm_bpid_{{ $loop->iteration }}" class="form-control" placeholder="Nama BPID" disabled="" value="{{ $model->nm_supp }}">
+                </div>
+              </div>
+              <div class="row form-group">
+                <div class="col-sm-3">
+                  <label name="no_rfq_{{ $loop->iteration }}">No. RFQ</label>
+                  <input type="text" id="no_rfq_{{ $loop->iteration }}" name="no_rfq_{{ $loop->iteration }}" class="form-control" placeholder="No. RFQ" readonly="readonly" value="{{ $model->no_rfq }}">
+                </div>
+                <div class="col-sm-2">
+                  <label name="no_rev_{{ $loop->iteration }}">No. Revisi</label>
+                  <input type="text" id="no_rev_{{ $loop->iteration }}" name="no_rev_{{ $loop->iteration }}" class="form-control" placeholder="No. Revisi" readonly="readonly" value="{{ $model->no_rev }}">
+                </div>
+                <div class="col-sm-2">
+                  <label name="tgl_rfq_{{ $loop->iteration }}">Tgl RFQ</label>
+                  <input type="text" id="tgl_rfq_{{ $loop->iteration }}" name="tgl_rfq_{{ $loop->iteration }}" class="form-control" placeholder="Tgl RFQ" disabled="" value="{{ \Carbon\Carbon::parse($model->tgl_rfq)->format('d/m/Y') }}">
+                </div>
+              </div>
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+        </div>
+        <!-- /.col -->
+      </div>
+      <!-- /.row -->
+    @endforeach
+    {!! Form::hidden('jml_row', $prctrfq->prctRfqsDetail()->get()->count(), ['class'=>'form-control', 'readonly'=>'readonly', 'id' => 'jml_row']) !!}
+  @else
+    {!! Form::hidden('jml_row', 0, ['class'=>'form-control', 'readonly'=>'readonly', 'id' => 'jml_row']) !!}
+  @endif
+</div>
+<!-- /.box-body -->
+
+<div class="box-body">
+  <p class="pull-right">
+    <button id="addRow" type="button" class="btn btn-success" data-toggle="tooltip" data-placement="top" title="Add Supplier"><span class="glyphicon glyphicon-plus"></span> Add Supplier</button>
+  </p>
+</div>
+<!-- /.box-body -->
+
+<div class="box-footer">
+  {!! Form::submit('Save RFQ', ['class'=>'btn btn-primary', 'id' => 'btn-save']) !!}
+  @if (!empty($prctrfq->no_ssr))
+    &nbsp;&nbsp;
+    <button id="btn-submit" type="button" class="btn btn-success">Save & Send RFQ</button>
+  @endif
+  &nbsp;&nbsp;
+  <a class="btn btn-default" href="{{ route('prctrfqs.index') }}">Cancel</a>
+    &nbsp;&nbsp;<p class="help-block pull-right has-error">{!! Form::label('info', '(*) tidak boleh kosong', ['style'=>'color:red']) !!}</p>
+</div>
+
+<!-- Modal SSR -->
+@include('eproc.rfq.popup.ssrModal')
+<!-- Modal Supplier -->
+@include('eproc.rfq.popup.supplierModal')
+
+@section('scripts')
+<script type="text/javascript">
+
+  document.getElementById("no_ssr").focus();
+
+  $('#form_id').submit(function (e, params) {
+    var localParams = params || {};
+    if (!localParams.send) {
+      e.preventDefault();
+      var valid = "T";
+      var msg = "";
+      if(valid !== "T") {
+        var info = msg;
+        swal(info, "Perhatikan inputan anda!", "warning");
+      } else {
+        //additional input validations can be done hear
+        swal({
+          title: 'Are you sure?',
+          text: '',
+          type: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: '<i class="fa fa-thumbs-up"></i> Yes, save it!',
+          cancelButtonText: '<i class="fa fa-thumbs-down"></i> No, cancel!',
+          allowOutsideClick: true,
+          allowEscapeKey: true,
+          allowEnterKey: true,
+          reverseButtons: false,
+          focusCancel: false,
+        }).then(function () {
+          $(e.currentTarget).trigger(e.type, { 'send': true });
+        }, function (dismiss) {
+          // dismiss can be 'cancel', 'overlay',
+          // 'close', and 'timer'
+          if (dismiss === 'cancel') {
+            // swal(
+            //   'Cancelled',
+            //   'Your imaginary file is safe :)',
+            //   'error'
+            // )
+          }
+        })
+      }
+    }
+  });
+
+  $("#btn-submit").click(function(){
+    var no_ssr = document.getElementById('no_ssr').value.trim();
+    var part_no = document.getElementById('part_no').value.trim();
+    var nm_proses = document.getElementById('nm_proses').value.trim();
+
+    if(no_ssr === "" || part_no === "" || nm_proses === "") {
+      var info = "Isi data yang tidak boleh kosong!";
+      swal(info, "Perhatikan inputan anda!", "warning");
+    } else {
+      var msg = 'Anda yakin Save & Send RFQ ini?';
+      var txt = 'No. SSR: ' + no_ssr + ', Part No: ' + part_no + ', Condition: ' + nm_proses;
+      swal({
+        title: msg,
+        text: txt,
+        type: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: '<i class="fa fa-thumbs-up"></i> Yes, Save & Send RFQ!',
+        cancelButtonText: '<i class="fa fa-thumbs-down"></i> No, cancel!',
+        allowOutsideClick: true,
+        allowEscapeKey: true,
+        allowEnterKey: true,
+        reverseButtons: false,
+        focusCancel: true,
+      }).then(function () {
+        document.getElementById("st_submit").value = "T";
+        document.getElementById("form_id").submit();
+      }, function (dismiss) {
+        if (dismiss === 'cancel') {
+        }
+      })
+    }
+  });
+
+  $(document).ready(function(){
+    
+  });
+
+  function keyPressedNoSsr(e) {
+    if(e.keyCode == 120) { //F9
+      $('#btnpopupnossr').click();
+    } else if(e.keyCode == 9) { //TAB
+      e.preventDefault();
+      document.getElementById('btnpopupnossr').focus();
+    }
+  }
+  
+  function popupNoSsr(ths) {
+    var myHeading = "<p>Popup SSR</p>";
+    $("#ssrModalLabel").html(myHeading);
+    var url = '{{ route('datatables.popupSsr') }}';
+    var lookupSsr = $('#lookupSsr').DataTable({
+      processing: true, 
+      "oLanguage": {
+        'sProcessing': '<div id="processing" style="margin: 0px; padding: 0px; position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; background-color: rgb(102, 102, 102); z-index: 30001; opacity: 0.8;"><p style="position: absolute; color: White; top: 50%; left: 45%;"><img src="{{ asset('images/ajax-loader.gif') }}"></p></div>Processing...'
+      }, 
+      serverSide: true,
+      "pagingType": "numbers",
+      ajax: url,
+      "aLengthMenu": [[5, 10, 25, 50, 75, 100, -1], [5, 10, 25, 50, 75, 100, "All"]],
+      responsive: true,
+      "order": [[0, 'desc'], [1, 'asc'], [3, 'asc']],
+      columns: [
+        { data: 'no_ssr', name: 'no_ssr'},
+        { data: 'part_no', name: 'part_no'},
+        { data: 'nm_part', name: 'nm_part'},
+        { data: 'nm_proses', name: 'nm_proses'}
+      ],
+      "bDestroy": true,
+      "initComplete": function(settings, json) {
+        // $('div.dataTables_filter input').focus();
+        $('#lookupSsr tbody').on( 'dblclick', 'tr', function () {
+          var dataArr = [];
+          var rows = $(this);
+          var rowData = lookupSsr.rows(rows).data();
+          $.each($(rowData),function(key,value){
+            document.getElementById("no_ssr").value = value["no_ssr"];
+            document.getElementById("part_no").value = value["part_no"];
+            document.getElementById("nm_part").value = value["nm_part"];
+            document.getElementById("nm_proses").value = value["nm_proses"];
+            $('#ssrModal').modal('hide');
+          });
+        });
+        $('#ssrModal').on('hidden.bs.modal', function () {
+          var no_ssr = document.getElementById("no_ssr").value.trim();
+          if(no_ssr === '') {
+            document.getElementById("no_ssr").value = "";
+            document.getElementById("part_no").value = "";
+            document.getElementById("nm_part").value = "";
+            document.getElementById("nm_proses").value = "";
+            document.getElementById("no_ssr").focus();
+          } else {
+            document.getElementById("addRow").focus();
+          }
+        });
+      },
+    });
+  }
+
+  function validateNoSsr() {
+    var no_ssr = document.getElementById('no_ssr').value.trim();
+    var part_no = document.getElementById('part_no').value.trim();
+    var nm_proses = document.getElementById('nm_proses').value.trim();
+    if(no_ssr !== "") {
+      var url = '{{ route('datatables.validasiSsr', 'param') }}';
+      if(part_no !== "" && nm_proses !== "") {
+        url = '{{ route('datatables.validasiSsr', ['param', 'param2', 'param3']) }}';
+        url = url.replace('param3', window.btoa(nm_proses));
+        url = url.replace('param2', window.btoa(part_no));
+        url = url.replace('param', window.btoa(no_ssr));
+      } else {
+        url = url.replace('param', window.btoa(no_ssr));
+      }      
+      //use ajax to run the check
+      $.get(url, function(result){  
+        if(result !== 'null'){
+          result = JSON.parse(result);
+          if(result["jml_row"] != null) {
+            document.getElementById("no_ssr").value = "";
+            document.getElementById("part_no").value = "";
+            document.getElementById("nm_part").value = "";
+            document.getElementById("nm_proses").value = "";
+            document.getElementById("no_ssr").focus();
+            swal("Terdapat " + result["jml_row"] + " Part untuk SSR tsb. Pilih dari Popup.", "tekan F9 untuk tampilkan data.", "warning");
+          } else {
+            document.getElementById("no_ssr").value = result["no_ssr"];
+            document.getElementById("part_no").value = result["part_no"];
+            document.getElementById("nm_part").value = result["nm_part"];
+            document.getElementById("nm_proses").value = result["nm_proses"];
+          }
+        } else {
+          document.getElementById("no_ssr").value = "";
+          document.getElementById("part_no").value = "";
+          document.getElementById("nm_part").value = "";
+          document.getElementById("nm_proses").value = "";
+          document.getElementById("no_ssr").focus();
+          swal("No. SSR tidak valid!", "Perhatikan inputan anda! tekan F9 untuk tampilkan data.", "error");
+        }
+      });
+    } else {
+      document.getElementById("no_ssr").value = "";
+      document.getElementById("part_no").value = "";
+      document.getElementById("nm_part").value = "";
+      document.getElementById("nm_proses").value = "";
+    }
+  }
+
+  function keyPressedSupplier(ths, e) {
+    if(e.keyCode == 120) { //F9
+      var row = ths.id.replace('kd_bpid_', '');
+      var id_btn = "#btnpopupsupplier_" + row;
+      $(id_btn).click();
+    } else if(e.keyCode == 9) { //TAB
+      e.preventDefault();
+      var row = ths.id.replace('kd_bpid_', '');
+      row = Number(row);
+      var id_btn = 'btnpopupsupplier_'+row;
+      document.getElementById(id_btn).focus();
+    }
+  }
+
+  function popupSupplier(ths) {
+    var myHeading = "<p>Popup Supplier</p>";
+    $("#supplierModalLabel").html(myHeading);
+    var url = '{{ route('datatables.popupSupplierBaans') }}';
+    var lookupSupplier = $('#lookupSupplier').DataTable({
+      processing: true, 
+      "oLanguage": {
+        'sProcessing': '<div id="processing" style="margin: 0px; padding: 0px; position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; background-color: rgb(102, 102, 102); z-index: 30001; opacity: 0.8;"><p style="position: absolute; color: White; top: 50%; left: 45%;"><img src="{{ asset('images/ajax-loader.gif') }}"></p></div>Processing...'
+      }, 
+      serverSide: true,
+      "pagingType": "numbers",
+      ajax: url,
+      "aLengthMenu": [[5, 10, 25, 50, 75, 100, -1], [5, 10, 25, 50, 75, 100, "All"]],
+      responsive: true,
+      // "scrollX": true,
+      // "scrollY": "500px",
+      // "scrollCollapse": true,
+      "order": [[1, 'asc']],
+      columns: [
+        { data: 'kd_supp', name: 'kd_supp'},
+        { data: 'nama', name: 'nama'},
+        { data: 'email', name: 'email'},
+        { data: 'init_supp', name: 'init_supp'}
+      ],
+      "bDestroy": true,
+      "initComplete": function(settings, json) {
+        // $('div.dataTables_filter input').focus();
+         $('#lookupSupplier tbody').on( 'dblclick', 'tr', function () {
+          var dataArr = [];
+          var rows = $(this);
+          var rowData = lookupSupplier.rows(rows).data();
+          $.each($(rowData),function(key,value){
+            var row = ths.id.replace('btnpopupsupplier_', '');
+            var id_kd_bpid = "kd_bpid_" + row;
+            var id_nm_bpid = "nm_bpid_" + row;
+            document.getElementById(id_kd_bpid).value = value["kd_supp"];
+            document.getElementById(id_nm_bpid).value = value["nama"];
+            $('#supplierModal').modal('hide');
+            if(!validateSupplierDuplicate(row)) {
+              document.getElementById(id_kd_bpid).value = "";
+              document.getElementById(id_nm_bpid).value = "";
+              document.getElementById(id_kd_bpid).focus();
+              swal("BPID tidak boleh ada yang sama!", "Perhatikan inputan anda!", "warning");
+            }
+          });
+        });
+        $('#supplierModal').on('hidden.bs.modal', function () {
+          var row = ths.id.replace('btnpopupsupplier_', '');
+          var id_kd_bpid = "kd_bpid_" + row;
+          var id_nm_bpid = "nm_bpid_" + row;
+          var id_btn = 'btnpopupsupplier_'+row;
+          var kd_bpid = document.getElementById(id_kd_bpid).value.trim();
+          if(kd_bpid === '') {
+            document.getElementById(id_kd_bpid).value = "";
+            document.getElementById(id_nm_bpid).value = "";
+            document.getElementById(id_kd_bpid).focus();
+          } else {
+            document.getElementById(id_btn).focus();
+          }
+        });
+      },
+    });
+  }
+
+  function validateSupplier(ths) {
+    var row = ths.id.replace('kd_bpid_', '');
+    var id_kd_bpid = "kd_bpid_" + row;
+    var id_nm_bpid = "nm_bpid_" + row;
+    var kd_bpid = document.getElementById(id_kd_bpid).value.trim();
+    if(kd_bpid !== '') {
+      var url = '{{ route('datatables.validasiSupplierBaan', 'param') }}';
+      url = url.replace('param', window.btoa(kd_bpid));
+      //use ajax to run the check
+      $.get(url, function(result){  
+        if(result !== 'null'){
+          result = JSON.parse(result);
+          document.getElementById(id_kd_bpid).value = result["kd_supp"];
+          document.getElementById(id_nm_bpid).value = result["nama"];
+          if(!validateSupplierDuplicate(row)) {
+            document.getElementById(id_kd_bpid).value = "";
+            document.getElementById(id_nm_bpid).value = "";
+            document.getElementById(id_kd_bpid).focus();
+            swal("BPID tidak boleh ada yang sama!", "Perhatikan inputan anda!", "warning");
+          }
+        } else {
+          document.getElementById(id_kd_bpid).value = "";
+          document.getElementById(id_nm_bpid).value = "";
+          document.getElementById(id_kd_bpid).focus();
+          swal("BPID tidak valid!", "Perhatikan inputan anda! tekan F9 untuk tampilkan data.", "error");
+        }
+      });
+    } else {
+      document.getElementById(id_kd_bpid).value = "";
+      document.getElementById(id_nm_bpid).value = "";
+    }
+  }
+
+  function validateSupplierDuplicate(row) {
+    var jml_row = document.getElementById("jml_row").value.trim();
+    var valid = 'T';
+    var kd_bpid = document.getElementById("kd_bpid_" + row).value.trim();
+    if(kd_bpid !== "") {
+      for($i = 1; $i <= jml_row; $i++) {
+        var baris = $i;
+        var id_kd_bpid = "kd_bpid_" + baris;
+        var id_nm_bpid = "nm_bpid_" + baris;
+        if(baris != row) {
+          var kd_bpid_temp = document.getElementById(id_kd_bpid).value.trim();
+          if(kd_bpid_temp !== '') {
+            if(kd_bpid_temp === kd_bpid) {
+              valid = 'F';
+              $i = jml_row + 1;
+            }
+          }
+        }
+      }
+    }
+    if(valid === 'T') {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  $("#addRow").click(function(){
+    var jml_row = document.getElementById("jml_row").value.trim();
+    jml_row = Number(jml_row) + 1;
+    document.getElementById("jml_row").value = jml_row;
+    var kd_bpid = 'kd_bpid_'+jml_row;
+    var nm_bpid = 'nm_bpid_'+jml_row;
+    var no_rfq = 'no_rfq_'+jml_row;
+    var no_rev = 'no_rev_'+jml_row;
+    var tgl_rfq = 'tgl_rfq_'+jml_row;
+    var btndelete = 'btndelete_'+jml_row;
+    var id_field = 'field_'+jml_row;
+    var id_box = 'box_'+jml_row;
+    var btnpopupsupplier = 'btnpopupsupplier_'+jml_row;
+
+    $("#field-detail").append(
+      '<div class="row" id="'+id_field+'">\
+        <div class="col-md-12">\
+          <div class="box box-primary">\
+            <div class="box-header with-border">\
+              <h3 class="box-title" id="'+id_box+'">BPID Ke-'+ jml_row +'</h3>\
+              <div class="box-tools pull-right">\
+                <button type="button" class="btn btn-success btn-sm" data-widget="collapse">\
+                  <i class="fa fa-minus"></i>\
+                </button>\
+                <button id="' + btndelete + '" name="' + btndelete + '" type="button" class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="top" title="Hapus BPID" onclick="deleteDetail(this)">\
+                  <i class="fa fa-times"></i>\
+                </button>\
+              </div>\
+            </div>\
+            <div class="box-body">\
+              <div class="row form-group">\
+                <div class="col-sm-3">\
+                  <label name="' + kd_bpid + '">BPID (*)</label>\
+                  <div class="input-group">\
+                    <input type="text" id="' + kd_bpid + '" name="' + kd_bpid + '" required class="form-control" placeholder="BPID" onkeydown="keyPressedSupplier(this, event)" onchange="validateSupplier(this)" required maxlength="10">\
+                    <span class="input-group-btn">\
+                      <button id="' + btnpopupsupplier + '" name="' + btnpopupsupplier + '" type="button" class="btn btn-info" onclick="popupSupplier(this)" data-toggle="modal" data-target="#supplierModal">\
+                        <span class="glyphicon glyphicon-search"></span>\
+                      </button>\
+                    </span>\
+                  </div>\
+                </div>\
+                <div class="col-sm-6">\
+                  <label name="' + nm_bpid + '">Nama BPID</label>\
+                  <input type="text" id="' + nm_bpid + '" name="' + nm_bpid + '" class="form-control" placeholder="Nama BPID" disabled="">\
+                </div>\
+              </div>\
+              <div class="row form-group">\
+                <div class="col-sm-3">\
+                  <label name="' + no_rfq + '">No. RFQ</label>\
+                  <input type="text" id="' + no_rfq + '" name="' + no_rfq + '" class="form-control" placeholder="No. RFQ" readonly="readonly">\
+                </div>\
+                <div class="col-sm-2">\
+                  <label name="' + no_rev + '">No. Revisi</label>\
+                  <input type="text" id="' + no_rev + '" name="' + no_rev + '" class="form-control" placeholder="No. Revisi" readonly="readonly">\
+                </div>\
+                <div class="col-sm-2">\
+                  <label name="' + tgl_rfq + '">Tgl RFQ</label>\
+                  <input type="text" id="' + tgl_rfq + '" name="' + tgl_rfq + '" class="form-control" placeholder="Tgl RFQ" disabled="">\
+                </div>\
+              </div>\
+            </div>\
+          </div>\
+        </div>\
+      </div>'
+    );
+    document.getElementById(kd_bpid).focus();
+  });
+
+  function changeId(row) {
+    var id_div = "#field_" + row;
+    $(id_div).remove();
+    var jml_row = document.getElementById("jml_row").value.trim();
+    jml_row = Number(jml_row);
+    nextRow = Number(row) + 1;
+    for($i = nextRow; $i <= jml_row; $i++) {
+      var kd_bpid = "#kd_bpid_" + $i;
+      var kd_bpid_new = "kd_bpid_" + ($i-1);
+      $(kd_bpid).attr({"id":kd_bpid_new, "name":kd_bpid_new});
+      var nm_bpid = "#nm_bpid_" + $i;
+      var nm_bpid_new = "nm_bpid_" + ($i-1);
+      $(nm_bpid).attr({"id":nm_bpid_new, "name":nm_bpid_new});
+      var no_rfq = "#no_rfq_" + $i;
+      var no_rfq_new = "no_rfq_" + ($i-1);
+      $(no_rfq).attr({"id":no_rfq_new, "name":no_rfq_new});
+      var no_rev = "#no_rev_" + $i;
+      var no_rev_new = "no_rev_" + ($i-1);
+      $(no_rev).attr({"id":no_rev_new, "name":no_rev_new});
+      var tgl_rfq = "#tgl_rfq_" + $i;
+      var tgl_rfq_new = "tgl_rfq_" + ($i-1);
+      $(tgl_rfq).attr({"id":tgl_rfq_new, "name":tgl_rfq_new});
+      
+      var btndelete = "#btndelete_" + $i;
+      var btndelete_new = "btndelete_" + ($i-1);
+      $(btndelete).attr({"id":btndelete_new, "name":btndelete_new});
+      var id_field = "#field_" + $i;
+      var id_field_new = "field_" + ($i-1);
+      $(id_field).attr({"id":id_field_new, "name":id_field_new});
+      var id_box = "#box_" + $i;
+      var id_box_new = "box_" + ($i-1);
+      $(id_box).attr({"id":id_box_new, "name":id_box_new});
+      var btnpopupsupplier = "#btnpopupsupplier_" + $i;
+      var btnpopupsupplier_new = "btnpopupsupplier_" + ($i-1);
+      $(btnpopupsupplier).attr({"id":btnpopupsupplier_new, "name":btnpopupsupplier_new});
+      var text = document.getElementById(id_box_new).innerHTML;
+      text = text.replace($i, ($i-1));
+      document.getElementById(id_box_new).innerHTML = text;
+    }
+    jml_row = jml_row - 1;
+    document.getElementById("jml_row").value = jml_row;
+  }
+
+  function deleteDetail(ths) {
+    var msg = 'Anda yakin menghapus No. RFQ ini?';
+    swal({
+      title: msg,
+      text: "",
+      type: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: '<i class="fa fa-thumbs-up"></i> Yes, delete it!',
+      cancelButtonText: '<i class="fa fa-thumbs-down"></i> No, cancel!',
+      allowOutsideClick: true,
+      allowEscapeKey: true,
+      allowEnterKey: true,
+      reverseButtons: false,
+      focusCancel: true,
+    }).then(function () {
+      //startcode
+      var row = ths.id.replace('btndelete_', '');
+      var info = "";
+      var info2 = "";
+      var info3 = "warning";
+      var no_rfq = document.getElementById("no_rfq_" + row).value.trim();
+      var no_rev = document.getElementById("no_rev_" + row).value.trim();
+      if(no_rfq === "" || no_rev === "") {
+        changeId(row);
+      } else {
+        //DELETE DI DATABASE
+        // remove these events;
+        window.onkeydown = null;
+        window.onfocus = null;
+        var token = document.getElementsByName('_token')[0].value.trim();
+        // delete via ajax
+        // hapus data detail dengan ajax
+        var url = "{{ route('prctrfqs.deletedetail', ['param','param2']) }}";
+        url = url.replace('param2', window.btoa(no_rev));
+        url = url.replace('param', window.btoa(no_rfq));
+        $.ajax({
+          type     : 'POST',
+          url      : url,
+          dataType : 'json',
+          data     : {
+            _method : 'DELETE',
+            // menambah csrf token dari Laravel
+            _token  : token
+          },
+          success:function(data){
+            if(data.status === 'OK'){
+              changeId(row);
+              info = "Deleted!";
+              info2 = data.message;
+              info3 = "success";
+              swal(info, info2, info3);
+            } else {
+              info = "Cancelled";
+              info2 = data.message;
+              info3 = "error";
+              swal(info, info2, info3);
+            }
+          }, error:function(){ 
+            info = "System Error!";
+            info2 = "Maaf, terjadi kesalahan pada system kami. Silahkan hubungi Administrator. Terima Kasih.";
+            info3 = "error";
+            swal(info, info2, info3);
+          }
+        });
+        //END DELETE DI DATABASE
+      }
+      //finishcode
+    }, function (dismiss) {
+      // dismiss can be 'cancel', 'overlay',
+      // 'close', and 'timer'
+      if (dismiss === 'cancel') {
+        // swal(
+        //   'Cancelled',
+        //   'Your imaginary file is safe :)',
+        //   'error'
+        // )
+      }
+    })
+  }
+</script>
+@endsection

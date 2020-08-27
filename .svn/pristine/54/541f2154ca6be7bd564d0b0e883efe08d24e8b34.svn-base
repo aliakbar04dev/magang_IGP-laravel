@@ -1,0 +1,810 @@
+@extends('layouts.app')
+@section('content')
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <h1>
+        Dashboard
+        <small>Dashboard</small>
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="{{ url('/home') }}"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li class="active">Dashboard</li>
+      </ol>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      @include('layouts._flash')
+      
+      @if (isset($andon) && isset($tgl_andon))
+        {{-- @if($andon->mtcAndons("1", $tgl_andon)->count() > 0) --}}
+          <!-- Informasi ANDON IGP 2-->
+          <!-- Info boxes -->
+          <div class="row" id="box-body-andon-igp1" name="box-body-andon-igp1">
+            @include ('mtc.andon.andon1')
+          </div>
+          <!-- /.row -->
+          <!-- End Informasi ANDON IGP 1-->
+        {{-- @endif --}}
+
+        {{-- @if($andon->mtcAndons("2", $tgl_andon)->count() > 0) --}}
+          <!-- Informasi ANDON IGP 2-->
+          <!-- Info boxes -->
+          <div class="row" id="box-body-andon-igp2" name="box-body-andon-igp2">
+            @include ('mtc.andon.andon2')
+          </div>
+          <!-- /.row -->
+          <!-- End Informasi ANDON IGP 2-->
+        {{-- @endif --}}
+        
+        {{-- @if($andon->mtcAndons("3", $tgl_andon)->count() > 0) --}}
+          <!-- Informasi ANDON IGP 3-->
+          <!-- Info boxes -->
+          <div class="row" id="box-body-andon-igp3" name="box-body-andon-igp3">
+            @include ('mtc.andon.andon3')
+          </div>
+          <!-- /.row -->
+          <!-- End Informasi ANDON IGP 3-->
+        {{-- @endif --}}
+      @endif
+
+      @if (isset($qpr))
+        @permission(['qpr-*','pica-*'])
+          <!-- Informasi QPR -->
+          <!-- Info boxes -->
+          <div class="row">
+            <div class="col-md-12">
+              <div class="box">
+                <div class="box-header with-border">
+                  <h3 class="box-title">Informasi QPR</h3>
+
+                  <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                  </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                  <div class="row">
+                    <div class="col-md-4 col-sm-6 col-xs-12">
+                      <div class="info-box">
+                        <span class="info-box-icon bg-aqua"><i class="fa fa-file-text"></i></span>
+
+                        <div class="info-box-content">
+                          <span class="info-box-text">Belum APPROVE</span>
+                          <span class="info-box-number">{{ numberFormatter(0, 2)->format($qpr->qprByStatus("2")->count()) }}</span>
+                        </div>
+                        <!-- /.info-box-content -->
+                      </div>
+                      <!-- /.info-box -->
+                    </div>
+                    <!-- /.col -->
+
+                    <!-- fix for small devices only -->
+                    <div class="clearfix visible-sm-block"></div>
+                    
+                    <div class="col-md-4 col-sm-6 col-xs-12">
+                      <div class="info-box">
+                        <span class="info-box-icon bg-green"><i class="fa fa-file-text"></i></span>
+
+                        <div class="info-box-content">
+                          <span class="info-box-text">Approve</span>
+                          <span class="info-box-number">{{ numberFormatter(0, 2)->format($qpr->qprByStatus("4")->count()) }} / {{ numberFormatter(0, 2)->format($qpr->qprByStatus("0")->count()) }}</span>
+                        </div>
+                        <!-- /.info-box-content -->
+                      </div>
+                      <!-- /.info-box -->
+                    </div>
+                    <!-- /.col -->
+
+                    <!-- fix for small devices only -->
+                    <div class="clearfix visible-sm-block"></div>
+
+                    <div class="col-md-4 col-sm-6 col-xs-12">
+                      <div class="info-box">
+                        <span class="info-box-icon bg-red"><i class="fa fa-file-text"></i></span>
+
+                        <div class="info-box-content">
+                          <span class="info-box-text">Reject</span>
+                          <span class="info-box-number">{{ numberFormatter(0, 2)->format($qpr->qprByStatus("5")->count()) }} / {{ numberFormatter(0, 2)->format($qpr->qprByStatus("0")->count()) }}</span>
+                        </div>
+                        <!-- /.info-box-content -->
+                      </div>
+                      <!-- /.info-box -->
+                    </div>
+                    <!-- /.col -->
+                    
+                  </div>
+                  <!-- /.row -->
+                </div>
+                <!-- ./box-body -->
+              </div>
+              <!-- /.box -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          <!-- End Informasi QPR -->
+        @endpermission
+      @endif
+
+      @if (isset($pica) && isset($qpr))
+        @permission(['qpr-*','pica-*'])
+          <!-- Informasi PICA -->
+          <!-- Info boxes -->
+          <div class="row">
+            <div class="col-md-12">
+              <div class="box">
+                <div class="box-header with-border">
+                  <h3 class="box-title">Informasi PICA</h3>
+
+                  <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                  </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                  <div class="row">
+                    <div class="col-md-3 col-sm-6 col-xs-12">
+                      <div class="info-box">
+                        <span class="info-box-icon bg-aqua"><i class="fa fa-file-text"></i></span>
+
+                        <div class="info-box-content">
+                          <span class="info-box-text">DRAFT</span>
+                          <span class="info-box-number">{{ numberFormatter(0, 2)->format($pica->picaByStatus("D")->count()) }} / {{ numberFormatter(0, 2)->format($qpr->qprByStatus("4")->count()) }}</span>
+                        </div>
+                        <!-- /.info-box-content -->
+                      </div>
+                      <!-- /.info-box -->
+                    </div>
+                    <!-- /.col -->
+                    <div class="col-md-3 col-sm-6 col-xs-12">
+                      <div class="info-box">
+                        <span class="info-box-icon bg-yellow"><i class="fa fa-file-text"></i></span>
+
+                        <div class="info-box-content">
+                          <span class="info-box-text">Submit</span>
+                          <span class="info-box-number">{{ numberFormatter(0, 2)->format($pica->picaByStatus("S")->count()) }} / {{ numberFormatter(0, 2)->format($qpr->qprByStatus("4")->count()) }}</span>
+                        </div>
+                        <!-- /.info-box-content -->
+                      </div>
+                      <!-- /.info-box -->
+                    </div>
+                    <!-- /.col -->
+
+                    <!-- fix for small devices only -->
+                    <div class="clearfix visible-sm-block"></div>
+
+                    <div class="col-md-3 col-sm-6 col-xs-12">
+                      <div class="info-box">
+                        <span class="info-box-icon bg-green"><i class="fa fa-file-text"></i></span>
+
+                        <div class="info-box-content">
+                          <span class="info-box-text">Approve</span>
+                          <span class="info-box-number">{{ numberFormatter(0, 2)->format($pica->picaByStatus("A")->count()) }} / {{ numberFormatter(0, 2)->format($pica->picaByStatus("S")->count() + $pica->picaByStatus("A")->count() + $pica->picaByStatus("R")->count()) }}</span>
+                        </div>
+                        <!-- /.info-box-content -->
+                      </div>
+                      <!-- /.info-box -->
+                    </div>
+                    <!-- /.col -->
+                    <div class="col-md-3 col-sm-6 col-xs-12">
+                      <div class="info-box">
+                        <span class="info-box-icon bg-red"><i class="fa fa-file-text"></i></span>
+
+                        <div class="info-box-content">
+                          <span class="info-box-text">Reject</span>
+                          <span class="info-box-number">{{ numberFormatter(0, 2)->format($pica->picaByStatus("R")->count()) }} / {{ numberFormatter(0, 2)->format($pica->picaByStatus("S")->count() + $pica->picaByStatus("A")->count() + $pica->picaByStatus("R")->count()) }}</span>
+                        </div>
+                        <!-- /.info-box-content -->
+                      </div>
+                      <!-- /.info-box -->
+                    </div>
+                    <!-- /.col -->
+                  </div>
+                  <!-- /.row -->
+                </div>
+                <!-- ./box-body -->
+              </div>
+              <!-- /.box -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          <!-- End Informasi PICA -->
+        @endpermission
+      @endif
+      
+      @if (isset($kd_plant_pmsachievement))
+        @if(Auth::user()->can(['mtc-dm-*','mtc-lp-*','mtc-apr-pic-dm','mtc-apr-fm-dm','mtc-apr-pic-lp','mtc-apr-sh-lp','dashboar-mtc']))
+          <!-- PMS Achievement Per-Plant -->
+          <!-- Info boxes -->
+          <div class="row">
+            <div class="col-md-12">
+              <div class="box">
+                <div class="box-header with-border">
+                  <h3 class="box-title">PMS Achievement Per-Plant {{ namaBulan((int) \Carbon\Carbon::now()->format('m')) }} {{ \Carbon\Carbon::now()->format('Y') }} {!! $label_pmsachievement !!}</h3>
+                  <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                  </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                  <canvas id="canvas-pmsachievement" width="1100" height="300"></canvas>
+                </div>
+                <!-- ./box-body -->
+              </div>
+              <!-- /.box -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          <!-- PMS Achievement Per-Plant -->
+
+          <!-- Pareto Breakdown Per-Plant -->
+          <!-- Info boxes -->
+          <div class="row">
+            <div class="col-md-12">
+              <div class="box">
+                <div class="box-header with-border">
+                  <h3 class="box-title">Pareto Breakdown Per-Plant {{ namaBulan((int) \Carbon\Carbon::now()->format('m')) }} {{ \Carbon\Carbon::now()->format('Y') }} {!! $label_paretobreakdown !!}</h3>
+                  <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                  </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                  <canvas id="canvas-paretobreakdown" width="1100" height="300"></canvas>
+                </div>
+                <!-- ./box-body -->
+              </div>
+              <!-- /.box -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          <!-- Pareto Breakdown Per-Plant -->
+
+          <!-- Ratio Breakdown vs Preventive Per-Plant -->
+          <!-- Info boxes -->
+          <div class="row">
+            <div class="col-md-12">
+              <div class="box">
+                <div class="box-header with-border">
+                  <h3 class="box-title">Ratio Breakdown vs Preventive Per-Plant {{ namaBulan((int) \Carbon\Carbon::now()->format('m')) }} {{ \Carbon\Carbon::now()->format('Y') }} {!! $label_ratiobreakdownpreventive !!}</h3>
+                  <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                  </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                  <canvas id="canvas-ratiobreakdownpreventive" width="1100" height="300"></canvas>
+                </div>
+                <!-- ./box-body -->
+              </div>
+              <!-- /.box -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          <!-- Ratio Breakdown vs Preventive Per-Plant -->
+        @endif
+      @endif
+
+      <!-- Kalender Kerja -->
+      <!-- Info boxes -->
+      <div class="row">
+        <div class="col-md-12">
+          <div class="box">
+            <div class="box-header with-border">
+              <h3 class="box-title">Kalender Kerja IGP Group</h3>
+
+              <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                </button>
+                <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+              </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+              <div class="row form-group">
+                <div class="col-sm-12">
+                  <p>
+                    {!! Html::image(asset('images/Kalender.jpg'), 'File Not Found', ['class'=>'img-responsive']) !!}
+                  </p>
+                </div>
+              </div>
+              <!-- /.form-group -->
+            </div>
+            <!-- ./box-body -->
+          </div>
+          <!-- /.box -->
+        </div>
+        <!-- /.col -->
+      </div>
+      <!-- /.row -->
+      <!-- Kalender Kerja -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+@endsection
+
+{{-- @section('scripts')
+AdminLTE dashboard demo (This is only for demo purposes)
+<script src="{{ asset('dist/js/pages/dashboard2.js') }}"></script>
+@endsection --}}
+
+@if (isset($kd_plant_pmsachievement) || (isset($andon) && isset($tgl_andon)))
+  @section('scripts')
+    @if (isset($kd_plant_pmsachievement))
+      @if(Auth::user()->can(['mtc-dm-*','mtc-lp-*','mtc-apr-pic-dm','mtc-apr-fm-dm','mtc-apr-pic-lp','mtc-apr-sh-lp','dashboar-mtc']))
+        <script src="{{ asset('chartjs/Chart.bundle.js') }}"></script>
+        <script src="{{ asset('chartjs/utils.js') }}"></script>
+      @endif
+    @endif
+    <script>
+      $(document).ready(function () {
+        @if(isset($andon) && isset($tgl_andon))
+          @if($andon->mtcAndons("1", $tgl_andon)->count() > 0 || $andon->mtcAndons("2", $tgl_andon)->count() > 0 || $andon->mtcAndons("3", $tgl_andon)->count() > 0)
+            setInterval(function(){
+              $("#box-body-andon-igp1").load('mtc-andon-igp1');
+              $("#box-body-andon-igp2").load('mtc-andon-igp2');
+              $("#box-body-andon-igp3").load('mtc-andon-igp3');
+            }, 10000);
+          @endif
+        @endif
+      });
+      @if(Auth::user()->can(['mtc-dm-*','mtc-lp-*','mtc-apr-pic-dm','mtc-apr-fm-dm','mtc-apr-pic-lp','mtc-apr-sh-lp','dashboar-mtc']))
+        var chartDataPmsAchievement = {
+          labels: {!! json_encode($kd_plant_pmsachievement) !!}, 
+          datasets: 
+          [
+            {
+              type: 'bar',
+              label: 'Plan',
+              backgroundColor: window.chartColors.red,
+              data: {!! json_encode($plans) !!}, 
+              borderColor: 'white',
+              borderWidth: 2
+            }, 
+            {
+              type: 'bar',
+              label: 'Actual',
+              backgroundColor: window.chartColors.blue,
+              data: {!! json_encode($acts) !!}, 
+              borderColor: 'white',
+              borderWidth: 2
+            }
+          ]
+        };
+
+        var chartDataParetoBreakdown = {
+          labels: {!! json_encode($kd_plant_paretobreakdown) !!}, 
+          datasets: 
+          [
+            {
+              type: 'bar',
+              label: 'Total Line Stop',
+              backgroundColor: window.chartColors.red,
+              data: {!! json_encode($sum_jml_ls) !!}, 
+              borderColor: 'white',
+              borderWidth: 2
+            }
+          ]
+        };
+
+        var chartDataRatioBreakdownPreventive = {
+          labels: {!! json_encode($kd_plant_ratiobreakdownpreventive) !!}, 
+          datasets: 
+          [
+            {
+              type: 'bar',
+              label: 'Line Stop',
+              backgroundColor: window.chartColors.red,
+              data: {!! json_encode($sum_jml_ls) !!}, 
+              borderColor: 'white',
+              borderWidth: 2
+            }, 
+            {
+              type: 'bar',
+              label: 'PMS',
+              backgroundColor: window.chartColors.blue,
+              data: {!! json_encode($sum_jml_pms) !!}, 
+              borderColor: 'white',
+              borderWidth: 2
+            }
+          ]
+        };
+
+        window.onload = function() {
+          var ctx_pmsachievement = document.getElementById('canvas-pmsachievement').getContext('2d');
+          window.myMixedChart_pmsachievement = new Chart(ctx_pmsachievement, {
+            type: 'bar',
+            data: chartDataPmsAchievement,
+            options: {
+              responsive: true,
+              maintainAspectRatio: true,
+              scales: {
+                yAxes: [{
+                  ticks: {
+                    beginAtZero:true,
+                    // max: 100, 
+                    // stepSize: 50
+                    callback: function(value, index, values) {
+                      // Remove the formatting to get integer data for summation
+                      var intVal = function (i) {
+                        return typeof i === 'string' ?
+                        i.replace(/[\$,]/g, '')*1 :
+                        typeof i === 'number' ?
+                        i : 0;
+                      };
+                      value = intVal(value);
+
+                      var format = function formatNumber(num) {
+                        return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                      };
+
+                      return format(value);
+                    }
+                  },
+                  gridLines: {
+                    display:true
+                  }
+                }],
+                xAxes: [{
+                  ticks: {
+                    fontSize: 18
+                  },
+                  gridLines: {
+                    display:true
+                  }   
+                }]
+              },
+              "hover": {
+                "animationDuration": 0
+              },
+              "animation": {
+                // "duration": 1,
+                "onComplete": function() {
+                  var chartInstance = this.chart,
+                  ctx = chartInstance.ctx;
+
+                  ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+                  ctx.fillStyle = 'black';
+                  ctx.textAlign = 'center';
+                  ctx.textBaseline = 'bottom';
+
+                  this.data.datasets.forEach(function(dataset, i) {
+                    var meta = chartInstance.controller.getDatasetMeta(i);
+                    meta.data.forEach(function(bar, index) {
+                      var data = dataset.data[index];
+                      // Remove the formatting to get integer data for summation
+                      var intVal = function (i) {
+                        return typeof i === 'string' ?
+                        i.replace(/[\$,]/g, '')*1 :
+                        typeof i === 'number' ?
+                        i : 0;
+                      };
+                      data = intVal(data);
+
+                      var format = function formatNumber(num) {
+                        return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                      };
+
+                      data = format(data);
+                      ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                    });
+                  });
+                }
+              },
+              title: {
+                display: true,
+                position: 'top', 
+                text: 'PMS Achievement',
+                fontSize: 14,
+              },
+              legend: {
+                position: 'top', 
+                "display": true,
+                labels: {
+                  // This more specific font property overrides the global property
+                  fontColor: 'black',
+                  //fontSize: 12,
+                }
+              },
+              tooltips: {
+                mode: 'index',
+                intersect: true, 
+                callbacks: {
+                  title: function(tooltipItem, data) {
+                    return data['labels'][tooltipItem[0].index];
+                  },
+                  label: function(tooltipItem, data) {
+                    var label = tooltipItem.yLabel;
+                    // Remove the formatting to get integer data for summation
+                    var intVal = function (i) {
+                      return typeof i === 'string' ?
+                      i.replace(/[\$,]/g, '')*1 :
+                      typeof i === 'number' ?
+                      i : 0;
+                    };
+                    label = intVal(label);
+
+                    var format = function formatNumber(num) {
+                      return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                    };
+
+                    label = format(label);
+                    return data.datasets[tooltipItem.datasetIndex].label + ": " + label;
+                  },
+                },
+              }
+            }
+          });
+
+          var ctx_paretobreakdown = document.getElementById('canvas-paretobreakdown').getContext('2d');
+          window.myMixedChart_paretobreakdown = new Chart(ctx_paretobreakdown, {
+            type: 'bar',
+            data: chartDataParetoBreakdown,
+            options: {
+              responsive: true,
+              maintainAspectRatio: true,
+              scales: {
+                yAxes: [{
+                  ticks: {
+                    beginAtZero:true,
+                    // max: 100, 
+                    // stepSize: 50
+                    callback: function(value, index, values) {
+                      // Remove the formatting to get integer data for summation
+                      var intVal = function (i) {
+                        return typeof i === 'string' ?
+                        i.replace(/[\$,]/g, '')*1 :
+                        typeof i === 'number' ?
+                        i : 0;
+                      };
+                      value = intVal(value);
+
+                      var format = function formatNumber(num) {
+                        return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                      };
+
+                      return format(value);
+                    }
+                  },
+                  gridLines: {
+                    display:true
+                  }
+                }],
+                xAxes: [{
+                  ticks: {
+                    fontSize: 18
+                  },
+                  gridLines: {
+                    display:true
+                  }   
+                }]
+              },
+              "hover": {
+                "animationDuration": 0
+              },
+              "animation": {
+                // "duration": 1,
+                "onComplete": function() {
+                  var chartInstance = this.chart,
+                  ctx = chartInstance.ctx;
+
+                  ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+                  ctx.fillStyle = 'black';
+                  ctx.textAlign = 'center';
+                  ctx.textBaseline = 'bottom';
+
+                  this.data.datasets.forEach(function(dataset, i) {
+                    var meta = chartInstance.controller.getDatasetMeta(i);
+                    meta.data.forEach(function(bar, index) {
+                      var data = dataset.data[index];
+                      // Remove the formatting to get integer data for summation
+                      var intVal = function (i) {
+                        return typeof i === 'string' ?
+                        i.replace(/[\$,]/g, '')*1 :
+                        typeof i === 'number' ?
+                        i : 0;
+                      };
+                      data = intVal(data);
+
+                      var format = function formatNumber(num) {
+                        return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                      };
+
+                      data = format(data);
+                      ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                    });
+                  });
+                }
+              },
+              title: {
+                display: true,
+                position: 'top', 
+                text: 'Pareto Breakdown',
+                fontSize: 14,
+              },
+              legend: {
+                position: 'top', 
+                "display": true,
+                labels: {
+                  // This more specific font property overrides the global property
+                  fontColor: 'black',
+                  //fontSize: 12,
+                }
+              },
+              tooltips: {
+                mode: 'index',
+                intersect: true, 
+                callbacks: {
+                  title: function(tooltipItem, data) {
+                    return data['labels'][tooltipItem[0].index];
+                  },
+                  label: function(tooltipItem, data) {
+                    var label = tooltipItem.yLabel;
+                    // Remove the formatting to get integer data for summation
+                    var intVal = function (i) {
+                      return typeof i === 'string' ?
+                      i.replace(/[\$,]/g, '')*1 :
+                      typeof i === 'number' ?
+                      i : 0;
+                    };
+                    label = intVal(label);
+
+                    var format = function formatNumber(num) {
+                      return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                    };
+
+                    label = format(label);
+                    return data.datasets[tooltipItem.datasetIndex].label + ": " + label;
+                  },
+                },
+              }
+            }
+          });
+
+          var ctx_ratiobreakdownpreventive = document.getElementById('canvas-ratiobreakdownpreventive').getContext('2d');
+          window.myMixedChart_ratiobreakdownpreventive = new Chart(ctx_ratiobreakdownpreventive, {
+            type: 'bar',
+            data: chartDataRatioBreakdownPreventive,
+            options: {
+              responsive: true,
+              maintainAspectRatio: true,
+              scales: {
+                yAxes: [{
+                  ticks: {
+                    beginAtZero:true,
+                    // max: 100, 
+                    // stepSize: 50
+                    callback: function(value, index, values) {
+                      // Remove the formatting to get integer data for summation
+                      var intVal = function (i) {
+                        return typeof i === 'string' ?
+                        i.replace(/[\$,]/g, '')*1 :
+                        typeof i === 'number' ?
+                        i : 0;
+                      };
+                      value = intVal(value);
+
+                      var format = function formatNumber(num) {
+                        return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                      };
+
+                      return format(value);
+                    }
+                  },
+                  gridLines: {
+                    display:true
+                  }
+                }],
+                xAxes: [{
+                  ticks: {
+                    fontSize: 18
+                  },
+                  gridLines: {
+                    display:true
+                  }   
+                }]
+              },
+              "hover": {
+                "animationDuration": 0
+              },
+              "animation": {
+                // "duration": 1,
+                "onComplete": function() {
+                  var chartInstance = this.chart,
+                  ctx = chartInstance.ctx;
+
+                  ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+                  ctx.fillStyle = 'black';
+                  ctx.textAlign = 'center';
+                  ctx.textBaseline = 'bottom';
+
+                  this.data.datasets.forEach(function(dataset, i) {
+                    var meta = chartInstance.controller.getDatasetMeta(i);
+                    meta.data.forEach(function(bar, index) {
+                      var data = dataset.data[index];
+                      // Remove the formatting to get integer data for summation
+                      var intVal = function (i) {
+                        return typeof i === 'string' ?
+                        i.replace(/[\$,]/g, '')*1 :
+                        typeof i === 'number' ?
+                        i : 0;
+                      };
+                      data = intVal(data);
+
+                      var format = function formatNumber(num) {
+                        return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                      };
+
+                      data = format(data);
+                      ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                    });
+                  });
+                }
+              },
+              title: {
+                display: true,
+                position: 'top', 
+                text: 'Ratio Breakdown vs Preventive',
+                fontSize: 14,
+              },
+              legend: {
+                position: 'top', 
+                "display": true,
+                labels: {
+                  // This more specific font property overrides the global property
+                  fontColor: 'black',
+                  //fontSize: 12,
+                }
+              },
+              tooltips: {
+                mode: 'index',
+                intersect: true, 
+                callbacks: {
+                  title: function(tooltipItem, data) {
+                    return data['labels'][tooltipItem[0].index];
+                  },
+                  label: function(tooltipItem, data) {
+                    var label = tooltipItem.yLabel;
+                    // Remove the formatting to get integer data for summation
+                    var intVal = function (i) {
+                      return typeof i === 'string' ?
+                      i.replace(/[\$,]/g, '')*1 :
+                      typeof i === 'number' ?
+                      i : 0;
+                    };
+                    label = intVal(label);
+
+                    var format = function formatNumber(num) {
+                      return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+                    };
+
+                    label = format(label);
+                    return data.datasets[tooltipItem.datasetIndex].label + ": " + label;
+                  },
+                },
+              }
+            }
+          });
+        };
+      @endif
+    </script>
+  @endsection
+@endif
